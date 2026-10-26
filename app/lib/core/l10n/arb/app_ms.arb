@@ -15,5 +15,15 @@
   "stageLabelHandoff": "Dipindahkan kepada orang lain",
   "stageLabelMoney": "Disuruh memindahkan wang",
   "stageLabelCredentials": "Diminta kod atau kata laluan",
-  "stageStepSemantics": "Langkah {step} daripada {total}: {label}"
+  "stageStepSemantics": "Langkah {step} daripada {total}: {label}",
+  "cautionBannerText": "Panggilan ini ada tanda penipuan",
+  "warningSemanticsLabel": "Amaran penipuan",
+  "warningOfficialNumberLabel": "Nombor rasmi {agency}",
+  "warningOfficialNumberLabelNoAgency": "Nombor rasmi",
+  "warningEvidenceLabel": "Pemanggil berkata",
+  "warningHangUp": "Letak telefon",
+  "warningDismissLabel": "Panggilan ini selamat",
+  "warningDismissHint": "Tekan dan tahan selama 2 saat",
+  "warningDismissConfirmHint": "Ketik sekali lagi untuk mengesahkan panggilan ini selamat",
+  "warningCommandFallback": "Letak telefon. Hang up."
 }

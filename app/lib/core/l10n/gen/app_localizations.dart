@@ -174,7 +174,7 @@ abstract class AppLocalizations {
   /// **'Asked to move money'**
   String get stageLabelMoney;
 
-  /// Stage bar label, step 7.
+  /// Stage bar label, step 6 (ties with money).
   ///
   /// In en, this message translates to:
   /// **'Asked for codes or passwords'**
@@ -185,6 +185,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Step {step} of {total}: {label}'**
   String stageStepSemantics(int step, int total, String label);
+
+  /// Caution banner text (medium risk), glossary wording.
+  ///
+  /// In en, this message translates to:
+  /// **'This call has signs of a scam'**
+  String get cautionBannerText;
+
+  /// Route name of the full-screen Warning, read by TalkBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam warning'**
+  String get warningSemanticsLabel;
+
+  /// Label above the official number on the Warning. agency is the agency the caller claimed.
+  ///
+  /// In en, this message translates to:
+  /// **'{agency}\'s official number'**
+  String warningOfficialNumberLabel(String agency);
+
+  /// Label above the official number when no agency was claimed.
+  ///
+  /// In en, this message translates to:
+  /// **'Official number'**
+  String get warningOfficialNumberLabelNoAgency;
+
+  /// Label above the masked quote on the Warning.
+  ///
+  /// In en, this message translates to:
+  /// **'The caller said'**
+  String get warningEvidenceLabel;
+
+  /// The big hang-up button on the Warning. She presses it; Jaga never hangs up itself.
+  ///
+  /// In en, this message translates to:
+  /// **'Hang up'**
+  String get warningHangUp;
+
+  /// Hold-to-dismiss button on the Caution banner and the Warning.
+  ///
+  /// In en, this message translates to:
+  /// **'This call is fine'**
+  String get warningDismissLabel;
+
+  /// TalkBack hint on the dismiss button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold for 2 seconds'**
+  String get warningDismissHint;
+
+  /// Announced when the dismiss button is armed in TalkBack two-tap mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap again to confirm this call is fine'**
+  String get warningDismissConfirmHint;
+
+  /// Safety-net command, same in every language. Only when the server sends no command at high risk. Wording to be approved by Lane D (Q35).
+  ///
+  /// In en, this message translates to:
+  /// **'Letak telefon. Hang up.'**
+  String get warningCommandFallback;
 }
 
 class _AppLocalizationsDelegate

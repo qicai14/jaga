@@ -42,5 +42,37 @@
       "total": { "type": "int" },
       "label": { "type": "String" }
     }
-  }
+  },
+  "cautionBannerText": "This call has signs of a scam",
+  "@cautionBannerText": { "description": "Caution banner text (medium risk), glossary wording." },
+
+  "warningSemanticsLabel": "Scam warning",
+  "@warningSemanticsLabel": { "description": "Route name of the full-screen Warning, read by TalkBack." },
+
+  "warningOfficialNumberLabel": "{agency}'s official number",
+  "@warningOfficialNumberLabel": {
+    "description": "Label above the official number on the Warning. agency is the agency the caller claimed.",
+    "placeholders": { "agency": { "type": "String" } }
+  },
+
+  "warningOfficialNumberLabelNoAgency": "Official number",
+  "@warningOfficialNumberLabelNoAgency": { "description": "Label above the official number when no agency was claimed." },
+
+  "warningEvidenceLabel": "The caller said",
+  "@warningEvidenceLabel": { "description": "Label above the masked quote on the Warning." },
+
+  "warningHangUp": "Hang up",
+  "@warningHangUp": { "description": "The big hang-up button on the Warning. She presses it; Jaga never hangs up itself." },
+
+  "warningDismissLabel": "This call is fine",
+  "@warningDismissLabel": { "description": "Hold-to-dismiss button on the Caution banner and the Warning." },
+
+  "warningDismissHint": "Hold for 2 seconds",
+  "@warningDismissHint": { "description": "TalkBack hint on the dismiss button." },
+
+  "warningDismissConfirmHint": "Tap again to confirm this call is fine",
+  "@warningDismissConfirmHint": { "description": "Announced when the dismiss button is armed in TalkBack two-tap mode." },
+
+  "warningCommandFallback": "Letak telefon. Hang up.",
+  "@warningCommandFallback": { "description": "Safety-net command, same in every language. Only when the server sends no command at high risk. Wording to be approved by Lane D (Q35)." }
 }

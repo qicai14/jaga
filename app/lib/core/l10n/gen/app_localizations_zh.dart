@@ -52,4 +52,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String stageStepSemantics(int step, int total, String label) {
     return '第 $step 步，共 $total 步：$label';
   }
+
+  @override
+  String get cautionBannerText => '这通电话有诈骗迹象';
+
+  @override
+  String get warningSemanticsLabel => '诈骗警告';
+
+  @override
+  String warningOfficialNumberLabel(String agency) {
+    return '$agency的官方电话';
+  }
+
+  @override
+  String get warningOfficialNumberLabelNoAgency => '官方电话';
+
+  @override
+  String get warningEvidenceLabel => '来电者说';
+
+  @override
+  String get warningHangUp => '挂断';
+
+  @override
+  String get warningDismissLabel => '这通电话没问题';
+
+  @override
+  String get warningDismissHint => '按住 2 秒';
+
+  @override
+  String get warningDismissConfirmHint => '再点一次，确认这通电话没问题';
+
+  @override
+  String get warningCommandFallback => 'Letak telefon. Hang up.';
 }

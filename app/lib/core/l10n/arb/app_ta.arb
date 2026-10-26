@@ -15,5 +15,15 @@
   "stageLabelHandoff": "வேறொருவருக்கு மாற்றினார்",
   "stageLabelMoney": "பணத்தை மாற்றச் சொன்னார்",
   "stageLabelCredentials": "குறியீடுகள் அல்லது கடவுச்சொற்களைக் கேட்டார்",
-  "stageStepSemantics": "படி {step} / {total}: {label}"
+  "stageStepSemantics": "படி {step} / {total}: {label}",
+  "cautionBannerText": "இந்த அழைப்பில் மோசடிக்கான அறிகுறிகள் உள்ளன",
+  "warningSemanticsLabel": "மோசடி எச்சரிக்கை",
+  "warningOfficialNumberLabel": "{agency} அதிகாரப்பூர்வ எண்",
+  "warningOfficialNumberLabelNoAgency": "அதிகாரப்பூர்வ எண்",
+  "warningEvidenceLabel": "அழைத்தவர் கூறியது",
+  "warningHangUp": "அழைப்பைத் துண்டிக்கவும்",
+  "warningDismissLabel": "இந்த அழைப்பு பாதுகாப்பானது",
+  "warningDismissHint": "2 விநாடிகள் அழுத்திப் பிடிக்கவும்",
+  "warningDismissConfirmHint": "இந்த அழைப்பு பாதுகாப்பானது என்பதை உறுதிப்படுத்த மீண்டும் தட்டவும்",
+  "warningCommandFallback": "Letak telefon. Hang up."
 }

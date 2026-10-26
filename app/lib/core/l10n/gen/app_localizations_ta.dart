@@ -53,4 +53,37 @@ class AppLocalizationsTa extends AppLocalizations {
   String stageStepSemantics(int step, int total, String label) {
     return 'படி $step / $total: $label';
   }
+
+  @override
+  String get cautionBannerText => 'இந்த அழைப்பில் மோசடிக்கான அறிகுறிகள் உள்ளன';
+
+  @override
+  String get warningSemanticsLabel => 'மோசடி எச்சரிக்கை';
+
+  @override
+  String warningOfficialNumberLabel(String agency) {
+    return '$agency அதிகாரப்பூர்வ எண்';
+  }
+
+  @override
+  String get warningOfficialNumberLabelNoAgency => 'அதிகாரப்பூர்வ எண்';
+
+  @override
+  String get warningEvidenceLabel => 'அழைத்தவர் கூறியது';
+
+  @override
+  String get warningHangUp => 'அழைப்பைத் துண்டிக்கவும்';
+
+  @override
+  String get warningDismissLabel => 'இந்த அழைப்பு பாதுகாப்பானது';
+
+  @override
+  String get warningDismissHint => '2 விநாடிகள் அழுத்திப் பிடிக்கவும்';
+
+  @override
+  String get warningDismissConfirmHint =>
+      'இந்த அழைப்பு பாதுகாப்பானது என்பதை உறுதிப்படுத்த மீண்டும் தட்டவும்';
+
+  @override
+  String get warningCommandFallback => 'Letak telefon. Hang up.';
 }

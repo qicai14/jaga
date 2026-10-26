@@ -52,4 +52,37 @@ class AppLocalizationsMs extends AppLocalizations {
   String stageStepSemantics(int step, int total, String label) {
     return 'Langkah $step daripada $total: $label';
   }
+
+  @override
+  String get cautionBannerText => 'Panggilan ini ada tanda penipuan';
+
+  @override
+  String get warningSemanticsLabel => 'Amaran penipuan';
+
+  @override
+  String warningOfficialNumberLabel(String agency) {
+    return 'Nombor rasmi $agency';
+  }
+
+  @override
+  String get warningOfficialNumberLabelNoAgency => 'Nombor rasmi';
+
+  @override
+  String get warningEvidenceLabel => 'Pemanggil berkata';
+
+  @override
+  String get warningHangUp => 'Letak telefon';
+
+  @override
+  String get warningDismissLabel => 'Panggilan ini selamat';
+
+  @override
+  String get warningDismissHint => 'Tekan dan tahan selama 2 saat';
+
+  @override
+  String get warningDismissConfirmHint =>
+      'Ketik sekali lagi untuk mengesahkan panggilan ini selamat';
+
+  @override
+  String get warningCommandFallback => 'Letak telefon. Hang up.';
 }

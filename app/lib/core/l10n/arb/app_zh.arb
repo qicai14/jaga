@@ -15,5 +15,15 @@
   "stageLabelHandoff": "转给了另一个人",
   "stageLabelMoney": "要求转账",
   "stageLabelCredentials": "索要验证码或密码",
-  "stageStepSemantics": "第 {step} 步，共 {total} 步：{label}"
+  "stageStepSemantics": "第 {step} 步，共 {total} 步：{label}",
+  "cautionBannerText": "这通电话有诈骗迹象",
+  "warningSemanticsLabel": "诈骗警告",
+  "warningOfficialNumberLabel": "{agency}的官方电话",
+  "warningOfficialNumberLabelNoAgency": "官方电话",
+  "warningEvidenceLabel": "来电者说",
+  "warningHangUp": "挂断",
+  "warningDismissLabel": "这通电话没问题",
+  "warningDismissHint": "按住 2 秒",
+  "warningDismissConfirmHint": "再点一次，确认这通电话没问题",
+  "warningCommandFallback": "Letak telefon. Hang up."
 }
