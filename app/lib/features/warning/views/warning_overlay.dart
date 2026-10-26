@@ -80,7 +80,11 @@ class _WarningOverlayState extends State<WarningOverlay> {
         return Stack(
           fit: StackFit.expand,
           children: [
-            widget.child,
+            // TalkBack must not reach the call screen under the Warning.
+            ExcludeSemantics(
+              excluding: s.layer == WarningLayer.warning,
+              child: widget.child,
+            ),
             if (s.layer == WarningLayer.caution)
               Positioned(
                 top: 0,

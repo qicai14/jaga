@@ -331,12 +331,44 @@ void main() {
   });
 
   testWidgets(
-    'Warning is a route scope with a live region and the spoken label',
+    'Warning has the spoken label, is not a live region, and hides the call screen',
     (tester) async {
       final handle = tester.ensureSemantics();
       final rig = await pump(tester, 1.0);
       await emit(tester, rig, extHigh);
       expect(find.bySemanticsLabel('Scam warning'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('Scam warning')),
+        isNot(matchesSemantics(isLiveRegion: true)),
+      );
+      expect(
+        tester
+            .widget<ExcludeSemantics>(
+              find
+                  .ancestor(
+                    of: find.text(caller),
+                    matching: find.byType(ExcludeSemantics),
+                  )
+                  .first,
+            )
+            .excluding,
+        isTrue,
+      );
+      rig.vm.dismiss();
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<ExcludeSemantics>(
+              find
+                  .ancestor(
+                    of: find.text(caller),
+                    matching: find.byType(ExcludeSemantics),
+                  )
+                  .first,
+            )
+            .excluding,
+        isFalse,
+      );
       handle.dispose();
     },
   );

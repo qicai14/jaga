@@ -164,7 +164,6 @@ class _WarningScreenState extends State<WarningScreen> {
           namesRoute: true,
           explicitChildNodes: true,
           label: l.warningSemanticsLabel,
-          liveRegion: true,
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 1),
             duration: instant
