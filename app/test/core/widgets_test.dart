@@ -155,12 +155,14 @@ void main() {
       expect(find.text('Asked for codes or passwords'), findsOneWidget);
     });
 
-    testWidgets('semantics reads step of 7', (tester) async {
+    testWidgets('semantics reads step of 6', (tester) async {
       final handle = tester.ensureSemantics();
       await pumpJaga(tester,
           const ScreenFrame(body: StageProgressBar(stage: Stage.isolation)));
-      expect(find.bySemanticsLabel('Step 4 of 7: Told to keep it secret'),
+      expect(find.bySemanticsLabel('Step 4 of 6: Told to keep it secret'),
           findsOneWidget);
+      expect(Stage.money.step, 6);
+      expect(Stage.credentials.step, 6);
       handle.dispose();
     });
 

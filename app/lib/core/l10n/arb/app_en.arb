@@ -32,7 +32,7 @@
   "stageLabelMoney": "Asked to move money",
   "@stageLabelMoney": { "description": "Stage bar label, step 6." },
   "stageLabelCredentials": "Asked for codes or passwords",
-  "@stageLabelCredentials": { "description": "Stage bar label, step 7." },
+  "@stageLabelCredentials": { "description": "Stage bar label, step 6 (ties with money)." },
 
   "stageStepSemantics": "Step {step} of {total}: {label}",
   "@stageStepSemantics": {

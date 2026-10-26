@@ -4,11 +4,11 @@ import '../../data/models/stage.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../theme/theme_context.dart';
 
-const _totalSteps = 7;
+const _totalSteps = 6;
 
 extension StageLabels on Stage {
-  /// 1..7 for pretext..credentials, 0 for none.
-  int get step => index;
+  /// 1..6 for pretext..money; `money` and `credentials` tie at 6 (GLOSSARY). 0 for none.
+  int get step => this == Stage.credentials ? Stage.money.index : index;
 
   /// Plain-word label; empty for [Stage.none].
   String label(AppLocalizations l) => switch (this) {
@@ -23,7 +23,7 @@ extension StageLabels on Stage {
       };
 }
 
-/// The 7-step scam-script bar with a plain-word label under it.
+/// The 6-step scam-script bar with a plain-word label under it.
 class StageProgressBar extends StatelessWidget {
   const StageProgressBar({super.key, required this.stage, this.compact = false});
 
