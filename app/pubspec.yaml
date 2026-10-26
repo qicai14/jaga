@@ -13,11 +13,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
+  proximity_sensor: ^2.0.0
+  vibration: ^3.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: any
+  json_schema: ^5.2.2
 
 flutter:
   uses-material-design: true
+  generate: true
