@@ -23,6 +23,10 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **Command** | The single instruction shown first in a warning ("Letak telefon. Hang up.") |
 | **Counter-move** | The coached next step that breaks the scam, e.g. "say you'll call back, then phone the station's official number" |
 | **Phrase library** | The fixed, reviewed text for every command and counter-move, per stage and language. Nothing else is shown to the protected user |
+| **Command language** | The language the command and counter-move are shown in, chosen at setup (the region's default; Malay for Malaysia). Always followed by English |
+| **App language** | The language of everything else on screen. On the protected user's phone it is the command language; a family co-pilot picks their own |
+| **Dismiss** | The protected user hiding a Caution or Warning on their own screen. Never stops family alerts or clears Jaga Pause, and lasts only until the stage or risk gets worse |
+| **Co-pilot lock** | The PIN a family co-pilot sets at setup that guards settings on the protected user's phone, so a caller can't coach them into switching Jaga off |
 | **Link code** | The code shown at setup that a family co-pilot enters to follow a protected user |
 | **Stage timeline** | What's kept after a call: stages, times, risk changes and masked evidence quotes. Never the transcript or audio |
 | **Jaga Pause** | Bank-facing signal: "is this customer mid-scam?". The Demo Bank uses it to hold a transfer |
