@@ -84,7 +84,8 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
   }
 
   void _up(PointerEvent _) {
-    if (_controller.isCompleted) return;
+    // The host may have removed us on confirm (the Warning does); the pointer-up still arrives.
+    if (!mounted || _controller.isCompleted) return;
     final instant = MediaQuery.disableAnimationsOf(context);
     _controller.animateBack(0, duration: instant ? Duration.zero : _rewind);
   }
