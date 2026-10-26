@@ -99,7 +99,7 @@ jaga/
 ├─ docs/plan.md              # the full plan (this brief is its summary)
 ├─ docs/adr/                 # decisions: Android only, Jaga line, Meta models for AI, pinned toolchain,
 │                            #   rules alone only raise a Caution, the user sees only fixed phrase-library text
-├─ .tickets/                 # spec.md + 26 tickets (one lane each, with "blocked by"); move to GitHub Issues on 26 Oct
+├─ docs/spec.md             # the spec; 26 tickets are GitHub Issues #1-#26 (one lane each, with "blocked by")
 ├─ contracts/                # JSON schemas the app and server agree on (stage update, family alert, pause)
 ├─ app/                      # Flutter: Android app + Demo Bank (web)          → Lane B (Preston), Demo Bank Lane D
 ├─ server/                   # Python FastAPI: telephony, listening, rules, AI   → Lane A (Qi Cai), tools + pause Lane D
@@ -133,7 +133,7 @@ Lanes C and D are interchangeable between Foon and Joshua. Tell me your pick.
 | **C. The evidence** | **Foon / Joshua** | `eval/` | Build the test sets, labelling, the replay harness, run the TeleAntiFraud benchmark, produce the numbers for the demo |
 | **D. Product edges + shipping** | **Joshua / Foon** | `server/jaga/tools`, `server/jaga/pause`, Demo Bank, CI | Scam-phrase library in 4 languages, official-hotline table, mule-account mock, Jaga Pause and the Demo Bank, golden-hour report, CI and deployment, the demo video |
 
-**Tickets are ready:** 26 of them in `.tickets/` (GitHub Issues from 26 Oct), each one lane, with "blocked by" links.
+**Tickets are ready:** 26 of them in GitHub Issues (#1 to #26), each one lane, with "blocked by" links.
 Day-1 starters with no blockers: A `001` contracts, `002` telephony test; C `003` transcription test, `005` corpus; D `004`
 CI and deploy, `006` phrase library. Lane B starts on `009` to `011` as soon as `001` (contracts) lands.
 

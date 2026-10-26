@@ -6,7 +6,7 @@ money before it moves. Meta Global AI Developer Hackathon 2026, Indie track.
 - The plan: [`docs/plan.md`](docs/plan.md) · Decisions: [`docs/adr/`](docs/adr) · Vocabulary: [`GLOSSARY.md`](GLOSSARY.md)
 - Rules for humans and agents: [`AGENTS.md`](AGENTS.md)
 - New here? Read the [team brief](docs/team-brief.md), then open the [call-flow diagram](docs/diagrams/jaga-call-flow.html) in a browser.
-- Spec and tickets: [`.tickets/`](.tickets)
+- Spec: [`docs/spec.md`](docs/spec.md) · Tickets: [GitHub Issues](https://github.com/qicai14/jaga/issues)
 
 ## Built before the Hackathon
 The Official Rules require new work to be clearly identified. Everything up to the git tag `pre-hackathon` was written
@@ -61,7 +61,7 @@ docker compose up server   # http://localhost:8000/health -> {"status":"ok"}
   `https://github.com/mattpocock/skills`). Copilot reads `AGENTS.md`, `.claude/skills/` and `.github/agents/`.
 
 ## How we work
-1. Pick an unblocked ticket in your lane from GitHub Issues (`.tickets/` until 26 Oct; spec in `.tickets/spec.md`) and assign yourself.
+1. Pick an unblocked ticket in your lane from GitHub Issues (filter by your `lane-x` label) and assign yourself.
 2. `git switch -c <name>/<ticket-id>-<slug>`, then `/implement <ticket>` (Matt Pocock skills).
 3. Review (`reviewer` agent or `/code-review`), rebase on `main`, open the PR (the template follows the `pr` skill).
 4. CI green plus one approval from the folder owner (`.github/CODEOWNERS`), then squash-merge.

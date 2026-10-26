@@ -15,7 +15,7 @@ Pinned toolchain (ADR 0004). Never use global tools.
 - `server/`: FastAPI pipeline, tools and Jaga Pause
 - `eval/`: corpus, replay harness, metrics
 - `contracts/`: JSON schemas, the only way server and app talk
-- `docs/`: plan, ADRs, conventions. `.tickets/`: spec and tickets
+- `docs/`: plan, spec, ADRs, conventions. Tickets: GitHub Issues
 
 ## Always
 - Meta models for every AI step (ADR 0003). Every Meta or Twilio client has a fake; tests never need keys or network.
@@ -26,5 +26,5 @@ Pinned toolchain (ADR 0004). Never use global tools.
 - Committing, PRs, dependencies or contracts: `docs/delivery.md`
 - Product plan and scope: `docs/plan.md`
 - Official Hackathon rules (deadlines, new-work rule, submission): `docs/hackathon-rules.md`
-- Issue tracker: `docs/agents/issue-tracker.md` (`.tickets/` until the GitHub move, then GitHub Issues).
+- Issue tracker: `docs/agents/issue-tracker.md` (GitHub Issues).
   Triage labels: `docs/agents/triage-labels.md`. Domain docs (single-context): `docs/agents/domain.md`
