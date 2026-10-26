@@ -8,6 +8,7 @@ members = ["server", "eval"]
 [tool.ruff]
 line-length = 110
 target-version = "py313"
+extend-exclude = [".claude"]  # vendored skill docs, not our code
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
