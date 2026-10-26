@@ -22,7 +22,7 @@ Everyone uses the same pinned versions (ADR 0004). Install these once:
 |---|---|---|
 | Git | version control | git-scm.com |
 | FVM 4.3.1 | pins Flutter 3.47.7 | Windows: standalone zip, see below (no Chocolatey needed). Turn on Developer Mode (Settings → System → For developers) so FVM can create links. macOS/Linux: the install script at fvm.app |
-| Android SDK + emulator | build and run the app | Android Studio (developer.android.com/studio), or the command-line tools only plus **Temurin JDK 21** (`winget install EclipseAdoptium.Temurin.21.JDK`; IntelliJ's bundled JBR can't build Android). Then `fvm flutter doctor --android-licenses` |
+| Android SDK + emulator | build and run the app | Android Studio (developer.android.com/studio), or the command-line tools only plus **Temurin JDK 21** (`winget install EclipseAdoptium.Temurin.21.JDK`; IntelliJ's bundled JBR has no `jlink`, so it can't build Android: in IntelliJ set Settings → Build Tools → Gradle → Gradle JVM to Temurin 21). Then `fvm flutter doctor --android-licenses` |
 | uv 0.12.24 | pins Python 3.13 + packages | `powershell -c "irm https://astral.sh/uv/0.12.24/install.ps1 \| iex"` (Windows), `curl -LsSf https://astral.sh/uv/0.12.24/install.sh \| sh` (macOS/Linux) |
 | Docker Desktop | runs the server exactly as deployed | docker.com |
 | GitHub CLI | issues and PRs | cli.github.com, then `gh auth login` |
