@@ -52,6 +52,8 @@ class _WarningScreenState extends State<WarningScreen> {
     final styles = context.jagaText;
     final content = widget.content;
     final instant = MediaQuery.disableAnimationsOf(context);
+    // Big text: the counter-move clamps so the official number is reachable.
+    final bigText = MediaQuery.textScalerOf(context).scale(10) >= 15;
 
     final command = content.command ?? l.warningCommandFallback;
     final english = content.command == null ? null : content.commandEnglish;
@@ -63,6 +65,7 @@ class _WarningScreenState extends State<WarningScreen> {
         : content.evidence.first;
 
     final commandRegion = Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _commandOverflows
@@ -101,6 +104,8 @@ class _WarningScreenState extends State<WarningScreen> {
           if (content.counterMove != null)
             Text(
               content.counterMove!,
+              maxLines: bigText ? 2 : null,
+              overflow: bigText ? TextOverflow.ellipsis : null,
               style: text.bodyLarge?.copyWith(color: c.onWarning),
             ),
           if (counterEnglish != null &&
@@ -108,6 +113,8 @@ class _WarningScreenState extends State<WarningScreen> {
             SizedBox(height: m.s),
             Text(
               counterEnglish,
+              maxLines: bigText ? 2 : null,
+              overflow: bigText ? TextOverflow.ellipsis : null,
               style: text.bodyMedium?.copyWith(color: c.onWarning),
             ),
           ],
@@ -222,14 +229,30 @@ class _WarningScreenState extends State<WarningScreen> {
                             ),
                           ),
                         )
-                      else ...[
-                        Flexible(flex: 5, child: commandRegion),
-                        rule,
-                        Flexible(
-                          flex: 4,
-                          child: SingleChildScrollView(child: detail),
+                      else
+                        // The command sizes to its content (up to 55% of the
+                        // room, then it shrinks); the detail gets the rest.
+                        Expanded(
+                          child: LayoutBuilder(
+                            builder: (context, box) => Column(
+                              children: [
+                                ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxHeight: box.maxHeight * 0.55,
+                                  ),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: commandRegion,
+                                  ),
+                                ),
+                                rule,
+                                Expanded(
+                                  child: SingleChildScrollView(child: detail),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
                       SizedBox(height: m.s),
                       BigButton(
                         tone: BigButtonTone.onWarning,

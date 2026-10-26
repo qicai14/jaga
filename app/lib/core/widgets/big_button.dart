@@ -35,13 +35,18 @@ class BigButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.jagaColors;
     final text = Text(label, textAlign: TextAlign.center);
-    final iconWidget = icon == null ? null : Icon(icon);
+    // The icon grows with the text, capped at 2x (a 24dp icon in a 64dp button).
+    final scale = MediaQuery.textScalerOf(context).scale(24).clamp(24.0, 48.0);
+    final iconWidget = icon == null ? null : Icon(icon, size: scale);
 
     if (tone == BigButtonTone.quiet) {
       return iconWidget == null
           ? OutlinedButton(onPressed: onPressed, child: text)
           : OutlinedButton.icon(
-              onPressed: onPressed, icon: iconWidget, label: text);
+              onPressed: onPressed,
+              icon: iconWidget,
+              label: text,
+            );
     }
 
     final (bg, fg) = switch (tone) {
@@ -49,10 +54,17 @@ class BigButton extends StatelessWidget {
       BigButtonTone.onWarning => (c.onWarning, c.warning),
       _ => (c.guarded, c.onGuarded),
     };
-    final style = FilledButton.styleFrom(backgroundColor: bg, foregroundColor: fg);
+    final style = FilledButton.styleFrom(
+      backgroundColor: bg,
+      foregroundColor: fg,
+    );
     return iconWidget == null
         ? FilledButton(onPressed: onPressed, style: style, child: text)
         : FilledButton.icon(
-            onPressed: onPressed, style: style, icon: iconWidget, label: text);
+            onPressed: onPressed,
+            style: style,
+            icon: iconWidget,
+            label: text,
+          );
   }
 }

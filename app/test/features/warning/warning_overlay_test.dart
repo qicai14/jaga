@@ -108,6 +108,24 @@ void main() {
     },
   );
 
+  forEachScale('3b high: the official number is reachable', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    await emit(tester, rig, extHigh);
+    await tester.scrollUntilVisible(
+      find.text('+60 3-2266 2222'),
+      50,
+      scrollable: find.descendant(
+        of: find.byType(WarningScreen),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    final hang = tester.getRect(find.byType(BigButton)).top;
+    expect(tester.getRect(find.text('+60 3-2266 2222')).bottom, lessThan(hang));
+  });
+
   // Note: flutter_test lays text out in Ahem (every glyph 1em wide), roughly 1.6x
   // wider than Noto Sans, so these are worst-case sizes.
   forEachScale('4 high, 73-character command and English: never below 32sp', (

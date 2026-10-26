@@ -26,11 +26,17 @@ class PlaceholderCallScreen extends StatelessWidget {
       onHangUp: onHangUp ?? () {},
       child: ScreenFrame(
         body: Padding(
-          padding: EdgeInsets.only(top: context.metrics.xxl),
+          padding: EdgeInsets.only(
+            top: MediaQuery.sizeOf(context).height * 0.3,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(callerNumber, style: text.headlineMedium),
+              Text(
+                callerNumber,
+                style: text.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
               SizedBox(height: context.metrics.s),
               Text(timer, style: text.bodyLarge),
             ],
