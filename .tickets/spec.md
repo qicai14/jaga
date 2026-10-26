@@ -197,10 +197,11 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 
 ## Further Notes
 
-- Day-1 tests on 26 Oct decide the riskiest assumptions: `<Start><Stream track="both_tracks">` with `<Dial><Client>`,
+- Day-1 tests on 27 Oct (building period start) decide the riskiest assumptions: `<Start><Stream track="both_tracks">` with `<Dial><Client>`,
   `twilio_voice` incoming calls on Android, connect time, and transcription quality on 8 kHz audio. Fallback for
   telephony: a browser dialer calls the Jaga number.
-- Re-read the Official Rules on 26 Oct before committing; the rules may limit pre-built code.
+- Official Rules (`docs/hackathon-rules.md`): public repo; the demo shows only work built during the Hackathon (after the
+  `pre-hackathon` tag); no data or assets we lack rights to.
 - The hard-trigger list and the phrase library's wording are open content work for lanes A and D.
 - Check PDPA 2010 and recording consent before making any legal claims.
 - Targets are fixed in `docs/plan.md` §5; report misses honestly and never tune on the held-out set.

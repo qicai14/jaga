@@ -104,7 +104,8 @@ Server: FastAPI on Fly.io (always-on WebSocket). Push, auth, small data: Firebas
 ## 9. Timeline (build window 26 Oct to 4 Nov, 9 PM ET)
 | Date | Milestone |
 |---|---|
-| 26 Oct | Read the Official Rules. Push the scaffold, protect `main`, tickets to Issues. Finalise contracts. Day-1 tests: Twilio audio fork, connect time, 8 kHz transcription quality |
+| 26 Oct (kickoff) | Rules read (`docs/hackathon-rules.md`). Push the scaffold, tag `pre-hackathon`, protect `main`, tickets to Issues. No feature code before the building period (27 Oct ET) |
+| 27 Oct | Finalise contracts. Day-1 tests: Twilio audio fork, connect time, 8 kHz transcription quality |
 | 27 to 29 Oct | First end-to-end call with a warning on fakes, then on real APIs |
 | 30 Oct to 1 Nov | Tools, family alert, Jaga Pause. Evaluation numbers. Architecture pass (31 Oct) |
 | 2 to 3 Nov | Stretch items, polish, feature freeze on the 3rd |
@@ -127,6 +128,6 @@ Closing line: "Caller-ID asks who's calling. Jaga asks what they want, and stops
 | Transcription quality on 8 kHz audio | Day-1 test. Keyword biasing; report the error rate |
 | False alarms on genuine calls | Genuine calls in every evaluation set; rules plus Spark ablation |
 | No public Semak Mule API | Mock with an explicit "production: PDRM partnership" label |
-| Corpus licensing and privacy | Usage note per source; audio never committed |
-| Rules on pre-built code | Scaffold is config and boilerplate only; re-read the Official Rules on 26 Oct |
+| Corpus licensing and privacy | The rules disqualify data we lack rights to: usage note per source, audio never committed, unlicensed clips never in the demo video |
+| Rules on pre-built code | Checked 26 Oct: allowed if clearly identified. Scaffold is setup only, tagged `pre-hackathon`, listed in the README; the demo shows only work after the tag |
 | Scope creep | MVP first; stretch only from the ordered list |

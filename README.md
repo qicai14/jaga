@@ -8,6 +8,13 @@ money before it moves. Meta Global AI Developer Hackathon 2026, Indie track.
 - New here? Read the [team brief](docs/team-brief.md), then open the [call-flow diagram](docs/diagrams/jaga-call-flow.html) in a browser.
 - Spec and tickets: [`.tickets/`](.tickets)
 
+## Built before the Hackathon
+The Official Rules require new work to be clearly identified. Everything up to the git tag `pre-hackathon` was written
+before kickoff (26 Oct 2026, 12:00 PM ET) and is setup only: the plan, ADRs, spec and tickets, toolchain pins, agent
+config, CI workflows, the `flutter create` app shell and a `/health` endpoint. All product features (telephony, ASR,
+stage tracker, Muse Spark escalation, warnings, family alerts, Jaga Pause, Demo Bank, evaluation) are built during the
+Hackathon, after that tag: `git log pre-hackathon..main`.
+
 ## One-time setup (Windows, macOS or Linux)
 Everyone uses the same pinned versions (ADR 0004). Install these once:
 

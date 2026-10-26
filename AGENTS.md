@@ -25,5 +25,6 @@ Pinned toolchain (ADR 0004). Never use global tools.
 ## Read when relevant
 - Committing, PRs, dependencies or contracts: `docs/delivery.md`
 - Product plan and scope: `docs/plan.md`
+- Official Hackathon rules (deadlines, new-work rule, submission): `docs/hackathon-rules.md`
 - Issue tracker: `docs/agents/issue-tracker.md` (`.tickets/` until the GitHub move, then GitHub Issues).
   Triage labels: `docs/agents/triage-labels.md`. Domain docs (single-context): `docs/agents/domain.md`
