@@ -1,0 +1,19 @@
+{
+  "@@locale": "ms",
+  "@@x-review": "Best-effort translation, needs native speaker review",
+
+  "appTitle": "Jaga",
+  "statusProtected": "Jaga sedang melindungi anda",
+  "statusPauseActive": "Jaga Pause aktif",
+  "callReconnecting": "Menyambung semula",
+  "commonHoldHint": "Tekan dan tahan selama 2 saat",
+  "commonTapAgainHint": "Ketik sekali lagi untuk mengesahkan",
+  "stageLabelPretext": "Memberi sebab untuk menelefon",
+  "stageLabelAuthority": "Mengaku sebagai pegawai",
+  "stageLabelFear": "Menakutkan anda",
+  "stageLabelIsolation": "Disuruh merahsiakan",
+  "stageLabelHandoff": "Dipindahkan kepada orang lain",
+  "stageLabelMoney": "Disuruh memindahkan wang",
+  "stageLabelCredentials": "Diminta kod atau kata laluan",
+  "stageStepSemantics": "Langkah {step} daripada {total}: {label}"
+}

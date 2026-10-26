@@ -1,0 +1,46 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Jaga",
+  "@appTitle": { "description": "App name. Window title and the placeholder home screen." },
+
+  "statusProtected": "Jaga is protecting you",
+  "@statusProtected": { "description": "Status hero on the protected user's home screen, and the 'protected' badge." },
+
+  "statusPauseActive": "Jaga Pause active",
+  "@statusPauseActive": { "description": "Badge shown while Jaga Pause is on." },
+
+  "callReconnecting": "Reconnecting",
+  "@callReconnecting": { "description": "Semantics label only, never shown as text. The reconnecting dot on the call and Warning screens." },
+
+  "commonHoldHint": "Hold for 2 seconds",
+  "@commonHoldHint": { "description": "TalkBack hint on every hold-to-confirm button." },
+
+  "commonTapAgainHint": "Tap again to confirm",
+  "@commonTapAgainHint": { "description": "Announced when a hold-to-confirm button is armed in TalkBack two-tap mode." },
+
+  "stageLabelPretext": "Gave a reason to call",
+  "@stageLabelPretext": { "description": "Stage bar label, step 1: the caller opened with a pretext." },
+  "stageLabelAuthority": "Claimed to be an official",
+  "@stageLabelAuthority": { "description": "Stage bar label, step 2." },
+  "stageLabelFear": "Made you afraid",
+  "@stageLabelFear": { "description": "Stage bar label, step 3." },
+  "stageLabelIsolation": "Told to keep it secret",
+  "@stageLabelIsolation": { "description": "Stage bar label, step 4." },
+  "stageLabelHandoff": "Passed to another person",
+  "@stageLabelHandoff": { "description": "Stage bar label, step 5." },
+  "stageLabelMoney": "Asked to move money",
+  "@stageLabelMoney": { "description": "Stage bar label, step 6." },
+  "stageLabelCredentials": "Asked for codes or passwords",
+  "@stageLabelCredentials": { "description": "Stage bar label, step 7." },
+
+  "stageStepSemantics": "Step {step} of {total}: {label}",
+  "@stageStepSemantics": {
+    "description": "TalkBack label of the stage progress bar.",
+    "placeholders": {
+      "step": { "type": "int" },
+      "total": { "type": "int" },
+      "label": { "type": "String" }
+    }
+  }
+}

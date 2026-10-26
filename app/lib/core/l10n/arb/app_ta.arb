@@ -1,0 +1,19 @@
+{
+  "@@locale": "ta",
+  "@@x-review": "Best-effort translation, needs native speaker review",
+
+  "appTitle": "Jaga",
+  "statusProtected": "Jaga உங்களைப் பாதுகாக்கிறது",
+  "statusPauseActive": "Jaga Pause இயக்கத்தில் உள்ளது",
+  "callReconnecting": "மீண்டும் இணைக்கிறது",
+  "commonHoldHint": "2 விநாடிகள் அழுத்திப் பிடிக்கவும்",
+  "commonTapAgainHint": "உறுதிப்படுத்த மீண்டும் தட்டவும்",
+  "stageLabelPretext": "அழைப்பதற்கு ஒரு காரணம் கூறினார்",
+  "stageLabelAuthority": "அதிகாரி என்று கூறிக்கொண்டார்",
+  "stageLabelFear": "உங்களைப் பயமுறுத்தினார்",
+  "stageLabelIsolation": "ரகசியமாக வைக்கச் சொன்னார்",
+  "stageLabelHandoff": "வேறொருவருக்கு மாற்றினார்",
+  "stageLabelMoney": "பணத்தை மாற்றச் சொன்னார்",
+  "stageLabelCredentials": "குறியீடுகள் அல்லது கடவுச்சொற்களைக் கேட்டார்",
+  "stageStepSemantics": "படி {step} / {total}: {label}"
+}
