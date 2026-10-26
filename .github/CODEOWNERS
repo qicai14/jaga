@@ -1,15 +1,15 @@
-# Replace the placeholders with GitHub usernames on 26 Oct, then turn on "Require review from Code Owners".
 # Lane A (Qi Cai): core pipeline, contracts, agent config
 # Lane B (Preston): app
-# Lane C (Foon or Joshua): eval
-# Lane D (Joshua or Foon): tools, Jaga Pause, Demo Bank, CI and deploy
-*                         @qicai14
-/server/                  @qicai14
-/contracts/               @qicai14
-/.claude/                 @qicai14
-/app/                     @PRESTON_GITHUB
-/eval/                    @LANE_C_GITHUB
-/server/jaga/tools/       @LANE_D_GITHUB
-/server/jaga/pause/       @LANE_D_GITHUB
-/app/lib/features/demo_bank/  @LANE_D_GITHUB
-/.github/workflows/       @LANE_D_GITHUB
+# Lane C (Foon): eval
+# Lane D (Joshua): tools, Jaga Pause, Demo Bank, CI and deploy
+# Two owners per path: authors can't approve their own PR, so the second owner reviews the first one's work.
+*                         @qicai14 @jlee-0211
+/server/                  @qicai14 @jlee-0211
+/contracts/               @qicai14 @Shadewebdev
+/.claude/                 @qicai14 @Shadewebdev
+/app/                     @Shadewebdev @qicai14
+/eval/                    @LXfoon @qicai14
+/server/jaga/tools/       @jlee-0211 @qicai14
+/server/jaga/pause/       @jlee-0211 @qicai14
+/app/lib/features/demo_bank/  @jlee-0211 @Shadewebdev
+/.github/workflows/       @jlee-0211 @qicai14
