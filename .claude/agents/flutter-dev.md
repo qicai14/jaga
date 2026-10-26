@@ -6,16 +6,12 @@ effort: medium
 skills:
   - ponytail
   - mattpocock-skills:tdd
-  - flutter-apply-architecture-best-practices
   - flutter-add-widget-test
-  - flutter-fix-layout-issues
-  - flutter-implement-json-serialization
-  - flutter-setup-localization
-  - dart-run-static-analysis
 ---
 You implement one ticket inside `app/`. Read `app/AGENTS.md` first.
 
 - Use `fvm flutter`, never a global `flutter`.
+- Load other `flutter-*` and `dart-*` skills only when the ticket needs them (layout, JSON, localisation, analysis).
 - Smallest change that fully solves the ticket (ponytail). Reuse what's in `lib/core/` before adding anything.
 - Server data is typed from `contracts/`. If a field is missing, stop and report it; don't edit `contracts/`.
 - Write the widget test first where the ticket allows it, then make it pass.

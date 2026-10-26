@@ -1,37 +1,29 @@
 # Jaga
 
-Scam-call guardian for Malaysian families. Calls forward to a Jaga line and ring inside our Android app. The server listens
-to *what* the caller says (Muse Voice Transcribe), tracks the scam script's stages with free rules, and calls Muse Spark
-only when the rules fire. Plan: `docs/plan.md`. Words we use: `GLOSSARY.md`. Decisions: `docs/adr/`.
+Android scam-call guardian, Malaysia first. Calls forward to a Jaga line and ring in our Flutter app; the FastAPI server
+hears *what* the caller says (Muse Voice Transcribe), tracks the scam script with free rules, and calls Muse Spark only
+when the rules fire.
 
-## Commands
-Toolchain is pinned. Use the pinned tools, never global ones.
-- App: `cd app && fvm flutter pub get`, `fvm flutter analyze`, `fvm flutter test`
-- Python (server + eval): `uv sync --locked`, `uv run ruff check`, `uv run ruff format`, `uv run pytest`
-- Server locally: `docker compose up server` (same image as deploy), health at `http://localhost:8000/health`
+## Tooling
+Pinned toolchain (ADR 0004). Never use global tools.
+- App: `fvm flutter ...` (never `flutter`)
+- Python (server + eval): `uv sync --locked`, `uv run pytest`, `uv run ruff check`
+- Server locally: `docker compose up server`, health at `http://localhost:8000/health`
 
-## Rules
-- Meta models for every AI step (hear, see, reason). Any tool is fine for plumbing. ADR 0003.
-- Server and app talk only through `contracts/*.schema.json`. Change a contract by ADR, in its own PR, never mixed with feature code.
-- Every Meta or Twilio client has a fake in `server/jaga/fakes/`. Tests never need keys, credits or network.
+## Layout
+- `app/`: Flutter app (Android) and the Demo Bank (web)
+- `server/`: FastAPI pipeline, tools and Jaga Pause
+- `eval/`: corpus, replay harness, metrics
+- `contracts/`: JSON schemas, the only way server and app talk
+- `docs/`: plan, ADRs, conventions. `.tickets/`: spec and tickets
+
+## Always
+- Meta models for every AI step (ADR 0003). Every Meta or Twilio client has a fake; tests never need keys or network.
 - Never read, print or commit `.env`. New config goes in `.env.example` with a comment.
-- Dependency changes (`pubspec.yaml`, `pyproject.toml`, locks) go in their own PR.
-- One ticket, one branch (`<name>/<ticket-id>-<slug>`), one PR. Rebase on `main` before opening. CI must be green.
-- Folder owners are in `.github/CODEOWNERS`. Stay inside your ticket's folder; ask before editing another lane's.
+- Use the words in `GLOSSARY.md`. Respect `docs/adr/`.
 
-## Where to look
-`app/AGENTS.md`, `server/AGENTS.md`, `eval/AGENTS.md` hold each area's rules. Tickets: GitHub Issues (`.tickets/` before kickoff).
-
-## Agent skills
-
-### Issue tracker
-
-Local markdown in `.tickets/` until 26 Oct, then GitHub Issues. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-The five default labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+## Read when relevant
+- Committing, PRs, dependencies or contracts: `docs/delivery.md`
+- Product plan and scope: `docs/plan.md`
+- Issue tracker: `docs/agents/issue-tracker.md` (`.tickets/` until the GitHub move, then GitHub Issues).
+  Triage labels: `docs/agents/triage-labels.md`. Domain docs (single-context): `docs/agents/domain.md`

@@ -6,7 +6,7 @@ effort: high
 tools: Read, Grep, Glob, Bash, Write, Edit
 skills:
   - mattpocock-skills:codebase-design
-  - mattpocock-skills:grill-with-docs
+  - mattpocock-skills:domain-modeling
 ---
 You make design decisions that cross lanes, and you write them down.
 

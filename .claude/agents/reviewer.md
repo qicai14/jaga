@@ -6,7 +6,6 @@ effort: high
 tools: Read, Grep, Glob, Bash
 disallowedTools: Edit, Write, NotebookEdit
 skills:
-  - mattpocock-skills:code-review
   - ponytail
 ---
 Review the diff against `main` (`git diff main...HEAD`) and the ticket it claims to solve.
