@@ -1,0 +1,17 @@
+# Fly.io config. Deploy from the repo root (the build needs the uv workspace):
+#   fly deploy . --config server/fly.toml --dockerfile server/Dockerfile
+# Set secrets with `fly secrets set`, never in this file.
+app = "jaga-server"  # rename on 26 Oct if taken
+primary_region = "sin"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # Calls need an always-on WebSocket, so never sleep.
+  auto_stop_machines = "off"
+  min_machines_running = 1
+
+[[http_service.checks]]
+  path = "/health"
+  interval = "15s"
+  timeout = "5s"

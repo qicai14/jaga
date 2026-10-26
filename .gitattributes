@@ -1,0 +1,8 @@
+# Same line endings on every OS, so Windows and macOS edits don't create whole-file diffs or conflicts.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.wav binary
+*.mp3 binary
+*.jar binary

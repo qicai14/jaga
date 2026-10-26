@@ -1,0 +1,20 @@
+[project]
+name = "jaga-server"
+version = "0.1.0"
+requires-python = "==3.13.*"
+# Lean on purpose: each lane adds what its ticket needs, in a dependency-only PR.
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "pydantic-settings",
+]
+
+[dependency-groups]
+dev = ["pytest", "httpx", "ruff"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["jaga"]

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/family-alert",
+  "title": "FamilyAlert (server -> family co-pilot via FCM). Summary only, never the transcript. Draft v0.",
+  "type": "object",
+  "required": ["callId", "protectedUserName", "stage", "summary", "at"],
+  "additionalProperties": false,
+  "properties": {
+    "callId": { "type": "string" },
+    "protectedUserName": { "type": "string" },
+    "stage": { "enum": ["isolation", "handoff", "money", "credentials"] },
+    "claimedAgency": { "type": ["string", "null"] },
+    "summary": { "type": "string", "maxLength": 200 },
+    "quotes": { "type": "array", "items": { "type": "string" }, "maxItems": 2 },
+    "at": { "type": "string", "format": "date-time" }
+  }
+}

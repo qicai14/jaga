@@ -1,0 +1,16 @@
+# uv workspace: one lock file (uv.lock) pins every Python dependency for server and eval on every machine.
+[tool.uv]
+required-version = "==0.12.24"
+
+[tool.uv.workspace]
+members = ["server", "eval"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["jaga", "jaga_eval"]

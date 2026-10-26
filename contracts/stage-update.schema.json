@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/stage-update",
+  "title": "StageUpdate (server -> protected user's app, during a call). Draft v0: finalise on 26 Oct by ADR.",
+  "type": "object",
+  "required": ["callId", "stage", "risk", "at"],
+  "additionalProperties": false,
+  "properties": {
+    "callId": { "type": "string" },
+    "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
+    "risk": { "enum": ["low", "medium", "high"] },
+    "claimedAgency": { "type": ["string", "null"], "description": "e.g. PDRM, LHDN, Bank Negara" },
+    "command": { "type": ["string", "null"], "description": "The single instruction shown first, in the user's language" },
+    "counterMove": { "type": ["string", "null"] },
+    "evidence": { "type": "array", "items": { "type": "string" }, "maxItems": 3, "description": "Short masked quotes" },
+    "source": { "enum": ["rules", "spark"] },
+    "at": { "type": "string", "format": "date-time" }
+  }
+}

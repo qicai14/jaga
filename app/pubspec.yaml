@@ -1,0 +1,23 @@
+name: jaga
+description: Scam-call guardian for Malaysian families.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  # Pinned to the team toolchain (app/.fvmrc). CI reads this exact version.
+  sdk: 3.13.5
+  flutter: 3.47.7
+
+# Lean on purpose: each lane adds what its ticket needs, in a dependency-only PR.
+# pubspec.lock is committed, so everyone resolves identical package versions.
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true

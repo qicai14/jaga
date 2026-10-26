@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Jaga: how a call is protected",
+    "output": ".archify/architecture-jaga-call-flow-20261025-134634/jaga-call-flow.html",
+    "quality_profile": "showcase",
+    "locale": "en"
+  },
+  "components": [
+    { "id": "scammer", "type": "external", "label": "Caller", "sublabel": "scammer or genuine", "pos": [40, 60], "size": [150, 70] },
+    { "id": "sim", "type": "cloud", "label": "Grandma's number", "sublabel": "carrier forwards calls", "pos": [340, 60], "size": [150, 70], "tag": "set at setup" },
+    { "id": "twilio", "type": "cloud", "label": "Jaga line", "sublabel": "Twilio number", "pos": [640, 60], "size": [150, 70] },
+    { "id": "app", "type": "frontend", "label": "Jaga app", "sublabel": "grandma's Android", "pos": [940, 60], "size": [150, 70], "tag": "Caution / Warning" },
+    { "id": "bank", "type": "frontend", "label": "Demo Bank", "sublabel": "Flutter web", "pos": [340, 240], "size": [150, 70] },
+    { "id": "server", "type": "backend", "label": "Jaga server", "sublabel": "FastAPI, stage tracker", "pos": [640, 240], "size": [150, 70], "tag": "rules first" },
+    { "id": "family", "type": "frontend", "label": "Family app", "sublabel": "son or daughter", "pos": [940, 240], "size": [150, 70] },
+    { "id": "transcribe", "type": "cloud", "label": "Muse Voice Transcribe", "sublabel": "live speech to text", "pos": [520, 430], "size": [150, 70] },
+    { "id": "spark", "type": "cloud", "label": "Muse Spark", "sublabel": "on escalation only", "pos": [760, 430], "size": [150, 70] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Telephony", "wraps": ["sim", "twilio"] },
+    { "kind": "region", "label": "Meta AI (Standard mode)", "wraps": ["transcribe", "spark"] }
+  ],
+  "connections": [
+    { "id": "call", "from": "scammer", "to": "sim", "label": "calls (spoofed ID)", "variant": "emphasis" },
+    { "id": "forward", "from": "sim", "to": "twilio", "label": "forwards call", "variant": "emphasis" },
+    { "id": "ring", "from": "twilio", "to": "app", "label": "rings in app", "variant": "emphasis" },
+    { "id": "fork", "from": "twilio", "to": "server", "label": "both legs' audio", "fromSide": "bottom", "toSide": "top" },
+    { "id": "hear", "from": "server", "to": "transcribe", "label": "audio stream", "fromSide": "bottom", "toSide": "top" },
+    { "id": "reason", "from": "server", "to": "spark", "label": "masked snippet", "variant": "security", "fromSide": "bottom", "toSide": "top" },
+    { "id": "warn", "from": "server", "to": "app", "label": "stage update", "fromSide": "right", "toSide": "bottom" },
+    { "id": "alert", "from": "server", "to": "family", "label": "push alert" },
+    { "id": "pause", "from": "bank", "to": "server", "label": "mid-scam?", "variant": "dashed" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "How the call reaches Jaga", "items": ["Grandma's SIM forwards every call to the Jaga line", "The Jaga line rings our app, so she answers there", "Twilio copies both sides' audio to the server"] },
+    { "dot": "emerald", "title": "What it listens for", "items": ["What is said, not who calls: works even when caller ID is spoofed", "Free rules track the scam script's stages", "Muse Spark is called only when the rules fire"] },
+    { "dot": "rose", "title": "What happens next", "items": ["Warning on grandma's screen: Letak telefon. Hang up.", "Family gets a push with a short summary", "The bank asks Jaga Pause and holds the transfer"] },
+    { "dot": "amber", "title": "Demo vs production", "items": ["Demo: a US Twilio number, called directly", "Production: forwarding from a Malaysian SIM needs a +60 number"] }
+  ]
+}

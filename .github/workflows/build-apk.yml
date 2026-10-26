@@ -1,0 +1,31 @@
+name: Build APK
+
+# A sideloadable release APK for the demo phones. Signed with the debug key: fine for a demo, not for the Play Store.
+on:
+  push:
+    branches: [main]
+    paths: ["app/**"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: app/pubspec.yaml
+          cache: true
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jaga-apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk

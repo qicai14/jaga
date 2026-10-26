@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/pause",
+  "title": "Jaga Pause (bank -> Jaga: 'is this customer mid-scam?'). Response body. Draft v0.",
+  "type": "object",
+  "required": ["inScam", "checkedAt"],
+  "additionalProperties": false,
+  "properties": {
+    "inScam": { "type": "boolean" },
+    "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
+    "claimedAgency": { "type": ["string", "null"] },
+    "callActiveForSeconds": { "type": ["integer", "null"] },
+    "recommendedHoldMinutes": { "type": "integer", "minimum": 0 },
+    "checkedAt": { "type": "string", "format": "date-time" }
+  }
+}
