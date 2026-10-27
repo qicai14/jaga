@@ -160,7 +160,7 @@ def test_hard_trigger_is_a_warning_at_once_and_rules_never_lower_it(client):
 def test_protected_user_reading_out_credentials_moves_the_call_to_credentials(client, said):
     updates = trail(client, "CA_user", [("caller", "Saya dari PDRM."), ("user", said)])
 
-    assert stages_of(updates)[-1] == ("credentials", "medium")
+    assert stages_of(updates)[-1] == ("credentials", "high")
     assert not any(c.isdigit() for e in updates[-1]["evidence"] for c in e)
 
 
@@ -227,7 +227,15 @@ def test_user_disclosure_ties_with_money_but_the_caller_never_takes_credentials_
         ],
     )
 
-    assert stages_of(updates) == [("none", "low"), ("money", "medium"), ("credentials", "medium")]
+    assert stages_of(updates) == [("none", "low"), ("money", "high"), ("credentials", "high")]
+
+
+def test_money_or_credentials_is_a_warning_while_spark_is_missing(client):
+    updates = trail(client, "CA_failsafe", [("caller", "Bayar jaminan hari ini.")])
+
+    assert stages_of(updates) == [("none", "low"), ("money", "high")]
+    assert updates[-1]["source"] == "rules"
+    assert updates[-1]["command"] and updates[-1]["counterMove"]
 
 
 def test_unknown_region_closes_the_stream_and_logs_it(client, caplog):

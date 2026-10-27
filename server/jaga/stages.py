@@ -1,7 +1,7 @@
 """The stage tracker: free, deterministic rules from a region pack's phrases and hard triggers (ADR 0005).
 
 Stages come from the caller leg. The user leg only matters when the protected user reads out a TAC,
-account number or IC. Rules alone reach a Caution; only a hard trigger raises a Warning.
+account number or IC. Rules alone reach a Caution; a hard trigger or money/credentials raises a Warning.
 """
 
 import json
@@ -51,7 +51,10 @@ class StageTracker:
         # max keeps the first of equals: user disclosure ties up to credentials, a caller never flips it back.
         seen = [s for s, _ in found]
         stage = max(seen + [self.stage] if leg == "user" else [self.stage] + seen, key=RANK.__getitem__)
-        risk = "high" if hard or self.risk == "high" else "medium" if stage != "none" else "low"
+        # shortcut: no Spark yet counts as Spark failing, so the spec's fail-safe Warning at money/credentials
+        # applies now; #13 moves it behind the real Spark call and its timeout.
+        warn = hard or self.risk == "high" or RANK[stage] == RANK["money"]
+        risk = "high" if warn else "medium" if stage != "none" else "low"
         if (stage, risk) == (self.stage, self.risk):
             return None
         self.stage, self.risk = stage, risk
