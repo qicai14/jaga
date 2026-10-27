@@ -7,8 +7,10 @@ from typing import Protocol
 class Transcriber(Protocol):
     async def transcribe(self, leg: str, audio: bytes) -> str | None: ...
 
+    async def close(self) -> None: ...
 
-def transcriber() -> Transcriber:
+
+def transcriber(pack: dict) -> Transcriber:
     if os.environ.get("JAGA_USE_FAKES", "").lower() == "true":
         from jaga.fakes.transcribe import FakeTranscriber
 

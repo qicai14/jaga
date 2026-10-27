@@ -1,5 +1,6 @@
 """Seam 1: a scripted call goes into the Twilio Media Streams WebSocket, `stage-update` messages come out."""
 
+import asyncio
 import json
 import time
 from pathlib import Path
@@ -307,3 +308,23 @@ def test_signature_matches_twilios_documented_example():
     assert twilio_auth.signature(url, params, "12345") == "0/KCTR6DLpKmkAf8muzZqo1nDgQ="
     assert twilio_auth.valid(url, params, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=", "12345")
     assert not twilio_auth.valid(url, params, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=", "")
+
+
+def test_a_slow_leg_does_not_hold_up_the_other_and_every_line_still_lands(client, monkeypatch):
+    done, transcribe = [], FakeTranscriber.transcribe
+
+    async def slow_caller(self, leg, audio):
+        if leg == "caller":
+            await asyncio.sleep(0.2)
+        line = await transcribe(self, leg, audio)
+        done.append((leg, line))
+        return line
+
+    monkeypatch.setattr(FakeTranscriber, "transcribe", slow_caller)
+    script = [("caller", "Ada bungkusan haram."), ("user", "Hmm."), ("caller", "Ada waran tangkap.")]
+
+    updates = trail(client, "CA_slow", script)
+
+    assert done[0] == ("user", "Hmm.")
+    assert [line for leg, line in done if leg == "caller"] == [s[1] for s in script if s[0] == "caller"]
+    assert stages_of(updates)[-1] == ("fear", "medium"), "stop must wait for the queued lines"

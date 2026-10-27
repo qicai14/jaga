@@ -73,14 +73,27 @@ async def voice(request: Request) -> Response:
     return Response(twiml, media_type="text/xml")
 
 
+async def listen(call: Call, transcriber: asr.Transcriber, leg: str, audio: asyncio.Queue) -> None:
+    """One leg's worker: transcribes its audio in order, so reading the stream never waits on Muse."""
+    while (chunk := await audio.get()) is not None:
+        try:
+            line = await transcriber.transcribe(leg, chunk)
+            change = call.tracker.hear(leg, line) if line else None
+            if change:
+                await call.publish(**change)
+        except Exception as e:
+            # Type only: the message could quote a transcript. The call goes on; this chunk is lost.
+            log.warning("call %s %s leg: transcribing failed (%s)", call.call_id, leg, type(e).__name__)
+
+
 @router.websocket("/twilio/media")
 async def media(ws: WebSocket) -> None:
     if not twilio_auth.check(ws, {}):
         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
         return
     await ws.accept()
-    transcriber = asr.transcriber()
-    call = None
+    call, transcriber = None, None
+    legs: dict[str, tuple[asyncio.Queue, asyncio.Task]] = {}
     try:
         async for text in ws.iter_text():
             msg = json.loads(text)
@@ -98,20 +111,31 @@ async def media(ws: WebSocket) -> None:
                         return
                     call = calls[sid] = Call(sid, tracker)
                     await call.publish("none", "low")
+                transcriber = asr.transcriber(call.tracker.pack)
             elif msg["event"] == "media" and call is not None:
                 leg = LEGS.get(msg["media"]["track"])
                 if leg is not None:
-                    line = await transcriber.transcribe(leg, base64.b64decode(msg["media"]["payload"]))
-                    change = call.tracker.hear(leg, line) if line else None
-                    if change:
-                        await call.publish(**change)
+                    if leg not in legs:
+                        queue = asyncio.Queue()
+                        legs[leg] = queue, asyncio.create_task(listen(call, transcriber, leg, queue))
+                    legs[leg][0].put_nowait(base64.b64decode(msg["media"]["payload"]))
             elif msg["event"] == "stop":
                 break
     except (ValueError, KeyError, TypeError):
         pass  # malformed Media Streams message: end the call below instead of a 1011 with a stack trace
     finally:
-        if call is not None:
-            await call.end()
+        for queue, _ in legs.values():
+            queue.put_nowait(None)
+        # Let queued audio finish, but not forever if Muse hangs.
+        _, hung = await asyncio.wait([task for _, task in legs.values()], timeout=5) if legs else (None, ())
+        for task in hung:
+            task.cancel()
+        try:
+            if transcriber is not None:
+                await transcriber.close()
+        finally:
+            if call is not None:
+                await call.end()
 
 
 @router.websocket("/calls/{call_id}/stages")
