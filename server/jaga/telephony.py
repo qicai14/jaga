@@ -142,10 +142,13 @@ async def media(ws: WebSocket) -> None:
             task.cancel()
         try:
             if transcriber is not None:
-                for leg, line in await transcriber.close():
-                    change = call.tracker.hear(leg, line)
-                    if change:
-                        await call.publish(**change)
+                async with asyncio.timeout(5):  # whatever Muse does, the call still ends below
+                    for leg, line in await transcriber.close():
+                        change = call.tracker.hear(leg, line)
+                        if change:
+                            await call.publish(**change)
+        except TimeoutError:
+            log.warning("call %s: Muse Voice Transcribe took too long to close", call.call_id)
         finally:
             if call is not None:
                 await call.end()

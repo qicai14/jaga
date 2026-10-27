@@ -17,6 +17,10 @@ log = logging.getLogger(__name__)
 class Transcriber(Protocol):
     async def transcribe(self, leg: str, audio: bytes) -> str | None: ...
 
+    async def _silence(self, leg: str, sock) -> None:
+        await sock.send(bytes(32000))
+        await self.arrived[leg].wait()
+
     async def close(self) -> list[tuple[str, str]]:
         """Ends the call's transcription; returns the (leg, line) pairs that finished at hangup."""
         ...
@@ -104,13 +108,16 @@ class MuseTranscriber:
             why = type(e).__name__
         await self._drop(leg, sock, why)
 
+    async def _silence(self, leg: str, sock) -> None:
+        await sock.send(bytes(32000))
+        await self.arrived[leg].wait()
+
     async def close(self) -> list[tuple[str, str]]:
         async def flush(leg: str, sock) -> list[tuple[str, str]]:
             self.arrived[leg].clear()
             try:
                 # 1 s of silence makes Muse end the utterance still in progress.
-                await sock.send(bytes(32000))
-                await asyncio.wait_for(self.arrived[leg].wait(), self.FLUSH)
+                await asyncio.wait_for(self._silence(leg, sock), self.FLUSH)
             except Exception:
                 pass  # a dead socket or no more speech: take what has arrived
             lines, self.lines[leg] = self.lines[leg], []

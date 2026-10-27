@@ -406,14 +406,16 @@ def test_a_date_or_parcel_number_read_out_is_not_a_tac(client, said):
 class MuseSocket:
     """Stands in for the Muse Voice Transcribe realtime socket: a final transcript for each audio frame."""
 
-    def __init__(self, replies, dies_on_frame=None):
+    def __init__(self, replies, dies_on_frame=None, stalls_on_silence=False):
         self.sent, self.replies, self.inbox = [], list(replies), asyncio.Queue()
-        self.dies_on_frame, self.closed = dies_on_frame, False
+        self.dies_on_frame, self.closed, self.stalls = dies_on_frame, False, stalls_on_silence
 
     async def send(self, data):
         if self.dies_on_frame is not None and len(self.sent) == self.dies_on_frame:
             raise ConnectionError("socket dropped")
         self.sent.append(data)
+        if self.stalls and len(data) == 32000:
+            await asyncio.Event().wait()  # a socket that never accepts the hangup silence
         await asyncio.sleep(0)
         if isinstance(data, bytes) and self.replies:
             reply = {"type": "speechComplete", "turnId": 1, "transcript": self.replies.pop(0)}
@@ -567,3 +569,18 @@ def test_a_failed_handshake_closes_the_socket(client, monkeypatch):
     trail(client, "CA_hs", [("caller", "x" * 160)] * 2)
 
     assert broken.closed
+
+
+def test_a_stalled_muse_socket_cannot_keep_the_call_from_ending(client, monkeypatch):
+    muse(monkeypatch, MuseSocket([], stalls_on_silence=True))
+
+    assert trail(client, "CA_stall", [("caller", "x" * 160)] * 2)  # follow() returns only once the call ended
+
+
+def test_a_tracking_code_is_not_a_tac_even_when_the_caller_said_kod(client):
+    script = [
+        ("caller", "Boleh beri kod tracking bungkusan anda?"),
+        ("user", "satu dua tiga empat lima enam"),
+    ]
+
+    assert stages_of(trail(client, "CA_kod", script)) == [("none", "low")]
