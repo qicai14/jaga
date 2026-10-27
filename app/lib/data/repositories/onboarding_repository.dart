@@ -8,7 +8,7 @@ import '../services/onboarding_api_service.dart';
 import 'pin_repository.dart';
 
 const _region = 'MY';
-const _progressKey = 'onboarding.progress';
+const onboardingProgressKey = 'onboarding.progress';
 
 /// The single source of truth for setup. [progress] changes the moment
 /// [update] is called and is saved straight after, so the app (locale, which
@@ -43,7 +43,7 @@ class OnboardingRepository {
   ) async {
     final fresh = OnboardingProgress(language: firstLanguage);
     try {
-      final raw = await store.read(_progressKey);
+      final raw = await store.read(onboardingProgressKey);
       return raw == null ? fresh : OnboardingProgress.parse(raw);
     } on Object catch (e) {
       debugPrint(
@@ -63,7 +63,7 @@ class OnboardingRepository {
   Future<void> update(OnboardingProgress next) async {
     progress.value = next;
     try {
-      await _store.write(_progressKey, next.toJson());
+      await _store.write(onboardingProgressKey, next.toJson());
     } on Object catch (e) {
       debugPrint('Could not save setup progress (${e.runtimeType})');
     }

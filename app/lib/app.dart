@@ -13,6 +13,7 @@ import 'data/repositories/onboarding_repository.dart';
 import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
+import 'data/services/auth_service.dart';
 import 'data/services/copilot_pause_service.dart';
 import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
@@ -45,6 +46,7 @@ class AppDependencies {
     required this.pause,
     required this.timeline,
     required this.initAlerts,
+    required this.auth,
   });
 
   final OnboardingRepository onboarding;
@@ -57,6 +59,7 @@ class AppDependencies {
   final AlertNotifier alertNotifier;
   final CopilotPauseService pause;
   final TimelineService timeline;
+  final AuthService auth;
 
   /// Creates the notification channels. Only a co-pilot needs it.
   final Future<void> Function() initAlerts;

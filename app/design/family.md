@@ -188,6 +188,11 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 `FcmAlertPushService` is a follow-up that waits for the team's Firebase project; #11 ships the `AlertPushService`
 interface and `FakeAlertPushService` only.
 
+16. FCM data push and anonymous auth wired (28 Oct); server registration of the FCM token waits for contracts v1.
+    Foreground pushes use `FirebaseMessaging.onMessage`; background and terminated ones go through
+    `familyAlertBackgroundHandler`, which reads the linked person from the onboarding store and shows the notification.
+    If Firebase fails to start, bootstrap falls back to the Fakes.
+
 ## 11. Dependency proposals (own PR, `docs/delivery.md`)
 `firebase_core`, `firebase_messaging` (FCM data pushes; needs `google-services.json` from the team's Firebase project),
 `flutter_local_notifications` (channels, heads-up, action, launch details; needs `POST_NOTIFICATIONS`), `url_launcher`

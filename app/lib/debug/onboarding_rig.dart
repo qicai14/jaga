@@ -3,6 +3,7 @@ import '../core/haptics/fake_buzzer.dart';
 import '../data/models/onboarding_progress.dart';
 import '../data/repositories/onboarding_repository.dart';
 import '../data/repositories/pin_repository.dart';
+import '../data/services/auth_service.dart';
 import '../data/services/alert_notifier.dart';
 import '../data/services/alert_push_service.dart';
 import '../data/services/copilot_pause_service.dart';
@@ -74,6 +75,7 @@ class OnboardingRig {
     pause: pause,
     timeline: timeline,
     initAlerts: () async {},
+    auth: const FakeAuthService(),
   );
 
   OnboardingViewModel onboardingViewModel({
