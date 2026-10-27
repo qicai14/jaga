@@ -35,6 +35,29 @@ void main() {
       expect(taps, 1);
     });
 
+    forEachScale('quiet tone grows with a long label and keeps its padding', (
+      tester,
+      scale,
+    ) async {
+      await pumpJaga(
+        tester,
+        ScreenFrame(
+          body: const SizedBox(),
+          bottomAction: BigButton(
+            label: long,
+            tone: BigButtonTone.quiet,
+            onPressed: () {},
+          ),
+        ),
+        scale: scale,
+      );
+      final size = tester.getSize(find.byType(OutlinedButton));
+      final label = tester.getSize(find.text(long));
+      expect(size.width, 393 - 48);
+      expect(size.height, greaterThanOrEqualTo(64));
+      expect(size.height, greaterThanOrEqualTo(label.height + 16));
+    });
+
     forEachScale('every tone renders', (tester, scale) async {
       await pumpJaga(
         tester,

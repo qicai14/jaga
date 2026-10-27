@@ -367,6 +367,19 @@ class _ClearPauseDemoState extends State<_ClearPauseDemo> {
         _pause.offline = true;
         unawaited(_vm.clear());
     }
+    // A real modal sheet, as on the home screen: closing it must leave this
+    // page, not pop the gallery's route.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _open());
+  }
+
+  Future<void> _open() {
+    if (!mounted) return Future.value();
+    return showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      builder: (_) => ClearPauseSheet(vm: _vm),
+    );
   }
 
   @override
@@ -377,9 +390,14 @@ class _ClearPauseDemoState extends State<_ClearPauseDemo> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: Align(
-      alignment: Alignment.bottomCenter,
-      child: ClearPauseSheet(vm: _vm),
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: FilledButton(
+          onPressed: _open,
+          child: const Text('Open the Clear Jaga Pause sheet'),
+        ),
+      ),
     ),
   );
 }
