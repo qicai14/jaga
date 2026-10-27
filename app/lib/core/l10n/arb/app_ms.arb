@@ -26,5 +26,21 @@
   "warningDismissLabel": "Panggilan ini selamat",
   "warningDismissHint": "Tekan dan tahan selama 2 saat",
   "warningDismissConfirmHint": "Ketik sekali lagi untuk mengesahkan panggilan ini selamat",
-  "warningCommandFallback": "Letak telefon. Hang up."
+  "warningCommandFallback": "Letak telefon. Hang up.",
+
+  "familyNotifChannelAlerts": "Amaran penipuan",
+  "familyNotifChannelUpdates": "Kemas kini panggilan",
+  "familyNotifTitle": "{name} mungkin menerima panggilan penipuan",
+  "familyNotifBody": "{stage}.",
+  "familyNotifBodyAgency": "{stage}. Mengaku daripada {agency}.",
+  "familyNotifGenuineTitle": "Panggilan {name} mungkin sah",
+  "familyNotifCallAction": "Telefon {name}",
+  "familyAlertHeadline": "{name} mungkin menerima panggilan penipuan",
+  "familyAlertTime": "Amaran pada {time}",
+  "familyAlertAgencyLabel": "Pemanggil mengaku daripada",
+  "familyAlertQuotesLabel": "Pemanggil berkata",
+  "familyAlertCall": "Telefon {name}",
+  "familyAlertOpenDialer": "Buka aplikasi telefon",
+  "familyGenuineHeadline": "Panggilan {name} mungkin sah",
+  "familyGenuineBody": "Jaga kini berpendapat panggilan ini kurang berkemungkinan penipuan. Anda masih boleh menelefon {name} untuk menyemak."
 }

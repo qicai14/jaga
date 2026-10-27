@@ -251,6 +251,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letak telefon. Hang up.'**
   String get warningCommandFallback;
+
+  /// Android notification channel name for urgent family alerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam alerts'**
+  String get familyNotifChannelAlerts;
+
+  /// Android notification channel name for quiet follow-ups ('may be genuine').
+  ///
+  /// In en, this message translates to:
+  /// **'Call updates'**
+  String get familyNotifChannelUpdates;
+
+  /// Notification title (lock screen). name is the protected person's name.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} may be on a scam call'**
+  String familyNotifTitle(String name);
+
+  /// Notification body without an agency. stage is the plain-word stage label. Never quotes or summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage}.'**
+  String familyNotifBody(String stage);
+
+  /// Notification body with an agency. stage is the stage label, agency the one the caller claimed.
+  ///
+  /// In en, this message translates to:
+  /// **'{stage}. Says they are from {agency}.'**
+  String familyNotifBodyAgency(String stage, String agency);
+
+  /// Notification title of the 'may be genuine' follow-up.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s call may be genuine'**
+  String familyNotifGenuineTitle(String name);
+
+  /// Notification action button that calls the protected person.
+  ///
+  /// In en, this message translates to:
+  /// **'Call {name}'**
+  String familyNotifCallAction(String name);
+
+  /// Family alert headline in the amber band.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} may be on a scam call'**
+  String familyAlertHeadline(String name);
+
+  /// Time line under the family alert headline. time is already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert at {time}'**
+  String familyAlertTime(String time);
+
+  /// Label above the agency the caller claimed, on the family alert.
+  ///
+  /// In en, this message translates to:
+  /// **'The caller says they are from'**
+  String get familyAlertAgencyLabel;
+
+  /// Label above the masked quotes on the family alert.
+  ///
+  /// In en, this message translates to:
+  /// **'The caller said'**
+  String get familyAlertQuotesLabel;
+
+  /// The family alert's one button. name is the protected person.
+  ///
+  /// In en, this message translates to:
+  /// **'Call {name}'**
+  String familyAlertCall(String name);
+
+  /// Button label when no number is known for the protected person.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the phone app'**
+  String get familyAlertOpenDialer;
+
+  /// Headline of the 'may be genuine' follow-up (blue band).
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s call may be genuine'**
+  String familyGenuineHeadline(String name);
+
+  /// Calm text of the follow-up. Also the follow-up notification body.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaga now thinks this call is less likely to be a scam. You can still call {name} to check.'**
+  String familyGenuineBody(String name);
 }
 
 class _AppLocalizationsDelegate

@@ -89,4 +89,70 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get warningCommandFallback => 'Letak telefon. Hang up.';
+
+  @override
+  String get familyNotifChannelAlerts => 'மோசடி எச்சரிக்கைகள்';
+
+  @override
+  String get familyNotifChannelUpdates => 'அழைப்பு புதுப்பிப்புகள்';
+
+  @override
+  String familyNotifTitle(String name) {
+    return '$name மோசடி அழைப்பில் இருக்கலாம்';
+  }
+
+  @override
+  String familyNotifBody(String stage) {
+    return '$stage.';
+  }
+
+  @override
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage. $agency என்று கூறுகிறார்கள்.';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return '$name அழைப்பு உண்மையானதாக இருக்கலாம்';
+  }
+
+  @override
+  String familyNotifCallAction(String name) {
+    return '$name ஐ அழைக்கவும்';
+  }
+
+  @override
+  String familyAlertHeadline(String name) {
+    return '$name மோசடி அழைப்பில் இருக்கலாம்';
+  }
+
+  @override
+  String familyAlertTime(String time) {
+    return 'எச்சரிக்கை நேரம் $time';
+  }
+
+  @override
+  String get familyAlertAgencyLabel =>
+      'அழைப்பவர் தாங்கள் இவர்கள் என்று கூறுகிறார்';
+
+  @override
+  String get familyAlertQuotesLabel => 'அழைப்பவர் கூறியது';
+
+  @override
+  String familyAlertCall(String name) {
+    return '$name ஐ அழைக்கவும்';
+  }
+
+  @override
+  String get familyAlertOpenDialer => 'தொலைபேசி செயலியைத் திறக்கவும்';
+
+  @override
+  String familyGenuineHeadline(String name) {
+    return '$name அழைப்பு உண்மையானதாக இருக்கலாம்';
+  }
+
+  @override
+  String familyGenuineBody(String name) {
+    return 'இந்த அழைப்பு மோசடியாக இருக்க வாய்ப்பு குறைவு என்று Jaga இப்போது நினைக்கிறது. சரிபார்க்க நீங்கள் $name ஐ அழைக்கலாம்.';
+  }
 }

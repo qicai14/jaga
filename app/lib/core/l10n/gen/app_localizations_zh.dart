@@ -87,4 +87,69 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get warningCommandFallback => 'Letak telefon. Hang up.';
+
+  @override
+  String get familyNotifChannelAlerts => '诈骗警报';
+
+  @override
+  String get familyNotifChannelUpdates => '通话更新';
+
+  @override
+  String familyNotifTitle(String name) {
+    return '$name 可能正在接听诈骗电话';
+  }
+
+  @override
+  String familyNotifBody(String stage) {
+    return '$stage。';
+  }
+
+  @override
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage。自称来自$agency。';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return '$name 的来电可能是真实的';
+  }
+
+  @override
+  String familyNotifCallAction(String name) {
+    return '致电$name';
+  }
+
+  @override
+  String familyAlertHeadline(String name) {
+    return '$name 可能正在接听诈骗电话';
+  }
+
+  @override
+  String familyAlertTime(String time) {
+    return '警报时间 $time';
+  }
+
+  @override
+  String get familyAlertAgencyLabel => '来电者自称来自';
+
+  @override
+  String get familyAlertQuotesLabel => '来电者说';
+
+  @override
+  String familyAlertCall(String name) {
+    return '致电$name';
+  }
+
+  @override
+  String get familyAlertOpenDialer => '打开电话应用';
+
+  @override
+  String familyGenuineHeadline(String name) {
+    return '$name 的来电可能是真实的';
+  }
+
+  @override
+  String familyGenuineBody(String name) {
+    return 'Jaga 现在认为这通电话不太可能是诈骗。您仍可以致电$name确认。';
+  }
 }
