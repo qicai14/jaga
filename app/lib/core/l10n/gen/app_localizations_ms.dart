@@ -416,4 +416,89 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get settingsReset => 'Tahan untuk menetapkan semula Jaga';
+
+  @override
+  String get familyHomeProtected => 'Dilindungi';
+
+  @override
+  String get familyClearPause => 'Kosongkan Jaga Pause';
+
+  @override
+  String familyClearPauseStatement(String name) {
+    return 'Saya telah bercakap dengan $name dan memastikan pemindahan ini sah.';
+  }
+
+  @override
+  String get familyClearPauseHold => 'Tahan untuk mengosongkan Jaga Pause';
+
+  @override
+  String get familyPauseCleared => 'Jaga Pause telah dikosongkan';
+
+  @override
+  String get familyClearPauseError =>
+      'Tidak dapat mengosongkan Jaga Pause. Semak internet dan cuba lagi.';
+
+  @override
+  String get familyCallsTitle => 'Panggilan yang diberi amaran';
+
+  @override
+  String get familyCallsEmpty =>
+      'Tiada panggilan yang diberi amaran dalam 30 hari lepas.';
+
+  @override
+  String get familyCallsError =>
+      'Tidak dapat memuatkan panggilan. Semak internet anda.';
+
+  @override
+  String get commonTryAgain => 'Cuba lagi';
+
+  @override
+  String familyTimelineTitle(String date) {
+    return 'Panggilan pada $date';
+  }
+
+  @override
+  String get familyTimelineError =>
+      'Tidak dapat memuatkan garis masa ini. Semak internet anda.';
+
+  @override
+  String get familyTimelineRiskMedium => 'Peringatan dipaparkan';
+
+  @override
+  String get familyTimelineRiskHigh => 'Amaran dipaparkan';
+
+  @override
+  String get familyTimelineRiskLow => 'Risiko kembali rendah';
+
+  @override
+  String familyCall997(String hotline) {
+    return 'Hubungi $hotline untuk melapor';
+  }
+
+  @override
+  String get familyTimelineDelete => 'Padam';
+
+  @override
+  String get familyTimelineDeleteConfirm =>
+      'Padam garis masa ini? Ia tidak boleh dikembalikan.';
+
+  @override
+  String get familyTimelineDeleted => 'Garis masa dipadam';
+
+  @override
+  String get familyTimelineDeleteError =>
+      'Tidak dapat memadam garis masa. Semak internet dan cuba lagi.';
+
+  @override
+  String familyUnlink(String name) {
+    return 'Berhenti mengikuti $name';
+  }
+
+  @override
+  String familyUnlinkConfirm(String name) {
+    return 'Berhenti menerima amaran tentang $name? Anda boleh memaut semula kemudian dengan kod baharu.';
+  }
+
+  @override
+  String get familyUnlinkAction => 'Nyahpaut';
 }
