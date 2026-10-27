@@ -33,6 +33,23 @@ def load_pack(region: str | None) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def phrase(region: str, phrase_id: str) -> dict:
+    """A phrase library entry by its stable ID (Spark picks by ID, #13); unknown fails loudly."""
+    for lib in load_pack(region)["library"].values():
+        for entry in [lib["command"], *lib["counterMoves"]]:
+            if entry["id"] == phrase_id:
+                return entry
+    raise KeyError(phrase_id)
+
+
+def official_contact(region: str, agency: str) -> dict:
+    """The region pack's static entry for an agency (name, number, purpose, hours, source, checked).
+
+    Valid keys are those in the pack's `contacts` (my.json); the scam hotline 997 is `nsrc`.
+    """
+    return load_pack(region)["contacts"][agency]
+
+
 class StageTracker:
     def __init__(self, pack: dict):
         self.pack = pack
@@ -96,5 +113,9 @@ class StageTracker:
         evidence = list(dict.fromkeys(p for _, p in found))[:3]
         fields = {"stage": stage, "risk": risk, "evidence": evidence}
         if risk == "high":
-            fields |= {"command": self.pack["command"], "counterMove": self.pack["counterMove"]}
+            lang, lib = self.pack["defaultLanguage"], self.pack["library"][stage]
+            fields |= {
+                "command": lib["command"]["text"][lang],
+                "counterMove": lib["counterMoves"][0]["text"][lang],
+            }
         return fields
