@@ -52,8 +52,6 @@ class _WarningScreenState extends State<WarningScreen> {
     final styles = context.jagaText;
     final content = widget.content;
     final instant = MediaQuery.disableAnimationsOf(context);
-    // Big text: the counter-move clamps so the official number is reachable.
-
     final command = content.command ?? l.warningCommandFallback;
     final english = content.command == null ? null : content.commandEnglish;
     final counterEnglish = content.counterMoveEnglish;

@@ -131,9 +131,11 @@ void main() {
     (tester) async {
       final rig = await pump(tester, 2.0);
       await emit(tester, rig, extHigh);
-      for (final t in tester.widgetList<Text>(
-        find.textContaining('Hubungi PDRM sendiri'),
-      )) {
+      final found = tester
+          .widgetList<Text>(find.textContaining('Hubungi PDRM sendiri'))
+          .toList();
+      expect(found, isNotEmpty);
+      for (final t in found) {
         expect(t.maxLines, isNull);
         expect(t.overflow, isNot(TextOverflow.ellipsis));
       }
