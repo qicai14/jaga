@@ -408,43 +408,43 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get onboardingContinue;
 
-  /// Setup step 1 title, both roles.
+  /// Setup step 2 title, both roles.
   ///
   /// In en, this message translates to:
   /// **'Who is this phone for?'**
   String get onboardingRoleTitle;
 
-  /// Step 1 choice: the protected user.
+  /// Step 2 choice: the protected user.
   ///
   /// In en, this message translates to:
   /// **'The person Jaga protects'**
   String get onboardingRoleProtected;
 
-  /// Step 1 choice body.
+  /// Step 2 choice body.
   ///
   /// In en, this message translates to:
   /// **'Calls to this phone will ring in Jaga.'**
   String get onboardingRoleProtectedBody;
 
-  /// Step 1 choice: the family co-pilot. Also quoted in the link code share text.
+  /// Step 2 choice: the family co-pilot. Also quoted in the link code share text.
   ///
   /// In en, this message translates to:
   /// **'A family co-pilot'**
   String get onboardingRoleCopilot;
 
-  /// Step 1 choice body.
+  /// Step 2 choice body.
   ///
   /// In en, this message translates to:
   /// **'Get alerts about someone you look after.'**
   String get onboardingRoleCopilotBody;
 
-  /// Protected setup step 2 title: the command language.
+  /// Protected user settings: title of the command language list.
   ///
   /// In en, this message translates to:
   /// **'Which language should warnings use?'**
   String get onboardingLanguageTitle;
 
-  /// Co-pilot setup step 2 title.
+  /// Setup step 1 title, both roles: the app language, which on a protected phone is also the command language.
   ///
   /// In en, this message translates to:
   /// **'Choose your language'**
@@ -459,8 +459,14 @@ abstract class AppLocalizations {
   /// Step 3 name field label.
   ///
   /// In en, this message translates to:
-  /// **'What does the family call her?'**
+  /// **'Her name'**
   String get onboardingNameLabel;
+
+  /// Helper text under the field whose short label is Her name.
+  ///
+  /// In en, this message translates to:
+  /// **'What does the family call her?'**
+  String get onboardingNameHelper;
 
   /// Step 3 read-only region row.
   ///
@@ -711,8 +717,14 @@ abstract class AppLocalizations {
   /// Co-pilot field: the nickname used in alerts, kept on this phone.
   ///
   /// In en, this message translates to:
-  /// **'What do you call her?'**
+  /// **'Her nickname'**
   String get onboardingCallHer;
+
+  /// Helper text under the field whose short label is Her nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you call her?'**
+  String get onboardingCallHerHelper;
 
   /// Link code error.
   ///

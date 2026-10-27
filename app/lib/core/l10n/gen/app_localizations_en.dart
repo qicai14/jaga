@@ -218,7 +218,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingAboutTitle => 'About her';
 
   @override
-  String get onboardingNameLabel => 'What does the family call her?';
+  String get onboardingNameLabel => 'Her name';
+
+  @override
+  String get onboardingNameHelper => 'What does the family call her?';
 
   @override
   String get onboardingRegionInfo =>
@@ -355,7 +358,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingYourName => 'Your name';
 
   @override
-  String get onboardingCallHer => 'What do you call her?';
+  String get onboardingCallHer => 'Her nickname';
+
+  @override
+  String get onboardingCallHerHelper => 'What do you call her?';
 
   @override
   String get onboardingCodeWrong =>

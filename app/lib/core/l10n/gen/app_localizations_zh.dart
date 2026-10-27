@@ -215,7 +215,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingAboutTitle => '关于她';
 
   @override
-  String get onboardingNameLabel => '家人怎么称呼她？';
+  String get onboardingNameLabel => '她的名字';
+
+  @override
+  String get onboardingNameHelper => '家人怎么称呼她？';
 
   @override
   String get onboardingRegionInfo => '地区：马来西亚。Jaga 使用马来西亚的官方电话号码。';
@@ -343,7 +346,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingYourName => '您的姓名';
 
   @override
-  String get onboardingCallHer => '您怎么称呼她？';
+  String get onboardingCallHer => '您对她的称呼';
+
+  @override
+  String get onboardingCallHerHelper => '您怎么称呼她？';
 
   @override
   String get onboardingCodeWrong => '代码不匹配。请检查这 6 位数字。';

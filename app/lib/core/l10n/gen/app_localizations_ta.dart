@@ -220,7 +220,10 @@ class AppLocalizationsTa extends AppLocalizations {
   String get onboardingAboutTitle => 'அவரைப் பற்றி';
 
   @override
-  String get onboardingNameLabel => 'குடும்பத்தினர் அவரை என்ன அழைப்பார்கள்?';
+  String get onboardingNameLabel => 'அவர் பெயர்';
+
+  @override
+  String get onboardingNameHelper => 'குடும்பத்தினர் அவரை என்ன அழைப்பார்கள்?';
 
   @override
   String get onboardingRegionInfo =>
@@ -361,7 +364,10 @@ class AppLocalizationsTa extends AppLocalizations {
   String get onboardingYourName => 'உங்கள் பெயர்';
 
   @override
-  String get onboardingCallHer => 'நீங்கள் அவரை என்ன அழைப்பீர்கள்?';
+  String get onboardingCallHer => 'அவரை அழைக்கும் பெயர்';
+
+  @override
+  String get onboardingCallHerHelper => 'நீங்கள் அவரை என்ன அழைப்பீர்கள்?';
 
   @override
   String get onboardingCodeWrong =>

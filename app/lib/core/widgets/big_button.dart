@@ -39,6 +39,7 @@ class BigButton extends StatelessWidget {
 
   /// Caps the label and icon scale (the Warning passes 1.5); null follows the system.
   final double? maxTextScale;
+
   /// Shows a spinner in place of the icon. The caller also passes a null [onPressed].
   final bool busy;
 
@@ -70,8 +71,8 @@ class BigButton extends StatelessWidget {
             child: const CircularProgressIndicator(strokeWidth: 3),
           )
         : icon == null
-            ? null
-            : Icon(icon, size: scale);
+        ? null
+        : Icon(icon, size: scale);
 
     if (tone == BigButtonTone.quiet) {
       return iconWidget == null

@@ -157,7 +157,11 @@ class _NamesEntryState extends State<_NamesEntry> {
           controller: _callName,
           textCapitalization: TextCapitalization.words,
           style: style,
-          decoration: InputDecoration(labelText: l.onboardingCallHer),
+          decoration: InputDecoration(
+            labelText: l.onboardingCallHer,
+            helperText: l.onboardingCallHerHelper,
+            helperMaxLines: 3,
+          ),
           onChanged: vm.setCallName,
         ),
         if (vm.networkError) InlineError(l.onboardingNetworkError),

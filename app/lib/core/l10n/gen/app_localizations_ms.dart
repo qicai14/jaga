@@ -219,7 +219,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get onboardingAboutTitle => 'Tentang beliau';
 
   @override
-  String get onboardingNameLabel => 'Apakah panggilan keluarga untuk beliau?';
+  String get onboardingNameLabel => 'Nama beliau';
+
+  @override
+  String get onboardingNameHelper => 'Apakah panggilan keluarga untuk beliau?';
 
   @override
   String get onboardingRegionInfo =>
@@ -359,7 +362,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String get onboardingYourName => 'Nama anda';
 
   @override
-  String get onboardingCallHer => 'Apakah panggilan anda untuk beliau?';
+  String get onboardingCallHer => 'Panggilan beliau';
+
+  @override
+  String get onboardingCallHerHelper => 'Apakah panggilan anda untuk beliau?';
 
   @override
   String get onboardingCodeWrong => 'Kod itu tidak sepadan. Semak 6 digit itu.';

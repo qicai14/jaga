@@ -40,7 +40,11 @@ class _AboutStepState extends State<AboutStep> {
           maxLength: _maxNameLength,
           textCapitalization: TextCapitalization.words,
           style: Theme.of(context).textTheme.bodyLarge,
-          decoration: InputDecoration(labelText: l.onboardingNameLabel),
+          decoration: InputDecoration(
+            labelText: l.onboardingNameLabel,
+            helperText: l.onboardingNameHelper,
+            helperMaxLines: 3,
+          ),
           onChanged: vm.setName,
         ),
         SizedBox(height: m.m),
