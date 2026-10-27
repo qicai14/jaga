@@ -2,6 +2,8 @@
   "_placeholder": "command and counterMove are stand-ins pending the phrase library (#6); phrases are a first pass for the Macau script pack",
   "command": "Letak telefon. Hang up.",
   "counterMove": "Say you will call back, then phone the official number yourself. Beritahu anda akan telefon semula.",
+  "languageBias": ["Malay", "English", "Mandarin Chinese", "Tamil"],
+  "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC", "997"],
   "phrases": {
     "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked"],
     "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "police officer"],

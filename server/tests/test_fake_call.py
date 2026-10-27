@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 from starlette.websockets import WebSocketDisconnect
 
-from jaga import stages, telephony, twilio_auth
+from jaga import asr, stages, telephony, twilio_auth
 from jaga.fakes.transcribe import FakeTranscriber
 from jaga.fakes.twilio import media_stream
 from jaga.main import app
@@ -395,3 +395,58 @@ def test_an_ic_read_out_in_spoken_digits_is_caught(client):
 )
 def test_a_date_or_parcel_number_read_out_is_not_a_tac(client, said):
     assert stages_of(trail(client, "CA_date", [("user", said)])) == [("none", "low")]
+
+
+class MuseSocket:
+    """Stands in for the Muse Voice Transcribe realtime socket: a final transcript for each audio frame."""
+
+    def __init__(self, replies):
+        self.sent, self.replies, self.inbox = [], list(replies), asyncio.Queue()
+
+    async def send(self, data):
+        self.sent.append(data)
+        await asyncio.sleep(0)
+        if isinstance(data, bytes) and self.replies:
+            reply = {"type": "transcript", "transcript": self.replies.pop(0), "final": True}
+            self.inbox.put_nowait(json.dumps(reply))
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if (item := await self.inbox.get()) is None:
+            raise StopAsyncIteration
+        return item
+
+    async def close(self):
+        self.inbox.put_nowait(None)
+        self.closed = True
+
+
+def test_real_muse_transcribe_gets_16khz_audio_and_the_region_packs_hints(client, monkeypatch, caplog):
+    sock, urls = MuseSocket(["Ada bungkusan", "haram atas nama puan."]), []
+
+    async def connect(url):
+        urls.append(url)
+        return sock
+
+    monkeypatch.setenv("JAGA_USE_FAKES", "false")
+    monkeypatch.setenv("META_API_KEY", "muse-key")
+    monkeypatch.setenv("META_API_BASE_URL", "https://api.meta.ai/v1")
+    monkeypatch.setattr(asr, "connect", connect)
+    caplog.set_level("DEBUG")
+    # The bytes only need a length: each mu-law byte becomes two 16 kHz samples of two bytes.
+    chunks = [("caller", "x" * 160)] * 4
+
+    updates = trail(client, "CA_muse", chunks)
+
+    assert urls == ["wss://api.meta.ai/v1/asr/realtime"]
+    handshake = json.loads(sock.sent[0])
+    assert handshake["authorization"] == {"accessToken": "Bearer muse-key"}
+    assert (handshake["audioEncoding"], handshake["mode"]) == ("PCM_16KHZ", "ENDPOINTING")
+    assert handshake["languageBias"] == ["Malay", "English", "Mandarin Chinese", "Tamil"]
+    assert {"LHDN", "akaun selamat", "TAC", "997"} <= set(handshake["keywords"])
+    assert [len(frame) for frame in sock.sent[1:]] == [640] * 4
+    assert stages_of(updates)[-1] == ("pretext", "medium")
+    assert sock.closed
+    assert "bungkusan" not in caplog.text and "muse-key" not in caplog.text
