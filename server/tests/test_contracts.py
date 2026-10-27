@@ -15,7 +15,7 @@ def validator(path: Path) -> Draft202012Validator:
     if path.parent.name == "pause":
         # pause holds both bodies in $defs; the file name says which one (request-*, response-*)
         schema = schema | {"$ref": "#/$defs/" + path.name.split("-")[0]}
-    return Draft202012Validator(schema)
+    return Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER)
 
 
 def load(path: Path):
