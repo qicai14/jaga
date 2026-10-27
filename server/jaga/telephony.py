@@ -92,17 +92,21 @@ async def hear(call: Call, leg: str, line: str) -> None:
     if change:
         await call.publish(**change)
     stage = call.tracker.stage
-    if stage != before and RANK[stage] >= RANK["authority"] and call.sparked < spark.MAX_CALLS:
+    if stage == before or RANK[stage] < RANK["authority"]:
+        return
+    raw = None
+    if call.sparked < spark.MAX_CALLS:  # a stage past the cap is answered as if Spark failed
         call.sparked += 1
-        # shortcut: this inline await holds the leg's queue up to the timeout; fine at 5 asks a call.
-        raw = None
+        # shortcut: this inline await holds the leg's queue up to the timeout; move Spark off the leg task
+        # if audio sheds in live tests (with #21).
         try:
             async with asyncio.timeout(spark.TIMEOUT):
                 raw = await call.spark.assess(stage, call.tracker.risk, call.tracker.snippet())
         except Exception as e:  # incl. the timeout; type only, the message could quote a transcript
             log.warning("call %s: Muse Spark failed (%s)", call.call_id, type(e).__name__)
-        if change := call.tracker.spark_said(raw):
-            await call.publish(**change)
+    # The other leg may have moved the call on while Spark was thinking; that stage has its own answer.
+    if call.tracker.stage == stage and (change := call.tracker.spark_said(raw)):
+        await call.publish(**change)
 
 
 async def listen(call: Call, transcriber: asr.Transcriber, leg: str, audio: asyncio.Queue) -> None:

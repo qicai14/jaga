@@ -647,7 +647,7 @@ def spark_out(risk="medium", stage="authority", counter="my.authority.counter.1"
     return {"stage": stage, "risk": risk, "counterMove": counter}
 
 
-def test_spark_asks_stop_at_five_a_call(client, asked):
+def test_spark_asks_stop_at_five_a_call_and_the_sixth_stage_gets_the_fail_safe(client, asked, monkeypatch):
     script = [
         ("caller", "Saya Inspektor Ali dari PDRM."),
         ("caller", "Ada waran tangkap untuk puan."),
@@ -656,11 +656,56 @@ def test_spark_asks_stop_at_five_a_call(client, asked):
         ("caller", "Bayar jaminan hari ini."),
         ("user", "OTP saya 482913."),
     ]
+    stages_asked = ["authority", "fear", "isolation", "handoff", "money"]
+    spark_says(monkeypatch, *[spark_out("low", s, f"my.{s}.counter.1") for s in stages_asked])
 
     updates = trail(client, "CA_cap", script)
 
-    assert [stage for stage, _, _ in asked] == ["authority", "fear", "isolation", "handoff", "money"]
-    assert stages_of(updates)[-1] == ("credentials", "high"), "the sixth stage still has the fail-safe"
+    assert stages_of(updates)[-3:] == [("money", "low"), ("credentials", "medium"), ("credentials", "high")]
+    assert updates[-1]["source"] == "rules"
+
+
+def test_the_spark_limits_are_a_second_and_a_half_and_five_asks():
+    assert (spark.TIMEOUT, spark.MAX_CALLS) == (1.5, 5)
+
+
+def test_a_slow_verdict_for_an_older_stage_cannot_lower_a_newer_warning(client, monkeypatch):
+    async def assess(self, stage, risk, snippet):
+        if stage == "authority":
+            await asyncio.sleep(0.3)
+            return spark_out("low")
+        return spark_out("high", "credentials", "my.credentials.counter.1")
+
+    monkeypatch.setattr(FakeSpark, "assess", assess)
+
+    updates = trail(client, "CA_race", [("caller", "Saya Inspektor Ali."), ("user", "OTP saya 482913.")])
+
+    assert stages_of(updates)[-1] == ("credentials", "high")
+
+
+@pytest.mark.parametrize(
+    "leak",
+    [
+        "akaun saya 12345",
+        "TAC saya 1234",
+        "kod 12345",
+        "TAC saya satu dua tiga empat",
+        "IC 900101/14/5678",
+        "IC 900101–14–5678",
+        "IC 900101_14_5678",
+        "akaun 1234567890123",
+    ],
+)
+def test_spark_sees_no_run_of_four_or_more_digits(client, asked, leak):
+    trail(client, "CA_leak", [("caller", "Saya Inspektor Ali, " + leak)])
+
+    assert "inspektor ali" in asked[0][2] and not any(c.isdigit() for c in asked[0][2])
+
+
+def test_a_number_split_across_two_lines_is_masked(client, asked):
+    trail(client, "CA_leak2", [("caller", "Saya Inspektor Ali, akaun saya 12345"), ("caller", "67890")])
+
+    assert not any(c.isdigit() for _, _, snippet in asked for c in snippet)
 
 
 @pytest.mark.parametrize(
@@ -701,6 +746,8 @@ def test_money_or_credentials_is_still_a_warning_when_spark_fails_or_says_nonsen
         5.0,
         {"stage": "authority", "risk": "low", "counterMove": "my.nope"},
         {"stage": "authority", "risk": 0, "counterMove": "my.authority.counter.1"},
+        spark_out("low", "authority", "my.authority.command"),
+        spark_out("low", "authority", "my.fear.counter.1"),
     ],
 )
 def test_lower_stages_stay_at_caution_when_spark_fails_or_is_invalid(client, monkeypatch, answer):
@@ -733,22 +780,30 @@ def test_spark_lowers_a_hard_trigger_warning_to_a_caution_never_to_low(client, m
 
 
 def test_spark_cannot_take_the_stage_down(client, monkeypatch):
-    spark_says(monkeypatch, spark_out("low", "pretext", "my.pretext.counter.1"))
+    spark_says(monkeypatch, spark_out("low", "pretext", "my.fear.counter.1"))
 
     updates = trail(client, "CA_stage", [("caller", "Ada waran tangkap untuk puan.")])
 
     assert stages_of(updates)[1:] == [("fear", "medium"), ("fear", "low")]
 
 
-def test_the_counter_move_shown_is_the_library_text_of_the_id_spark_picked(client, monkeypatch):
-    spark_says(monkeypatch, spark_out("high", "fear", "my.credentials.counter.1"))
+def test_the_counter_move_shown_is_the_library_text_of_the_stage(client, monkeypatch):
+    spark_says(monkeypatch, spark_out("high", "fear", "my.fear.counter.1"))
 
     warning = trail(client, "CA_pick", [("caller", "Ada waran tangkap untuk puan.")])[-1]
 
-    library = stages.load_pack("my")["library"]
+    library = stages.load_pack("my")["library"]["fear"]
     assert warning["source"] == "spark"
-    assert warning["command"] == library["fear"]["command"]["text"]["ms"]
-    assert warning["counterMove"] == library["credentials"]["counterMoves"][0]["text"]["ms"]
+    assert warning["command"] == library["command"]["text"]["ms"]
+    assert warning["counterMove"] == library["counterMoves"][0]["text"]["ms"]
+
+
+def test_spark_cannot_raise_the_stage(client, monkeypatch):
+    spark_says(monkeypatch, spark_out("high", "credentials", "my.fear.counter.1"))
+
+    updates = trail(client, "CA_raise", [("caller", "Ada waran tangkap untuk puan.")])
+
+    assert stages_of(updates)[1:] == [("fear", "medium"), ("fear", "high")]
 
 
 def test_spark_sees_no_ic_account_or_otp_numbers(client, asked):

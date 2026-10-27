@@ -78,10 +78,11 @@ class StageTracker:
         return re.sub(r"(?<=\d)[ ,.]+(?=\d)", "", text)
 
     def snippet(self) -> str:
-        """The latest lines of both legs, for Muse Spark, with every run of 6+ digits (IC, account, TAC)
-        masked, spoken or typed."""
-        text = "\n".join(f"{leg}: {line}" for leg, lines in self.prev.items() for line in lines)
-        return re.sub(r"\d(?:[ -]?\d){5,}", "[number]", self.digits(text))
+        """Each leg's latest lines, for Muse Spark, with every run of 4+ digits (IC, account, TAC) masked,
+        spoken or typed."""
+        # shortcut: legs are listed one after the other, not in conversation order; fine for a masked hint.
+        text = "\n".join(f"{leg}: {' '.join(lines)}" for leg, lines in self.prev.items())
+        return re.sub(r"\d(?:[ \-–/_.]?\d){3,}", "[number]", self.digits(text))
 
     def hear(self, leg: str, line: str) -> dict | None:
         """The new stage-update fields if this line changed the call's stage or risk, else None."""
@@ -125,10 +126,12 @@ class StageTracker:
             return None
         self.stage, self.risk = stage, risk
         self.evidence = list(dict.fromkeys(p for _, p in found))[:3]
-        return self.fields()
+        return self.show()
 
-    def fields(self, counter: dict | None = None) -> dict:
-        """The stage-update fields for the current state; a Warning has library text only (ADR 0006)."""
+    def show(self, counter: dict | None = None) -> dict:
+        """The stage-update fields for the current state, remembered as what's on screen.
+
+        A Warning has library text only (ADR 0006)."""
         fields = {"stage": self.stage, "risk": self.risk, "evidence": self.evidence}
         self.counter = None
         if self.risk == "high":
@@ -140,21 +143,22 @@ class StageTracker:
     def spark_said(self, raw: dict | None) -> dict | None:
         """The stage-update fields once Muse Spark has answered, or None if nothing changes.
 
-        `raw` is Spark's unchecked output; None, invalid output and an unknown phrase ID all count as Spark
-        failing, when a call at money or credentials still gets a Warning (spec fail-safe).
+        `raw` is Spark's unchecked output; None, invalid output and a counter-move not of this stage all count
+        as Spark failing, when a call at money or credentials still gets a Warning (spec fail-safe).
         """
         try:
             verdict = Verdict.model_validate(raw)
-            counter = phrase(self.region, verdict.counterMove)
+            # Only this stage's counter-moves: a command or another stage's ID is invalid output.
+            moves = {m["id"]: m for m in self.pack["library"][self.stage]["counterMoves"]}
+            counter = moves[verdict.counterMove]
         except (ValidationError, KeyError):
             if RANK[self.stage] < RANK["money"] or self.risk == "high":
                 return None
             self.risk = "high"
-            return self.fields()
-        before = self.stage, self.risk, self.counter
-        # A Warning can be lowered to a Caution but not to low; the stage never goes down.
+            return self.show()
+        before = self.risk, self.counter
+        # A Warning can be lowered to a Caution but not to low. The stage comes from the rules alone.
         floor = "medium" if self.risk == "high" else "low"
         self.risk = max(verdict.risk, floor, key=RISK.__getitem__)
-        self.stage = max(self.stage, verdict.stage, key=RANK.__getitem__)
-        fields = self.fields(counter)
-        return fields | {"source": "spark"} if before != (self.stage, self.risk, self.counter) else None
+        fields = self.show(counter)
+        return fields | {"source": "spark"} if before != (self.risk, self.counter) else None
