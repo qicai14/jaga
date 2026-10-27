@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "my.jaga.jaga"
     // permission_handler_android compiles against SDK 37.
-    compileSdk = 37
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
