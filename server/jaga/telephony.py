@@ -91,7 +91,7 @@ async def hear(call: Call, leg: str, line: str) -> None:
     change = call.tracker.hear(leg, line)
     if change:
         await call.publish(**change)
-    stage = call.tracker.stage
+    stage, risk = asked = call.tracker.stage, call.tracker.risk
     if stage == before or RANK[stage] < RANK["authority"]:
         return
     raw = None
@@ -101,11 +101,11 @@ async def hear(call: Call, leg: str, line: str) -> None:
         # if audio sheds in live tests (with #21).
         try:
             async with asyncio.timeout(spark.TIMEOUT):
-                raw = await call.spark.assess(stage, call.tracker.risk, call.tracker.snippet())
+                raw = await call.spark.assess(stage, risk, call.tracker.snippet())
         except Exception as e:  # incl. the timeout; type only, the message could quote a transcript
             log.warning("call %s: Muse Spark failed (%s)", call.call_id, type(e).__name__)
-    # The other leg may have moved the call on while Spark was thinking; that stage has its own answer.
-    if call.tracker.stage == stage and (change := call.tracker.spark_said(raw)):
+    # The other leg may have moved the call on while Spark was thinking; Spark never heard that, so drop it.
+    if (call.tracker.stage, call.tracker.risk) == asked and (change := call.tracker.spark_said(raw)):
         await call.publish(**change)
 
 
@@ -139,7 +139,7 @@ async def media(ws: WebSocket) -> None:
                 if call is None or call.ended:
                     region = msg["start"].get("customParameters", {}).get("region")
                     try:
-                        tracker = StageTracker(load_pack(region), region)
+                        tracker = StageTracker(load_pack(region))
                     except ValueError as e:
                         log.warning("call %s refused: %s", sid, e)
                         await ws.close(code=status.WS_1008_POLICY_VIOLATION)

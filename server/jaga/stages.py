@@ -57,8 +57,8 @@ def official_contact(region: str, agency: str) -> dict:
 
 
 class StageTracker:
-    def __init__(self, pack: dict, region: str | None = None):
-        self.pack, self.region = pack, region
+    def __init__(self, pack: dict):
+        self.pack = pack
         self.disclosure = {label: re.compile(rx) for label, rx in pack["userDisclosure"].items()}
         words = sorted(pack["digitWords"], key=len, reverse=True)
         self.digit_words = re.compile(rf"\b({'|'.join(map(re.escape, words))})\b")

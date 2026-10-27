@@ -683,6 +683,19 @@ def test_a_slow_verdict_for_an_older_stage_cannot_lower_a_newer_warning(client, 
     assert stages_of(updates)[-1] == ("credentials", "high")
 
 
+def test_a_slow_verdict_cannot_lower_a_warning_the_other_leg_raised_at_the_same_stage(client, monkeypatch):
+    async def assess(self, stage, risk, snippet):
+        await asyncio.sleep(0.3)
+        return spark_out("low", "credentials", "my.credentials.counter.1")
+
+    monkeypatch.setattr(FakeSpark, "assess", assess)
+
+    script = [("user", "OTP saya 482913."), ("caller", "Pindahkan ke akaun selamat.")]
+    updates = trail(client, "CA_race2", script)
+
+    assert stages_of(updates)[-1] == ("credentials", "high")
+
+
 @pytest.mark.parametrize(
     "leak",
     [
