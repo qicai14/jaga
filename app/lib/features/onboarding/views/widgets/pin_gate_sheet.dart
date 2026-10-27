@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/gen/app_localizations.dart';
@@ -18,25 +20,57 @@ class PinGateSheet extends StatefulWidget {
 }
 
 class _PinGateSheetState extends State<PinGateSheet> {
-  PinResult? _result;
+  bool _locked = false;
+  bool _wrong = false;
+  bool _busy = false;
+  Timer? _unlock;
 
   @override
   void initState() {
     super.initState();
     // Reopened while locked: say so straight away.
-    widget.vm.isLocked().then((locked) {
-      if (mounted && locked) setState(() => _result = PinResult.locked);
+    _syncLock();
+  }
+
+  /// Follows the repository: locked until its expiry, then open again.
+  Future<void> _syncLock() async {
+    final remaining = await widget.vm.lockRemaining();
+    if (!mounted) return;
+    _unlock?.cancel();
+    setState(() {
+      _locked = remaining != null;
+      _wrong = false;
     });
+    if (remaining != null) {
+      _unlock = Timer(remaining, () {
+        if (mounted) setState(() => _locked = false);
+      });
+    }
   }
 
   Future<void> _submit(String pin) async {
-    final result = await widget.vm.verifyPin(pin);
-    if (!mounted) return;
-    if (result == PinResult.ok) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() => _result = result);
+    if (_busy) return; // two checks must not overlap
+    _busy = true;
+    try {
+      final result = await widget.vm.verifyPin(pin);
+      if (!mounted) return;
+      switch (result) {
+        case PinResult.ok:
+          Navigator.of(context).pop(true);
+        case PinResult.wrong:
+          setState(() => _wrong = true);
+        case PinResult.locked:
+          await _syncLock();
+      }
+    } finally {
+      _busy = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _unlock?.cancel();
+    super.dispose();
   }
 
   @override
@@ -56,15 +90,11 @@ class _PinGateSheetState extends State<PinGateSheet> {
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
-            if (_result != null)
-              InlineError(
-                _result == PinResult.locked
-                    ? l.settingsPinLocked
-                    : l.settingsPinWrong,
-              ),
+            if (_locked || _wrong)
+              InlineError(_locked ? l.settingsPinLocked : l.settingsPinWrong),
             SizedBox(height: m.l),
             IgnorePointer(
-              ignoring: _result == PinResult.locked,
+              ignoring: _locked,
               child: PinPad(onCompleted: _submit),
             ),
             TextButton(

@@ -183,6 +183,37 @@ void main() {
     expect(find.text('Too many tries. Wait 5 minutes.'), findsOneWidget);
   });
 
+  testWidgets('the lock lifts when it expires, without reopening the sheet', (
+    tester,
+  ) async {
+    var now = DateTime(2026, 10, 27, 12);
+    final rig = await OnboardingRig.create(
+      start: _done,
+      device: _granted(),
+      clock: () => now,
+    );
+    addTearDown(rig.dispose);
+    await rig.pin.set('1234');
+    for (var i = 0; i < 5; i++) {
+      await rig.pin.verify('0000');
+    }
+    await pumpJaga(
+      tester,
+      ViewModelHost<ProtectedHomeViewModel>(
+        create: rig.protectedHomeViewModel,
+        builder: (_, vm) => ProtectedHomeScreen(vm: vm),
+      ),
+    );
+    await openGate(tester);
+    expect(find.text('Too many tries. Wait 5 minutes.'), findsOneWidget);
+
+    now = now.add(const Duration(minutes: 5));
+    await tester.pump(const Duration(minutes: 5));
+    expect(find.text('Too many tries. Wait 5 minutes.'), findsNothing);
+    await unlockWith(tester, '1234');
+    expect(find.text('Settings'), findsOneWidget);
+  });
+
   testWidgets('the right PIN opens settings, and back returns to the status', (
     tester,
   ) async {

@@ -327,11 +327,17 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
         return _repository.update(progress.copyWith(complete: true));
       default:
     }
+    if (_disposed) return;
     _goTo(steps[steps.indexOf(step) + 1]);
   }
 
   /// Goes to the previous step. False on the first step: the app should close.
   bool back() {
+    if (step == OnboardingStep.joinCode && _joinStage == JoinStage.names) {
+      _joinStage = JoinStage.code;
+      notifyListeners();
+      return true;
+    }
     if (isFirstStep) return false;
     if (canGoBack) _goTo(steps[steps.indexOf(step) - 1]);
     return true;
@@ -362,6 +368,12 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   void _end() {
     _busy = false;
     notifyListeners();
+  }
+
+  /// Async work (a request, a buzz) can finish after the screen is gone.
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
   }
 
   @override

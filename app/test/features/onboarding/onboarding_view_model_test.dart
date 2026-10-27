@@ -369,6 +369,22 @@ void main() {
       },
     );
 
+    test(
+      'back from the names returns to the code, then leaves the step',
+      () async {
+        await start(_copilotAt.copyWith(step: OnboardingStep.joinCode));
+        vm.setCode(fakeLinkCode);
+        await vm.next();
+        expect(vm.joinStage, JoinStage.names);
+        expect(vm.back(), isTrue);
+        expect(vm.joinStage, JoinStage.code);
+        expect(vm.step, OnboardingStep.joinCode);
+        expect(vm.code, fakeLinkCode, reason: 'what was typed is kept');
+        vm.back();
+        expect(vm.step, OnboardingStep.language);
+      },
+    );
+
     test('each refusal stays on the code with its own error', () async {
       await start(_copilotAt.copyWith(step: OnboardingStep.joinCode));
       for (final (code, error) in [

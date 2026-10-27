@@ -64,7 +64,8 @@ class ProtectedHomeViewModel extends ChangeNotifier
 
   Future<PinResult> verifyPin(String pin) => _pin.verify(pin);
 
-  Future<bool> isLocked() async => await _pin.lockedUntil() != null;
+  /// How long the co-pilot lock still holds, or null if it is open.
+  Future<Duration?> lockRemaining() => _pin.lockRemaining();
 
   void selectLanguage(String code) {
     _repository.update(_repository.progress.value.copyWith(language: code));

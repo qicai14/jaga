@@ -53,10 +53,20 @@ class AppDependencies {
 }
 
 /// The locale and the home screen both come from the saved setup progress.
-class JagaApp extends StatelessWidget {
+class JagaApp extends StatefulWidget {
   const JagaApp({super.key, required this.deps});
 
   final AppDependencies deps;
+
+  @override
+  State<JagaApp> createState() => _JagaAppState();
+}
+
+class _JagaAppState extends State<JagaApp> {
+  /// Built once per language: a progress change must not rebuild the theme.
+  final _themes = <String, ThemeData>{};
+
+  AppDependencies get deps => widget.deps;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +76,10 @@ class JagaApp extends StatelessWidget {
         final locale = Locale(progress.language);
         return MaterialApp(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-          theme: buildJagaTheme(locale),
+          theme: _themes.putIfAbsent(
+            progress.language,
+            () => buildJagaTheme(locale),
+          ),
           themeMode: ThemeMode.light,
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
