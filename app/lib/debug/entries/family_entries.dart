@@ -2,15 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/widgets/view_model_host.dart';
 import '../../data/models/family_alert.dart';
 import '../../data/models/linked_person.dart';
 import '../../data/repositories/family_alert_repository.dart';
 import '../../data/services/alert_notifier.dart';
 import '../../data/services/alert_push_service.dart';
+import '../../data/services/copilot_pause_service.dart';
 import '../../data/services/dialer_service.dart';
+import '../../data/services/timeline_service.dart';
+import '../../features/family/view_models/clear_pause_view_model.dart';
+import '../../features/family/view_models/copilot_home_view_model.dart';
 import '../../features/family/view_models/family_alert_view_model.dart';
+import '../../features/family/view_models/stage_timeline_view_model.dart';
+import '../../features/family/views/copilot_home_screen.dart';
 import '../../features/family/views/family_alert_screen.dart';
+import '../../features/family/views/stage_timeline_screen.dart';
+import '../../features/family/views/widgets/clear_pause_sheet.dart';
 import '../fixtures/family_alert_fixtures.dart';
+import '../fixtures/timeline_fixtures.dart';
 import '../gallery_entry.dart';
 
 /// Shows [alert] on a fresh view model backed by fakes. With a [followUp], a
@@ -188,6 +198,121 @@ class _NotificationTestState extends State<_NotificationTest> {
   );
 }
 
+/// The co-pilot home on fakes. Opening a call or the sheet works as in the app.
+class _CopilotHomeDemo extends StatefulWidget {
+  const _CopilotHomeDemo({
+    this.pauseActive = false,
+    this.many = false,
+    this.empty = false,
+    this.offline = false,
+  });
+
+  final bool pauseActive;
+  final bool many;
+  final bool empty;
+  final bool offline;
+
+  @override
+  State<_CopilotHomeDemo> createState() => _CopilotHomeDemoState();
+}
+
+class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
+  late final _pause = FakeCopilotPauseService(active: widget.pauseActive)
+    ..offline = widget.offline;
+  late final _timeline =
+      (widget.empty
+            ? FakeTimelineService()
+            : fixtureTimelineService(many: widget.many))
+        ..offline = widget.offline;
+  final _dialer = FakeDialerService();
+
+  @override
+  Widget build(BuildContext context) => ViewModelHost(
+    create: () => CopilotHomeViewModel(
+      person: familyPerson,
+      pause: _pause,
+      timeline: _timeline,
+    ),
+    builder: (_, vm) => CopilotHomeScreen(
+      vm: vm,
+      pause: _pause,
+      timelineFor: (call) => StageTimelineViewModel(
+        call: call,
+        timeline: _timeline,
+        dialer: _dialer,
+      ),
+      createSettings: () =>
+          throw UnsupportedError('No settings in the gallery'),
+    ),
+  );
+}
+
+/// One call's timeline on fakes.
+class _TimelineDemo extends StatelessWidget {
+  const _TimelineDemo(this.callId);
+
+  final String callId;
+
+  @override
+  Widget build(BuildContext context) => ViewModelHost(
+    create: () => StageTimelineViewModel(
+      call: fixtureCalls().firstWhere((c) => c.callId == callId),
+      timeline: fixtureTimelineService(),
+      dialer: FakeDialerService(),
+    ),
+    builder: (_, vm) => StageTimelineScreen(vm: vm),
+  );
+}
+
+enum _SheetState { idle, busy, error }
+
+/// The Clear Jaga Pause sheet, driven into [state] on a fake.
+class _ClearPauseDemo extends StatefulWidget {
+  const _ClearPauseDemo(this.state);
+
+  final _SheetState state;
+
+  @override
+  State<_ClearPauseDemo> createState() => _ClearPauseDemoState();
+}
+
+class _ClearPauseDemoState extends State<_ClearPauseDemo> {
+  final _pause = FakeCopilotPauseService(active: true);
+  late final _vm = ClearPauseViewModel(
+    personName: familyPerson.name,
+    pause: _pause,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    switch (widget.state) {
+      case _SheetState.idle:
+        break;
+      case _SheetState.busy:
+        _pause.hold = Completer<void>().future; // never answers
+        unawaited(_vm.clear());
+      case _SheetState.error:
+        _pause.offline = true;
+        unawaited(_vm.clear());
+    }
+  }
+
+  @override
+  void dispose() {
+    _vm.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Align(
+      alignment: Alignment.bottomCenter,
+      child: ClearPauseSheet(vm: _vm),
+    ),
+  );
+}
+
 GalleryEntry _entry(
   String state,
   String raw, {
@@ -203,6 +328,9 @@ GalleryEntry _entry(
   ),
 );
 
+GalleryEntry _home(String state, Widget demo) =>
+    GalleryEntry(feature: 'family', state: state, build: (_) => demo);
+
 List<GalleryEntry> familyEntries() => [
   _entry('alert-isolation', familyIsolation),
   _entry('alert-money', familyMoney),
@@ -213,6 +341,16 @@ List<GalleryEntry> familyEntries() => [
   _entry('alert-no-number', familyIsolation, person: familyPersonNoNumber),
   _entry('may-be-genuine', familyMayBeGenuine),
   _entry('alert-to-genuine', familyMoney, followUp: familyMayBeGenuine),
+  _home('home-pause-active', const _CopilotHomeDemo(pauseActive: true)),
+  _home('home-no-pause', const _CopilotHomeDemo()),
+  _home('home-empty', const _CopilotHomeDemo(empty: true)),
+  _home('home-error', const _CopilotHomeDemo(offline: true)),
+  _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
+  _home('timeline', const _TimelineDemo('call-1')),
+  _home('timeline-long-quotes', const _TimelineDemo('call-5')),
+  _home('clear-pause-idle', const _ClearPauseDemo(_SheetState.idle)),
+  _home('clear-pause-busy', const _ClearPauseDemo(_SheetState.busy)),
+  _home('clear-pause-error', const _ClearPauseDemo(_SheetState.error)),
   const GalleryEntry(
     feature: 'family',
     state: 'notification-test',

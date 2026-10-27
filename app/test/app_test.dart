@@ -105,7 +105,48 @@ void main() {
     await pumpApp(tester, start: _copilotDone.copyWith(language: 'en'));
     await tester.tap(find.text('Finish'));
     await tester.pumpAndSettle();
-    expect(find.text("You'll get alerts about Mak Cik."), findsOneWidget);
+    expect(find.text('Mak Cik'), findsOneWidget);
+    expect(find.text('Protected'), findsOneWidget);
+  });
+
+  group('co-pilot settings', () {
+    Future<void> openSettings(WidgetTester tester) async {
+      await tester.tap(find.byType(PopupMenuButton<void>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('the app language changes at once', (tester) async {
+      await pumpApp(
+        tester,
+        start: _copilotDone.copyWith(language: 'en', complete: true),
+      );
+      await openSettings(tester);
+      await tester.tap(find.text('Bahasa Melayu'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tetapan'), findsOneWidget);
+    });
+
+    testWidgets('unlink asks first, then returns to setup', (tester) async {
+      final rig = await pumpApp(
+        tester,
+        start: _copilotDone.copyWith(language: 'en', complete: true),
+      );
+      await openSettings(tester);
+      await tester.tap(find.text('Stop following Mak Cik'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      expect(rig.onboarding.progress.value.link, isNotNull);
+
+      await tester.tap(find.text('Stop following Mak Cik'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Unlink'));
+      await tester.pumpAndSettle();
+      expect(rig.onboarding.progress.value.link, isNull);
+      expect(find.text('Who is this phone for?'), findsOneWidget);
+    });
   });
 
   testWidgets('a notification tap opens the family alert for a co-pilot', (

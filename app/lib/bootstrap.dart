@@ -10,16 +10,20 @@ import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
 import 'data/services/device_setup_service.dart';
+import 'data/services/copilot_pause_service.dart';
 import 'data/services/dialer_service.dart';
 import 'data/services/key_value_store.dart';
 import 'data/services/onboarding_api_service.dart';
 import 'data/services/share_service.dart';
+import 'data/services/timeline_service.dart';
 
-/// The real services, except the server and push, which are still Fakes.
+/// The real services, except the server, push, pause and timeline, which are still Fakes.
 Future<AppDependencies> createDependencies() async {
-  // TODO(#1): the real onboarding API and push services replace these Fakes once
+  // TODO(#1): the real onboarding API, push, pause and timeline services replace these Fakes once
   // contracts v1 and the Firebase project land.
-  debugPrint('Jaga is running on Fake onboarding API and push services.');
+  debugPrint(
+    'Jaga is running on Fake onboarding API, push, pause and timeline services.',
+  );
   final pin = PinRepository(store: const SecureStore());
   final onboarding = await OnboardingRepository.load(
     store: const SecureStore(),
@@ -39,6 +43,8 @@ Future<AppDependencies> createDependencies() async {
     share: const SharePlusService(),
     alertPush: FakeAlertPushService(),
     alertNotifier: notifier,
+    pause: FakeCopilotPauseService(),
+    timeline: FakeTimelineService(),
     initAlerts: notifier.init,
   );
 }

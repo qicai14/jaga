@@ -6,6 +6,7 @@ import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
 import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
+import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
 import 'package:json_schema/json_schema.dart';
 
 void main() {
@@ -16,7 +17,7 @@ void main() {
   );
 
   test('every v0 stage-update fixture validates and parses', () {
-    for (final raw in stageUpdateV0Fixtures) {
+    for (final raw in [...stageUpdateV0Fixtures, ...timelineV0Fixtures]) {
       final result = schema.validate(jsonDecode(raw));
       expect(result.isValid, isTrue, reason: '${result.errors}\n$raw');
       StageUpdate.parse(raw); // through the real model
