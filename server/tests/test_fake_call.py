@@ -56,6 +56,7 @@ def client(monkeypatch):
     monkeypatch.setenv("JAGA_USE_FAKES", "true")
     monkeypatch.setenv("JAGA_DEFAULT_REGION", "my")
     monkeypatch.setenv("TWILIO_AUTH_TOKEN", TOKEN)
+    monkeypatch.setattr(asr.MuseTranscriber, "FLUSH", 0.2)  # tests need no 1.5 s wait at hangup
     # One TestClient context shares one event loop between the call's WebSocket and the app's stage stream.
     with TestClient(app) as client:
         yield client
@@ -405,14 +406,17 @@ def test_a_date_or_parcel_number_read_out_is_not_a_tac(client, said):
 class MuseSocket:
     """Stands in for the Muse Voice Transcribe realtime socket: a final transcript for each audio frame."""
 
-    def __init__(self, replies):
+    def __init__(self, replies, dies_on_frame=None):
         self.sent, self.replies, self.inbox = [], list(replies), asyncio.Queue()
+        self.dies_on_frame, self.closed = dies_on_frame, False
 
     async def send(self, data):
+        if self.dies_on_frame is not None and len(self.sent) == self.dies_on_frame:
+            raise ConnectionError("socket dropped")
         self.sent.append(data)
         await asyncio.sleep(0)
         if isinstance(data, bytes) and self.replies:
-            reply = {"type": "transcript", "transcript": self.replies.pop(0), "final": True}
+            reply = {"type": "speechComplete", "turnId": 1, "transcript": self.replies.pop(0)}
             self.inbox.put_nowait(json.dumps(reply))
 
     def __aiter__(self):
@@ -451,7 +455,7 @@ def test_real_muse_transcribe_gets_16khz_audio_and_the_region_packs_hints(client
     assert (handshake["audioEncoding"], handshake["mode"]) == ("PCM_16KHZ", "ENDPOINTING")
     assert handshake["languageBias"] == ["Malay", "English", "Mandarin Chinese", "Tamil"]
     assert {"LHDN", "akaun selamat", "TAC", "997"} <= set(handshake["keywords"])
-    assert [len(frame) for frame in sock.sent[1:]] == [640] * 4
+    assert [len(frame) for frame in sock.sent[1:]] == [640] * 4 + [32000]  # then 1 s of silence at hangup
     assert stages_of(updates)[-1] == ("pretext", "medium")
     assert sock.closed
     assert "bungkusan" not in caplog.text and "muse-key" not in caplog.text
@@ -510,3 +514,56 @@ def test_a_bare_code_read_out_right_after_the_caller_asked_for_one_is_caught(cli
 
 def test_a_bare_six_digit_run_without_the_caller_asking_is_not_a_code(client):
     assert stages_of(trail(client, "CA_unasked", [("user", "482913")])) == [("none", "low")]
+
+
+def muse(monkeypatch, *sockets):
+    """Real Muse client over these sockets, in order; returns the list of connects."""
+    opened = []
+
+    async def connect(url):
+        opened.append(url)
+        return sockets[len(opened) - 1]
+
+    monkeypatch.setenv("JAGA_USE_FAKES", "false")
+    monkeypatch.setenv("META_API_KEY", "muse-key")
+    monkeypatch.setattr(asr, "connect", connect)
+    return opened
+
+
+def test_the_last_line_before_hangup_still_reaches_the_tracker(client, monkeypatch):
+    # The last utterance only finishes when the silence flushed at hangup arrives.
+    muse(monkeypatch, MuseSocket(["Ada", "bungkusan", "haram"]))
+
+    updates = trail(client, "CA_flush", [("caller", "x" * 160)] * 2)
+
+    assert stages_of(updates)[-1] == ("pretext", "medium")
+
+
+def test_a_dead_muse_socket_is_dropped_logged_once_and_not_retried_per_chunk(client, monkeypatch, caplog):
+    dead = MuseSocket([], dies_on_frame=2)
+    opened = muse(monkeypatch, dead)
+
+    trail(client, "CA_dead", [("caller", "x" * 160)] * 10)
+
+    assert len(opened) == 1 and dead.closed
+    assert len([r for r in caplog.records if "Muse Voice Transcribe" in r.getMessage()]) == 1
+
+
+def test_the_leg_reconnects_to_muse_after_the_backoff(client, monkeypatch):
+    monkeypatch.setattr(asr.MuseTranscriber, "BACKOFF", 0)
+    dead, fresh = MuseSocket([], dies_on_frame=1), MuseSocket(["Ada bungkusan haram"])
+    opened = muse(monkeypatch, dead, fresh)
+
+    updates = trail(client, "CA_back", [("caller", "x" * 160)] * 4)
+
+    assert len(opened) == 2 and json.loads(fresh.sent[0])["audioEncoding"] == "PCM_16KHZ"
+    assert stages_of(updates)[-1] == ("pretext", "medium")
+
+
+def test_a_failed_handshake_closes_the_socket(client, monkeypatch):
+    broken = MuseSocket([], dies_on_frame=0)
+    muse(monkeypatch, broken)
+
+    trail(client, "CA_hs", [("caller", "x" * 160)] * 2)
+
+    assert broken.closed

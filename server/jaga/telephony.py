@@ -142,7 +142,10 @@ async def media(ws: WebSocket) -> None:
             task.cancel()
         try:
             if transcriber is not None:
-                await transcriber.close()
+                for leg, line in await transcriber.close():
+                    change = call.tracker.hear(leg, line)
+                    if change:
+                        await call.publish(**change)
         finally:
             if call is not None:
                 await call.end()
