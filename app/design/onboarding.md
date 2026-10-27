@@ -122,7 +122,7 @@ exists (no schema test).
 | `onboardingDialNow` / `onboardingCheckForwarding` / `onboardingForwardDone` | Dial now / Check forwarding / I've dialled it |
 | `onboardingPinTitle` / `onboardingPinBody` | Set the co-pilot lock / Only family can change Jaga's settings with this PIN, so a caller can't talk her into switching it off. |
 | `onboardingPinConfirm` / `onboardingPinMismatch` | Enter the PIN again / The PINs don't match. Set it again. |
-| `onboardingPauseTitle` / `onboardingPauseBody` | Pause token / Give this to your bank so it can hold transfers during a scam call. |
+| `onboardingPauseTitle` / `onboardingPauseBody` | Pause token / Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she's on a scam call. |
 | `commonCopy` / `commonCopied` / `commonShare` / `commonCancel` | Copy / Copied / Share / Cancel |
 | `onboardingLinkTitle` / `onboardingLinkBody` | Link code / Up to 3 family members can enter this code in their own Jaga app. |
 | `onboardingLinkShareText` | Open Jaga, choose "A family co-pilot" and enter {code} to get alerts about {name}. |
@@ -182,3 +182,4 @@ Manifest: `USE_FULL_SCREEN_INTENT`, `RECORD_AUDIO`, `POST_NOTIFICATIONS`.
    - The microphone row says "Lets you talk on calls through Jaga": the server hears the caller (ADR 0002), the phone mic carries her own voice.
 10. Language is step 1 (Preston, 28 Oct): a family member reads every later screen in their chosen language. Role is step 2; step 1 has no back arrow and no step count; the step totals stay 10 and 5.
 11. PIN uses Continue (Preston, 28 Oct): the pad does not submit on the 4th digit. Continue turns on at 4 digits; on the confirmation it checks for a match, and a mismatch goes back to set with the error. The prompt and the error share one fixed slot so the keypad never moves. The settings gate still checks on the 4th digit.
+12. Pause token copy explains the one-time hand-over (Preston, 28 Oct). No "bank linked" status yet: requested in #1.

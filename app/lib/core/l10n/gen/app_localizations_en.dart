@@ -312,7 +312,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPauseBody =>
-      'Give this to your bank so it can hold transfers during a scam call.';
+      'Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she\'s on a scam call.';
 
   @override
   String get onboardingLinkTitle => 'Link code';

@@ -206,7 +206,7 @@
   "@onboardingPinMismatch": {"description": "Step 6 error when the two entries differ."},
   "onboardingPauseTitle": "Pause token",
   "@onboardingPauseTitle": {"description": "Protected setup step 7 title."},
-  "onboardingPauseBody": "Give this to your bank so it can hold transfers during a scam call.",
+  "onboardingPauseBody": "Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she's on a scam call.",
   "@onboardingPauseBody": {"description": "Step 7 body."},
   "onboardingLinkTitle": "Link code",
   "@onboardingLinkTitle": {"description": "Protected setup step 8 title."},

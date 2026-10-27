@@ -92,7 +92,7 @@
   "onboardingPinConfirm": "Masukkan PIN sekali lagi",
   "onboardingPinMismatch": "PIN tidak sepadan. Tetapkan semula.",
   "onboardingPauseTitle": "Token Pause",
-  "onboardingPauseBody": "Berikan ini kepada bank anda supaya ia boleh menahan pemindahan semasa panggilan penipuan.",
+  "onboardingPauseBody": "Berikan kod ini kepada banknya sekali sahaja. Apabila dia membuat pemindahan, bank menyemak dengan Jaga dan boleh menahannya jika dia sedang menerima panggilan penipuan.",
   "onboardingLinkTitle": "Kod pautan",
   "onboardingLinkBody": "Sehingga 3 ahli keluarga boleh memasukkan kod ini dalam aplikasi Jaga mereka.",
   "onboardingLinkShareText": "Buka Jaga, pilih \"Co-pilot keluarga\" dan masukkan {code} untuk menerima amaran tentang {name}.",

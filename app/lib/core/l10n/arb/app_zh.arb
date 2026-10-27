@@ -92,7 +92,7 @@
   "onboardingPinConfirm": "请再输入一次 PIN",
   "onboardingPinMismatch": "两次 PIN 不一致。请重新设置。",
   "onboardingPauseTitle": "暂停令牌",
-  "onboardingPauseBody": "把它交给银行，这样银行可以在诈骗电话期间暂缓转账。",
+  "onboardingPauseBody": "把这个代码交给她的银行，只需一次。她转账时，银行会向 Jaga 核实，如果她正在接听诈骗电话，银行可以暂缓这笔转账。",
   "onboardingLinkTitle": "关联码",
   "onboardingLinkBody": "最多 3 位家人可以在自己的 Jaga 应用中输入此代码。",
   "onboardingLinkShareText": "打开 Jaga，选择“家庭协助人”，输入 {code}，即可接收关于{name}的警报。",

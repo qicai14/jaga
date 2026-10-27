@@ -316,7 +316,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get onboardingPauseBody =>
-      'Berikan ini kepada bank anda supaya ia boleh menahan pemindahan semasa panggilan penipuan.';
+      'Berikan kod ini kepada banknya sekali sahaja. Apabila dia membuat pemindahan, bank menyemak dengan Jaga dan boleh menahannya jika dia sedang menerima panggilan penipuan.';
 
   @override
   String get onboardingLinkTitle => 'Kod pautan';

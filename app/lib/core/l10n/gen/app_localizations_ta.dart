@@ -318,7 +318,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get onboardingPauseBody =>
-      'மோசடி அழைப்பின் போது பரிமாற்றங்களை நிறுத்த, இதை உங்கள் வங்கியிடம் கொடுங்கள்.';
+      'இந்தக் குறியீட்டை அவரது வங்கியிடம் ஒருமுறை கொடுங்கள். அவர் பரிமாற்றம் செய்யும்போது, வங்கி Jaga-விடம் சரிபார்க்கும்; அவர் மோசடி அழைப்பில் இருந்தால் அதை நிறுத்தி வைக்கலாம்.';
 
   @override
   String get onboardingLinkTitle => 'இணைப்புக் குறியீடு';

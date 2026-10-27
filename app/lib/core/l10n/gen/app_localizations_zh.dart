@@ -302,7 +302,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingPauseTitle => '暂停令牌';
 
   @override
-  String get onboardingPauseBody => '把它交给银行，这样银行可以在诈骗电话期间暂缓转账。';
+  String get onboardingPauseBody =>
+      '把这个代码交给她的银行，只需一次。她转账时，银行会向 Jaga 核实，如果她正在接听诈骗电话，银行可以暂缓这笔转账。';
 
   @override
   String get onboardingLinkTitle => '关联码';
