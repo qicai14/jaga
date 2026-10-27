@@ -145,7 +145,8 @@ void main() {
       await tester.tap(find.widgetWithText(TextButton, 'Remove'));
       await tester.pumpAndSettle();
       expect(rig.onboarding.progress.value.link, isNull);
-      expect(find.text('Who is this phone for?'), findsOneWidget);
+      expect(find.text('Choose your language'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
     });
   });
 
