@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from xml.sax.saxutils import escape, quoteattr
 
-from fastapi import APIRouter, Request, WebSocket, status
+from fastapi import APIRouter, HTTPException, Request, WebSocket, status
 from fastapi.responses import Response
 
 from jaga import asr, twilio_auth
@@ -63,14 +63,24 @@ async def voice(request: Request) -> Response:
     # shortcut: every call is the default region's one protected user and rings one app identity, until a
     # protected-user registry (setup, #12/#19) maps the dialled number to a user.
     region = os.environ.get("JAGA_DEFAULT_REGION", "")
-    stream = twilio_auth.public_url(request).replace("https://", "wss://", 1).replace("/voice", "/media")
+    identity = os.environ.get("JAGA_APP_CLIENT_IDENTITY", "")
+    if not identity:
+        raise HTTPException(503, "JAGA_APP_CLIENT_IDENTITY is not set")
     twiml = (
         '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
-        f'<Stream url={quoteattr(stream)} track="both_tracks">'
+        f'<Stream url={quoteattr(twilio_auth.stream_url(request))} track="both_tracks">'
         f'<Parameter name="region" value={quoteattr(region)}/></Stream></Start>'
-        f"<Dial><Client>{escape(os.environ.get('JAGA_APP_CLIENT_IDENTITY', ''))}</Client></Dial></Response>"
+        f"<Dial><Client>{escape(identity)}</Client></Dial></Response>"
     )
     return Response(twiml, media_type="text/xml")
+
+
+def put(queue: asyncio.Queue, item: bytes | None) -> None:
+    """Queue audio, dropping the oldest when Muse falls behind (its limit is 5 s ahead of processing)."""
+    # shortcut: 250 chunks is 5 s at Twilio's 20 ms; dropped audio is a gap in the transcript, not a stall.
+    if queue.full():
+        queue.get_nowait()
+    queue.put_nowait(item)
 
 
 async def listen(call: Call, transcriber: asr.Transcriber, leg: str, audio: asyncio.Queue) -> None:
@@ -116,16 +126,16 @@ async def media(ws: WebSocket) -> None:
                 leg = LEGS.get(msg["media"]["track"])
                 if leg is not None:
                     if leg not in legs:
-                        queue = asyncio.Queue()
+                        queue = asyncio.Queue(maxsize=250)
                         legs[leg] = queue, asyncio.create_task(listen(call, transcriber, leg, queue))
-                    legs[leg][0].put_nowait(base64.b64decode(msg["media"]["payload"]))
+                    put(legs[leg][0], base64.b64decode(msg["media"]["payload"]))
             elif msg["event"] == "stop":
                 break
     except (ValueError, KeyError, TypeError):
         pass  # malformed Media Streams message: end the call below instead of a 1011 with a stack trace
     finally:
         for queue, _ in legs.values():
-            queue.put_nowait(None)
+            put(queue, None)
         # Let queued audio finish, but not forever if Muse hangs.
         _, hung = await asyncio.wait([task for _, task in legs.values()], timeout=5) if legs else (None, ())
         for task in hung:

@@ -266,12 +266,12 @@ def test_unknown_region_closes_the_stream_and_logs_it(client, caplog):
     assert "'zz'" in caplog.text
 
 
-def voice(client, signed_with=TOKEN, **params):
+def voice(client, signed_with=TOKEN, base="https://testserver", query="", **params):
     form = {"CallSid": ["CA_v"], "From": ["+60123456789"]} | params
-    sig = twilio_auth.signature("https://testserver/twilio/voice", form, signed_with)
+    sig = twilio_auth.signature(f"{base}/twilio/voice{query}", form, signed_with)
     body = "&".join(f"{k}={v[0]}".replace("+", "%2B") for k, v in form.items())
     return client.post(
-        "/twilio/voice",
+        f"/twilio/voice{query}",
         content=body,
         headers={"X-Twilio-Signature": sig, "Content-Type": "application/x-www-form-urlencoded"},
     )
@@ -450,3 +450,47 @@ def test_real_muse_transcribe_gets_16khz_audio_and_the_region_packs_hints(client
     assert stages_of(updates)[-1] == ("pretext", "medium")
     assert sock.closed
     assert "bungkusan" not in caplog.text and "muse-key" not in caplog.text
+
+
+def test_stream_url_is_the_public_origin_plus_the_media_path(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    monkeypatch.setenv("JAGA_PUBLIC_URL", "https://voice.jaga.example")
+
+    response = voice(client, base="https://voice.jaga.example", query="?x=1")
+
+    stream = ElementTree.fromstring(response.text).find("Start/Stream")
+    assert stream.get("url") == "wss://voice.jaga.example/twilio/media"
+
+
+def test_voice_webhook_without_an_app_identity_is_unavailable(client, monkeypatch):
+    monkeypatch.delenv("JAGA_APP_CLIENT_IDENTITY", raising=False)
+
+    assert voice(client).status_code == 503
+
+
+def test_garbage_signatures_and_bodies_are_refused_not_a_500(client):
+    headers = {
+        "X-Twilio-Signature": "s\u00efg".encode("latin-1"),
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    assert client.post("/twilio/voice", content=b"CallSid=CA", headers=headers).status_code == 403
+    headers["X-Twilio-Signature"] = "x"
+    assert client.post("/twilio/voice", content=b"\xff\xfe=\xff", headers=headers).status_code == 403
+    with pytest.raises(WebSocketDisconnect), client.websocket_connect("/twilio/media", headers=headers):
+        pass
+
+
+def test_a_backed_up_leg_keeps_the_newest_audio(client, monkeypatch):
+    heard, transcribe = [], FakeTranscriber.transcribe
+
+    async def stalled(self, leg, audio):
+        if not heard:
+            await asyncio.sleep(0.3)  # Muse stalls on the first chunk while the stream keeps coming
+        heard.append(audio)
+        return await transcribe(self, leg, audio)
+
+    monkeypatch.setattr(FakeTranscriber, "transcribe", stalled)
+
+    trail(client, "CA_backlog", [("caller", f"chunk {i}") for i in range(600)])
+
+    assert len(heard) < 600 and heard[-1] == b"chunk 599"
