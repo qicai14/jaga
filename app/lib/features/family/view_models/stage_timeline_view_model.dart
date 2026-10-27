@@ -26,6 +26,8 @@ class StageTimelineViewModel extends ChangeNotifier {
   LoadStatus _status = LoadStatus.loading;
   List<TimelineEvent> _events = const [];
 
+  /// A delete is in flight: the screen can't be left or deleted again.
+  bool get deleting => _deleting;
   LoadStatus get status => _status;
   List<TimelineEvent> get events => _events;
 
@@ -48,6 +50,7 @@ class StageTimelineViewModel extends ChangeNotifier {
   Future<bool> delete() async {
     if (_deleting) return false;
     _deleting = true;
+    notifyListeners();
     try {
       await _timeline.delete(call.callId);
       return true;
@@ -55,6 +58,7 @@ class StageTimelineViewModel extends ChangeNotifier {
       return false;
     } finally {
       _deleting = false;
+      if (!_disposed) notifyListeners();
     }
   }
 

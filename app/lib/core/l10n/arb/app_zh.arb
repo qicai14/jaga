@@ -125,11 +125,11 @@
   "settingsReset": "按住以重置 Jaga",
 
   "familyHomeProtected": "受保护",
-  "familyClearPause": "解除 Jaga Pause",
+  "familyClearPause": "解除 Jaga 暂停",
   "familyClearPauseStatement": "我已和{name}通过话，确认这笔转账是真实的。",
-  "familyClearPauseHold": "按住以解除 Jaga Pause",
-  "familyPauseCleared": "已解除 Jaga Pause",
-  "familyClearPauseError": "无法解除 Jaga Pause。请检查网络后重试。",
+  "familyClearPauseHold": "按住以解除 Jaga 暂停",
+  "familyPauseCleared": "已解除 Jaga 暂停",
+  "familyClearPauseError": "无法解除 Jaga 暂停。请检查网络后重试。",
   "familyCallsTitle": "已发出警报的来电",
   "familyCallsEmpty": "过去 30 天没有发出警报的来电。",
   "familyCallsError": "无法加载来电。请检查网络。",
@@ -139,12 +139,13 @@
   "familyTimelineRiskMedium": "已显示提醒",
   "familyTimelineRiskHigh": "已显示警告",
   "familyTimelineRiskLow": "风险已降回较低",
-  "familyCall997": "拨打 {hotline} 举报",
+  "familyCallHotline": "拨打 {hotline} 举报",
   "familyTimelineDelete": "删除",
   "familyTimelineDeleteConfirm": "删除此时间线？删除后无法恢复。",
   "familyTimelineDeleted": "时间线已删除",
   "familyTimelineDeleteError": "无法删除时间线。请检查网络后重试。",
-  "familyUnlink": "不再关注{name}",
-  "familyUnlinkConfirm": "不再接收有关{name}的警报？以后可用新代码重新关联。",
-  "familyUnlinkAction": "取消关联"
+  "familyUnlink": "从此手机移除{name}",
+  "familyUnlinkConfirm": "从此手机移除{name}？可用新代码重新关联。",
+  "familyUnlinkAction": "移除",
+  "familyUnlinkError": "无法移除{name}。请重试。"
 }

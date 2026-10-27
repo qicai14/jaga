@@ -12,6 +12,17 @@ extension DateText on DateTime {
   String formatDayAndTime(BuildContext context) =>
       DateFormat.yMMMd(_locale(context)).add_jm().format(toLocal());
 
+  /// Time only for today, date and time before that.
+  String formatWhen(BuildContext context) {
+    final local = toLocal();
+    final now = DateTime.now();
+    final today =
+        local.year == now.year &&
+        local.month == now.month &&
+        local.day == now.day;
+    return today ? formatTime(context) : formatDayAndTime(context);
+  }
+
   static String _locale(BuildContext context) =>
       Localizations.localeOf(context).toString();
 }

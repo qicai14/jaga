@@ -18,6 +18,7 @@ import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
 import 'data/services/share_service.dart';
 import 'data/services/timeline_service.dart';
+import 'features/family/view_models/clear_pause_view_model.dart';
 import 'features/family/view_models/copilot_home_view_model.dart';
 import 'features/family/view_models/copilot_settings_view_model.dart';
 import 'features/family/view_models/family_alert_view_model.dart';
@@ -147,6 +148,11 @@ class _CopilotShellState extends State<CopilotShell> {
     notifier: widget.deps.alertNotifier,
     person: widget.person,
   );
+  late final _home = CopilotHomeViewModel(
+    person: widget.person,
+    pause: widget.deps.pause,
+    timeline: widget.deps.timeline,
+  );
   StreamSubscription<AlertOpen>? _opens;
 
   @override
@@ -165,47 +171,49 @@ class _CopilotShellState extends State<CopilotShell> {
   }
 
   void _open(AlertOpen open) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ViewModelHost(
-          create: () => FamilyAlertViewModel(
-            repository: _alerts,
-            dialer: widget.deps.dialer,
-            initial: open.alert,
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => ViewModelHost(
+              create: () => FamilyAlertViewModel(
+                repository: _alerts,
+                dialer: widget.deps.dialer,
+                initial: open.alert,
+              ),
+              builder: (_, vm) =>
+                  FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
+            ),
           ),
-          builder: (_, vm) =>
-              FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
-        ),
-      ),
-    );
+        )
+        // The call may have changed while the alert was open.
+        .then((_) {
+          if (mounted) _home.load();
+        });
   }
 
   @override
   void dispose() {
     _opens?.cancel();
     _alerts.dispose();
+    _home.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => ViewModelHost(
-    create: () => CopilotHomeViewModel(
-      person: widget.person,
+  Widget build(BuildContext context) => CopilotHomeScreen(
+    vm: _home,
+    createClearPause: () => ClearPauseViewModel(
+      personName: widget.person.name,
       pause: widget.deps.pause,
-      timeline: widget.deps.timeline,
     ),
-    builder: (_, vm) => CopilotHomeScreen(
-      vm: vm,
-      pause: widget.deps.pause,
-      timelineFor: (call) => StageTimelineViewModel(
-        call: call,
-        timeline: widget.deps.timeline,
-        dialer: widget.deps.dialer,
-      ),
-      createSettings: () => CopilotSettingsViewModel(
-        repository: widget.deps.onboarding,
-        person: widget.person,
-      ),
+    timelineFor: (call) => StageTimelineViewModel(
+      call: call,
+      timeline: widget.deps.timeline,
+      dialer: widget.deps.dialer,
+    ),
+    createSettings: () => CopilotSettingsViewModel(
+      repository: widget.deps.onboarding,
+      person: widget.person,
     ),
   );
 }

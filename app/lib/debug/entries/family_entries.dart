@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/widgets/view_model_host.dart';
 import '../../data/models/family_alert.dart';
+import '../../data/models/onboarding_progress.dart';
 import '../../data/models/linked_person.dart';
 import '../../data/repositories/family_alert_repository.dart';
 import '../../data/services/alert_notifier.dart';
@@ -13,15 +14,18 @@ import '../../data/services/dialer_service.dart';
 import '../../data/services/timeline_service.dart';
 import '../../features/family/view_models/clear_pause_view_model.dart';
 import '../../features/family/view_models/copilot_home_view_model.dart';
+import '../../features/family/view_models/copilot_settings_view_model.dart';
 import '../../features/family/view_models/family_alert_view_model.dart';
 import '../../features/family/view_models/stage_timeline_view_model.dart';
 import '../../features/family/views/copilot_home_screen.dart';
+import '../../features/family/views/copilot_settings_screen.dart';
 import '../../features/family/views/family_alert_screen.dart';
 import '../../features/family/views/stage_timeline_screen.dart';
 import '../../features/family/views/widgets/clear_pause_sheet.dart';
 import '../fixtures/family_alert_fixtures.dart';
 import '../fixtures/timeline_fixtures.dart';
 import '../gallery_entry.dart';
+import '../onboarding_rig.dart';
 
 /// Shows [alert] on a fresh view model backed by fakes. With a [followUp], a
 /// debug bar under the screen pushes it, to watch the band swap in place.
@@ -198,7 +202,53 @@ class _NotificationTestState extends State<_NotificationTest> {
   );
 }
 
-/// The co-pilot home on fakes. Opening a call or the sheet works as in the app.
+/// A co-pilot's setup rig (complete, linked to [familyPerson]) for the
+/// screens that need the onboarding repository. Built async, disposed with the demo.
+class _WithRig extends StatefulWidget {
+  const _WithRig(this.builder);
+
+  final Widget Function(OnboardingRig rig) builder;
+
+  @override
+  State<_WithRig> createState() => _WithRigState();
+}
+
+class _WithRigState extends State<_WithRig> {
+  OnboardingRig? _rig;
+
+  @override
+  void initState() {
+    super.initState();
+    OnboardingRig.create(
+      start: const OnboardingProgress(
+        role: OnboardingRole.copilot,
+        step: OnboardingStep.done,
+        link: familyPerson,
+        complete: true,
+      ),
+    ).then((rig) {
+      if (mounted) {
+        setState(() => _rig = rig);
+      } else {
+        rig.dispose();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _rig?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final rig = _rig;
+    return rig == null ? const SizedBox.shrink() : widget.builder(rig);
+  }
+}
+
+/// The co-pilot home on fakes. Opening a call, the sheet or Settings works as in the app.
 class _CopilotHomeDemo extends StatefulWidget {
   const _CopilotHomeDemo({
     this.pauseActive = false,
@@ -227,22 +277,43 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
   final _dialer = FakeDialerService();
 
   @override
-  Widget build(BuildContext context) => ViewModelHost(
-    create: () => CopilotHomeViewModel(
-      person: familyPerson,
-      pause: _pause,
-      timeline: _timeline,
-    ),
-    builder: (_, vm) => CopilotHomeScreen(
-      vm: vm,
-      pause: _pause,
-      timelineFor: (call) => StageTimelineViewModel(
-        call: call,
+  Widget build(BuildContext context) => _WithRig(
+    (rig) => ViewModelHost(
+      create: () => CopilotHomeViewModel(
+        person: familyPerson,
+        pause: _pause,
         timeline: _timeline,
-        dialer: _dialer,
       ),
-      createSettings: () =>
-          throw UnsupportedError('No settings in the gallery'),
+      builder: (_, vm) => CopilotHomeScreen(
+        vm: vm,
+        createClearPause: () =>
+            ClearPauseViewModel(personName: familyPerson.name, pause: _pause),
+        timelineFor: (call) => StageTimelineViewModel(
+          call: call,
+          timeline: _timeline,
+          dialer: _dialer,
+        ),
+        createSettings: () => CopilotSettingsViewModel(
+          repository: rig.onboarding,
+          person: familyPerson,
+        ),
+      ),
+    ),
+  );
+}
+
+/// The co-pilot's settings on a fresh rig.
+class _SettingsDemo extends StatelessWidget {
+  const _SettingsDemo();
+
+  @override
+  Widget build(BuildContext context) => _WithRig(
+    (rig) => ViewModelHost(
+      create: () => CopilotSettingsViewModel(
+        repository: rig.onboarding,
+        person: familyPerson,
+      ),
+      builder: (_, vm) => CopilotSettingsScreen(vm: vm),
     ),
   );
 }
@@ -346,6 +417,7 @@ List<GalleryEntry> familyEntries() => [
   _home('home-empty', const _CopilotHomeDemo(empty: true)),
   _home('home-error', const _CopilotHomeDemo(offline: true)),
   _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
+  _home('settings', const _SettingsDemo()),
   _home('timeline', const _TimelineDemo('call-1')),
   _home('timeline-long-quotes', const _TimelineDemo('call-5')),
   _home('clear-pause-idle', const _ClearPauseDemo(_SheetState.idle)),

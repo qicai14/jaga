@@ -439,7 +439,7 @@ class AppLocalizationsMs extends AppLocalizations {
       'Tidak dapat mengosongkan Jaga Pause. Semak internet dan cuba lagi.';
 
   @override
-  String get familyCallsTitle => 'Panggilan yang diberi amaran';
+  String get familyCallsTitle => 'Panggilan yang dimaklumkan';
 
   @override
   String get familyCallsEmpty =>
@@ -471,7 +471,7 @@ class AppLocalizationsMs extends AppLocalizations {
   String get familyTimelineRiskLow => 'Risiko kembali rendah';
 
   @override
-  String familyCall997(String hotline) {
+  String familyCallHotline(String hotline) {
     return 'Hubungi $hotline untuk melapor';
   }
 
@@ -491,14 +491,19 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String familyUnlink(String name) {
-    return 'Berhenti mengikuti $name';
+    return 'Alih keluar $name daripada telefon ini';
   }
 
   @override
   String familyUnlinkConfirm(String name) {
-    return 'Berhenti menerima amaran tentang $name? Anda boleh memaut semula kemudian dengan kod baharu.';
+    return 'Alih keluar $name daripada telefon ini? Anda boleh memaut semula dengan kod baharu.';
   }
 
   @override
-  String get familyUnlinkAction => 'Nyahpaut';
+  String get familyUnlinkAction => 'Alih keluar';
+
+  @override
+  String familyUnlinkError(String name) {
+    return 'Tidak dapat mengalih keluar $name. Cuba lagi.';
+  }
 }

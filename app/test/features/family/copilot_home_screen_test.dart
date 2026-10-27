@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
@@ -6,6 +8,7 @@ import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/timeline_service.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
 import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
+import 'package:jaga/features/family/view_models/clear_pause_view_model.dart';
 import 'package:jaga/features/family/view_models/copilot_home_view_model.dart';
 import 'package:jaga/features/family/view_models/stage_timeline_view_model.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
@@ -33,7 +36,8 @@ class Rig {
 
   Widget get screen => CopilotHomeScreen(
     vm: vm,
-    pause: pause,
+    createClearPause: () =>
+        ClearPauseViewModel(personName: familyPerson.name, pause: pause),
     timelineFor: (call) =>
         StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
     createSettings: () => throw UnimplementedError('covered in app_test'),
@@ -54,14 +58,15 @@ Future<Rig> pump(
   return rig;
 }
 
-Future<void> hold(WidgetTester tester) async {
+/// Holds the button 2.1 s. [settle] false while a spinner keeps animating.
+Future<void> hold(WidgetTester tester, {bool settle = true}) async {
   final g = await tester.startGesture(
     tester.getCenter(find.byType(HoldToConfirmButton)),
   );
   await tester.pump(); // the ticker starts on the first frame
   await tester.pump(const Duration(milliseconds: 2100));
   await g.up();
-  await tester.pumpAndSettle();
+  if (settle) await tester.pumpAndSettle();
 }
 
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
@@ -259,4 +264,113 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TimelineEventRow), findsWidgets);
   });
+
+  forEachScale('a tap or a short hold does not clear Jaga Pause', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    await tester.tap(clearPause);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(HoldToConfirmButton));
+    await tester.pump();
+    final g = await tester.startGesture(
+      tester.getCenter(find.byType(HoldToConfirmButton)),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await g.up();
+    await tester.pumpAndSettle();
+    expect(rig.pause.active, isTrue);
+    expect(find.byType(HoldToConfirmButton), findsOneWidget);
+  });
+
+  forEachScale('the sheet cannot be closed while clearing, but can when idle', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    // Idle: Back closes it and nothing is announced.
+    await tester.tap(clearPause);
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(HoldToConfirmButton), findsNothing);
+    expect(find.text('Jaga Pause cleared'), findsNothing);
+    expect(find.text('Jaga Pause active'), findsOneWidget);
+
+    // Busy: Back (and, with room above the sheet, a tap outside) do nothing.
+    final gate = Completer<void>();
+    rig.pause.hold = gate.future;
+    await tester.tap(clearPause);
+    await tester.pumpAndSettle();
+    await hold(tester, settle: false);
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    if (scale == 1.0) {
+      await tester.tapAt(const Offset(196, 100)); // the barrier
+      await tester.pump();
+    }
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.text('Jaga Pause cleared'), findsOneWidget);
+    expect(find.text('Jaga Pause active'), findsNothing);
+  });
+
+  forEachScale('a delete in flight blocks Back and a second tap', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    await tapVisible(tester, find.byType(AlertedCallTile).first); // call-5
+    await tester.pumpAndSettle();
+    final gate = Completer<void>();
+    rig.timeline.hold = gate.future;
+    await tester.tap(find.byTooltip(_deleteTooltip));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.pumpAndSettle(); // the dialog closes
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.textContaining('Call on'), findsOneWidget);
+    await tester.tap(find.byTooltip(_deleteTooltip), warnIfMissed: false);
+    await tester.pump();
+    expect(find.byType(AlertDialog), findsNothing);
+
+    gate.complete();
+    await tester.pumpAndSettle();
+    expect(rig.timeline.deleted, ['call-5']);
+    expect(find.text('Timeline deleted'), findsOneWidget);
+    expect(find.textContaining('Call on'), findsNothing);
+  });
+
+  forEachScale('a call tile is a button for TalkBack', (tester, scale) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester, scale);
+    final tile = find.byType(AlertedCallTile).first;
+    final node = tester.getSemantics(tile);
+    expect(node.getSemanticsData().flagsCollection.isButton, isTrue);
+    expect(node.label, contains('2026'));
+    handle.dispose();
+  });
+
+  for (final locale in const ['ms', 'ta']) {
+    testWidgets('home in $locale at text x2.0 has no overflow', (tester) async {
+      final rig = Rig();
+      addTearDown(rig.vm.dispose);
+      await pumpJaga(tester, rig.screen, scale: 2.0, locale: Locale(locale));
+      expect(find.byType(AlertedCallTile, skipOffstage: false), findsWidgets);
+      expect(tester.takeException(), isNull);
+      await tapVisible(tester, find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(TimelineEventRow, skipOffstage: false), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

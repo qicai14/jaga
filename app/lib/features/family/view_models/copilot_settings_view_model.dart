@@ -18,7 +18,16 @@ class CopilotSettingsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Forgets the link on this phone and goes back to setup. The server is not
-  /// told: there is no unlink endpoint yet (requested from contracts #1).
-  Future<void> unlink() => _repository.reset();
+  /// Forgets the link on this phone and goes back to setup; false if that
+  /// failed and nothing changed. Only this phone forgets: the server is not
+  /// told, as there is no unlink endpoint yet (requested from contracts #1).
+  Future<bool> unlink() async {
+    try {
+      await _repository.reset();
+      return true;
+    } on Object catch (e) {
+      debugPrint('Could not unlink (${e.runtimeType})');
+      return false;
+    }
+  }
 }

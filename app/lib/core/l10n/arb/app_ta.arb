@@ -139,12 +139,13 @@
   "familyTimelineRiskMedium": "எச்சரிக்கை காட்டப்பட்டது",
   "familyTimelineRiskHigh": "எச்சரிக்கை திரை காட்டப்பட்டது",
   "familyTimelineRiskLow": "ஆபத்து மீண்டும் குறைந்தது",
-  "familyCall997": "புகாரளிக்க {hotline}-ஐ அழைக்கவும்",
+  "familyCallHotline": "புகாரளிக்க {hotline}-ஐ அழைக்கவும்",
   "familyTimelineDelete": "அழி",
   "familyTimelineDeleteConfirm": "இந்த காலவரிசையை அழிக்கவா? இதை மீட்டெடுக்க முடியாது.",
   "familyTimelineDeleted": "காலவரிசை அழிக்கப்பட்டது",
   "familyTimelineDeleteError": "காலவரிசையை அழிக்க முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
-  "familyUnlink": "{name}-ஐப் பின்தொடர்வதை நிறுத்து",
-  "familyUnlinkConfirm": "{name} பற்றிய எச்சரிக்கைகளைப் பெறுவதை நிறுத்தவா? பிறகு புதிய குறியீட்டுடன் மீண்டும் இணைக்கலாம்.",
-  "familyUnlinkAction": "இணைப்பை நீக்கு"
+  "familyUnlink": "{name}-ஐ இந்த தொலைபேசியிலிருந்து நீக்கு",
+  "familyUnlinkConfirm": "{name}-ஐ இந்த தொலைபேசியிலிருந்து நீக்கவா? புதிய குறியீட்டுடன் மீண்டும் இணைக்கலாம்.",
+  "familyUnlinkAction": "நீக்கு",
+  "familyUnlinkError": "{name}-ஐ நீக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்."
 }

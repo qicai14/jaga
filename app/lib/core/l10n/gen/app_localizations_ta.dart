@@ -476,7 +476,7 @@ class AppLocalizationsTa extends AppLocalizations {
   String get familyTimelineRiskLow => 'ஆபத்து மீண்டும் குறைந்தது';
 
   @override
-  String familyCall997(String hotline) {
+  String familyCallHotline(String hotline) {
     return 'புகாரளிக்க $hotline-ஐ அழைக்கவும்';
   }
 
@@ -496,14 +496,19 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String familyUnlink(String name) {
-    return '$name-ஐப் பின்தொடர்வதை நிறுத்து';
+    return '$name-ஐ இந்த தொலைபேசியிலிருந்து நீக்கு';
   }
 
   @override
   String familyUnlinkConfirm(String name) {
-    return '$name பற்றிய எச்சரிக்கைகளைப் பெறுவதை நிறுத்தவா? பிறகு புதிய குறியீட்டுடன் மீண்டும் இணைக்கலாம்.';
+    return '$name-ஐ இந்த தொலைபேசியிலிருந்து நீக்கவா? புதிய குறியீட்டுடன் மீண்டும் இணைக்கலாம்.';
   }
 
   @override
-  String get familyUnlinkAction => 'இணைப்பை நீக்கு';
+  String get familyUnlinkAction => 'நீக்கு';
+
+  @override
+  String familyUnlinkError(String name) {
+    return '$name-ஐ நீக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.';
+  }
 }

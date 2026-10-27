@@ -403,7 +403,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get familyHomeProtected => '受保护';
 
   @override
-  String get familyClearPause => '解除 Jaga Pause';
+  String get familyClearPause => '解除 Jaga 暂停';
 
   @override
   String familyClearPauseStatement(String name) {
@@ -411,13 +411,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get familyClearPauseHold => '按住以解除 Jaga Pause';
+  String get familyClearPauseHold => '按住以解除 Jaga 暂停';
 
   @override
-  String get familyPauseCleared => '已解除 Jaga Pause';
+  String get familyPauseCleared => '已解除 Jaga 暂停';
 
   @override
-  String get familyClearPauseError => '无法解除 Jaga Pause。请检查网络后重试。';
+  String get familyClearPauseError => '无法解除 Jaga 暂停。请检查网络后重试。';
 
   @override
   String get familyCallsTitle => '已发出警报的来电';
@@ -449,7 +449,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get familyTimelineRiskLow => '风险已降回较低';
 
   @override
-  String familyCall997(String hotline) {
+  String familyCallHotline(String hotline) {
     return '拨打 $hotline 举报';
   }
 
@@ -467,14 +467,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String familyUnlink(String name) {
-    return '不再关注$name';
+    return '从此手机移除$name';
   }
 
   @override
   String familyUnlinkConfirm(String name) {
-    return '不再接收有关$name的警报？以后可用新代码重新关联。';
+    return '从此手机移除$name？可用新代码重新关联。';
   }
 
   @override
-  String get familyUnlinkAction => '取消关联';
+  String get familyUnlinkAction => '移除';
+
+  @override
+  String familyUnlinkError(String name) {
+    return '无法移除$name。请重试。';
+  }
 }

@@ -64,6 +64,16 @@ void main() {
       },
     );
 
+    test('markPauseCleared hides the pause at once and notifies', () async {
+      build();
+      await pumpEventQueue();
+      var notified = 0;
+      vm.addListener(() => notified++);
+      vm.markPauseCleared();
+      expect(vm.pauseActive, isFalse);
+      expect(notified, 1);
+    });
+
     test('no alerted calls is loaded and empty', () async {
       timeline = FakeTimelineService();
       build();
@@ -152,6 +162,24 @@ void main() {
       expect(timeline.deleted, ['call-1']);
       expect(await timeline.calls(), hasLength(4));
     });
+
+    test(
+      'deleting is true while a delete is in flight, and notifies',
+      () async {
+        final gate = Completer<void>();
+        timeline.hold = gate.future;
+        final states = <bool>[];
+        vm.addListener(() => states.add(vm.deleting));
+        final first = vm.delete();
+        expect(vm.deleting, isTrue);
+        expect(await vm.delete(), isFalse); // a second tap is ignored
+        gate.complete();
+        expect(await first, isTrue);
+        expect(vm.deleting, isFalse);
+        expect(states, [true, false]);
+        expect(timeline.deleted, ['call-1']);
+      },
+    );
 
     test('a failed delete reports false and deletes nothing', () async {
       timeline.offline = true;

@@ -96,7 +96,7 @@ ClearPauseSheet (modal bottom sheet): Text(familyClearPauseStatement(name), body
   HoldToConfirmButton(label: familyClearPauseHold) → request → sheet closes, badge gone, SnackBar familyPauseCleared
 StageTimelineScreen: ScreenFrame(title: familyTimelineTitle(date))
   vertical list, one row per event: time (bodyMedium) | stage label (titleLarge) | risk change badge | masked quote
-  bottomAction: BigButton(familyCall997(hotline)) ; AppBar action: IconButton(delete, semantics familyTimelineDelete)
+  bottomAction: BigButton(familyCallHotline(hotline)) ; AppBar action: IconButton(delete, semantics familyTimelineDelete)
     → AlertDialog(familyTimelineDeleteConfirm) → deletes, pops, SnackBar familyTimelineDeleted
 ```
 Settings (app language, unlink) via the AppBar overflow. Genuine calls never appear. Error: list fails to load →
@@ -144,7 +144,7 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 | `familyPauseCleared` / `familyClearPauseError` | Jaga Pause cleared / Couldn't clear Jaga Pause. Check your internet and try again. |
 | `familyCallsTitle` / `familyCallsEmpty` | Alerted calls / No alerted calls in the last 30 days. |
 | `familyCallsError` | Couldn't load calls. Check your internet. |
-| `familyTimelineTitle` / `familyCall997` | Call on {date} / Call {hotline} to report |
+| `familyTimelineTitle` / `familyCallHotline` | Call on {date} / Call {hotline} to report |
 | `familyTimelineDelete` / `familyTimelineDeleteConfirm` | Delete / Delete this timeline? It can't be brought back. |
 | `familyTimelineDeleted` / `commonTryAgain` | Timeline deleted / Try again |
 
@@ -177,12 +177,13 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 8. No battery-optimisation checklist item for now.
 
 #23 deviations (flutter-dev):
-9. No `FakeFamilyHomeService`: two interfaces instead, `CopilotPauseService` (isActive, clear) and `TimelineService` (calls, events, delete), each with a Fake only. View models take the services directly (no pass-through repository). `AlertedCall` is derived from `FamilyAlert`, `TimelineEvent` from `StageUpdate`; both are provisional until #1.
-10. Settings is one "Settings" item in the AppBar overflow, opening a screen with the app language list and "Stop following {name}" (confirm dialog, then `OnboardingRepository.reset()`). The server is not told: there is no unlink endpoint yet.
+9. No `FakeFamilyHomeService`: two interfaces instead, `CopilotPauseService` (isActive, clear) and `TimelineService` (calls, events, delete), each with a Fake only. View models take the services directly (no pass-through repository). `AlertedCall` and `TimelineEvent` reuse v0 fields and are provisional until #1; only the fixtures convert from `FamilyAlert` and `StageUpdate`.
+10. Settings is one "Settings" item in the AppBar overflow, opening a screen with the app language list and "Remove {name} from this phone" (confirm dialog, then `OnboardingRepository.reset()`; a failure shows `familyUnlinkError` and stays put). Only this phone forgets: the server is not told, there is no unlink endpoint yet, so no copy promises alerts stop.
 11. `StageTimelineScreen` puts its title in the scrolling body, not `ScreenFrame.title`: a long (Tamil) title plus the pinned 997 button overflowed at text x2.0.
 12. Clear Jaga Pause has its own `ClearPauseViewModel`, so every sheet opens clean. While busy the hold button becomes a spinner button.
 13. The timeline's risk badge shows only where risk differs from the step before (Caution shown / Warning shown / Risk fell back to low); never red. Extra copy keys: `familyTimelineError`, `familyTimelineDeleteError`, `familyTimelineRisk*`, `familyUnlink*`.
-14. The 997 hotline is `scamHotline` in `lib/data/models/scam_hotline.dart` (no region pack yet). "Genuine calls never appear" is the server's job: the list holds only calls that were alerted.
+14. The Clear Jaga Pause sheet cannot be closed while a request is in flight (`PopScope`, drag off); the timeline likewise blocks Back and a second delete. The sheet's text scrolls and its button stays pinned. The brief's `familyCall997` is `familyCallHotline`.
+15. The 997 hotline is `scamHotline` in `lib/data/models/scam_hotline.dart` (no region pack yet). "Genuine calls never appear" is the server's job: the list holds only calls that were alerted.
 
 `FcmAlertPushService` is a follow-up that waits for the team's Firebase project; #11 ships the `AlertPushService`
 interface and `FakeAlertPushService` only.

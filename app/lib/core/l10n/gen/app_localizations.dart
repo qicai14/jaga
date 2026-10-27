@@ -910,7 +910,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Call {hotline} to report'**
-  String familyCall997(String hotline);
+  String familyCallHotline(String hotline);
 
   /// Stage timeline: delete button tooltip and confirm button.
   ///
@@ -936,23 +936,29 @@ abstract class AppLocalizations {
   /// **'Couldn\'t delete the timeline. Check your internet and try again.'**
   String get familyTimelineDeleteError;
 
-  /// Co-pilot settings: button to stop following the protected user. name is theirs.
+  /// Co-pilot settings: button that forgets the protected user on this phone. name is theirs.
   ///
   /// In en, this message translates to:
-  /// **'Stop following {name}'**
+  /// **'Remove {name} from this phone'**
   String familyUnlink(String name);
 
-  /// Co-pilot settings: unlink confirmation dialog.
+  /// Co-pilot settings: confirmation dialog. This only removes the link from this phone.
   ///
   /// In en, this message translates to:
-  /// **'Stop getting alerts about {name}? You can link again later with a new code.'**
+  /// **'Remove {name} from this phone? You can link again with a new code.'**
   String familyUnlinkConfirm(String name);
 
-  /// Co-pilot settings: confirm button in the unlink dialog.
+  /// Co-pilot settings: confirm button in the remove dialog.
   ///
   /// In en, this message translates to:
-  /// **'Unlink'**
+  /// **'Remove'**
   String get familyUnlinkAction;
+
+  /// Co-pilot settings: SnackBar when the link could not be removed from this phone. name is the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t remove {name}. Try again.'**
+  String familyUnlinkError(String name);
 }
 
 class _AppLocalizationsDelegate

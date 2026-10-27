@@ -134,15 +134,15 @@ void main() {
         start: _copilotDone.copyWith(language: 'en', complete: true),
       );
       await openSettings(tester);
-      await tester.tap(find.text('Stop following Mak Cik'));
+      await tester.tap(find.text('Remove Mak Cik from this phone'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
       expect(rig.onboarding.progress.value.link, isNotNull);
 
-      await tester.tap(find.text('Stop following Mak Cik'));
+      await tester.tap(find.text('Remove Mak Cik from this phone'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Unlink'));
+      await tester.tap(find.widgetWithText(TextButton, 'Remove'));
       await tester.pumpAndSettle();
       expect(rig.onboarding.progress.value.link, isNull);
       expect(find.text('Who is this phone for?'), findsOneWidget);
@@ -159,6 +159,24 @@ void main() {
     rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyIsolation)));
     await tester.pumpAndSettle();
     expect(find.text('Mak Cik may be on a scam call'), findsOneWidget);
+  });
+
+  testWidgets('the home reloads when the alert that was opened is closed', (
+    tester,
+  ) async {
+    final rig = await pumpApp(
+      tester,
+      start: _copilotDone.copyWith(language: 'en', complete: true),
+    );
+    rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyIsolation)));
+    await tester.pumpAndSettle();
+    rig.timeline.offline = true; // the server is down when she comes back
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(
+      find.text("Couldn't load calls. Check your internet."),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the tap that launched the app opens the alert too', (

@@ -130,7 +130,7 @@
   "familyClearPauseHold": "Tahan untuk mengosongkan Jaga Pause",
   "familyPauseCleared": "Jaga Pause telah dikosongkan",
   "familyClearPauseError": "Tidak dapat mengosongkan Jaga Pause. Semak internet dan cuba lagi.",
-  "familyCallsTitle": "Panggilan yang diberi amaran",
+  "familyCallsTitle": "Panggilan yang dimaklumkan",
   "familyCallsEmpty": "Tiada panggilan yang diberi amaran dalam 30 hari lepas.",
   "familyCallsError": "Tidak dapat memuatkan panggilan. Semak internet anda.",
   "commonTryAgain": "Cuba lagi",
@@ -139,12 +139,13 @@
   "familyTimelineRiskMedium": "Peringatan dipaparkan",
   "familyTimelineRiskHigh": "Amaran dipaparkan",
   "familyTimelineRiskLow": "Risiko kembali rendah",
-  "familyCall997": "Hubungi {hotline} untuk melapor",
+  "familyCallHotline": "Hubungi {hotline} untuk melapor",
   "familyTimelineDelete": "Padam",
   "familyTimelineDeleteConfirm": "Padam garis masa ini? Ia tidak boleh dikembalikan.",
   "familyTimelineDeleted": "Garis masa dipadam",
   "familyTimelineDeleteError": "Tidak dapat memadam garis masa. Semak internet dan cuba lagi.",
-  "familyUnlink": "Berhenti mengikuti {name}",
-  "familyUnlinkConfirm": "Berhenti menerima amaran tentang {name}? Anda boleh memaut semula kemudian dengan kod baharu.",
-  "familyUnlinkAction": "Nyahpaut"
+  "familyUnlink": "Alih keluar {name} daripada telefon ini",
+  "familyUnlinkConfirm": "Alih keluar {name} daripada telefon ini? Anda boleh memaut semula dengan kod baharu.",
+  "familyUnlinkAction": "Alih keluar",
+  "familyUnlinkError": "Tidak dapat mengalih keluar {name}. Cuba lagi."
 }

@@ -16,6 +16,7 @@ class CopilotSettingsScreen extends StatelessWidget {
   Future<void> _unlink(BuildContext context) async {
     final l = AppLocalizations.of(context);
     final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -33,9 +34,16 @@ class CopilotSettingsScreen extends StatelessWidget {
       ),
     );
     if (confirmed != true) return;
-    // Leave first: unlinking swaps the home screen under this route.
-    navigator.popUntil((route) => route.isFirst);
-    vm.unlink();
+    final removed = await vm.unlink();
+    if (!context.mounted) return;
+    if (removed) {
+      // Unlinking swapped the home screen under this route: leave it.
+      navigator.popUntil((route) => route.isFirst);
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l.familyUnlinkError(vm.person.name))),
+      );
+    }
   }
 
   @override

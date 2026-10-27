@@ -1,10 +1,10 @@
-import 'family_alert.dart';
 import 'stage.dart';
-import 'stage_update.dart';
+import 'stage_update.dart' show Risk;
 
 // PROVISIONAL (#1): the stage-timeline list and event shapes are not in
-// contracts v0. Both models are derived from the v0 fields they will most
-// likely reuse, so only these two factories change when the contract lands.
+// contracts v0. Both models reuse the v0 fields they will most likely carry:
+// an alert's (callId, at, stage, claimedAgency) and a stage update's
+// (at, stage, risk, evidence).
 
 /// One call the family was alerted about, as a row of the co-pilot home.
 class AlertedCall {
@@ -14,14 +14,6 @@ class AlertedCall {
     required this.stage,
     this.claimedAgency,
   });
-
-  /// The latest alert of a call: when it began, how far it got, who they claimed to be.
-  factory AlertedCall.fromAlert(FamilyAlert alert) => AlertedCall(
-    callId: alert.callId,
-    at: alert.at,
-    stage: alert.stage,
-    claimedAgency: alert.claimedAgency,
-  );
 
   final String callId;
   final DateTime at;
@@ -38,13 +30,6 @@ class TimelineEvent {
     required this.risk,
     this.quotes = const [],
   });
-
-  factory TimelineEvent.fromStageUpdate(StageUpdate update) => TimelineEvent(
-    at: update.at,
-    stage: update.stage,
-    risk: update.risk,
-    quotes: update.evidence,
-  );
 
   final DateTime at;
   final Stage stage;

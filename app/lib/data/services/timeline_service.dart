@@ -28,6 +28,9 @@ class FakeTimelineService implements TimelineService {
   /// Every call throws [NetworkException], to test failures.
   bool offline = false;
 
+  /// [delete] waits for this first, to show the busy state.
+  Future<void>? hold;
+
   /// Ids passed to [delete], in order.
   final deleted = <String>[];
 
@@ -50,6 +53,7 @@ class FakeTimelineService implements TimelineService {
   @override
   Future<void> delete(String callId) async {
     _reach();
+    await hold;
     deleted.add(callId);
     _calls.removeWhere((c) => c.callId == callId);
     _events.remove(callId);

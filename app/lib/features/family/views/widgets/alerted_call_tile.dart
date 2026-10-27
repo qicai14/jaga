@@ -18,35 +18,39 @@ class AlertedCallTile extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final agency = call.claimedAgency;
     final shape = BorderRadius.circular(m.radiusMedium);
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainer,
-      borderRadius: shape,
-      child: InkWell(
+    return Semantics(
+      button: true,
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: shape,
-        onTap: onTap,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 72),
-          child: Padding(
-            padding: EdgeInsets.all(m.m),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        call.at.formatDayAndTime(context),
-                        style: text.titleLarge,
-                      ),
-                      if (agency != null) Text(agency, style: text.bodyMedium),
-                      SizedBox(height: m.s),
-                      StageProgressBar(stage: call.stage, compact: true),
-                    ],
+        child: InkWell(
+          borderRadius: shape,
+          onTap: onTap,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 72),
+            child: Padding(
+              padding: EdgeInsets.all(m.m),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          call.at.formatDayAndTime(context),
+                          style: text.titleLarge,
+                        ),
+                        if (agency != null)
+                          Text(agency, style: text.bodyMedium),
+                        SizedBox(height: m.s),
+                        StageProgressBar(stage: call.stage, compact: true),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(width: m.s),
-                const ExcludeSemantics(child: Icon(Icons.chevron_right)),
-              ],
+                  SizedBox(width: m.s),
+                  const ExcludeSemantics(child: Icon(Icons.chevron_right)),
+                ],
+              ),
             ),
           ),
         ),

@@ -6,7 +6,6 @@ import '../../../core/widgets/big_button.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../../../core/widgets/view_model_host.dart';
 import '../../../data/models/alerted_call.dart';
-import '../../../data/services/copilot_pause_service.dart';
 import '../view_models/clear_pause_view_model.dart';
 import '../view_models/copilot_home_view_model.dart';
 import '../view_models/copilot_settings_view_model.dart';
@@ -24,13 +23,13 @@ class CopilotHomeScreen extends StatelessWidget {
   const CopilotHomeScreen({
     super.key,
     required this.vm,
-    required this.pause,
+    required this.createClearPause,
     required this.timelineFor,
     required this.createSettings,
   });
 
   final CopilotHomeViewModel vm;
-  final CopilotPauseService pause;
+  final ClearPauseViewModel Function() createClearPause;
   final StageTimelineViewModel Function(AlertedCall call) timelineFor;
   final CopilotSettingsViewModel Function() createSettings;
 
@@ -40,16 +39,19 @@ class CopilotHomeScreen extends StatelessWidget {
     final cleared = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      // The sheet can't be dragged shut mid-request; Back and a tap outside
+      // are guarded by its PopScope.
+      enableDrag: false,
       builder: (_) => ViewModelHost(
-        create: () =>
-            ClearPauseViewModel(personName: vm.person.name, pause: pause),
+        create: createClearPause,
         builder: (_, sheetVm) => ClearPauseSheet(vm: sheetVm),
       ),
     );
-    if (cleared != true) return;
+    if (cleared == true) {
+      vm.markPauseCleared();
+      messenger.showSnackBar(SnackBar(content: Text(l.familyPauseCleared)));
+    }
     vm.load();
-    messenger.showSnackBar(SnackBar(content: Text(l.familyPauseCleared)));
   }
 
   Future<void> _openTimeline(BuildContext context, AlertedCall call) async {
@@ -101,7 +103,7 @@ class CopilotHomeScreen extends StatelessWidget {
           children: [
             ProtectedPersonCard(
               name: vm.person.name,
-              pauseActive: vm.pauseActive,
+              pauseActive: vm.status == LoadStatus.loaded && vm.pauseActive,
               onClearPause: () => _clearPause(context),
             ),
             SizedBox(height: m.xl),

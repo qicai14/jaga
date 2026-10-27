@@ -41,7 +41,7 @@ class StageTimelineScreen extends StatelessWidget {
     );
     if (confirmed != true) return;
     final deleted = await vm.delete();
-    if (deleted) navigator.pop(true);
+    if (deleted && context.mounted) navigator.pop(true);
     messenger.showSnackBar(
       SnackBar(
         content: Text(
@@ -57,36 +57,40 @@ class StageTimelineScreen extends StatelessWidget {
     final m = context.metrics;
     return ListenableBuilder(
       listenable: vm,
-      builder: (context, _) => ScreenFrame(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l.familyTimelineDelete,
-              onPressed: () => _delete(context),
-            ),
-          ],
-        ),
-        // The title scrolls with the steps: a long title at large text must not
-        // squeeze them against the pinned hotline button.
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Semantics(
-              header: true,
-              child: Text(
-                l.familyTimelineTitle(vm.call.at.formatDay(context)),
-                style: Theme.of(context).textTheme.headlineMedium,
+      // Leaving mid-delete would hide whether it worked.
+      builder: (context, _) => PopScope(
+        canPop: !vm.deleting,
+        child: ScreenFrame(
+          appBar: AppBar(
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: l.familyTimelineDelete,
+                onPressed: vm.deleting ? null : () => _delete(context),
               ),
-            ),
-            SizedBox(height: m.m),
-            _content(context, l, m),
-          ],
-        ),
-        bottomAction: BigButton(
-          icon: Icons.call,
-          label: l.familyCall997(scamHotline),
-          onPressed: vm.callHotline,
+            ],
+          ),
+          // The title scrolls with the steps: a long title at large text must not
+          // squeeze them against the pinned hotline button.
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  l.familyTimelineTitle(vm.call.at.formatDay(context)),
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ),
+              SizedBox(height: m.m),
+              _content(context, l, m),
+            ],
+          ),
+          bottomAction: BigButton(
+            icon: Icons.call,
+            label: l.familyCallHotline(scamHotline),
+            onPressed: vm.callHotline,
+          ),
         ),
       ),
     );

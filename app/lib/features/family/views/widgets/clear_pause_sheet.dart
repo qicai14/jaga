@@ -23,44 +23,58 @@ class ClearPauseSheet extends StatelessWidget {
     final l = AppLocalizations.of(context);
     final m = context.metrics;
     final text = Theme.of(context).textTheme;
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(m.l, 0, m.l, m.l),
-        child: ListenableBuilder(
-          listenable: vm,
-          builder: (context, _) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l.familyClearPauseStatement(vm.personName),
-                style: text.bodyLarge,
-              ),
-              if (vm.failed) ...[
-                SizedBox(height: m.m),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    l.familyClearPauseError,
-                    style: text.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+    return ListenableBuilder(
+      listenable: vm,
+      // Closing mid-request would hide the outcome from the co-pilot.
+      builder: (context, _) => PopScope(
+        canPop: !vm.busy,
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(m.l),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Only as tall as its text (the barrier above stays tappable);
+                // large text scrolls here and the button stays in reach. A
+                // failure comes first: it is the news.
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      if (vm.failed) ...[
+                        Semantics(
+                          liveRegion: true,
+                          child: Text(
+                            l.familyClearPauseError,
+                            style: text.bodyLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: m.m),
+                      ],
+                      Text(
+                        l.familyClearPauseStatement(vm.personName),
+                        style: text.bodyLarge,
+                      ),
+                    ],
                   ),
                 ),
+                SizedBox(height: m.l),
+                if (vm.busy)
+                  BigButton(
+                    label: l.familyClearPause,
+                    busy: true,
+                    onPressed: null,
+                  )
+                else
+                  HoldToConfirmButton(
+                    label: l.familyClearPauseHold,
+                    onConfirmed: () => _clear(context),
+                  ),
               ],
-              SizedBox(height: m.l),
-              if (vm.busy)
-                BigButton(
-                  label: l.familyClearPause,
-                  busy: true,
-                  onPressed: null,
-                )
-              else
-                HoldToConfirmButton(
-                  label: l.familyClearPauseHold,
-                  onConfirmed: () => _clear(context),
-                ),
-            ],
+            ),
           ),
         ),
       ),

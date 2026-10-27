@@ -31,6 +31,12 @@ class CopilotHomeViewModel extends ChangeNotifier {
   bool get pauseActive => _pauseActive;
   List<AlertedCall> get calls => _calls;
 
+  /// The sheet cleared it: hide the pause row now, before the reload confirms.
+  void markPauseCleared() {
+    _pauseActive = false;
+    notifyListeners();
+  }
+
   /// Loads the pause status and the calls. Content already on screen stays
   /// while it refreshes; after an error the spinner returns.
   Future<void> load() async {
