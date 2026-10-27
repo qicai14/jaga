@@ -1,7 +1,8 @@
 """Subset the Noto fonts into app/assets/fonts (see app/design/design-system.md, Fonts).
 
 Usage, from a folder outside the repo (so the repo's uv version pin doesn't apply):
-    uv run --no-project --no-config --with fonttools python -I <repo>/app/tool/subset_fonts.py <dir with the original Noto files>
+    uv run --no-project --no-config --with fonttools \
+        python -I <repo>/app/tool/subset_fonts.py <dir with the original Noto files>
 Re-run whenever the zh ARB gains new characters.
 
 Sources: notofonts/notofonts.github.io (NotoSans, NotoSansTamil, unhinted static TTF) and
