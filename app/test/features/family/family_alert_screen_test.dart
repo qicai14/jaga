@@ -208,8 +208,116 @@ void main() {
     expect(find.text('Told to keep it secret'), findsNothing);
   });
 
-  testWidgets('one isolation quote is shown with its marks', (tester) async {
-    await pump(tester, 1.0, familyIsolation);
+  forEachScale('one isolation quote is shown with its marks', (
+    tester,
+    scale,
+  ) async {
+    await pump(tester, scale, familyIsolation);
     expect(find.text(_quote), findsOneWidget);
+  });
+
+  forEachScale('9 a long name shortens the button but is still spoken', (
+    tester,
+    scale,
+  ) async {
+    final handle = tester.ensureSemantics();
+    final rig = await pump(
+      tester,
+      scale,
+      familyIsolation,
+      person: familyPersonLongName,
+    );
+    expect(find.text('Call'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Call Puan Sri Rajeswari binti Abdullah'),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('Call'));
+    await tester.pump();
+    expect(rig.dialer.dialed, ['+60 12-345 6789']);
+    handle.dispose();
+  });
+
+  forEachScale('9b a short name keeps Call and the name', (
+    tester,
+    scale,
+  ) async {
+    await pump(tester, scale, familyIsolation);
+    expect(find.text('Call'), findsNothing);
+    expect(callMum, findsOneWidget);
+  });
+
+  forEachScale('10 a phone app that will not open shows the number', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale, familyIsolation);
+    expect(find.text("Couldn't open the phone app."), findsNothing);
+    rig.dialer.opens = false;
+    await tester.tap(callMum);
+    await tester.pumpAndSettle();
+    expect(find.text("Couldn't open the phone app."), findsOneWidget);
+    expect(find.text('+60 12-345 6789'), findsOneWidget);
+    expect(callMum, findsOneWidget);
+    rig.dialer.opens = true;
+    await tester.tap(callMum);
+    await tester.pumpAndSettle();
+    expect(find.text("Couldn't open the phone app."), findsNothing);
+  });
+
+  forEachScale('10b failure with no number known: message only', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(
+      tester,
+      scale,
+      familyIsolation,
+      person: familyPersonNoNumber,
+    );
+    rig.dialer.opens = false;
+    await tester.tap(find.text('Open the phone app'));
+    await tester.pumpAndSettle();
+    expect(find.text("Couldn't open the phone app."), findsOneWidget);
+  });
+
+  group('NameBand', () {
+    Widget band(BuildContext _) =>
+        const NameBand(genuine: false, headline: 'Head', time: 'Now');
+
+    forEachScale('is a header and a live region', (tester, scale) async {
+      final handle = tester.ensureSemantics();
+      await pumpJaga(tester, Builder(builder: band), scale: scale);
+      expect(
+        tester.getSemantics(find.text('Head')),
+        matchesSemantics(
+          label: 'Head',
+          isHeader: true,
+          isLiveRegion: true,
+        ),
+      );
+      handle.dispose();
+    });
+
+    AnimatedContainer container(WidgetTester tester) =>
+        tester.widget<AnimatedContainer>(find.byType(AnimatedContainer));
+
+    testWidgets('cross-fades in 200 ms', (tester) async {
+      await pumpJaga(tester, Builder(builder: band));
+      expect(container(tester).duration, const Duration(milliseconds: 200));
+    });
+
+    testWidgets('is instant with animations disabled', (tester) async {
+      await pumpJaga(
+        tester,
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: band(context),
+          ),
+        ),
+      );
+      expect(container(tester).duration, Duration.zero);
+    });
   });
 }

@@ -45,35 +45,46 @@ void main() {
     expect(vm.state.agency, 'PDRM');
     expect(vm.state.quotes, hasLength(1));
     expect(vm.state.canDial, isTrue);
+    expect(vm.state.phoneNumber, '+60 12-345 6789');
   });
 
-  test('a push for the same call updates in place and notifies listeners', () {
-    build(initial: familyIsolation);
-    var notified = 0;
-    vm.addListener(() => notified++);
-    push.emit(FamilyAlert.parse(familyMoney));
-    expect(vm.state.stage, Stage.money);
-    expect(vm.state.quotes, hasLength(2));
-    expect(notified, 1);
-  });
+  test(
+    'a push for the same call updates in place and notifies listeners',
+    () async {
+      build(initial: familyIsolation);
+      var notified = 0;
+      vm.addListener(() => notified++);
+      push.emit(FamilyAlert.parse(familyMoney));
+      await pumpEventQueue();
+      expect(vm.state.stage, Stage.money);
+      expect(vm.state.quotes, hasLength(2));
+      expect(notified, 1);
+    },
+  );
 
-  test('another call is ignored', () {
+  test('another call is ignored', () async {
     build(initial: familyIsolation);
     push.emit(FamilyAlert.parse(familyCredentials));
+    await pumpEventQueue();
     expect(vm.state.stage, Stage.isolation);
   });
 
-  test('the follow-up flips the kind, hides quotes, and the stage holds', () {
-    build(initial: familyMoney);
-    push.emit(FamilyAlert.parse(familyMayBeGenuine));
-    expect(vm.state.kind, FamilyAlertKind.mayBeGenuine);
-    expect(vm.state.quotes, isEmpty);
-    expect(vm.state.stage, Stage.money);
-  });
+  test(
+    'the follow-up flips the kind, hides quotes, and the stage holds',
+    () async {
+      build(initial: familyMoney);
+      push.emit(FamilyAlert.parse(familyMayBeGenuine));
+      await pumpEventQueue();
+      expect(vm.state.kind, FamilyAlertKind.mayBeGenuine);
+      expect(vm.state.quotes, isEmpty);
+      expect(vm.state.stage, Stage.money);
+    },
+  );
 
-  test('a late older alert does not lower the stage', () {
+  test('a late older alert does not lower the stage', () async {
     build(initial: familyMoney);
     push.emit(FamilyAlert.parse(familyIsolation));
+    await pumpEventQueue();
     expect(vm.state.stage, Stage.money);
   });
 
@@ -88,5 +99,37 @@ void main() {
     expect(vm.state.canDial, isFalse);
     await vm.call();
     expect(dialer.dialed, [null]);
+  });
+
+  test(
+    'a phone app that will not open sets dialFailed; a retry clears it',
+    () async {
+      build(initial: familyIsolation);
+      dialer.opens = false;
+      var notified = 0;
+      vm.addListener(() => notified++);
+      await vm.call();
+      expect(vm.dialFailed, isTrue);
+      expect(notified, 1);
+      await vm.call(); // still failing: no second notification
+      expect(notified, 1);
+      dialer.opens = true;
+      await vm.call();
+      expect(vm.dialFailed, isFalse);
+      expect(notified, 2);
+    },
+  );
+
+  test('a dial finishing after dispose does not notify', () async {
+    build(initial: familyIsolation);
+    dialer.opens = false;
+    final pending = vm.call();
+    vm.dispose();
+    await pending; // would throw if it notified a disposed notifier
+    vm = FamilyAlertViewModel(
+      repository: repo,
+      dialer: dialer,
+      initial: FamilyAlert.parse(familyIsolation),
+    ); // so tearDown has something to dispose
   });
 }

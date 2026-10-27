@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../core/l10n/gen/app_localizations.dart';
-import '../../core/widgets/stage_progress_bar.dart';
+import '../../core/l10n/stage_labels.dart';
 import '../models/family_alert.dart';
 import '../models/linked_person.dart';
 
@@ -28,32 +28,98 @@ abstract class AlertNotifier {
   Future<AlertOpen?> launchOpen();
 
   Future<void> show(FamilyAlert alert, LinkedPerson person);
+
+  void dispose();
 }
 
 const alertChannelId = 'family_alerts';
 const updateChannelId = 'family_updates';
-const _callActionId = 'call';
+const callActionId = 'call';
 
 /// Stable across runs, so a push after a restart still replaces the earlier one.
 int notificationIdFor(String callId) =>
     callId.codeUnits.fold(0, (h, c) => (h * 31 + c) & 0x7fffffff);
 
-/// The "may be genuine" follow-up arrives quietly; everything else heads-up.
-String channelIdFor(FamilyAlertKind kind) =>
-    kind == FamilyAlertKind.alert ? alertChannelId : updateChannelId;
-
-/// Local notifications, in the app's language. The lock screen shows the stage
+/// What one notification says and how loudly. The lock screen shows the stage
 /// and agency, never quotes or the summary.
+@immutable
+class AlertContent {
+  const AlertContent({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.payload,
+    required this.channelId,
+    required this.channelName,
+    required this.importance,
+  });
+
+  final int id;
+  final String title;
+  final String body;
+
+  /// The alert as JSON, handed back when the notification is tapped.
+  final String payload;
+  final String channelId;
+  final String channelName;
+  final Importance importance;
+}
+
+/// The "may be genuine" follow-up arrives quietly; everything else heads-up.
+AlertContent alertContentFor(
+  FamilyAlert alert,
+  LinkedPerson person,
+  AppLocalizations l,
+) {
+  final genuine = alert.kind == FamilyAlertKind.mayBeGenuine;
+  final stage = alert.stage.label(l);
+  final agency = alert.claimedAgency;
+  return AlertContent(
+    id: notificationIdFor(alert.callId),
+    title: genuine
+        ? l.familyNotifGenuineTitle(person.name)
+        : l.familyNotifTitle(person.name),
+    body: genuine
+        ? l.familyGenuineBody(person.name)
+        : agency == null
+        ? l.familyNotifBody(stage)
+        : l.familyNotifBodyAgency(stage, agency),
+    payload: jsonEncode(alert.toJson()),
+    channelId: genuine ? updateChannelId : alertChannelId,
+    channelName: genuine
+        ? l.familyNotifChannelUpdates
+        : l.familyNotifChannelAlerts,
+    importance: genuine ? Importance.low : Importance.max,
+  );
+}
+
+/// A tap on a notification, or null when it carries no readable alert.
+AlertOpen? alertOpenFrom(NotificationResponse r) {
+  final payload = r.payload;
+  if (payload == null) return null;
+  try {
+    return AlertOpen(
+      FamilyAlert.parse(payload),
+      autoDial: r.actionId == callActionId,
+    );
+  } catch (e) {
+    debugPrint('Ignoring a notification with a bad payload: $e');
+    return null;
+  }
+}
+
+/// Local notifications, in the app's language at the moment they are shown.
 class LocalAlertNotifier implements AlertNotifier {
   LocalAlertNotifier({
-    required Locale locale,
+    required this._locale,
     FlutterLocalNotificationsPlugin? plugin,
-  }) : _l = lookupAppLocalizations(locale),
-       _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+  }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
 
-  final AppLocalizations _l;
+  final Locale Function() _locale;
   final FlutterLocalNotificationsPlugin _plugin;
   final _opens = StreamController<AlertOpen>.broadcast();
+
+  AppLocalizations get _l => lookupAppLocalizations(_locale());
 
   @override
   Stream<AlertOpen> get opens => _opens.stream;
@@ -65,10 +131,11 @@ class LocalAlertNotifier implements AlertNotifier {
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
       ),
       onDidReceiveNotificationResponse: (r) {
-        final open = _parse(r);
+        final open = alertOpenFrom(r);
         if (open != null) _opens.add(open);
       },
     );
+    final l = _l;
     final android = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -76,14 +143,14 @@ class LocalAlertNotifier implements AlertNotifier {
     await android.createNotificationChannel(
       AndroidNotificationChannel(
         alertChannelId,
-        _l.familyNotifChannelAlerts,
+        l.familyNotifChannelAlerts,
         importance: Importance.max,
       ),
     );
     await android.createNotificationChannel(
       AndroidNotificationChannel(
         updateChannelId,
-        _l.familyNotifChannelUpdates,
+        l.familyNotifChannelUpdates,
         importance: Importance.low,
       ),
     );
@@ -95,38 +162,32 @@ class LocalAlertNotifier implements AlertNotifier {
     final launch = await _plugin.getNotificationAppLaunchDetails();
     final response = launch?.notificationResponse;
     return launch?.didNotificationLaunchApp == true && response != null
-        ? _parse(response)
+        ? alertOpenFrom(response)
         : null;
   }
 
   @override
   Future<void> show(FamilyAlert alert, LinkedPerson person) {
-    final genuine = alert.kind == FamilyAlertKind.mayBeGenuine;
-    final stage = alert.stage.label(_l);
-    final agency = alert.claimedAgency;
+    final l = _l;
+    final c = alertContentFor(alert, person, l);
+    final loud = c.importance == Importance.max;
     return _plugin.show(
-      id: notificationIdFor(alert.callId),
-      title: genuine
-          ? _l.familyNotifGenuineTitle(person.name)
-          : _l.familyNotifTitle(person.name),
-      body: genuine
-          ? _l.familyGenuineBody(person.name)
-          : agency == null
-          ? _l.familyNotifBody(stage)
-          : _l.familyNotifBodyAgency(stage, agency),
-      payload: jsonEncode(alert.toJson()),
+      id: c.id,
+      title: c.title,
+      body: c.body,
+      payload: c.payload,
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
-          channelIdFor(alert.kind),
-          genuine ? _l.familyNotifChannelUpdates : _l.familyNotifChannelAlerts,
-          importance: genuine ? Importance.low : Importance.max,
-          priority: genuine ? Priority.low : Priority.high,
+          c.channelId,
+          c.channelName,
+          importance: c.importance,
+          priority: loud ? Priority.high : Priority.low,
           visibility: NotificationVisibility.public,
           category: AndroidNotificationCategory.message,
           actions: [
             AndroidNotificationAction(
-              _callActionId,
-              _l.familyNotifCallAction(person.name),
+              callActionId,
+              l.familyNotifCallAction(person.name),
               showsUserInterface: true,
             ),
           ],
@@ -135,26 +196,18 @@ class LocalAlertNotifier implements AlertNotifier {
     );
   }
 
-  AlertOpen? _parse(NotificationResponse r) {
-    final payload = r.payload;
-    if (payload == null) return null;
-    try {
-      return AlertOpen(
-        FamilyAlert.parse(payload),
-        autoDial: r.actionId == _callActionId,
-      );
-    } catch (e) {
-      debugPrint('Ignoring a notification with a bad payload: $e');
-      return null;
-    }
-  }
+  @override
+  void dispose() => _opens.close();
 }
 
 /// Records notifications for tests and the debug gallery.
 class FakeAlertNotifier implements AlertNotifier {
-  FakeAlertNotifier({this.launch});
+  FakeAlertNotifier({this.launch, this.showError});
 
   final AlertOpen? launch;
+
+  /// Thrown by every [show], to test failures.
+  final Object? showError;
   final shown = <(FamilyAlert, LinkedPerson)>[];
   final _opens = StreamController<AlertOpen>.broadcast(sync: true);
 
@@ -165,10 +218,14 @@ class FakeAlertNotifier implements AlertNotifier {
   Future<AlertOpen?> launchOpen() async => launch;
 
   @override
-  Future<void> show(FamilyAlert alert, LinkedPerson person) async =>
-      shown.add((alert, person));
+  Future<void> show(FamilyAlert alert, LinkedPerson person) async {
+    final error = showError;
+    if (error != null) throw error;
+    shown.add((alert, person));
+  }
 
   void emitOpen(AlertOpen open) => _opens.add(open);
 
+  @override
   void dispose() => _opens.close();
 }

@@ -1,4 +1,4 @@
-/// The protected person this co-pilot watches over, from the local link record
+/// The protected user this co-pilot watches over, from the local link record
 /// (written by onboarding). The nickname here wins over the name in a push.
 class LinkedPerson {
   const LinkedPerson({required this.name, this.phoneNumber});

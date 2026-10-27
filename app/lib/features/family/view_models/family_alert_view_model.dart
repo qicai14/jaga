@@ -18,7 +18,7 @@ class FamilyAlertState {
     required this.summary,
     required this.quotes,
     required this.at,
-    required this.canDial,
+    this.phoneNumber,
     this.agency,
   });
 
@@ -30,8 +30,10 @@ class FamilyAlertState {
   final DateTime at;
   final String? agency;
 
-  /// A number is known. False: the Call button opens the dialer empty.
-  final bool canDial;
+  /// Null when unknown: the Call button then opens the phone app empty.
+  final String? phoneNumber;
+
+  bool get canDial => phoneNumber != null;
 }
 
 /// One call's alert, updated in place by later pushes for the same call.
@@ -56,7 +58,19 @@ class FamilyAlertViewModel extends ChangeNotifier {
   late FamilyAlertState _state;
   FamilyAlertState get state => _state;
 
-  Future<void> call() => _dialer.dial(_person.phoneNumber);
+  bool _dialFailed = false;
+
+  /// The phone app would not open: the screen shows the number to dial by hand.
+  bool get dialFailed => _dialFailed;
+
+  bool _disposed = false;
+
+  Future<void> call() async {
+    final opened = await _dialer.dial(_person.phoneNumber);
+    if (_disposed || _dialFailed == !opened) return;
+    _dialFailed = !opened;
+    notifyListeners();
+  }
 
   /// The nickname on this phone wins over the name in the push; the quotes of a
   /// "may be genuine" follow-up are hidden.
@@ -68,7 +82,7 @@ class FamilyAlertViewModel extends ChangeNotifier {
     quotes: a.kind == FamilyAlertKind.alert ? a.quotes : const [],
     at: a.at,
     agency: a.claimedAgency,
-    canDial: _person.phoneNumber != null,
+    phoneNumber: _person.phoneNumber,
   );
 
   void _set(FamilyAlertState s) {
@@ -78,6 +92,7 @@ class FamilyAlertViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _sub.cancel();
     super.dispose();
   }

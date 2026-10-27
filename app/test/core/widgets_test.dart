@@ -6,6 +6,7 @@ import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/core/widgets/reconnecting_dot.dart';
 import 'package:jaga/core/widgets/screen_frame.dart';
 import 'package:jaga/core/widgets/shrink_to_fit_text.dart';
+import 'package:jaga/core/l10n/stage_labels.dart';
 import 'package:jaga/core/widgets/stage_progress_bar.dart';
 import 'package:jaga/core/widgets/status_badge.dart';
 import 'package:jaga/data/models/stage.dart';

@@ -11,6 +11,9 @@ import '../view_models/family_alert_view_model.dart';
 import 'widgets/name_band.dart';
 import 'widgets/quote_block.dart';
 
+/// Beyond this many characters the Call button says just "Call".
+const _longNameLength = 12;
+
 /// The family co-pilot's alert: who and when, how far the scam got, who the
 /// caller claims to be, what is happening, proof, and one button to call.
 class FamilyAlertScreen extends StatefulWidget {
@@ -48,6 +51,8 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
             final s = widget.vm.state;
             final genuine = s.kind == FamilyAlertKind.mayBeGenuine;
             final agency = s.agency;
+            final callLabel = l.familyAlertCall(s.personName);
+            final longName = s.personName.length > _longNameLength;
             return Column(
               children: [
                 // The band scrolls with the rest, so a long name at large text
@@ -109,15 +114,38 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
                   top: false,
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(m.l, m.s, m.l, m.m),
-                    child: BigButton(
-                      tone: genuine
-                          ? BigButtonTone.genuine
-                          : BigButtonTone.guarded,
-                      icon: Icons.call,
-                      label: s.canDial
-                          ? l.familyAlertCall(s.personName)
-                          : l.familyAlertOpenDialer,
-                      onPressed: widget.vm.call,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (widget.vm.dialFailed) ...[
+                          Semantics(
+                            liveRegion: true,
+                            child: Text(
+                              l.familyAlertDialFailed,
+                              style: text.bodyLarge,
+                            ),
+                          ),
+                          // So she can dial it herself.
+                          if (s.phoneNumber != null)
+                            Text(s.phoneNumber!, style: text.titleLarge),
+                          SizedBox(height: m.s),
+                        ],
+                        BigButton(
+                          tone: genuine
+                              ? BigButtonTone.genuine
+                              : BigButtonTone.guarded,
+                          icon: Icons.call,
+                          label: !s.canDial
+                              ? l.familyAlertOpenDialer
+                              : longName
+                              ? l.familyAlertCallShort
+                              : callLabel,
+                          semanticsLabel: s.canDial && longName
+                              ? callLabel
+                              : null,
+                          onPressed: widget.vm.call,
+                        ),
+                      ],
                     ),
                   ),
                 ),

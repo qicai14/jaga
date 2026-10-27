@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show listEquals;
+
 import 'stage.dart';
 
 enum FamilyAlertKind {
@@ -29,7 +31,7 @@ class FamilyAlert {
   factory FamilyAlert.fromJson(Map<String, dynamic> json) => FamilyAlert(
     callId: json['callId'] as String,
     protectedUserName: json['protectedUserName'] as String,
-    stage: Stage.fromJson(json['stage'] as String),
+    stage: _stageFrom(json['stage'] as String),
     summary: json['summary'] as String,
     at: DateTime.parse(json['at'] as String),
     claimedAgency: json['claimedAgency'] as String?,
@@ -39,6 +41,13 @@ class FamilyAlert {
         ? FamilyAlertKind.alert
         : FamilyAlertKind.fromJson(json['kind'] as String),
   );
+
+  /// The contract's stage enum starts at isolation: `none` is never sent.
+  static Stage _stageFrom(String value) {
+    final stage = Stage.fromJson(value);
+    if (stage == Stage.none) throw const FormatException('stage none');
+    return stage;
+  }
 
   factory FamilyAlert.parse(String raw) =>
       FamilyAlert.fromJson(jsonDecode(raw) as Map<String, dynamic>);
@@ -63,14 +72,40 @@ class FamilyAlert {
     'kind': kind.name,
   };
 
-  FamilyAlert withStage(Stage value) => FamilyAlert(
-    callId: callId,
-    protectedUserName: protectedUserName,
-    stage: value,
-    summary: summary,
-    at: at,
-    claimedAgency: claimedAgency,
-    quotes: quotes,
-    kind: kind,
+  FamilyAlert withStage(Stage value) => value == stage
+      ? this
+      : FamilyAlert(
+          callId: callId,
+          protectedUserName: protectedUserName,
+          stage: value,
+          summary: summary,
+          at: at,
+          claimedAgency: claimedAgency,
+          quotes: quotes,
+          kind: kind,
+        );
+
+  @override
+  bool operator ==(Object other) =>
+      other is FamilyAlert &&
+      callId == other.callId &&
+      protectedUserName == other.protectedUserName &&
+      stage == other.stage &&
+      summary == other.summary &&
+      at == other.at &&
+      claimedAgency == other.claimedAgency &&
+      kind == other.kind &&
+      listEquals(quotes, other.quotes);
+
+  @override
+  int get hashCode => Object.hash(
+    callId,
+    protectedUserName,
+    stage,
+    summary,
+    at,
+    claimedAgency,
+    kind,
+    Object.hashAll(quotes),
   );
 }
