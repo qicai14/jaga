@@ -4,11 +4,15 @@ import '../l10n/gen/app_localizations.dart';
 import '../theme/theme_context.dart';
 
 /// A number pad for a short PIN: dots on top, three columns of keys below.
-/// Calls [onCompleted] with the digits once [length] are typed, then clears itself.
+/// With [onCompleted], it is called with the digits once [length] are typed and
+/// the pad clears itself. Without it, the pad keeps the digits and only reports
+/// every change to [onChanged]; the host decides when to submit and resets the
+/// pad by giving it a new key.
 class PinPad extends StatefulWidget {
-  const PinPad({super.key, required this.onCompleted, this.length = 4});
+  const PinPad({super.key, this.onCompleted, this.onChanged, this.length = 4});
 
-  final ValueChanged<String> onCompleted;
+  final ValueChanged<String>? onCompleted;
+  final ValueChanged<String>? onChanged;
   final int length;
 
   @override
@@ -19,19 +23,23 @@ class _PinPadState extends State<PinPad> {
   String _digits = '';
 
   void _type(String digit) {
+    if (_digits.length >= widget.length) return;
     final digits = _digits + digit;
-    if (digits.length < widget.length) {
-      setState(() => _digits = digits);
+    final complete = digits.length == widget.length;
+    final onCompleted = widget.onCompleted;
+    if (complete && onCompleted != null) {
+      setState(() => _digits = '');
+      onCompleted(digits);
       return;
     }
-    setState(() => _digits = '');
-    widget.onCompleted(digits);
+    setState(() => _digits = digits);
+    widget.onChanged?.call(digits);
   }
 
   void _delete() {
-    if (_digits.isNotEmpty) {
-      setState(() => _digits = _digits.substring(0, _digits.length - 1));
-    }
+    if (_digits.isEmpty) return;
+    setState(() => _digits = _digits.substring(0, _digits.length - 1));
+    widget.onChanged?.call(_digits);
   }
 
   @override
@@ -102,7 +110,11 @@ class _PinPadState extends State<PinPad> {
 const _keyHeight = 72.0;
 
 class _Key extends StatelessWidget {
-  const _Key({required this.onPressed, required this.child, this.semanticsLabel});
+  const _Key({
+    required this.onPressed,
+    required this.child,
+    this.semanticsLabel,
+  });
 
   final VoidCallback onPressed;
   final Widget child;
@@ -124,6 +136,11 @@ class _Key extends StatelessWidget {
     );
     return semanticsLabel == null
         ? key
-        : Semantics(label: semanticsLabel, excludeSemantics: true, button: true, child: key);
+        : Semantics(
+            label: semanticsLabel,
+            excludeSemantics: true,
+            button: true,
+            child: key,
+          );
   }
 }

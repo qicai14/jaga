@@ -77,7 +77,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     OnboardingStep.about => aboutLocked || _name.trim().isNotEmpty,
     OnboardingStep.permissions =>
       platformItemsOk(_setup) && (!_xiaomi || _autostartConfirmed),
-    OnboardingStep.pin => progress.pinSet,
+    OnboardingStep.pin => _pinDigits.length == pinLength,
     OnboardingStep.buzz => _buzzed,
     OnboardingStep.joinCode =>
       _joinStage == JoinStage.code
@@ -179,15 +179,29 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   // Co-pilot lock
 
+  static const pinLength = 4;
+
   String? _firstPin;
+  String _pinDigits = '';
   bool _pinMismatch = false;
 
   /// The second entry is being asked for.
   bool get confirmingPin => _firstPin != null;
   bool get pinMismatch => _pinMismatch;
 
-  Future<void> submitPin(String pin) async {
+  /// The digits typed so far; Continue turns on at [pinLength].
+  void setPinDigits(String digits) {
+    _pinDigits = digits;
+    notifyListeners();
+  }
+
+  /// Continue on the PIN step: the first entry moves to the confirmation, a
+  /// mismatch goes back to the first entry, a match stores the PIN.
+  /// True when the PIN was stored and the step is done.
+  Future<bool> _submitPin() async {
+    final pin = _pinDigits;
     final first = _firstPin;
+    _pinDigits = '';
     _pinMismatch = false;
     if (first == null) {
       _firstPin = pin;
@@ -198,9 +212,10 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
       _firstPin = null;
       await _pin.set(pin);
       await _repository.update(progress.copyWith(pinSet: true));
-      return next();
+      return true;
     }
     notifyListeners();
+    return false;
   }
 
   // Link code
@@ -310,6 +325,8 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     switch (step) {
       case OnboardingStep.about:
         if (!aboutLocked && !await _register()) return;
+      case OnboardingStep.pin:
+        if (!await _submitPin()) return;
       case OnboardingStep.joinCode:
         if (!await _join()) return;
       case OnboardingStep.done:
@@ -334,6 +351,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   void _goTo(OnboardingStep to) {
     _poll?.cancel();
+    _pinDigits = ''; // the pad is a fresh one on every visit
     _repository.update(progress.copyWith(step: to));
     _enter(to);
     notifyListeners();

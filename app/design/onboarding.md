@@ -27,7 +27,7 @@ lib/core/widgets/pin_pad.dart              shared by step 6 and the settings gat
 segmented `LinearProgressIndicator` (guarded on `surfaceContainerHigh`) under it, `headlineMedium` step title, body
 scrolls, `bottomAction` = `BigButton(onboardingContinue)`, disabled until the step is valid.
 
-**Back:** the AppBar arrow and system back go to the previous step (values kept). Step 1 (language) has no back arrow in the AppBar
+**Back:** the AppBar arrow and system back go to the previous step (values kept). Step 1 (language) has no AppBar at all (headline in the body); step 2 has the back arrow but no title or progress bar until a role is chosen. The AppBar title stops scaling at 1.5. Step 1 has no back arrow
 and system back exits the app; so do the status and co-pilot homes, which are roots. After
 registration (end of step 3) the role and region are locked: going back to step 2 or 3 shows them read-only (the language stays changeable, and later in settings). Step 10 has no
 back. **Persistence:** after every Continue, `OnboardingProgress` is saved; a relaunch resumes at the saved step. Step 4
@@ -44,8 +44,8 @@ offline): the protection is the lockout and the Keystore.
 | 3 | About her | Text field `onboardingNameLabel` (her name, as the family calls her, max 30), then region row "Malaysia" with `onboardingRegionInfo` (read-only). Continue = **register**: button shows a spinner and "Setting up…"; error → inline `onboardingNetworkError` + retry |
 | 4 | Phone permissions | Checklist (§5). Continue enabled when every required item is green |
 | 5 | Call forwarding (a "Skip" `TextButton` appears only under `kDebugMode`, decision 6) | Body `onboardingForwardBody`; the code `*21*+1 555 010 0199#` in `officialNumber` style inside a `surfaceContainer` box; `BigButton(onboardingDialNow)`; secondary `OutlinedButton(onboardingCheckForwarding)` dials `*#21#`; Continue labelled `onboardingForwardDone` ("I've dialled it"). No live tick: Android can't read forwarding state |
-| 6 | Co-pilot lock PIN | `PinPad`, 4 digits. Sub-state set → confirm (`onboardingPinConfirm`); mismatch → `onboardingPinMismatch`, back to set. Body `onboardingPinBody` explains why |
-| 7 | Pause token | Token in a `surfaceContainer` box, `bodyLarge`, selectable, shown in groups of 4 (copy raw). `onboardingPauseBody`. Buttons: `commonCopy` (SnackBar `commonCopied`), `commonShare` (`share_plus`) |
+| 6 | Co-pilot lock PIN | `PinPad`, 4 digits, then Continue (enabled at 4; no auto-advance). Sub-state set → confirm (`onboardingPinConfirm`); mismatch → `onboardingPinMismatch`, back to set. Body `onboardingPinBody` explains why |
+| 7 | Pause token | Token in a `surfaceContainer` box, `bodyLarge`, selectable, shown in groups of 4 (copy raw). `onboardingPauseBody`. Buttons: `commonCopy` (the button reads `commonCopied` with a check for 3 s; no SnackBar, it would cover Continue), `commonShare` (`share_plus`) |
 | 8 | Link code | Code centred, `linkCode`, Semantics reads digits singly. `commonShare` with `onboardingLinkShareText`. Below: live list "Joined so far" (`onboardingJoined`), polled every 5 s while visible; empty = `onboardingJoinedNone`. Continue never waits for a join |
 | 9 | Feel the buzz | `onboardingBuzzBody`; `BigButton(onboardingBuzzButton, icon: vibration)` → `Buzzer.playOnce()`; Continue enabled after one play. Buzz only, no sound (decision 5) |
 | 10 | Done | Big guarded check, `onboardingDoneProtected`; `BigButton(onboardingFinish)` → status screen (replaces the stack) |
@@ -177,8 +177,8 @@ Manifest: `USE_FULL_SCREEN_INTENT`, `RECORD_AUDIO`, `POST_NOTIFICATIONS`.
    - The calling-account row is neutral (clock icon, "Set up later with calls", no Fix), not red: it can't be fixed until #12.
    - On Xiaomi, Redmi and POCO the autostart row blocks Continue until the family ticks "I've done this".
    - The forwarding code is shown without spaces (`*21*+15550100199#`) and shrinks to fit one line.
-   - A matching PIN moves on to the next step by itself.
    - The first screen preselects the phone's language when Jaga supports it, otherwise Malay (superseded by decision 10: it applies to both roles).
    - A linked co-pilot has no back from step 4 (the code is used up); on the names sub-step, back returns to the code.
    - The microphone row says "Lets you talk on calls through Jaga": the server hears the caller (ADR 0002), the phone mic carries her own voice.
 10. Language is step 1 (Preston, 28 Oct): a family member reads every later screen in their chosen language. Role is step 2; step 1 has no back arrow and no step count; the step totals stay 10 and 5.
+11. PIN uses Continue (Preston, 28 Oct): the pad does not submit on the 4th digit. Continue turns on at 4 digits; on the confirmation it checks for a match, and a mismatch goes back to set with the error. The prompt and the error share one fixed slot so the keypad never moves. The settings gate still checks on the 4th digit.

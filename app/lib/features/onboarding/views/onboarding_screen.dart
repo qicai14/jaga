@@ -97,7 +97,10 @@ class OnboardingScreen extends StatelessWidget {
             if (!didPop) vm.back();
           },
           child: ScreenFrame(
-            appBar: _SetupAppBar(vm: vm),
+            // The language step has nothing to put in a bar: no title, no back.
+            appBar: progress.role == null && !vm.canGoBack
+                ? null
+                : _SetupAppBar(vm: vm),
             title: title,
             body: body,
             bottomAction: _Actions(vm: vm),
@@ -108,14 +111,15 @@ class OnboardingScreen extends StatelessWidget {
   }
 }
 
-/// Back arrow (not on the first step), "Step n of m", and a thin progress bar.
+/// Back arrow, and once a role is chosen "Step n of m" and a thin progress bar.
 class _SetupAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _SetupAppBar({required this.vm});
 
   final OnboardingViewModel vm;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 6);
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (vm.progress.role == null ? 0 : 6));
 
   @override
   Widget build(BuildContext context) {
@@ -135,21 +139,27 @@ class _SetupAppBar extends StatelessWidget implements PreferredSizeWidget {
           : null,
       automaticallyImplyLeading: false,
       title: chosen
-          ? FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(l.onboardingStepOf(vm.stepNumber, vm.stepCount)),
+          // The bar is a fixed height, so its text stops growing at 1.5.
+          ? MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 1.5,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text(l.onboardingStepOf(vm.stepNumber, vm.stepCount)),
+              ),
             )
           : null,
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(6),
-        child: LinearProgressIndicator(
-          value: chosen ? vm.stepNumber / vm.stepCount : 0,
-          minHeight: 6,
-          color: context.jagaColors.guarded,
-          backgroundColor: scheme.surfaceContainerHigh,
-        ),
-      ),
+      bottom: chosen
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(6),
+              child: LinearProgressIndicator(
+                value: vm.stepNumber / vm.stepCount,
+                minHeight: 6,
+                color: context.jagaColors.guarded,
+                backgroundColor: scheme.surfaceContainerHigh,
+              ),
+            )
+          : null,
     );
   }
 }

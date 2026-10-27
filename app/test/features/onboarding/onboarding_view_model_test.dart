@@ -29,6 +29,11 @@ void main() {
     });
   }
 
+  Future<void> enterPin(String pin) {
+    vm.setPinDigits(pin);
+    return vm.next();
+  }
+
   Future<void> pump() => Future<void>.delayed(Duration.zero);
 
   group('protected flow', () {
@@ -49,8 +54,8 @@ void main() {
       await vm.next();
       await vm.next(); // forwarding
       expect(vm.step, OnboardingStep.pin);
-      await vm.submitPin('1234');
-      await vm.submitPin('1234'); // advances by itself
+      await enterPin('1234');
+      await enterPin('1234'); // Continue twice: set, then confirm
       expect(vm.step, OnboardingStep.pauseToken);
       await vm.next();
       await vm.next(); // link code
@@ -266,14 +271,16 @@ void main() {
           registration: fakeRegistration,
         ),
       );
-      await vm.submitPin('1234');
+      expect(vm.canContinue, isFalse);
+      await enterPin('1234');
       expect(vm.confirmingPin, isTrue);
-      await vm.submitPin('1111');
+      expect(vm.canContinue, isFalse, reason: 'the confirmation starts empty');
+      await enterPin('1111');
       expect(vm.confirmingPin, isFalse);
       expect(vm.pinMismatch, isTrue);
       expect(vm.canContinue, isFalse);
       expect(vm.step, OnboardingStep.pin);
-      await vm.submitPin('1234');
+      await enterPin('1234');
       expect(vm.pinMismatch, isFalse, reason: 'a fresh entry clears the error');
     });
 
@@ -284,8 +291,8 @@ void main() {
           registration: fakeRegistration,
         ),
       );
-      await vm.submitPin('1234');
-      await vm.submitPin('1234');
+      await enterPin('1234');
+      await enterPin('1234');
       expect(rig.onboarding.progress.value.pinSet, isTrue);
       expect(vm.step, OnboardingStep.pauseToken);
       expect(await rig.pin.verify('1234'), PinResult.ok);

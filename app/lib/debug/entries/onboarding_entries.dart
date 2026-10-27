@@ -234,14 +234,14 @@ List<GalleryEntry> onboardingEntries() => [
   _setup(
     'pin-confirm',
     _protected.copyWith(step: OnboardingStep.pin),
-    arrange: (_, vm) => vm.submitPin('1234'),
+    arrange: (_, vm) => _enterPin(vm, '1234'),
   ),
   _setup(
     'pin-mismatch',
     _protected.copyWith(step: OnboardingStep.pin),
     arrange: (_, vm) async {
-      await vm.submitPin('1234');
-      await vm.submitPin('1111');
+      await _enterPin(vm, '1234');
+      await _enterPin(vm, '1111');
     },
   ),
   _setup('pause-token', _protected.copyWith(step: OnboardingStep.pauseToken)),
@@ -315,3 +315,9 @@ List<GalleryEntry> onboardingEntries() => [
   _home('pin-locked', _HomeView.gate, locked: true),
   _home('settings', _HomeView.settings, family: ['Aisyah']),
 ];
+
+/// Types a PIN and taps Continue.
+Future<void> _enterPin(OnboardingViewModel vm, String pin) {
+  vm.setPinDigits(pin);
+  return vm.next();
+}

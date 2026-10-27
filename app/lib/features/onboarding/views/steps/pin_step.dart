@@ -21,17 +21,50 @@ class PinStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(l.onboardingPinBody, style: text.bodyLarge),
-        if (vm.confirmingPin) ...[
-          SizedBox(height: m.m),
-          Semantics(
-            liveRegion: true,
-            child: Text(l.onboardingPinConfirm, style: text.titleLarge),
-          ),
-        ],
-        if (vm.pinMismatch) InlineError(l.onboardingPinMismatch),
+        // The prompt and the error share one slot, sized for the taller, so the
+        // keypad never moves while the PIN is typed.
+        Stack(
+          children: [
+            _Slot(
+              visible: vm.confirmingPin,
+              child: Padding(
+                padding: EdgeInsets.only(top: m.m),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(l.onboardingPinConfirm, style: text.titleLarge),
+                ),
+              ),
+            ),
+            _Slot(
+              visible: vm.pinMismatch,
+              child: InlineError(l.onboardingPinMismatch),
+            ),
+          ],
+        ),
         SizedBox(height: m.l),
-        PinPad(onCompleted: vm.submitPin),
+        // A new key empties the pad when the entry changes.
+        PinPad(
+          key: ValueKey(vm.confirmingPin),
+          length: OnboardingViewModel.pinLength,
+          onChanged: vm.setPinDigits,
+        ),
       ],
     );
   }
+}
+
+class _Slot extends StatelessWidget {
+  const _Slot({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Visibility(
+    visible: visible,
+    maintainSize: true,
+    maintainAnimation: true,
+    maintainState: true,
+    child: child,
+  );
 }

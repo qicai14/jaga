@@ -135,10 +135,12 @@ void main() {
       await pumpSetup(tester, const OnboardingProgress());
       expect(find.textContaining('Step '), findsNothing);
       expect(find.byIcon(Icons.arrow_back), findsNothing);
+      expect(find.byType(AppBar), findsNothing);
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
       expect(find.text('Who is this phone for?'), findsOneWidget);
       expect(find.textContaining('Step '), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsNothing);
       expect(continueButton(tester).onPressed, isNull);
       await tester.tap(find.text('A family co-pilot'));
       await tester.pumpAndSettle();
@@ -299,16 +301,57 @@ void main() {
     expect(uris.last, 'tel:*%2321%23');
   });
 
+  Future<void> tapContinue(WidgetTester tester) async {
+    await tester.ensureVisible(find.text('Continue'));
+    await tester.tap(find.text('Continue'));
+    await tester.pumpAndSettle();
+  }
+
+  /// The PIN prompt and error stay in the tree (they hold the space), hidden.
+  bool shown(WidgetTester tester, String text) => tester
+      .widget<Visibility>(
+        find.ancestor(of: find.text(text), matching: find.byType(Visibility)),
+      )
+      .visible;
+
   group('co-pilot lock', () {
+    testWidgets('four digits do not advance; Continue does', (tester) async {
+      await pumpSetup(tester, _protected.copyWith(step: OnboardingStep.pin));
+      await tapDigits(tester, '123');
+      expect(continueButton(tester).onPressed, isNull);
+      await tapDigits(tester, '4');
+      expect(shown(tester, 'Enter the PIN again'), isFalse);
+      expect(continueButton(tester).onPressed, isNotNull);
+      await tapContinue(tester);
+      expect(shown(tester, 'Enter the PIN again'), isTrue);
+      expect(continueButton(tester).onPressed, isNull);
+    });
+
+    testWidgets('the keypad does not move when the mismatch error shows', (
+      tester,
+    ) async {
+      await pumpSetup(tester, _protected.copyWith(step: OnboardingStep.pin));
+      final key = find.text('5');
+      await tapDigits(tester, '1234');
+      await tapContinue(tester);
+      final before = tester.getTopLeft(key);
+      await tapDigits(tester, '1111');
+      await tapContinue(tester);
+      expect(shown(tester, "The PINs don't match. Set it again."), isTrue);
+      expect(tester.getTopLeft(key), before);
+    });
+
     testWidgets('a mismatch returns to the first entry with the error', (
       tester,
     ) async {
       await pumpSetup(tester, _protected.copyWith(step: OnboardingStep.pin));
       await tapDigits(tester, '1234');
-      expect(find.text('Enter the PIN again'), findsOneWidget);
+      await tapContinue(tester);
+      expect(shown(tester, 'Enter the PIN again'), isTrue);
       await tapDigits(tester, '1111');
-      expect(find.text("The PINs don't match. Set it again."), findsOneWidget);
-      expect(find.text('Enter the PIN again'), findsNothing);
+      await tapContinue(tester);
+      expect(shown(tester, "The PINs don't match. Set it again."), isTrue);
+      expect(shown(tester, 'Enter the PIN again'), isFalse);
       expect(find.text('Step 6 of 10'), findsOneWidget);
     });
 
@@ -320,7 +363,9 @@ void main() {
         _protected.copyWith(step: OnboardingStep.pin),
       );
       await tapDigits(tester, '1234');
+      await tapContinue(tester);
       await tapDigits(tester, '1234');
+      await tapContinue(tester);
       expect(find.text('Step 7 of 10'), findsOneWidget);
       expect(s.rig.onboarding.progress.value.pinSet, isTrue);
       expect(s.rig.onboarding.progress.value.toJson(), isNot(contains('1234')));
@@ -332,7 +377,8 @@ void main() {
       await tester.ensureVisible(find.byIcon(Icons.backspace_outlined));
       await tester.tap(find.byIcon(Icons.backspace_outlined));
       await tapDigits(tester, '345');
-      expect(find.text('Enter the PIN again'), findsOneWidget);
+      await tapContinue(tester);
+      expect(shown(tester, 'Enter the PIN again'), isTrue);
     });
   });
 
@@ -350,6 +396,13 @@ void main() {
     await tester.tap(find.text('Copy'));
     await tester.pump();
     expect(find.text('Copied'), findsOneWidget);
+    expect(
+      find.byType(SnackBar),
+      findsNothing,
+      reason: 'it would cover Continue',
+    );
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.text('Copy'), findsOneWidget);
   });
 
   group('link code', () {
