@@ -17,10 +17,6 @@ log = logging.getLogger(__name__)
 class Transcriber(Protocol):
     async def transcribe(self, leg: str, audio: bytes) -> str | None: ...
 
-    async def _silence(self, leg: str, sock) -> None:
-        await sock.send(bytes(32000))
-        await self.arrived[leg].wait()
-
     async def close(self) -> list[tuple[str, str]]:
         """Ends the call's transcription; returns the (leg, line) pairs that finished at hangup."""
         ...
@@ -62,7 +58,7 @@ class MuseTranscriber:
         return " ".join(lines) or None
 
     async def _open(self, leg: str):
-        sock = await connect(self.url)
+        sock = await connect(self.url, close_timeout=1)  # flush + close stay inside the 5 s hangup bound
         handshake = {
             "authorization": {"accessToken": f"Bearer {self.key}"},
             "audioEncoding": "PCM_16KHZ",

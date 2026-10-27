@@ -437,7 +437,7 @@ class MuseSocket:
 def test_real_muse_transcribe_gets_16khz_audio_and_the_region_packs_hints(client, monkeypatch, caplog):
     sock, urls = MuseSocket(["Ada bungkusan", "haram atas nama puan."]), []
 
-    async def connect(url):
+    async def connect(url, **_):
         urls.append(url)
         return sock
 
@@ -522,7 +522,7 @@ def muse(monkeypatch, *sockets):
     """Real Muse client over these sockets, in order; returns the list of connects."""
     opened = []
 
-    async def connect(url):
+    async def connect(url, **_):
         opened.append(url)
         return sockets[len(opened) - 1]
 
