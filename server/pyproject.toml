@@ -7,6 +7,7 @@ dependencies = [
   "fastapi",
   "uvicorn[standard]",
   "pydantic-settings",
+  "websockets",  # client for the Muse Voice Transcribe realtime socket (#20)
 ]
 
 [dependency-groups]
