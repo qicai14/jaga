@@ -44,49 +44,65 @@ its real call screen in it; the fallback (full-screen notification) can push `Wa
 
 ## 3. Caution banner (medium)
 ```
-Positioned(top) > Semantics(liveRegion, container) > Material(color: caution, bottom radius 20, 3dp cautionEdge rule)
+MediaQuery.withClampedTextScaling(max 1.5) > Positioned(top) > Semantics(liveRegion, container)
+ > Material(color: caution, bottom radius medium 20) + 3dp cautionEdge rule
   SafeArea(bottom: false) > Padding(l24, m16) > Column
-    Row: Icon(Icons.hearing, 32, onCaution) | gap s8 | Expanded(Text(cautionBannerText, titleLarge, onCaution))
-    ReconnectingDot (end of row, when reconnecting)
-    gap m16
-    HoldToConfirmButton(tone: onCaution outlined, label: warningDismissLabel, secondLabel: English, small: height 56)
+    Row: JagaWordmark(small, onCaution) | Spacer | ReconnectingDot(onCaution, when reconnecting)
+    gap s8; Text(cautionBannerText, titleLarge, onCaution)
+    gap m16; DismissButton(calm, height 56)
 ```
-Order: icon + text, then dismiss. Slides down 200 ms on appear (instant if animations off). The call controls below stay
-usable; at text scale 2.0 the banner may grow to ~40% of the height, never more (the text wraps, nothing scrolls).
+Wordmark row, then the text, then dismiss. The ear icon is gone (an ear reads as "you are being listened to"). Slides down
+200 ms (instant if animations off). At 2.0 the banner stays within about 40% of the height. Never buzzes.
 
-## 4. Warning (high), full screen
+## 4. Warning (high), "the Jaga notice"
+**Point of view:** an official notice from someone she already trusts, not an alarm. Same `surface` paper and teal as the
+rest of Jaga; red appears once (the command band) plus the red Hang up button. One typeface, no italics, no yellow.
+Urgency comes from the buzz and the command. **Reviewer rejects:** flashing or pulsing, an all-red screen, more than one
+icon (no `!`, triangle, shield, siren, ear, hand), countdowns, all-caps or `!` in copy, mixed sizes in one block,
+link-styled text, two equally loud buttons.
 ```
-AnnotatedRegion(SystemUiOverlayStyle.light) > PopScope(canPop: false) > Semantics(scopesRoute, namesRoute,
-  label: warningSemanticsLabel, liveRegion) > Material(color: warning) > SafeArea > Padding(h l24) > Column
-  1 Row: Icon(call_end | pan_tool for credentials, 40, onWarning) ... ReconnectingDot(onWarning 60%)
-  2 Flexible(flex 5) command region, LayoutBuilder:
-      ShrinkToFitText(content.command, JagaTextStyles.command, min 32, onWarning)
-      gap s8
-      Text(content.commandEnglish, commandEnglish)          // only if it differs from the command
-  3 Divider(2dp, onWarning 40%)
-  4 Flexible(flex 4) SingleChildScrollView > Column:
-      Text(content.counterMove, bodyLarge, onWarning)
-      gap m16
-      Text(warningOfficialNumberLabel(agency) | warningOfficialNumberLabelNoAgency, bodyMedium, onWarning)
-      Text(content.officialNumber, officialNumber, warningNumber)   // plain text, not a button
-      gap l24
-      Text(warningEvidenceLabel, bodyMedium) + Text("“${evidence[0]}”", bodyLarge italic, maxLines 3, ellipsis)  // never on credentials (Q36)
-  5 BigButton(tone: onWarning, icon: call_end, label: warningHangUp) → onHangUp
-  6 gap s8, HoldToConfirmButton(tone: onWarning outlined, height 56, label + English second line)
+AnnotatedRegion(SystemUiOverlayStyle.light) > PopScope(canPop: false)
+ > Semantics(scopesRoute, namesRoute, label: warningFromJaga, explicitChildNodes)
+ > FadeTransition 150 ms > Material(color: surface) > Column
+  1 Masthead: ColoredBox(guarded, full bleed under the status bar) > SafeArea(bottom: false), min height 56:
+      JagaWordmark(large, onGuarded) + Text(warningSemanticsLabel, titleMedium, onGuarded)  (Semantics header, texts excluded)
+      ReconnectingDot(onGuarded) at the end
+  2 Command band: ColoredBox(warning), full bleed, padding l24/v24
+      ShrinkToFitText(command, command style, onWarning)   // max height 30% of body, floor 32sp
+      gap s8; Text(commandEnglish, onWarning)               // only if it differs
+  3 Expanded > Scrollbar(thumbVisibility) > SingleChildScrollView > Padding(l24, top l24) > Column   // body text capped at 1.4
+      Text(counterMove, bodyLarge, onSurface)
+      gap l24; Text(number label, bodyMedium, onSurfaceVariant)
+      FittedBox(scaleDown) > Text(officialNumber, officialNumber style, onSurface)      // one line, never wraps
+      gap m16; Text(counterMoveEnglish, bodyMedium, onSurfaceVariant)
+      Divider(outlineVariant); Text(evidence label) + Text("“evidence”", bodyLarge, maxLines 3)  // not on credentials (Q36)
+      gap xl; DismissButton(calm)                           // end of the scroll area, still hold-to-confirm
+  4 Footer (pinned): Padding(l24, v16) > BigButton(hangUp, call_end, warningHangUp, maxTextScale 1.5)
 ```
-- **Fit rule:** the command region never scrolls. `ShrinkToFitText` steps from 52sp × text scale down to 32sp. If it still
-  doesn't fit at 32, the command region takes the space it needs and only region 4 scrolls.
-- **English fallback:** if a phrase is missing in her language the server sends English (#1); when `command` equals
-  `commandEnglish` it is shown once. Same for the counter-move.
-- **Motion:** one moment. The red field wipes down from the top in 200 ms, then the command fades in (100 ms). Off when
-  `disableAnimations`.
-- **Back:** predictive back gesture does nothing while the Warning is up. Only the hold-to-dismiss closes it.
+- **Credentials:** same tree; no evidence, no divider, no hand icon (the masthead is the only mark).
+- **Safety net** (`command` null): band shows `warningCommandFallback` alone; region 3 shows whatever arrived; if empty only
+  the dismiss shows.
+- **Fit rule:** at 393x852 and text 2.0 the command, counter-move and full official number are visible without scrolling
+  (budget: masthead 64, band <= 240, counter-move ~200, number ~100, footer ~104). The command never scrolls; the band
+  shrinks first, then region 3 scrolls. At 1.0 region 3 uses `spaceBetween` so the dismiss rests above Hang up.
+- **English fallback:** a phrase missing in her language arrives as English; when equal to the command it is shown once.
+- **Motion:** a single 150 ms fade, no wipe or pulse. Off when `disableAnimations`.
+- **Reconnecting:** content frozen; a 12dp `onGuarded` dot in the masthead (banner: wordmark row). Never text.
+- **Back:** does nothing while the Warning is up. Only the hold-to-dismiss closes it.
+- **Widgets:** `JagaWordmark` (core; "Jaga", NotoSans 800, -0.5 spacing; large 28sp, small 22sp; own cap 1.3; excluded from
+  semantics). `BigButton` gains tone `hangUp` (fill `warning`, label `onWarning`) and `maxTextScale`. `HoldToConfirmButton`
+  gains `maxTextScale` (dismiss passes 1.5). `warningNumber` is no longer used on this screen.
 
 ## 5. Copy (`app_en.arb`; ms/zh/ta by flutter-dev)
+| Key | en | ms | zh | ta |
+|---|---|---|---|---|
+| `warningFromJaga` | Scam warning from Jaga | Amaran penipuan daripada Jaga | 来自 Jaga 的诈骗警告 | Jaga-விடமிருந்து மோசடி எச்சரிக்கை |
+
+Route name for TalkBack ("Jaga" is never translated). The rest:
 | Key | English | Notes |
 |---|---|---|
 | `cautionBannerText` | This call has signs of a scam | glossary wording |
-| `warningSemanticsLabel` | Scam warning | route name for TalkBack |
+| `warningSemanticsLabel` | Scam warning | the masthead's visible label |
 | `warningOfficialNumberLabel` | {agency}'s official number | `agency` = `claimedAgency` |
 | `warningOfficialNumberLabelNoAgency` | Official number | |
 | `warningEvidenceLabel` | The caller said | |
@@ -94,15 +110,16 @@ AnnotatedRegion(SystemUiOverlayStyle.light) > PopScope(canPop: false) > Semantic
 | `warningDismissLabel` | This call is fine | ms: "Panggilan ini selamat" |
 | `warningDismissHint` | Hold for 2 seconds | semantics hint |
 | `warningDismissConfirmHint` | Tap again to confirm this call is fine | TalkBack two-step |
-| `warningCommandFallback` | Letak telefon. Hang up. | only if `command` is null at high; Lane D (Joshua) to approve the wording (Q35) |
+| `warningCommandFallback` | Letak telefon. Hang up. | only if `command` is null at high; Lane D to approve (Q35) |
 | `callReconnecting` | Reconnecting | semantics only, never shown as text |
 
 ## 6. Buzz and TalkBack
 - **Pattern** (`vibration`, amplitude 255): `[0, 120, 80, 120, 80, 120, 80, 700]` then 1,000 ms gap = 2.3 s per cycle, three
   short then one long. Repeats until: `looked` (proximity far for 1 s), any touch on the Warning, dismiss, step-down, call
   end, or 60 s. Re-armed by the next re-show or command change. Caution: no buzz. No sound into the call.
-- **TalkBack:** the Warning is a new route scope with `liveRegion`, and the view model also calls
-  `SemanticsService.sendAnnouncement` with "command. commandEnglish". Focus order follows §4 (1→6). The official number has a
+- **TalkBack:** the Warning is a new route scope named `warningFromJaga` ("Scam warning from Jaga", heard once; the masthead texts are
+  excluded), and the overlay also calls `SemanticsService.sendAnnouncement` with "command. commandEnglish". Focus order:
+  masthead, command, English, counter-move, number, English counter-move, evidence, dismiss, Hang up. The official number has a
   `semanticsLabel` with spaces between digits so it is read digit by digit. The banner is a polite live region.
 
 ## 7. Placeholder call-screen host (debug only, until #12)
@@ -131,8 +148,10 @@ Until #1 lands, missing fields are nullable in the model and their elements are 
 1. low: nothing from the overlay in the tree; call screen unchanged.
 2. medium: banner text shown, no command, `FakeBuzzer` not started.
 3. high: command appears before English, counter-move, number, evidence in paint and semantics order; buzz started.
-4. high, 2.0 scale and a 60-character command: command `fontSize` ≥ 32 effective, no overflow errors, no scroll in region 2.
-5. high-credentials: credentials command and hand icon; no evidence line even if `evidence` is non-empty.
+4. high, 2.0 scale and a 60-character command: command `fontSize` ≥ 32 effective, no overflow errors, no scroll in the band.
+4b. high at 2.0: command, counter-move and official number are inside the viewport above the pinned Hang up; one icon only;
+    masthead present with the `warningFromJaga` semantics; dismiss is in the scroll area and still hold-to-confirm.
+5. high-credentials: credentials command; no evidence line even if `evidence` is non-empty; no hand icon.
 6. English-only phrase: command shown once.
 7. Hold 1 s and release: still shown. Hold 2 s: hidden, buzz stopped, repository received nothing (dismiss is local).
 8. Dismissed, then same update: hidden. Then a new stage: Warning back and buzz restarts.
@@ -150,3 +169,6 @@ Until #1 lands, missing fields are nullable in the model and their elements are 
 - Q36: the evidence line is a labelled masked quote ("The caller said"); the credentials Warning shows no evidence.
 - Q37: a Caution never buzzes. The buzz always means "look now, it's serious".
 - The re-show rule (stage change or risk rise), the TalkBack two-tap dismiss and the command-fit rule are accepted as written.
+- Redesign (Preston, 28 Oct): the Warning becomes the Jaga notice (§4). Q38: body text on the Warning is capped at 1.4
+  (buttons 1.5). Q39: "This call is fine" moves to the end of the scroll area, still hold-to-confirm. Q40: the counter-move
+  length budget (about 90 characters per language) is raised with Lane D separately; no code.
