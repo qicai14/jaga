@@ -18,7 +18,7 @@
       "counterMoves": [{"id": "my.isolation.counter.1", "text": {"ms": "Beritahu ahli keluarga sekarang. Pegawai sebenar tidak pernah suruh anda rahsiakan.", "en": "Tell a family member now. A real officer never asks you to keep it secret.", "zh": "现在就告诉家人。真正的官员不会要求你保密。", "ta": "இப்போதே குடும்பத்தினரிடம் சொல்லுங்கள். உண்மையான அதிகாரி ரகசியமாக வைக்கச் சொல்ல மாட்டார்."}}]
     },
     "handoff": {
-      "command": {"id": "my.handoff.command", "text": {"ms": "Jangan terima sambungan itu. Letak telefon. Do not accept the transfer. Hang up.", "en": "Do not accept the transfer. Hang up.", "zh": "不要接受转接，请挂断电话。 Do not accept the transfer. Hang up.", "ta": "அந்த இணைப்பை ஏற்க வேண்டாம். தொலைபேசியை வையுங்கள். Do not accept the transfer. Hang up."}},
+      "command": {"id": "my.handoff.command", "text": {"ms": "Jangan terima panggilan yang dipindahkan itu. Letak telefon. Do not accept the transferred call. Hang up.", "en": "Do not accept the transferred call. Hang up.", "zh": "不要接听被转接的电话，请挂断电话。 Do not accept the transferred call. Hang up.", "ta": "மாற்றப்பட்ட அழைப்பை ஏற்க வேண்டாம். தொலைபேசியை வையுங்கள். Do not accept the transferred call. Hang up."}},
       "counterMoves": [{"id": "my.handoff.counter.1", "text": {"ms": "Jangan sertai panggilan video atau buat pindahan. Hubungi 997 sendiri.", "en": "Do not join the video call or make a transfer. Call 997 yourself.", "zh": "不要加入视频通话或转账。请自己致电 997。", "ta": "வீடியோ அழைப்பில் சேரவோ பணம் மாற்றவோ வேண்டாம். 997-ஐ நீங்களே அழையுங்கள்."}}]
     },
     "money": {
@@ -32,7 +32,7 @@
   },
   "libraryReview": {"zh": "Machine-drafted, needs native-speaker review. Reviewer: Qi Cai (qicai14).", "ta": "Machine-drafted, needs native-speaker review. Reviewer: unassigned."},
   "contacts": {
-    "nsrc": {"name": "National Scam Response Centre (NSRC)", "number": "997", "purpose": "Real-time help for online financial scams; call within 24 hours so the money can be blocked", "hours": "Daily, 24 hours", "source": "https://www.malaysia.gov.my/en/categories/safety-and-community/cybersecurity/nsrc-997-hotline", "checked": "2026-10-28"},
+    "nsrc": {"name": "National Scam Response Centre (NSRC)", "number": "997", "purpose": "Real-time help for online financial scams; call within 24 hours so the money can be blocked", "hours": "Daily, 24 hours (some bank and government pages still list 8am-8pm; treat those as stale)", "source": "https://www.malaysia.gov.my/en/categories/safety-and-community/cybersecurity/nsrc-997-hotline", "checked": "2026-10-28"},
     "pdrm": {"name": "PDRM (MERS 999)", "number": "999", "purpose": "Emergencies only, shared with Bomba, hospitals, APM and Maritim", "hours": "Not stated", "source": "https://999.gov.my/mers-999/apa-itu-mers-999/", "checked": "2026-10-28"},
     "pdrm_hq": {"name": "PDRM Bukit Aman HQ", "number": "+603-2266 2222", "purpose": "General line", "hours": "Not stated", "source": "https://www.rmp.gov.my/news-detail/2026/04/27/besmartstayalert-letsfightscammertogether-postings-pilihan-nsrc-997-perangi-jenayah-dan-penipuan", "checked": "2026-10-28"},
     "lhdn": {"name": "LHDN (HASiL Contact Centre)", "number": "603-8911 1000", "purpose": "Tax enquiries", "hours": "Mon-Fri 9:00 am to 5:00 pm, except public holidays", "source": "https://www.hasil.gov.my/en/hubungi-kami/meja-bantuan-hasil/", "checked": "2026-10-28"},

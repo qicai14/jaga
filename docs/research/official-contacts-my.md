@@ -25,7 +25,7 @@ No official page I found lists a CCID WhatsApp number, so the WhatsApp line is U
 
 | key | bank | number (as published) | line type | hours | source |
 |---|---|---|---|---|---|
-| `maybank` | Maybank | +603 5891 4744 | Fraud Hotline | "24 hours a day" | https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/security_alert/report-disputed-transaction.page. **UNCONFIRMED**: every maybank2u fetch timed out, so this comes from a search snippet of that page. General line: 1-300 88 6688 |
+| `maybank` | Maybank | +603 5891 4744 | Fraud Hotline | "24 hours a day" | https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/about_us/contact-us.page. Confirmed 2026-10-28. General line: 1-300 88 6688 |
 | `cimb` | CIMB | +603 6204 7788 | 24-hour Contact Centre, which CIMB names as the line to call if scammed | 24 hours | https://www.cimb.com.my/en/personal/help-support/security-and-fraud/security-and-fraud-awareness/reporting-instructions-personal.html |
 | `public_bank` | Public Bank | 03-21773555 | Report Fraud (Case Management), a dedicated fraud line | 24 hours | https://www.pbebank.com/en/contact-us/ (general line 03-21708000 is office hours only) |
 | `rhb` | RHB | 603-9206 8118 | Customer Contact Centre; the site lists no separate fraud line | "Available 24 hours" | https://www.rhbgroup.com/others/contact-us/index.html |

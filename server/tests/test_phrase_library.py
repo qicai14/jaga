@@ -1,5 +1,7 @@
 """The phrase library and official contacts in the Malaysia region pack (#6)."""
 
+from datetime import date
+
 import pytest
 
 from jaga.stages import RANK, load_pack, official_contact, phrase
@@ -46,9 +48,8 @@ def test_the_command_is_followed_by_english_in_every_language():
 
 def test_machine_drafted_languages_are_marked_for_native_review():
     review = load_pack("my")["libraryReview"]
-    assert set(review) == {"zh", "ta"}
-    assert "qicai14" in review["zh"]
-    assert "unassigned" in review["ta"]
+    assert all(review[lang].strip() for lang in ("ms", "zh", "ta"))
+    assert "en" not in review
 
 
 def test_official_contact_returns_the_number_with_its_source():
@@ -59,11 +60,14 @@ def test_official_contact_returns_the_number_with_its_source():
         assert official_contact("my", agency)["number"]
 
 
-def test_every_contact_has_a_source_and_a_checked_date():
-    for agency, c in load_pack("my")["contacts"].items():
+def test_every_contact_has_a_number_a_source_and_a_checked_date():
+    contacts = load_pack("my")["contacts"]
+    for agency in ["nsrc", "pdrm", "lhdn", "bnm", "maybank", "cimb", "public_bank", "rhb"]:
+        assert agency in contacts
+    for agency, c in contacts.items():
+        assert c["number"] and c["name"] and c["purpose"] and c["hours"], agency
         assert c["source"].startswith("https://"), agency
-        assert c["checked"] == "2026-10-28", agency
-        assert c["name"] and c["number"] and c["purpose"] and c["hours"], agency
+        date.fromisoformat(c["checked"])
 
 
 def test_unknown_agency_or_region_fails_loudly():

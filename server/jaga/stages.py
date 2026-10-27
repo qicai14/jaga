@@ -43,7 +43,10 @@ def phrase(region: str, phrase_id: str) -> dict:
 
 
 def official_contact(region: str, agency: str) -> dict:
-    """The region pack's static entry for an agency (name, number, purpose, hours, source, checked)."""
+    """The region pack's static entry for an agency (name, number, purpose, hours, source, checked).
+
+    Valid keys are those in the pack's `contacts` (my.json); the scam hotline 997 is `nsrc`.
+    """
     return load_pack(region)["contacts"][agency]
 
 
