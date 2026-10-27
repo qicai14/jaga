@@ -8,7 +8,7 @@ only, Material 3. Terms follow `GLOSSARY.md`.
 text, flat tonal surfaces, no shadows, no decoration. The one loud thing in the app is the **Warning**, designed like a road
 sign: a solid red field, the command in very heavy type, the official number in pale sign-yellow. Nothing else in the app
 uses red fields or yellow type, so she learns that this look means one thing.
-- Left-align all text (Tamil and Chinese read better left-aligned too). The only centred element is the link code.
+- Left-align all text (Chinese reads better left-aligned too). The only centred element is the link code.
 - One primary action per screen, full width, in the thumb zone at the bottom.
 - Structure only where it carries meaning: the 6-step stage bar is a real sequence; onboarding steps are numbered because
   they are a sequence. No eyebrow labels, no all-caps, no `→` on buttons.
@@ -51,9 +51,8 @@ On the Warning, the reconnecting dot is `onWarning` at 60% opacity. Never put `w
 screen and the hang-up control; form errors use `error`, which is darker and browner.
 
 ## 3. Type
-Fonts are bundled (no `google_fonts`, no network): family `NotoSans`, `fontFamilyFallback: ['NotoSansSC', 'NotoSansTamil']`.
-Fallback is per glyph, so mixed lines (Malay command + Chinese name) render without a per-locale theme. For `ta`, the
-theme builder raises `height` by +0.15 on every style (Tamil vowel signs are tall). Sizes are sp before `TextScaler`.
+Fonts are bundled (no `google_fonts`, no network): family `NotoSans`, `fontFamilyFallback: ['NotoSansSC']`.
+Fallback is per glyph, so mixed lines (Malay command + Chinese name) render without a per-locale theme. Sizes are sp before `TextScaler`.
 
 | Style | Where | sp | Weight | Height |
 |---|---|---|---|---|
@@ -73,13 +72,11 @@ No style is below 20sp. Unused M3 slots (`bodySmall`, `labelSmall`, `titleSmall`
 so a stray default can't go smaller.
 
 **Font files** (`app/assets/fonts/`, OFL 1.1, `OFL.txt` registered with `LicenseRegistry`): static instances only (variable
-fonts don't follow `fontWeight` reliably): `NotoSans-{Regular,SemiBold,ExtraBold}.ttf`, `NotoSansSC-{Regular,ExtraBold}.ttf`,
-`NotoSansTamil-{Regular,SemiBold,ExtraBold}.ttf`. Weights 600/700 map to SemiBold/ExtraBold for SC.
+fonts don't follow `fontWeight` reliably): `NotoSans-{Regular,SemiBold,ExtraBold}.ttf`, `NotoSansSC-{Regular,ExtraBold}.ttf`. Weights 600/700 map to SemiBold/ExtraBold for SC.
 **Subsetting** with `pyftsubset` (`uvx --from fonttools pyftsubset`, script at `app/tool/subset_fonts.py`, committed with
 its output): Latin = Basic Latin, Latin-1, Latin Extended-A, General Punctuation; SC = the 3,500 first-level characters of
 the Table of General Standard Chinese Characters plus every Han glyph found in the ARB files (family summaries are free text,
-so don't subset to the ARB alone); Tamil = U+0B80–0BFF plus U+200C/200D. Keep `--layout-features='*'` (Tamil needs its GSUB
-conjuncts). Budget: under 5 MB total.
+so don't subset to the ARB alone). Keep `--layout-features='*'`. Budget: under 5 MB total.
 
 ## 4. Spacing, radii, elevation, targets (`JagaMetrics` ThemeExtension)
 - **Spacing** (4dp grid): `xs 4`, `s 8`, `m 16`, `l 24`, `xl 32`, `xxl 48`. Screen side padding `l 24` (at 360dp that leaves
@@ -140,8 +137,8 @@ Feature-specific widgets stay in `lib/features/<feature>/views/widgets/`.
 ## 9. Localisation (`lib/core/l10n/`)
 - `flutter_localizations` (SDK) + `intl`, `fvm flutter gen-l10n` with `l10n.yaml`: `arb-dir: lib/core/l10n/arb`,
   `template-arb-file: app_en.arb`, `output-dir: lib/core/l10n/gen`, `output-class: AppLocalizations`, `nullable-getter: false`.
-- Files: `app_en.arb` (template, written by the architect), `app_ms.arb`, `app_zh.arb` (Simplified), `app_ta.arb` (filled by
-  flutter-dev, flagged for native review). `supportedLocales: [ms, en, zh, ta]`; fallback locale `ms`.
+- Files: `app_en.arb` (template, written by the architect), `app_ms.arb`, `app_zh.arb` (Simplified; filled by
+  flutter-dev, flagged for native review). `supportedLocales: [ms, en, zh]`; fallback locale `ms`.
 - **Key naming:** `<feature><Element><Variant?>` in lowerCamelCase, e.g. `warningDismissLabel`, `cautionBannerText`,
   `familyAlertCallButton`. Shared words use `common…`. Every key has an `@key` description saying where it appears.
   Placeholders are named (`{agency}`, `{name}`), never positional.
@@ -155,7 +152,7 @@ Feature-specific widgets stay in `lib/features/<feature>/views/widgets/`.
   `lib/debug/`, so release builds can't contain it.
 - `GalleryEntry({required String feature, required String state, required Widget Function(BuildContext) build})`. Each
   feature adds `lib/debug/entries/<feature>_entries.dart` returning `List<GalleryEntry>`; `gallery_registry.dart` concatenates them.
-- The gallery home lists entries grouped by feature. A top bar switches locale (ms/en/zh/ta) and text scale (1.0/1.5/2.0)
+- The gallery home lists entries grouped by feature. A top bar switches locale (ms/en/zh) and text scale (1.0/1.5/2.0)
   by wrapping the entry in `Localizations.override` and `MediaQuery(textScaler: ...)`.
 - **Fixtures** live in `lib/debug/fixtures/` as raw JSON strings (`const stageUpdateHigh = r'''{...}''';`) and are parsed
   through the real `fromJson`, so the gallery and widget tests exercise the model layer. A test

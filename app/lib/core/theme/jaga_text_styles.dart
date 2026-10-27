@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 
-const _fallback = ['NotoSansSC', 'NotoSansTamil'];
-
-/// Tamil vowel signs are tall, so every style gets more line height.
-double _h(Locale locale, double height) =>
-    locale.languageCode == 'ta' ? height + 0.15 : height;
+const _fallback = ['NotoSansSC'];
 
 // Colour is never set here: it comes from the ColorScheme / JagaColors.
 TextStyle _style(
-  Locale locale,
   double size,
   FontWeight weight,
   double height, {
@@ -20,7 +15,7 @@ TextStyle _style(
       fontFamilyFallback: _fallback,
       fontSize: size,
       fontWeight: weight,
-      height: _h(locale, height),
+      height: height,
       letterSpacing: letterSpacing,
       fontFeatures: features,
     );
@@ -38,11 +33,11 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
   factory JagaTextStyles.of(Locale locale) {
     const tabular = [FontFeature.tabularFigures()];
     return JagaTextStyles(
-      command: _style(locale, 52, FontWeight.w800, 1.08),
-      commandEnglish: _style(locale, 30, FontWeight.w700, 1.15),
-      officialNumber: _style(locale, 40, FontWeight.w800, 1.1,
+      command: _style(52, FontWeight.w800, 1.08),
+      commandEnglish: _style(30, FontWeight.w700, 1.15),
+      officialNumber: _style(40, FontWeight.w800, 1.1,
           letterSpacing: 1.0, features: tabular),
-      linkCode: _style(locale, 48, FontWeight.w800, 1.0,
+      linkCode: _style(48, FontWeight.w800, 1.0,
           letterSpacing: 6.0, features: tabular),
     );
   }
@@ -80,18 +75,18 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
 
 /// The M3 text theme: nothing below 20sp.
 TextTheme jagaTextTheme(Locale locale) {
-  final body = _style(locale, 20, FontWeight.w400, 1.4);
-  final label = _style(locale, 20, FontWeight.w600, 1.2);
+  final body = _style(20, FontWeight.w400, 1.4);
+  final label = _style(20, FontWeight.w600, 1.2);
   return TextTheme(
-    displaySmall: _style(locale, 36, FontWeight.w700, 1.15),
-    headlineMedium: _style(locale, 28, FontWeight.w700, 1.2),
-    titleLarge: _style(locale, 24, FontWeight.w600, 1.25),
-    titleMedium: _style(locale, 22, FontWeight.w600, 1.25),
+    displaySmall: _style(36, FontWeight.w700, 1.15),
+    headlineMedium: _style(28, FontWeight.w700, 1.2),
+    titleLarge: _style(24, FontWeight.w600, 1.25),
+    titleMedium: _style(22, FontWeight.w600, 1.25),
     titleSmall: label,
-    bodyLarge: _style(locale, 22, FontWeight.w400, 1.4),
+    bodyLarge: _style(22, FontWeight.w400, 1.4),
     bodyMedium: body,
     bodySmall: body,
-    labelLarge: _style(locale, 22, FontWeight.w600, 1.2),
+    labelLarge: _style(22, FontWeight.w600, 1.2),
     labelMedium: label,
     labelSmall: label,
   );

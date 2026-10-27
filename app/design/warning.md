@@ -93,10 +93,10 @@ AnnotatedRegion(SystemUiOverlayStyle.light) > PopScope(canPop: false)
   semantics). `BigButton` gains tone `hangUp` (fill `warning`, label `onWarning`) and `maxTextScale`. `HoldToConfirmButton`
   gains `maxTextScale` (dismiss passes 1.5). `warningNumber` is no longer used on this screen.
 
-## 5. Copy (`app_en.arb`; ms/zh/ta by flutter-dev)
-| Key | en | ms | zh | ta |
-|---|---|---|---|---|
-| `warningFromJaga` | Scam warning from Jaga | Amaran penipuan daripada Jaga | 来自 Jaga 的诈骗警告 | Jaga-விடமிருந்து மோசடி எச்சரிக்கை |
+## 5. Copy (`app_en.arb`; ms/zh by flutter-dev)
+| Key | en | ms | zh |
+|---|---|---|---|
+| `warningFromJaga` | Scam warning from Jaga | Amaran penipuan daripada Jaga | 来自 Jaga 的诈骗警告 |
 
 Route name for TalkBack ("Jaga" is never translated). The rest:
 | Key | English | Notes |

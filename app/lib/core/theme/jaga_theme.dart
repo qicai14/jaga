@@ -18,7 +18,7 @@ ThemeData buildJagaTheme(Locale locale) {
     colorScheme: scheme,
     textTheme: text,
     fontFamily: 'NotoSans',
-    fontFamilyFallback: const ['NotoSansSC', 'NotoSansTamil'],
+    fontFamilyFallback: const ['NotoSansSC'],
     scaffoldBackgroundColor: scheme.surface,
     materialTapTargetSize: MaterialTapTargetSize.padded,
     visualDensity: VisualDensity.standard,

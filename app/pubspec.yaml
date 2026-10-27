@@ -58,12 +58,3 @@ flutter:
           weight: 700
         - asset: assets/fonts/NotoSansSC-Bold.otf
           weight: 800
-    - family: NotoSansTamil
-      fonts:
-        - asset: assets/fonts/NotoSansTamil-Regular.ttf
-        - asset: assets/fonts/NotoSansTamil-SemiBold.ttf
-          weight: 600
-        - asset: assets/fonts/NotoSansTamil-ExtraBold.ttf
-          weight: 700
-        - asset: assets/fonts/NotoSansTamil-ExtraBold.ttf
-          weight: 800

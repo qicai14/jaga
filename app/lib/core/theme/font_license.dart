@@ -6,6 +6,6 @@ void registerFontLicense() {
   LicenseRegistry.addLicense(() async* {
     final text = await rootBundle.loadString('assets/fonts/OFL.txt');
     yield LicenseEntryWithLineBreaks(
-        ['Noto Sans, Noto Sans SC, Noto Sans Tamil'], text);
+        ['Noto Sans, Noto Sans SC'], text);
   });
 }

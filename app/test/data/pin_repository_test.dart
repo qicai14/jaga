@@ -106,7 +106,7 @@ void main() {
         repo.progress.value.copyWith(
           role: OnboardingRole.protectedUser,
           step: OnboardingStep.pin,
-          language: 'ta',
+          language: 'zh',
           registration: fakeRegistration,
         ),
       );
@@ -118,7 +118,7 @@ void main() {
       final p = again.progress.value;
       expect(
         (p.role, p.step, p.language),
-        (OnboardingRole.protectedUser, OnboardingStep.pin, 'ta'),
+        (OnboardingRole.protectedUser, OnboardingStep.pin, 'zh'),
       );
       expect(p.registration!.linkCode, fakeLinkCode);
     },

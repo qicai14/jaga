@@ -7,12 +7,12 @@ design briefs (`app/design/<feature>.md`) are written by `b-architect` from this
 - **One app, two roles.** First launch asks "Who is this phone for?": protected user or family co-pilot. The role is
   fixed for the install; switching means a PIN-protected reset (protected) or unlink (co-pilot).
 - **No login anywhere.** Firebase Anonymous Auth runs silently; the link code is the only bond between phones.
-- **Calm every day, loud once.** Warm off-white background, deep teal/green "guarded" colour, big type in Noto Sans (chosen for its Tamil and Chinese coverage).
+- **Calm every day, loud once.** Warm off-white background, deep teal/green "guarded" colour, big type in Noto Sans (chosen for its Latin and Chinese coverage).
   Caution is amber, Warning is full-screen solid red, the family "may be genuine" follow-up is calm blue. Light theme
   only.
 - **Elderly-first.** Body ≥ 20sp, touch targets ≥ 56dp, WCAG AAA contrast. Honour Android's system font size and work
   at 2×. The Warning command always fits without scrolling (it shrinks to no less than ~32sp).
-- **Four languages.** ms, en, zh, ta via `flutter_localizations`. Bundled Noto Sans, Noto Sans SC and Noto Sans Tamil
+- **Three languages.** ms, en, zh via `flutter_localizations`. Bundled Noto Sans and Noto Sans SC
   (subsetted). The protected phone's **app language** is its **command language**; a co-pilot picks their own (default:
   the phone's language).
 - **Portrait Android phone only**, 360–412dp wide.
@@ -86,7 +86,7 @@ it: Android's own call screen, with the Warning as a full-screen notification op
   and checked this transfer is genuine") and then a hold-to-confirm.
 - **Alerted calls:** a list of the last 30 days, one entry per call that alerted. Each opens its **stage timeline**,
   which has Delete and a **"Call 997"** button. Genuine calls are never shown.
-- **Stage labels:** plain words instead of jargon ("Told to keep it secret", "Asked to move money"), in all 4 languages.
+- **Stage labels:** plain words instead of jargon ("Told to keep it secret", "Asked to move money"), in all 3 languages.
 - **Settings:** app language and unlink.
 
 ## 4. Architecture (flutter-apply-architecture-best-practices + `app/AGENTS.md`)
@@ -126,6 +126,9 @@ change.
 - **#1 contracts v1** (Lane A): phrase IDs vs resolved text, the "may be genuine" alert kind, the stage-timeline shape,
   and the pause request.
 - **#2 telephony test** (Lane A): blocks #12, and the call screen vs fallback choice.
-- **Phrase library content** in 4 languages (Lane D), and the official contacts table (Lane D).
+- **Phrase library content** in 3 languages (Lane D), and the official contacts table (Lane D).
 - **Physical test phones** (team).
 - **`twilio_voice` vs our Android Gradle Plugin 9.1**: it targets AGP 8.9.1. Check with a test build in #12.
+
+## 8. Decisions
+- Tamil removed from the app (Preston, 28 Oct): project scope change. Languages are ms, en, zh.

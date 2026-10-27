@@ -360,7 +360,7 @@ void main() {
     handle.dispose();
   });
 
-  for (final locale in const ['ms', 'ta']) {
+  for (final locale in const ['ms', 'zh']) {
     testWidgets('home in $locale at text x2.0 has no overflow', (tester) async {
       final rig = Rig();
       addTearDown(rig.vm.dispose);

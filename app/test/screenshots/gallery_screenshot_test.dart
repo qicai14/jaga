@@ -42,11 +42,6 @@ void main() {
       '${dir}NotoSansSC-Regular.otf',
       '${dir}NotoSansSC-Bold.otf',
     ]);
-    await _load('NotoSansTamil', [
-      '${dir}NotoSansTamil-Regular.ttf',
-      '${dir}NotoSansTamil-SemiBold.ttf',
-      '${dir}NotoSansTamil-ExtraBold.ttf',
-    ]);
     // Icons: the SDK's fonts, found through FLUTTER_ROOT (set by `flutter test`).
     final root = Platform.environment['FLUTTER_ROOT'];
     final icons = root == null
@@ -72,7 +67,7 @@ void main() {
         ('ms', 1.0),
         ('en', 1.0),
         ('en', 2.0),
-        if (state == 'alert-isolation' || state == 'home-pause-active') ...[('ta', 1.0), ('zh', 1.0)],
+        if (state == 'alert-isolation' || state == 'home-pause-active') ...[('zh', 1.0)],
         if (state == 'alert-long-text') ('ms', 2.0),
       ];
     }
@@ -83,14 +78,14 @@ void main() {
         if (const {'link-code', 'perms-mixed', 'join-full', 'pin-confirm', 'settings'}
             .contains(state))
           ('en', 2.0),
-        if (state == 'perms-mixed' || state == 'link-code') ...[('ta', 1.0), ('zh', 1.0)],
+        if (state == 'perms-mixed' || state == 'link-code') ...[('zh', 1.0)],
       ];
     }
     if (feature != 'warning') return [('ms', 1.0), ('en', 1.0)];
     return [
       ('ms', 1.0),
       ('en', 1.0),
-      if (state == 'high') ...[('ta', 1.0), ('zh', 1.0)],
+      if (state == 'high') ...[('zh', 1.0)],
       if (state == 'high' ||
           state == 'high-credentials' ||
           state == 'medium') ...[
