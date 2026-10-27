@@ -3,13 +3,14 @@
 import json
 import time
 from pathlib import Path
+from xml.etree import ElementTree
 
 import pytest
 from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 from starlette.websockets import WebSocketDisconnect
 
-from jaga import stages, telephony
+from jaga import stages, telephony, twilio_auth
 from jaga.fakes.transcribe import FakeTranscriber
 from jaga.fakes.twilio import media_stream
 from jaga.main import app
@@ -19,6 +20,14 @@ STAGE_UPDATE = Draft202012Validator(
     json.loads((CONTRACTS / "stage-update.schema.json").read_text(encoding="utf-8")),
     format_checker=Draft202012Validator.FORMAT_CHECKER,
 )
+
+TOKEN = "test-auth-token"
+# What Twilio signs: the public https URL, and wss for the stream.
+
+
+def media_headers():
+    return {"X-Twilio-Signature": twilio_auth.signature("wss://testserver/twilio/media", {}, TOKEN)}
+
 
 SCRIPT = [
     ("caller", "Hello, saya dari Pos Malaysia. Ada bungkusan untuk puan."),
@@ -45,6 +54,7 @@ def heard(monkeypatch):
 def client(monkeypatch):
     monkeypatch.setenv("JAGA_USE_FAKES", "true")
     monkeypatch.setenv("JAGA_DEFAULT_REGION", "my")
+    monkeypatch.setenv("TWILIO_AUTH_TOKEN", TOKEN)
     # One TestClient context shares one event loop between the call's WebSocket and the app's stage stream.
     with TestClient(app) as client:
         yield client
@@ -69,7 +79,7 @@ def wait_for_start(call_sid):
 def play_call(client, call_sid, script, before_end=(), region=None):
     """Plays the call; the app joins its stage stream once the call starts. Returns what the app got."""
     start, *media, stop = media_stream(call_sid, script, region)[1:]
-    with client.websocket_connect("/twilio/media") as twilio:
+    with client.websocket_connect("/twilio/media", headers=media_headers()) as twilio:
         twilio.send_text(start)
         wait_for_start(call_sid)
         with client.websocket_connect(f"/calls/{call_sid}/stages") as app_stream:
@@ -240,10 +250,60 @@ def test_money_or_credentials_is_a_warning_while_spark_is_missing(client):
 
 def test_unknown_region_closes_the_stream_and_logs_it(client, caplog):
     start = media_stream("CA_zz", [], region="zz")[1]
-    with client.websocket_connect("/twilio/media") as twilio:
+    with client.websocket_connect("/twilio/media", headers=media_headers()) as twilio:
         twilio.send_text(start)
         with pytest.raises(WebSocketDisconnect):
             twilio.receive_text()
 
     assert "CA_zz" not in telephony.calls
     assert "'zz'" in caplog.text
+
+
+def voice(client, signed_with=TOKEN, **params):
+    form = {"CallSid": ["CA_v"], "From": ["+60123456789"]} | params
+    sig = twilio_auth.signature("https://testserver/twilio/voice", form, signed_with)
+    body = "&".join(f"{k}={v[0]}".replace("+", "%2B") for k, v in form.items())
+    return client.post(
+        "/twilio/voice",
+        content=body,
+        headers={"X-Twilio-Signature": sig, "Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+
+def test_voice_webhook_streams_both_tracks_with_the_region_and_rings_the_app(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    response = voice(client)
+
+    assert response.status_code == 200
+    twiml = ElementTree.fromstring(response.text)
+    stream = twiml.find("Start/Stream")
+    assert stream.get("url") == "wss://testserver/twilio/media"
+    assert stream.get("track") == "both_tracks"
+    assert {p.get("name"): p.get("value") for p in stream.findall("Parameter")} == {"region": "my"}
+    assert twiml.findtext("Dial/Client") == "jaga-app"
+
+
+def test_voice_webhook_without_a_valid_signature_is_refused(client):
+    assert voice(client, signed_with="someone-elses-token").status_code == 403
+    assert client.post("/twilio/voice", content="CallSid=CA_v").status_code == 403
+
+
+def test_media_stream_without_a_valid_signature_is_refused(client):
+    for headers in ({}, {"X-Twilio-Signature": "forged"}):
+        with pytest.raises(WebSocketDisconnect), client.websocket_connect("/twilio/media", headers=headers):
+            pass
+
+
+def test_signature_matches_twilios_documented_example():
+    params = {
+        "CallSid": ["CA1234567890ABCDE"],
+        "Caller": ["+12349013030"],
+        "Digits": ["1234"],
+        "From": ["+12349013030"],
+        "To": ["+18005551212"],
+    }
+    url = "https://mycompany.com/myapp.php?foo=1&bar=2"
+
+    assert twilio_auth.signature(url, params, "12345") == "0/KCTR6DLpKmkAf8muzZqo1nDgQ="
+    assert twilio_auth.valid(url, params, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=", "12345")
+    assert not twilio_auth.valid(url, params, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=", "")

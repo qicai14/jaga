@@ -8,12 +8,15 @@ import asyncio
 import base64
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from xml.sax.saxutils import escape, quoteattr
 
-from fastapi import APIRouter, WebSocket, status
+from fastapi import APIRouter, Request, WebSocket, status
+from fastapi.responses import Response
 
-from jaga import asr
+from jaga import asr, twilio_auth
 from jaga.stages import StageTracker, load_pack
 
 router = APIRouter()
@@ -54,8 +57,27 @@ class Call:
 calls: dict[str, Call] = {}
 
 
+@router.post("/twilio/voice")
+async def voice(request: Request) -> Response:
+    await twilio_auth.require_voice(request)
+    # shortcut: every call is the default region's one protected user and rings one app identity, until a
+    # protected-user registry (setup, #12/#19) maps the dialled number to a user.
+    region = os.environ.get("JAGA_DEFAULT_REGION", "")
+    stream = twilio_auth.public_url(request).replace("https://", "wss://", 1).replace("/voice", "/media")
+    twiml = (
+        '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
+        f'<Stream url={quoteattr(stream)} track="both_tracks">'
+        f'<Parameter name="region" value={quoteattr(region)}/></Stream></Start>'
+        f"<Dial><Client>{escape(os.environ.get('JAGA_APP_CLIENT_IDENTITY', ''))}</Client></Dial></Response>"
+    )
+    return Response(twiml, media_type="text/xml")
+
+
 @router.websocket("/twilio/media")
 async def media(ws: WebSocket) -> None:
+    if not twilio_auth.check(ws, {}):
+        await ws.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
     await ws.accept()
     transcriber = asr.transcriber()
     call = None
