@@ -28,8 +28,10 @@
     "lima": 5, "five": 5, "enam": 6, "six": 6, "tujuh": 7, "seven": 7, "lapan": 8, "eight": 8,
     "sembilan": 9, "nine": 9
   },
+  "codeAsk": "\\b(?:kod|otp|tac)\\b",
+  "bareTac": "(?<!\\d)\\d{6}(?!\\d)",
   "userDisclosure": {
-    "TAC read out": "(?:kod|tac|otp|code)\\D{0,20}(?<!\\d)\\d{6}(?!\\d)",
+    "TAC read out": "(?:tac|otp|code)\\D{0,20}(?<!\\d)\\d{6}(?!\\d)",
     "account number read out": "(?:akaun|account)\\D{0,20}(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
     "IC read out": "(?<!\\d)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])-?\\d{2}-?\\d{4}(?!\\d)"
   }

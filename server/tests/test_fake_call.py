@@ -166,7 +166,7 @@ def test_hard_trigger_is_a_warning_at_once_and_rules_never_lower_it(client):
 
 
 @pytest.mark.parametrize(
-    "said", ["Kod saya 482913.", "Nombor akaun 1234567890123.", "IC saya 900101-14-5678."]
+    "said", ["OTP saya 482913.", "Nombor akaun 1234567890123.", "IC saya 900101-14-5678."]
 )
 def test_protected_user_reading_out_credentials_moves_the_call_to_credentials(client, said):
     updates = trail(client, "CA_user", [("caller", "Saya dari PDRM."), ("user", said)])
@@ -191,6 +191,8 @@ def test_region_comes_from_the_call_or_the_default(client, monkeypatch, tmp_path
             "hardTriggers": {},
             "userDisclosure": {},
             "digitWords": {"nol": 0},
+            "codeAsk": "x",
+            "bareTac": "x",
         }
         (tmp_path / f"{region}.json").write_text(json.dumps(pack | {"phrases": {"pretext": [phrase]}}))
     monkeypatch.setattr(stages, "DIR", tmp_path)
@@ -239,7 +241,7 @@ def test_user_disclosure_ties_with_money_but_the_caller_never_takes_credentials_
         "CA_tie",
         [
             ("caller", "Pindahkan wang sekarang."),
-            ("user", "Kod saya 482913."),
+            ("user", "OTP saya 482913."),
             ("caller", "Pindahkan wang lagi."),
         ],
     )
@@ -355,10 +357,11 @@ def test_a_phrase_split_across_two_transcript_lines_still_matches_and_fires_once
     "lines",
     [
         ["Kod TAC saya empat lapan dua sembilan satu tiga."],
-        ["Kod saya empat lapan dua", "sembilan satu tiga"],
-        ["Kod saya zero four eight two nine one"],
-        ["Kod saya 4 8 2 sembilan satu 3"],
-        ["Kod saya 482 913"],
+        ["TAC saya empat lapan", "dua sembilan", "satu tiga"],
+        ["OTP saya empat lapan dua", "sembilan satu tiga"],
+        ["OTP saya zero four eight two nine one"],
+        ["OTP saya 4 8 2 sembilan satu 3"],
+        ["OTP saya 482 913"],
     ],
 )
 def test_a_tac_read_out_in_spoken_digits_is_caught(client, lines):
@@ -391,6 +394,8 @@ def test_an_ic_read_out_in_spoken_digits_is_caught(client):
         "Nombor tracking bungkusan saya 123456",
         "Nombor tracking saya satu dua tiga empat lima enam",
         "Tracking number MY 4829 1357 9024",
+        "Kod tracking 123456",
+        "Kod resit satu dua tiga empat lima enam",
     ],
 )
 def test_a_date_or_parcel_number_read_out_is_not_a_tac(client, said):
@@ -494,3 +499,14 @@ def test_a_backed_up_leg_keeps_the_newest_audio(client, monkeypatch):
     trail(client, "CA_backlog", [("caller", f"chunk {i}") for i in range(600)])
 
     assert len(heard) < 600 and heard[-1] == b"chunk 599"
+
+
+@pytest.mark.parametrize("said", ["482913", "empat lapan dua sembilan satu tiga", "4 8 2, 9 1 3"])
+def test_a_bare_code_read_out_right_after_the_caller_asked_for_one_is_caught(client, said):
+    ask = ("caller", "Boleh beritahu kod OTP yang anda terima?")
+
+    assert stages_of(trail(client, "CA_asked", [ask, ("user", said)]))[-1] == ("credentials", "high")
+
+
+def test_a_bare_six_digit_run_without_the_caller_asking_is_not_a_code(client):
+    assert stages_of(trail(client, "CA_unasked", [("user", "482913")])) == [("none", "low")]
