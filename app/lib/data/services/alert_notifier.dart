@@ -128,7 +128,7 @@ class LocalAlertNotifier implements AlertNotifier {
   Future<void> init() async {
     await _plugin.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('@drawable/ic_stat_jaga'),
       ),
       onDidReceiveNotificationResponse: (r) {
         final open = alertOpenFrom(r);
