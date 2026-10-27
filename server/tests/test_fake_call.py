@@ -185,7 +185,13 @@ def test_the_same_digits_from_the_caller_do_not(client):
 
 def test_region_comes_from_the_call_or_the_default(client, monkeypatch, tmp_path):
     for region, phrase in {"alpha": "kucing oren", "beta": "anjing hitam"}.items():
-        pack = {"command": "c", "counterMove": "m", "hardTriggers": {}, "userDisclosure": {}}
+        pack = {
+            "command": "c",
+            "counterMove": "m",
+            "hardTriggers": {},
+            "userDisclosure": {},
+            "digitWords": {"nol": 0},
+        }
         (tmp_path / f"{region}.json").write_text(json.dumps(pack | {"phrases": {"pretext": [phrase]}}))
     monkeypatch.setattr(stages, "DIR", tmp_path)
     monkeypatch.setenv("JAGA_DEFAULT_REGION", "beta")
@@ -328,3 +334,64 @@ def test_a_slow_leg_does_not_hold_up_the_other_and_every_line_still_lands(client
     assert done[0] == ("user", "Hmm.")
     assert [line for leg, line in done if leg == "caller"] == [s[1] for s in script if s[0] == "caller"]
     assert stages_of(updates)[-1] == ("fear", "medium"), "stop must wait for the queued lines"
+
+
+def test_a_phrase_split_across_two_transcript_lines_still_matches_and_fires_once(client):
+    updates = trail(
+        client,
+        "CA_split",
+        [
+            ("caller", "Puan, ada bungkusan"),
+            ("caller", "haram atas nama puan."),
+            ("caller", "Sila dengar baik-baik."),
+        ],
+    )
+
+    assert stages_of(updates) == [("none", "low"), ("pretext", "medium")]
+    assert updates[-1]["evidence"] == ["bungkusan haram"]
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        ["Kod TAC saya empat lapan dua sembilan satu tiga."],
+        ["Kod saya empat lapan dua", "sembilan satu tiga"],
+        ["Kod saya zero four eight two nine one"],
+        ["Kod saya 4 8 2 sembilan satu 3"],
+        ["Kod saya 482 913"],
+    ],
+)
+def test_a_tac_read_out_in_spoken_digits_is_caught(client, lines):
+    updates = trail(client, "CA_tac", [("user", line) for line in lines])
+
+    assert stages_of(updates)[-1] == ("credentials", "high")
+
+
+@pytest.mark.parametrize(
+    "said",
+    [
+        "Akaun saya kosong satu dua tiga empat lima enam tujuh lapan sembilan",
+        "Nombor akaun saya 123 456 789 012",
+    ],
+)
+def test_an_account_number_read_out_in_spoken_digits_is_caught(client, said):
+    assert stages_of(trail(client, "CA_acct", [("user", said)]))[-1] == ("credentials", "high")
+
+
+def test_an_ic_read_out_in_spoken_digits_is_caught(client):
+    said = "sembilan kosong kosong satu kosong satu, satu empat, lima enam tujuh lapan"
+    assert stages_of(trail(client, "CA_ic", [("user", said)]))[-1] == ("credentials", "high")
+
+
+@pytest.mark.parametrize(
+    "said",
+    [
+        "Hari ini lima sepuluh dua ribu dua puluh lima",
+        "Tarikh bungkusan 5 10 2025, jam sepuluh",
+        "Nombor tracking bungkusan saya 123456",
+        "Nombor tracking saya satu dua tiga empat lima enam",
+        "Tracking number MY 4829 1357 9024",
+    ],
+)
+def test_a_date_or_parcel_number_read_out_is_not_a_tac(client, said):
+    assert stages_of(trail(client, "CA_date", [("user", said)])) == [("none", "low")]

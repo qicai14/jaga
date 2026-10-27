@@ -20,8 +20,14 @@
     "jangan beritahu sesiapa": "isolation",
     "don't tell anyone": "isolation"
   },
+  "digitWords": {
+    "kosong": 0, "sifar": 0, "zero": 0, "oh": 0,
+    "satu": 1, "one": 1, "dua": 2, "two": 2, "tiga": 3, "three": 3, "empat": 4, "four": 4,
+    "lima": 5, "five": 5, "enam": 6, "six": 6, "tujuh": 7, "seven": 7, "lapan": 8, "eight": 8,
+    "sembilan": 9, "nine": 9
+  },
   "userDisclosure": {
-    "TAC read out": "(?<!\\d)\\d(?:[ -]?\\d){5}(?!\\d)",
+    "TAC read out": "(?:kod|tac|otp|code)\\D{0,20}(?<!\\d)\\d{6}(?!\\d)",
     "account number read out": "(?:akaun|account)\\D{0,20}(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
     "IC read out": "(?<!\\d)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])-?\\d{2}-?\\d{4}(?!\\d)"
   }
