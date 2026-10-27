@@ -159,4 +159,251 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyAlertDialFailed => 'Couldn\'t open the phone app.';
+
+  @override
+  String get commonCopy => 'Copy';
+
+  @override
+  String get commonCopied => 'Copied';
+
+  @override
+  String get commonShare => 'Share';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonSkip => 'Skip';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String commonPinEntered(int count, int total) {
+    return '$count of $total digits entered';
+  }
+
+  @override
+  String onboardingStepOf(int step, int total) {
+    return 'Step $step of $total';
+  }
+
+  @override
+  String get onboardingContinue => 'Continue';
+
+  @override
+  String get onboardingRoleTitle => 'Who is this phone for?';
+
+  @override
+  String get onboardingRoleProtected => 'The person Jaga protects';
+
+  @override
+  String get onboardingRoleProtectedBody =>
+      'Calls to this phone will ring in Jaga.';
+
+  @override
+  String get onboardingRoleCopilot => 'A family co-pilot';
+
+  @override
+  String get onboardingRoleCopilotBody =>
+      'Get alerts about someone you look after.';
+
+  @override
+  String get onboardingLanguageTitle => 'Which language should warnings use?';
+
+  @override
+  String get onboardingAppLanguageTitle => 'Choose your language';
+
+  @override
+  String get onboardingAboutTitle => 'About her';
+
+  @override
+  String get onboardingNameLabel => 'What does the family call her?';
+
+  @override
+  String get onboardingRegionInfo =>
+      'Region: Malaysia. Jaga uses Malaysia\'s official numbers.';
+
+  @override
+  String get onboardingSettingUp => 'Setting up…';
+
+  @override
+  String get onboardingNetworkError =>
+      'Can\'t reach Jaga. Check the internet and try again.';
+
+  @override
+  String get onboardingPermissionsTitle => 'Phone permissions';
+
+  @override
+  String get onboardingFix => 'Fix';
+
+  @override
+  String get onboardingFixedIt => 'I\'ve done this';
+
+  @override
+  String get onboardingPermNotifications => 'Notifications';
+
+  @override
+  String get onboardingPermNotificationsWhy => 'Shows alerts.';
+
+  @override
+  String get onboardingPermMicrophone => 'Microphone';
+
+  @override
+  String get onboardingPermMicrophoneWhy => 'Lets Jaga hear the caller.';
+
+  @override
+  String get onboardingPermFullScreen => 'Full-screen alerts';
+
+  @override
+  String get onboardingPermFullScreenWhy => 'Lets the warning fill the screen.';
+
+  @override
+  String get onboardingPermCallingAccount => 'Calling account';
+
+  @override
+  String get onboardingPermCallingAccountWhy => 'Lets calls ring in Jaga.';
+
+  @override
+  String get onboardingPermAutostart => 'Start automatically';
+
+  @override
+  String get onboardingPermAutostartWhy =>
+      'Keeps Jaga running on Xiaomi phones.';
+
+  @override
+  String get onboardingAfterCallSetup => 'Set up later with calls';
+
+  @override
+  String get onboardingForwardTitle => 'Forward calls to Jaga';
+
+  @override
+  String get onboardingForwardBody =>
+      'Dial this code once. Calls to this phone will then ring in Jaga.';
+
+  @override
+  String get onboardingDialNow => 'Dial now';
+
+  @override
+  String get onboardingCheckForwarding => 'Check forwarding';
+
+  @override
+  String get onboardingForwardDone => 'I\'ve dialled it';
+
+  @override
+  String get onboardingPinTitle => 'Set the co-pilot lock';
+
+  @override
+  String get onboardingPinBody =>
+      'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk her into switching it off.';
+
+  @override
+  String get onboardingPinConfirm => 'Enter the PIN again';
+
+  @override
+  String get onboardingPinMismatch => 'The PINs don\'t match. Set it again.';
+
+  @override
+  String get onboardingPauseTitle => 'Pause token';
+
+  @override
+  String get onboardingPauseBody =>
+      'Give this to your bank so it can hold transfers during a scam call.';
+
+  @override
+  String get onboardingLinkTitle => 'Link code';
+
+  @override
+  String get onboardingLinkBody =>
+      'Up to 3 family members can enter this code in their own Jaga app.';
+
+  @override
+  String onboardingLinkShareText(String code, String name) {
+    return 'Open Jaga, choose \"A family co-pilot\" and enter $code to get alerts about $name.';
+  }
+
+  @override
+  String get onboardingJoined => 'Joined so far';
+
+  @override
+  String get onboardingJoinedNone => 'No one yet';
+
+  @override
+  String get onboardingBuzzTitle => 'Feel the buzz';
+
+  @override
+  String get onboardingBuzzBody =>
+      'When the phone buzzes like this during a call, look at the screen.';
+
+  @override
+  String get onboardingBuzzButton => 'Feel the buzz';
+
+  @override
+  String get onboardingDoneProtected => 'Jaga is set up.';
+
+  @override
+  String get onboardingFinish => 'Finish';
+
+  @override
+  String get onboardingJoinCode => 'Enter the 6-digit code';
+
+  @override
+  String get onboardingNamesTitle => 'A few details';
+
+  @override
+  String get onboardingYourName => 'Your name';
+
+  @override
+  String get onboardingCallHer => 'What do you call her?';
+
+  @override
+  String get onboardingCodeWrong =>
+      'That code doesn\'t match. Check the 6 digits.';
+
+  @override
+  String get onboardingCodeExpired =>
+      'This code has expired. Ask for a new one.';
+
+  @override
+  String get onboardingCopilotsFull =>
+      '3 family co-pilots are already linked. One must unlink before you can join.';
+
+  @override
+  String get onboardingNotifTitle => 'Allow alerts';
+
+  @override
+  String get onboardingNotifBody =>
+      'Jaga sends an alert here when someone you look after may be on a scam call.';
+
+  @override
+  String get onboardingNotNow => 'Not now';
+
+  @override
+  String onboardingDoneCopilot(String name) {
+    return 'You\'ll get alerts about $name.';
+  }
+
+  @override
+  String get statusFamilyLabel => 'Your family';
+
+  @override
+  String get statusFamilyNone => 'No family linked yet';
+
+  @override
+  String get statusNeedsFamily => 'Ask your family to check Jaga';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsPinTitle => 'Enter the co-pilot lock';
+
+  @override
+  String get settingsPinWrong => 'Wrong PIN';
+
+  @override
+  String get settingsPinLocked => 'Too many tries. Wait 5 minutes.';
+
+  @override
+  String get settingsReset => 'Hold to reset Jaga';
 }
