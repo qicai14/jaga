@@ -16,8 +16,8 @@ from xml.sax.saxutils import escape, quoteattr
 from fastapi import APIRouter, HTTPException, Request, WebSocket, status
 from fastapi.responses import Response
 
-from jaga import asr, twilio_auth
-from jaga.stages import StageTracker, load_pack
+from jaga import asr, spark, twilio_auth
+from jaga.stages import RANK, StageTracker, load_pack
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -29,11 +29,13 @@ LEGS = {"inbound": "caller", "outbound": "user"}
 class Call:
     call_id: str
     tracker: StageTracker
+    spark: spark.Spark
+    sparked: int = 0
     updates: list[dict] = field(default_factory=list)
     ended: bool = False
     changed: asyncio.Condition = field(default_factory=asyncio.Condition)
 
-    async def publish(self, stage, risk, evidence=(), command=None, counterMove=None) -> None:
+    async def publish(self, stage, risk, evidence=(), command=None, counterMove=None, source="rules") -> None:
         update = {
             "callId": self.call_id,
             "stage": stage,
@@ -41,7 +43,7 @@ class Call:
             "command": command,
             "counterMove": counterMove,
             "evidence": list(evidence),
-            "source": "rules",
+            "source": source,
         }
         async with self.changed:
             self.updates.append(update | {"at": datetime.now(UTC).isoformat()})
@@ -83,14 +85,33 @@ def put(queue: asyncio.Queue, item: bytes | None) -> None:
     queue.put_nowait(item)
 
 
+async def hear(call: Call, leg: str, line: str) -> None:
+    """The rules hear the line; a new stage from `authority` up is then put to Muse Spark."""
+    before = call.tracker.stage
+    change = call.tracker.hear(leg, line)
+    if change:
+        await call.publish(**change)
+    stage = call.tracker.stage
+    if stage != before and RANK[stage] >= RANK["authority"] and call.sparked < spark.MAX_CALLS:
+        call.sparked += 1
+        # shortcut: this inline await holds the leg's queue up to the timeout; fine at 5 asks a call.
+        raw = None
+        try:
+            async with asyncio.timeout(spark.TIMEOUT):
+                raw = await call.spark.assess(stage, call.tracker.risk, call.tracker.snippet())
+        except Exception as e:  # incl. the timeout; type only, the message could quote a transcript
+            log.warning("call %s: Muse Spark failed (%s)", call.call_id, type(e).__name__)
+        if change := call.tracker.spark_said(raw):
+            await call.publish(**change)
+
+
 async def listen(call: Call, transcriber: asr.Transcriber, leg: str, audio: asyncio.Queue) -> None:
     """One leg's worker: transcribes its audio in order, so reading the stream never waits on Muse."""
     while (chunk := await audio.get()) is not None:
         try:
             line = await transcriber.transcribe(leg, chunk)
-            change = call.tracker.hear(leg, line) if line else None
-            if change:
-                await call.publish(**change)
+            if line:
+                await hear(call, leg, line)
         except Exception as e:
             # Type only: the message could quote a transcript. The call goes on; this chunk is lost.
             log.warning("call %s %s leg: transcribing failed (%s)", call.call_id, leg, type(e).__name__)
@@ -114,12 +135,12 @@ async def media(ws: WebSocket) -> None:
                 if call is None or call.ended:
                     region = msg["start"].get("customParameters", {}).get("region")
                     try:
-                        tracker = StageTracker(load_pack(region))
+                        tracker = StageTracker(load_pack(region), region)
                     except ValueError as e:
                         log.warning("call %s refused: %s", sid, e)
                         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
                         return
-                    call = calls[sid] = Call(sid, tracker)
+                    call = calls[sid] = Call(sid, tracker, spark.spark(tracker.pack))
                     await call.publish("none", "low")
                 transcriber = asr.transcriber(call.tracker.pack)
             elif msg["event"] == "media" and call is not None:
@@ -144,9 +165,7 @@ async def media(ws: WebSocket) -> None:
             if transcriber is not None:
                 async with asyncio.timeout(5):  # whatever Muse does, the call still ends below
                     for leg, line in await transcriber.close():
-                        change = call.tracker.hear(leg, line)
-                        if change:
-                            await call.publish(**change)
+                        await hear(call, leg, line)
         except TimeoutError:
             log.warning("call %s: Muse Voice Transcribe took too long to close", call.call_id)
         finally:
