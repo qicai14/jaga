@@ -96,7 +96,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String familyNotifTitle(String name) {
-    return '$name 可能正在接听诈骗电话';
+    return '$name可能正在接听诈骗电话';
   }
 
   @override
@@ -111,7 +111,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String familyNotifGenuineTitle(String name) {
-    return '$name 的来电可能是真实的';
+    return '$name的来电可能是真实的';
   }
 
   @override
@@ -121,7 +121,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String familyAlertHeadline(String name) {
-    return '$name 可能正在接听诈骗电话';
+    return '$name可能正在接听诈骗电话';
   }
 
   @override
@@ -145,11 +145,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String familyGenuineHeadline(String name) {
-    return '$name 的来电可能是真实的';
+    return '$name的来电可能是真实的';
   }
 
   @override
   String familyGenuineBody(String name) {
     return 'Jaga 现在认为这通电话不太可能是诈骗。您仍可以致电$name确认。';
   }
+
+  @override
+  String get familyAlertCallShort => '致电';
+
+  @override
+  String get familyAlertDialFailed => '无法打开电话应用。';
 }

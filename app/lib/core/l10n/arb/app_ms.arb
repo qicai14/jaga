@@ -42,5 +42,7 @@
   "familyAlertCall": "Telefon {name}",
   "familyAlertOpenDialer": "Buka aplikasi telefon",
   "familyGenuineHeadline": "Panggilan {name} mungkin sah",
-  "familyGenuineBody": "Jaga kini berpendapat panggilan ini kurang berkemungkinan penipuan. Anda masih boleh menelefon {name} untuk menyemak."
+  "familyGenuineBody": "Jaga kini berpendapat panggilan ini kurang berkemungkinan penipuan. Anda masih boleh menelefon {name} untuk menyemak.",
+  "familyAlertCallShort": "Telefon",
+  "familyAlertDialFailed": "Tidak dapat membuka aplikasi telefon."
 }

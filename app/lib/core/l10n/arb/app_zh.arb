@@ -30,17 +30,19 @@
 
   "familyNotifChannelAlerts": "诈骗警报",
   "familyNotifChannelUpdates": "通话更新",
-  "familyNotifTitle": "{name} 可能正在接听诈骗电话",
+  "familyNotifTitle": "{name}可能正在接听诈骗电话",
   "familyNotifBody": "{stage}。",
   "familyNotifBodyAgency": "{stage}。自称来自{agency}。",
-  "familyNotifGenuineTitle": "{name} 的来电可能是真实的",
+  "familyNotifGenuineTitle": "{name}的来电可能是真实的",
   "familyNotifCallAction": "致电{name}",
-  "familyAlertHeadline": "{name} 可能正在接听诈骗电话",
+  "familyAlertHeadline": "{name}可能正在接听诈骗电话",
   "familyAlertTime": "警报时间 {time}",
   "familyAlertAgencyLabel": "来电者自称来自",
   "familyAlertQuotesLabel": "来电者说",
   "familyAlertCall": "致电{name}",
   "familyAlertOpenDialer": "打开电话应用",
-  "familyGenuineHeadline": "{name} 的来电可能是真实的",
-  "familyGenuineBody": "Jaga 现在认为这通电话不太可能是诈骗。您仍可以致电{name}确认。"
+  "familyGenuineHeadline": "{name}的来电可能是真实的",
+  "familyGenuineBody": "Jaga 现在认为这通电话不太可能是诈骗。您仍可以致电{name}确认。",
+  "familyAlertCallShort": "致电",
+  "familyAlertDialFailed": "无法打开电话应用。"
 }

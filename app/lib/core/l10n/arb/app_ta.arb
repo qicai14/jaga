@@ -34,13 +34,15 @@
   "familyNotifBody": "{stage}.",
   "familyNotifBodyAgency": "{stage}. {agency} என்று கூறுகிறார்கள்.",
   "familyNotifGenuineTitle": "{name} அழைப்பு உண்மையானதாக இருக்கலாம்",
-  "familyNotifCallAction": "{name} ஐ அழைக்கவும்",
+  "familyNotifCallAction": "{name}ஐ அழைக்கவும்",
   "familyAlertHeadline": "{name} மோசடி அழைப்பில் இருக்கலாம்",
   "familyAlertTime": "எச்சரிக்கை நேரம் {time}",
-  "familyAlertAgencyLabel": "அழைப்பவர் தாங்கள் இவர்கள் என்று கூறுகிறார்",
+  "familyAlertAgencyLabel": "அழைப்பவர் கூறும் அமைப்பு",
   "familyAlertQuotesLabel": "அழைப்பவர் கூறியது",
-  "familyAlertCall": "{name} ஐ அழைக்கவும்",
+  "familyAlertCall": "{name}ஐ அழைக்கவும்",
   "familyAlertOpenDialer": "தொலைபேசி செயலியைத் திறக்கவும்",
   "familyGenuineHeadline": "{name} அழைப்பு உண்மையானதாக இருக்கலாம்",
-  "familyGenuineBody": "இந்த அழைப்பு மோசடியாக இருக்க வாய்ப்பு குறைவு என்று Jaga இப்போது நினைக்கிறது. சரிபார்க்க நீங்கள் {name} ஐ அழைக்கலாம்."
+  "familyGenuineBody": "இந்த அழைப்பு மோசடியாக இருக்க வாய்ப்பு குறைவு என்று Jaga இப்போது நினைக்கிறது. சரிபார்க்க நீங்கள் {name}ஐ அழைக்கலாம்.",
+  "familyAlertCallShort": "அழைக்கவும்",
+  "familyAlertDialFailed": "தொலைபேசி செயலியைத் திறக்க முடியவில்லை."
 }

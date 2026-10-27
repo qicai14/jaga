@@ -153,4 +153,10 @@ class AppLocalizationsMs extends AppLocalizations {
   String familyGenuineBody(String name) {
     return 'Jaga kini berpendapat panggilan ini kurang berkemungkinan penipuan. Anda masih boleh menelefon $name untuk menyemak.';
   }
+
+  @override
+  String get familyAlertCallShort => 'Telefon';
+
+  @override
+  String get familyAlertDialFailed => 'Tidak dapat membuka aplikasi telefon.';
 }

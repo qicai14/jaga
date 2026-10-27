@@ -31,7 +31,7 @@ A newer push for the same `callId` updates the open screen in place (stage only 
   (FCM data values must be strings).
 - **Channels** (created at first launch): `family_alerts` "Scam alerts", `Importance.max` (heads-up), default sound and
   vibration, `NotificationVisibility.public`, category `message` (no DND bypass). `family_updates` "Call updates",
-  `Importance.defaultImportance` (no heads-up, no sound) for "may be genuine".
+  `Importance.low` (no heads-up, no sound) for "may be genuine".
 - **Content:** title `familyNotifTitle` ("Mum may be on a scam call"), body `familyNotifBody` (stage label, plus agency
   when known). Never quotes or summary on the lock screen. Notification id = hash of `callId`, so the second push and the
   follow-up **replace** the first instead of stacking (`onlyAlertOnce: false` on the alert channel so the money push re-rings).
@@ -45,18 +45,27 @@ A newer push for the same `callId` updates the open screen in place (stage only 
 ## 4. Alert screen (`FamilyAlertScreen`)
 ```
 Scaffold(surface) > Column
-  NameBand: Material(caution | genuineContainer), bottom radius 28, 3dp cautionEdge rule (alert only)
-    SafeArea(bottom:false) > Padding(l24) > Semantics(header, liveRegion) > Column
-      Text(familyAlertHeadline | familyGenuineHeadline, headlineMedium, onCaution | onGenuineContainer)
-      gap s8, Text(familyAlertTime(at), bodyMedium)
-  Expanded > SingleChildScrollView > Padding(l24) > Column
-    1 StageProgressBar(stage)                         // 6 steps, plain label under it
-    2 gap l24, Text(familyAlertAgencyLabel, bodyMedium) + Text(agency, titleLarge)   // hidden if null
-    3 gap l24, Text(summary, bodyLarge)
-    4 gap l24, Text(familyAlertQuotesLabel, bodyMedium), then per quote: QuoteBlock
-        (surfaceContainer, radius 12, 4dp left rule outline, "“…”" bodyLarge, no maxLines)   // hidden if empty
-  BottomAction (ScreenFrame-style pinned): BigButton(icon: call, label: familyAlertCall(name), tone: guarded | genuine)
+  Expanded > SingleChildScrollView > Column         // the band scrolls with the body (see below)
+    NameBand: Material(caution | genuineContainer), bottom radius 28, 3dp cautionEdge rule (alert only)
+      SafeArea(bottom:false) > Padding(l24) > Semantics(header, liveRegion) > Column
+        Text(familyAlertHeadline | familyGenuineHeadline, headlineMedium, onCaution | onGenuineContainer)
+        gap s8, Text(familyAlertTime(at), bodyMedium)
+    Padding(l24) > Column
+      0 (genuine only) Text(familyGenuineBody, bodyLarge)
+      1 StageProgressBar(stage)                         // 6 steps, plain label under it
+      2 gap l24, Text(familyAlertAgencyLabel, bodyMedium) + Text(agency, titleLarge)   // hidden if null
+      3 gap l24, Text(summary, bodyLarge)
+      4 gap l24, Text(familyAlertQuotesLabel, bodyMedium), then per quote: QuoteBlock
+          (surfaceContainer, radius 12, 4dp left rule outline, "“…”" bodyLarge, no maxLines)   // hidden if empty
+  BottomAction (pinned): [dial-failed message + number], BigButton(icon: call, label: familyAlertCall(name), tone: guarded | genuine)
 ```
+- **The band scrolls, the Call button is pinned.** A long name at text scale 2.0 makes the band taller than the room
+  above the button; a pinned band overflowed and pushed the button off screen. The band therefore scrolls with the
+  body, and only the Call button stays fixed, so it is always reachable.
+- **Long names:** past 12 characters the button reads just "Call" (`familyAlertCallShort`); TalkBack still says the full
+  "Call {name}".
+- **Phone app will not open:** `familyAlertDialFailed` appears above the button with the number under it (when known),
+  so the co-pilot can dial it herself. The next successful tap clears it.
 - Order is the scan order in seconds: who and when, how far it got, who they claim to be, what's happening, proof, act.
 - **Time:** `at` as local time, `DateFormat.jm(locale)` ("2:04 PM"); today only shows time, older shows date too.
 - **Back:** normal `canPop`. Back goes to the co-pilot home (or exits if it was a cold start with no home yet).

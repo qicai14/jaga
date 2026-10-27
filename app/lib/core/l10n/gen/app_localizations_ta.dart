@@ -118,7 +118,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String familyNotifCallAction(String name) {
-    return '$name ஐ அழைக்கவும்';
+    return '$nameஐ அழைக்கவும்';
   }
 
   @override
@@ -132,15 +132,14 @@ class AppLocalizationsTa extends AppLocalizations {
   }
 
   @override
-  String get familyAlertAgencyLabel =>
-      'அழைப்பவர் தாங்கள் இவர்கள் என்று கூறுகிறார்';
+  String get familyAlertAgencyLabel => 'அழைப்பவர் கூறும் அமைப்பு';
 
   @override
   String get familyAlertQuotesLabel => 'அழைப்பவர் கூறியது';
 
   @override
   String familyAlertCall(String name) {
-    return '$name ஐ அழைக்கவும்';
+    return '$nameஐ அழைக்கவும்';
   }
 
   @override
@@ -153,6 +152,12 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String familyGenuineBody(String name) {
-    return 'இந்த அழைப்பு மோசடியாக இருக்க வாய்ப்பு குறைவு என்று Jaga இப்போது நினைக்கிறது. சரிபார்க்க நீங்கள் $name ஐ அழைக்கலாம்.';
+    return 'இந்த அழைப்பு மோசடியாக இருக்க வாய்ப்பு குறைவு என்று Jaga இப்போது நினைக்கிறது. சரிபார்க்க நீங்கள் $nameஐ அழைக்கலாம்.';
   }
+
+  @override
+  String get familyAlertCallShort => 'அழைக்கவும்';
+
+  @override
+  String get familyAlertDialFailed => 'தொலைபேசி செயலியைத் திறக்க முடியவில்லை.';
 }

@@ -264,7 +264,7 @@ abstract class AppLocalizations {
   /// **'Call updates'**
   String get familyNotifChannelUpdates;
 
-  /// Notification title (lock screen). name is the protected person's name.
+  /// Notification title (lock screen). name is the protected user's name.
   ///
   /// In en, this message translates to:
   /// **'{name} may be on a scam call'**
@@ -288,7 +288,7 @@ abstract class AppLocalizations {
   /// **'{name}\'s call may be genuine'**
   String familyNotifGenuineTitle(String name);
 
-  /// Notification action button that calls the protected person.
+  /// Notification action button that calls the protected user.
   ///
   /// In en, this message translates to:
   /// **'Call {name}'**
@@ -318,13 +318,13 @@ abstract class AppLocalizations {
   /// **'The caller said'**
   String get familyAlertQuotesLabel;
 
-  /// The family alert's one button. name is the protected person.
+  /// The family alert's one button. name is the protected user.
   ///
   /// In en, this message translates to:
   /// **'Call {name}'**
   String familyAlertCall(String name);
 
-  /// Button label when no number is known for the protected person.
+  /// Button label when no number is known for the protected user.
   ///
   /// In en, this message translates to:
   /// **'Open the phone app'**
@@ -341,6 +341,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Jaga now thinks this call is less likely to be a scam. You can still call {name} to check.'**
   String familyGenuineBody(String name);
+
+  /// The family alert button when the protected user's name is long: the name stays in the TalkBack label.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get familyAlertCallShort;
+
+  /// Shown above the Call button when the phone app would not open. The number, if known, is shown under it so the co-pilot can dial it themselves.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the phone app.'**
+  String get familyAlertDialFailed;
 }
 
 class _AppLocalizationsDelegate

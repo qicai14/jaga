@@ -153,4 +153,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String familyGenuineBody(String name) {
     return 'Jaga now thinks this call is less likely to be a scam. You can still call $name to check.';
   }
+
+  @override
+  String get familyAlertCallShort => 'Call';
+
+  @override
+  String get familyAlertDialFailed => 'Couldn\'t open the phone app.';
 }
