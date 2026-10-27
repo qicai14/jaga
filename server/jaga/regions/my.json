@@ -4,12 +4,12 @@
   "counterMove": "Say you will call back, then phone the official number yourself. Beritahu anda akan telefon semula.",
   "phrases": {
     "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked"],
-    "authority": ["pdrm", "polis diraja", "inspektor", "lhdn", "bank negara", "mahkamah", "police officer"],
+    "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "police officer"],
     "fear": ["waran tangkap", "arrest warrant", "akan ditangkap", "dibekukan", "money laundering", "wang haram"],
     "isolation": ["jangan letak telefon", "do not hang up", "rahsia siasatan", "keep this confidential"],
-    "handoff": ["sambungkan anda kepada", "transfer you to", "video call", "skype"],
+    "handoff": ["sambungkan anda kepada polis", "transfer you to the police", "video call", "skype"],
     "money": ["pindahkan wang", "transfer the money", "bayar jaminan", "wang jaminan"],
-    "credentials": ["kata laluan", "password", "nombor kad", "card number"]
+    "credentials": ["beritahu kata laluan", "tell me your password", "give me your password"]
   },
   "hardTriggers": {
     "akaun selamat": "money",
@@ -22,7 +22,7 @@
   },
   "userDisclosure": {
     "TAC read out": "(?<!\\d)\\d(?:[ -]?\\d){5}(?!\\d)",
-    "account number read out": "(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
+    "account number read out": "(?:akaun|account)\\D{0,20}(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
     "IC read out": "(?<!\\d)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])-?\\d{2}-?\\d{4}(?!\\d)"
   }
 }

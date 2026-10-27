@@ -196,3 +196,46 @@ def test_malformed_message_ends_the_call(client):
 def test_stage_stream_for_unknown_call_is_refused(client):
     with pytest.raises(WebSocketDisconnect), client.websocket_connect("/calls/CA_unknown/stages"):
         pass
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "This is the bank, your card statement is ready, we will never ask for your password, "
+        "let me transfer you to a colleague.",
+        "Ini LHDN, peringatan bayaran cukai melalui portal rasmi.",
+    ],
+)
+def test_genuine_bank_and_tax_calls_stay_at_none(client, line):
+    assert stages_of(trail(client, "CA_genuine", [("caller", line)])) == [("none", "low")]
+
+
+def test_a_phone_number_from_the_user_is_not_an_account_number(client):
+    updates = trail(client, "CA_phone", [("user", "Telefon saya 0123456789.")])
+
+    assert stages_of(updates) == [("none", "low")]
+
+
+def test_user_disclosure_ties_with_money_but_the_caller_never_takes_credentials_back(client):
+    updates = trail(
+        client,
+        "CA_tie",
+        [
+            ("caller", "Pindahkan wang sekarang."),
+            ("user", "Kod saya 482913."),
+            ("caller", "Pindahkan wang lagi."),
+        ],
+    )
+
+    assert stages_of(updates) == [("none", "low"), ("money", "medium"), ("credentials", "medium")]
+
+
+def test_unknown_region_closes_the_stream_and_logs_it(client, caplog):
+    start = media_stream("CA_zz", [], region="zz")[1]
+    with client.websocket_connect("/twilio/media") as twilio:
+        twilio.send_text(start)
+        with pytest.raises(WebSocketDisconnect):
+            twilio.receive_text()
+
+    assert "CA_zz" not in telephony.calls
+    assert "'zz'" in caplog.text

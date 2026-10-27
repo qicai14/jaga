@@ -7,6 +7,7 @@ The app follows /calls/{callId}/stages: every `stage-update` so far, then live o
 import asyncio
 import base64
 import json
+import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
@@ -16,6 +17,7 @@ from jaga import asr
 from jaga.stages import StageTracker, load_pack
 
 router = APIRouter()
+log = logging.getLogger(__name__)
 # Media Streams tracks on the forwarded call: inbound is the caller, outbound is the protected user (#2).
 LEGS = {"inbound": "caller", "outbound": "user"}
 
@@ -66,7 +68,13 @@ async def media(ws: WebSocket) -> None:
                 # A reconnect keeps a live call's Call, so stage clients following it still get the end.
                 if call is None or call.ended:
                     region = msg["start"].get("customParameters", {}).get("region")
-                    call = calls[sid] = Call(sid, StageTracker(load_pack(region)))
+                    try:
+                        tracker = StageTracker(load_pack(region))
+                    except ValueError as e:
+                        log.warning("call %s refused: %s", sid, e)
+                        await ws.close(code=status.WS_1008_POLICY_VIOLATION)
+                        return
+                    call = calls[sid] = Call(sid, tracker)
                     await call.publish("none", "low")
             elif msg["event"] == "media" and call is not None:
                 leg = LEGS.get(msg["media"]["track"])
