@@ -12,6 +12,9 @@ enum BigButtonTone {
   /// White fill, red text: on the Warning's red field.
   onWarning,
 
+  /// Red fill, white label: the phone's own hang-up colour, on the paper Warning.
+  hangUp,
+
   /// Outlined, no fill.
   quiet,
 }
@@ -24,6 +27,7 @@ class BigButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.tone = BigButtonTone.guarded,
+    this.maxTextScale,
   });
 
   final String label;
@@ -31,8 +35,20 @@ class BigButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final BigButtonTone tone;
 
+  /// Caps the label and icon scale (the Warning passes 1.5); null follows the system.
+  final double? maxTextScale;
+
   @override
   Widget build(BuildContext context) {
+    final cap = maxTextScale;
+    if (cap == null) return _build(context);
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: cap,
+      child: Builder(builder: _build),
+    );
+  }
+
+  Widget _build(BuildContext context) {
     final c = context.jagaColors;
     final text = Text(label, textAlign: TextAlign.center);
     // The icon grows with the text, capped at 2x (a 24dp icon in a 64dp button).
@@ -52,6 +68,7 @@ class BigButton extends StatelessWidget {
     final (bg, fg) = switch (tone) {
       BigButtonTone.genuine => (c.genuine, c.onGenuine),
       BigButtonTone.onWarning => (c.onWarning, c.warning),
+      BigButtonTone.hangUp => (c.warning, c.onWarning),
       _ => (c.guarded, c.onGuarded),
     };
     final style = FilledButton.styleFrom(

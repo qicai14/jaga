@@ -60,6 +60,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get warningSemanticsLabel => 'Amaran penipuan';
 
   @override
+  String get warningFromJaga => 'Amaran penipuan daripada Jaga';
+
+  @override
   String warningOfficialNumberLabel(String agency) {
     return 'Nombor rasmi $agency';
   }

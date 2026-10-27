@@ -61,6 +61,9 @@ class AppLocalizationsTa extends AppLocalizations {
   String get warningSemanticsLabel => 'மோசடி எச்சரிக்கை';
 
   @override
+  String get warningFromJaga => 'Jaga-விடமிருந்து மோசடி எச்சரிக்கை';
+
+  @override
   String warningOfficialNumberLabel(String agency) {
     return '$agency அதிகாரப்பூர்வ எண்';
   }

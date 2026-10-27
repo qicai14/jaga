@@ -18,6 +18,7 @@
   "stageStepSemantics": "படி {step} / {total}: {label}",
   "cautionBannerText": "இந்த அழைப்பில் மோசடிக்கான அறிகுறிகள் உள்ளன",
   "warningSemanticsLabel": "மோசடி எச்சரிக்கை",
+  "warningFromJaga": "Jaga-விடமிருந்து மோசடி எச்சரிக்கை",
   "warningOfficialNumberLabel": "{agency} அதிகாரப்பூர்வ எண்",
   "warningOfficialNumberLabelNoAgency": "அதிகாரப்பூர்வ எண்",
   "warningEvidenceLabel": "அழைத்தவர் கூறியது",

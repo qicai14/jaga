@@ -72,7 +72,12 @@ void main() {
       ('ms', 1.0),
       ('en', 1.0),
       if (state == 'high') ...[('ta', 1.0), ('zh', 1.0)],
-      if (state == 'high' || state == 'medium') ...[('ms', 2.0), ('en', 2.0)],
+      if (state == 'high' ||
+          state == 'high-credentials' ||
+          state == 'medium') ...[
+        ('ms', 2.0),
+        ('en', 2.0),
+      ],
     ];
   }
 

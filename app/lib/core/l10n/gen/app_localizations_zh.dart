@@ -60,6 +60,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warningSemanticsLabel => '诈骗警告';
 
   @override
+  String get warningFromJaga => '来自 Jaga 的诈骗警告';
+
+  @override
   String warningOfficialNumberLabel(String agency) {
     return '$agency的官方电话';
   }

@@ -60,6 +60,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningSemanticsLabel => 'Scam warning';
 
   @override
+  String get warningFromJaga => 'Scam warning from Jaga';
+
+  @override
   String warningOfficialNumberLabel(String agency) {
     return '$agency\'s official number';
   }

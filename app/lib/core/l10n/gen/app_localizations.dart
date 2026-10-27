@@ -192,11 +192,17 @@ abstract class AppLocalizations {
   /// **'This call has signs of a scam'**
   String get cautionBannerText;
 
-  /// Route name of the full-screen Warning, read by TalkBack.
+  /// Visible label in the Warning masthead, next to the Jaga wordmark.
   ///
   /// In en, this message translates to:
   /// **'Scam warning'**
   String get warningSemanticsLabel;
+
+  /// Route name of the full-screen Warning, read by TalkBack once. Jaga is never translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Scam warning from Jaga'**
+  String get warningFromJaga;
 
   /// Label above the official number on the Warning. agency is the agency the caller claimed.
   ///

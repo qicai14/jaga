@@ -38,29 +38,41 @@ void main() {
       await pumpJaga(
         tester,
         ScreenFrame(
-          body: Column(children: [
-            for (final t in BigButtonTone.values)
-              BigButton(label: 'x', icon: Icons.phone, tone: t, onPressed: () {}),
-          ]),
+          body: Column(
+            children: [
+              for (final t in BigButtonTone.values)
+                BigButton(
+                  label: 'x',
+                  icon: Icons.phone,
+                  tone: t,
+                  onPressed: () {},
+                ),
+            ],
+          ),
         ),
         scale: scale,
       );
-      expect(find.byType(BigButton), findsNWidgets(4));
+      expect(
+        find.byType(BigButton),
+        findsNWidgets(BigButtonTone.values.length),
+      );
     });
   });
 
   group('HoldToConfirmButton', () {
     Widget host(VoidCallback onConfirmed) => ScreenFrame(
-          body: const SizedBox(),
-          bottomAction: HoldToConfirmButton(
-            label: 'This call is fine',
-            secondLabel: 'Keep holding',
-            onConfirmed: onConfirmed,
-          ),
-        );
+      body: const SizedBox(),
+      bottomAction: HoldToConfirmButton(
+        label: 'This call is fine',
+        secondLabel: 'Keep holding',
+        onConfirmed: onConfirmed,
+      ),
+    );
 
-    forEachScale('hold 1 s and release does not confirm; hold 2 s does',
-        (tester, scale) async {
+    forEachScale('hold 1 s and release does not confirm; hold 2 s does', (
+      tester,
+      scale,
+    ) async {
       var n = 0;
       await pumpJaga(tester, host(() => n++), scale: scale);
       final centre = tester.getCenter(find.byType(HoldToConfirmButton));
@@ -81,16 +93,19 @@ void main() {
       expect(n, 1);
     });
 
-    testWidgets('TalkBack: two semantic taps confirm, one does not',
-        (tester) async {
+    testWidgets('TalkBack: two semantic taps confirm, one does not', (
+      tester,
+    ) async {
       final handle = tester.ensureSemantics();
       var n = 0;
       await pumpJaga(tester, host(() => n++));
       tester.semantics.tap(find.semantics.byLabel('This call is fine'));
       await tester.pump();
       expect(n, 0);
-      expect(tester.getSemantics(find.byType(HoldToConfirmButton)).hint,
-          'Tap again to confirm');
+      expect(
+        tester.getSemantics(find.byType(HoldToConfirmButton)).hint,
+        'Tap again to confirm',
+      );
       tester.semantics.tap(find.semantics.byLabel('This call is fine'));
       await tester.pump();
       expect(n, 1);
@@ -125,16 +140,20 @@ void main() {
       await pumpJaga(
         tester,
         ScreenFrame(
-          body: Column(children: [
-            for (final t in BadgeTone.values)
-              StatusBadge(label: long, tone: t, icon: Icons.shield),
-          ]),
+          body: Column(
+            children: [
+              for (final t in BadgeTone.values)
+                StatusBadge(label: long, tone: t, icon: Icons.shield),
+            ],
+          ),
         ),
         scale: scale,
       );
       for (var i = 0; i < BadgeTone.values.length; i++) {
-        expect(tester.getSize(find.byType(StatusBadge).at(i)).height,
-            greaterThanOrEqualTo(40));
+        expect(
+          tester.getSize(find.byType(StatusBadge).at(i)).height,
+          greaterThanOrEqualTo(40),
+        );
       }
     });
   });
@@ -144,10 +163,12 @@ void main() {
       await pumpJaga(
         tester,
         ScreenFrame(
-          body: Column(children: [
-            for (final s in Stage.values) StageProgressBar(stage: s),
-            const StageProgressBar(stage: Stage.money, compact: true),
-          ]),
+          body: Column(
+            children: [
+              for (final s in Stage.values) StageProgressBar(stage: s),
+              const StageProgressBar(stage: Stage.money, compact: true),
+            ],
+          ),
         ),
         scale: scale,
       );
@@ -157,10 +178,14 @@ void main() {
 
     testWidgets('semantics reads step of 6', (tester) async {
       final handle = tester.ensureSemantics();
-      await pumpJaga(tester,
-          const ScreenFrame(body: StageProgressBar(stage: Stage.isolation)));
-      expect(find.bySemanticsLabel('Step 4 of 6: Told to keep it secret'),
-          findsOneWidget);
+      await pumpJaga(
+        tester,
+        const ScreenFrame(body: StageProgressBar(stage: Stage.isolation)),
+      );
+      expect(
+        find.bySemanticsLabel('Step 4 of 6: Told to keep it secret'),
+        findsOneWidget,
+      );
       expect(Stage.money.step, 6);
       expect(Stage.credentials.step, 6);
       handle.dispose();
@@ -177,11 +202,16 @@ void main() {
   });
 
   group('ReconnectingDot', () {
-    forEachScale('visible dot has a 48dp area and a label', (tester, scale) async {
+    forEachScale('visible dot has a 48dp area and a label', (
+      tester,
+      scale,
+    ) async {
       final handle = tester.ensureSemantics();
       await pumpJaga(
         tester,
-        const ScreenFrame(body: Row(children: [ReconnectingDot(visible: true)])),
+        const ScreenFrame(
+          body: Row(children: [ReconnectingDot(visible: true)]),
+        ),
         scale: scale,
       );
       expect(tester.getSize(find.byType(ReconnectingDot)), const Size(48, 48));
@@ -193,7 +223,9 @@ void main() {
       final handle = tester.ensureSemantics();
       await pumpJaga(
         tester,
-        const ScreenFrame(body: Row(children: [ReconnectingDot(visible: false)])),
+        const ScreenFrame(
+          body: Row(children: [ReconnectingDot(visible: false)]),
+        ),
       );
       expect(tester.getSize(find.byType(ReconnectingDot)), const Size(48, 48));
       expect(find.bySemanticsLabel('Reconnecting'), findsNothing);
@@ -202,8 +234,10 @@ void main() {
   });
 
   group('ShrinkToFitText', () {
-    forEachScale('shrinks to fit a box, never below the floor',
-        (tester, scale) async {
+    forEachScale('shrinks to fit a box, never below the floor', (
+      tester,
+      scale,
+    ) async {
       await pumpJaga(
         tester,
         Builder(
@@ -226,7 +260,10 @@ void main() {
       final size = tester.widget<Text>(find.byType(Text)).style!.fontSize!;
       expect(size, lessThan(52));
       expect(size, greaterThanOrEqualTo(32));
-      expect(tester.getSize(find.byType(Text)).height, lessThanOrEqualTo(300.5));
+      expect(
+        tester.getSize(find.byType(Text)).height,
+        lessThanOrEqualTo(300.5),
+      );
     });
 
     testWidgets('reports overflow at the floor', (tester) async {
@@ -271,14 +308,19 @@ void main() {
         tester,
         ScreenFrame(
           title: 'Title',
-          body: Column(children: [for (var i = 0; i < 30; i++) Text('line $i')]),
+          body: Column(
+            children: [for (var i = 0; i < 30; i++) Text('line $i')],
+          ),
           bottomAction: BigButton(label: 'Go', onPressed: () {}),
         ),
         scale: scale,
       );
       expect(tester.getTopLeft(find.text('Title')).dx, 24);
       expect(find.byType(BigButton), findsOneWidget);
-      expect(tester.getBottomRight(find.byType(BigButton)).dy, lessThanOrEqualTo(852));
+      expect(
+        tester.getBottomRight(find.byType(BigButton)).dy,
+        lessThanOrEqualTo(852),
+      );
     });
   });
 }

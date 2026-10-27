@@ -10,10 +10,12 @@ class DismissButton extends StatelessWidget {
     super.key,
     required this.tone,
     required this.onConfirmed,
+    this.maxTextScale,
   });
 
   final HoldTone tone;
   final VoidCallback onConfirmed;
+  final double? maxTextScale;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class DismissButton extends StatelessWidget {
           : lookupAppLocalizations(const Locale('en')).warningDismissLabel,
       tone: tone,
       height: 56,
+      maxTextScale: maxTextScale,
       hint: l.warningDismissHint,
       confirmHint: l.warningDismissConfirmHint,
       onConfirmed: onConfirmed,

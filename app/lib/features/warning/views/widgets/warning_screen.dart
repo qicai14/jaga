@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,13 +7,15 @@ import '../../../../core/l10n/gen/app_localizations.dart';
 import '../../../../core/theme/theme_context.dart';
 import '../../../../core/widgets/big_button.dart';
 import '../../../../core/widgets/hold_to_confirm_button.dart';
+import '../../../../core/widgets/jaga_wordmark.dart';
 import '../../../../core/widgets/reconnecting_dot.dart';
 import '../../../../core/widgets/shrink_to_fit_text.dart';
 import '../../view_models/warning_view_model.dart';
 import 'dismiss_button.dart';
 
-/// The full-screen Warning (high risk): the command first, then the counter-move
-/// with the official number, then the evidence. Edge to edge, red, no radius.
+/// The full-screen Warning (high risk), "the Jaga notice": a teal Jaga masthead,
+/// the command on one red band, then the counter-move with the official number
+/// and the evidence on paper. Only Hang up is pinned; dismiss ends the scroll.
 class WarningScreen extends StatefulWidget {
   const WarningScreen({
     super.key,
@@ -31,9 +35,17 @@ class WarningScreen extends StatefulWidget {
 }
 
 class _WarningScreenState extends State<WarningScreen> {
+  final _scroll = ScrollController();
+
   /// The command did not fit at the 32sp floor: it takes the space it needs and
-  /// only the lower region scrolls.
+  /// the band itself scrolls (last resort, huge text).
   bool _commandOverflows = false;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   void didUpdateWidget(WarningScreen old) {
@@ -46,114 +58,7 @@ class _WarningScreenState extends State<WarningScreen> {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final c = context.jagaColors;
-    final m = context.metrics;
-    final text = Theme.of(context).textTheme;
-    final styles = context.jagaText;
-    final content = widget.content;
     final instant = MediaQuery.disableAnimationsOf(context);
-    final command = content.command ?? l.warningCommandFallback;
-    final english = content.command == null ? null : content.commandEnglish;
-    final counterEnglish = content.counterMoveEnglish;
-    final number = content.officialNumber;
-    // Never on the credentials Warning (Q36).
-    final evidence = content.isCredentials || content.evidence.isEmpty
-        ? null
-        : content.evidence.first;
-
-    final commandRegion = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _commandOverflows
-            ? Text(
-                command,
-                style: styles.command.copyWith(
-                  fontSize: 32,
-                  color: c.onWarning,
-                ),
-              )
-            : Flexible(
-                child: ShrinkToFitText(
-                  text: command,
-                  style: styles.command.copyWith(color: c.onWarning),
-                  onOverflow: () {
-                    if (mounted) setState(() => _commandOverflows = true);
-                  },
-                ),
-              ),
-        // Shown once: when her language is missing the server sends English.
-        if (english != null && english != command) ...[
-          SizedBox(height: m.s),
-          Text(
-            english,
-            style: styles.commandEnglish.copyWith(color: c.onWarning),
-          ),
-        ],
-      ],
-    );
-
-    final detail = SizedBox(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (content.counterMove != null)
-            Text(
-              content.counterMove!,
-              style: text.bodyLarge?.copyWith(color: c.onWarning),
-            ),
-          if (counterEnglish != null &&
-              counterEnglish != content.counterMove) ...[
-            SizedBox(height: m.s),
-            Text(
-              counterEnglish,
-              style: text.bodyMedium?.copyWith(color: c.onWarning),
-            ),
-          ],
-          if (number != null) ...[
-            SizedBox(height: m.m),
-            Text(
-              content.agency == null
-                  ? l.warningOfficialNumberLabelNoAgency
-                  : l.warningOfficialNumberLabel(content.agency!),
-              style: text.bodyMedium?.copyWith(color: c.onWarning),
-            ),
-            // Read digit by digit, not as a quantity.
-            Text(
-              number,
-              semanticsLabel: number.replaceAllMapped(
-                RegExp(r'\d'),
-                (d) => '${d[0]} ',
-              ),
-              style: styles.officialNumber.copyWith(color: c.warningNumber),
-            ),
-          ],
-          if (evidence != null) ...[
-            SizedBox(height: m.l),
-            Text(
-              l.warningEvidenceLabel,
-              style: text.bodyMedium?.copyWith(color: c.onWarning),
-            ),
-            Text(
-              '“$evidence”',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: text.bodyLarge?.copyWith(
-                color: c.onWarning,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-
-    final rule = Divider(
-      height: m.l,
-      thickness: 2,
-      color: c.onWarning.withValues(alpha: 0.4),
-    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -163,105 +68,29 @@ class _WarningScreenState extends State<WarningScreen> {
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
-          label: l.warningSemanticsLabel,
+          label: l.warningFromJaga,
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: 1),
             duration: instant
                 ? Duration.zero
-                : const Duration(milliseconds: 300),
-            builder: (context, t, child) {
-              // First 200 ms the red field wipes down; the last 100 ms the content fades in.
-              final wipe = Curves.easeOutCubic.transform((t * 1.5).clamp(0, 1));
-              final fade = ((t - 2 / 3) * 3).clamp(0.0, 1.0);
-              return ClipRect(
-                clipper: _TopReveal(wipe),
-                child: ColoredBox(
-                  color: c.warning,
-                  child: Opacity(
-                    opacity: fade,
-                    alwaysIncludeSemantics: true,
-                    child: child,
-                  ),
-                ),
-              );
-            },
+                : const Duration(milliseconds: 150),
+            builder: (context, t, child) =>
+                Opacity(opacity: t, alwaysIncludeSemantics: true, child: child),
             child: Material(
-              color: c.warning,
-              child: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: m.l),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              color: Theme.of(context).colorScheme.surface,
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  final pad = MediaQuery.paddingOf(context);
+                  final body = box.maxHeight - pad.top - pad.bottom;
+                  return Column(
                     children: [
-                      Row(
-                        children: [
-                          ExcludeSemantics(
-                            child: Icon(
-                              content.isCredentials
-                                  ? Icons.pan_tool
-                                  : Icons.call_end,
-                              size: 40,
-                              color: c.onWarning,
-                            ),
-                          ),
-                          const Spacer(),
-                          ReconnectingDot(
-                            visible: widget.reconnecting,
-                            color: c.onWarning.withValues(alpha: 0.6),
-                          ),
-                        ],
-                      ),
-                      if (_commandOverflows)
-                        // Last resort (huge text): the command is still first, at
-                        // its 32sp floor, but it scrolls with the rest.
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [commandRegion, rule, detail],
-                            ),
-                          ),
-                        )
-                      else
-                        // The command sizes to its content (up to 55% of the
-                        // room, then it shrinks); the detail gets the rest.
-                        Expanded(
-                          child: LayoutBuilder(
-                            builder: (context, box) => Column(
-                              children: [
-                                ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxHeight: box.maxHeight * 0.55,
-                                  ),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: commandRegion,
-                                  ),
-                                ),
-                                rule,
-                                Expanded(
-                                  child: SingleChildScrollView(child: detail),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      SizedBox(height: m.s),
-                      BigButton(
-                        tone: BigButtonTone.onWarning,
-                        icon: Icons.call_end,
-                        label: l.warningHangUp,
-                        onPressed: widget.onHangUp,
-                      ),
-                      SizedBox(height: m.s),
-                      DismissButton(
-                        tone: HoldTone.onWarning,
-                        onConfirmed: widget.onDismiss,
-                      ),
-                      SizedBox(height: m.m),
+                      _masthead(context),
+                      _commandBand(context, body * 0.30),
+                      Expanded(child: _detail(context)),
+                      _footer(context),
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -269,18 +98,260 @@ class _WarningScreenState extends State<WarningScreen> {
       ),
     );
   }
-}
 
-/// Reveals the top [fraction] of the box.
-class _TopReveal extends CustomClipper<Rect> {
-  const _TopReveal(this.fraction);
+  Widget _masthead(BuildContext context) {
+    final c = context.jagaColors;
+    final m = context.metrics;
+    final l = AppLocalizations.of(context);
+    return Semantics(
+      header: true,
+      child: ColoredBox(
+        color: c.guarded,
+        child: SafeArea(
+          bottom: false,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: EdgeInsets.only(left: m.l, right: m.s),
+              child: Row(
+                children: [
+                  // The route name already says "Scam warning from Jaga".
+                  Expanded(
+                    child: ExcludeSemantics(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          JagaWordmark(color: c.onGuarded),
+                          SizedBox(width: m.m),
+                          Expanded(
+                            child: MediaQuery.withClampedTextScaling(
+                              maxScaleFactor: 1.5,
+                              child: Text(
+                                l.warningSemanticsLabel,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(color: c.onGuarded),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  ReconnectingDot(
+                    visible: widget.reconnecting,
+                    color: c.onGuarded,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-  final double fraction;
+  Widget _commandBand(BuildContext context, double maxHeight) {
+    final l = AppLocalizations.of(context);
+    final c = context.jagaColors;
+    final m = context.metrics;
+    final styles = context.jagaText;
+    final content = widget.content;
+    final command = content.command ?? l.warningCommandFallback;
+    // Shown once: when her language is missing the server sends English.
+    final english = content.command == null ? null : content.commandEnglish;
+    final scale = MediaQuery.textScalerOf(context).scale(1);
 
-  @override
-  Rect getClip(Size size) =>
-      Rect.fromLTWH(0, 0, size.width, size.height * fraction);
+    final band = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _commandOverflows
+            ? Text(
+                command,
+                style: styles.command.copyWith(
+                  fontSize: 32 / max(1.0, scale),
+                  color: c.onWarning,
+                ),
+              )
+            : Flexible(
+                child: ShrinkToFitText(
+                  text: command,
+                  style: styles.command.copyWith(color: c.onWarning),
+                  // The 32sp floor is what she sees, so it is divided by the scale.
+                  minFontSize: 32 / max(1.0, scale),
+                  onOverflow: () {
+                    if (mounted) setState(() => _commandOverflows = true);
+                  },
+                ),
+              ),
+        if (english != null && english != command) ...[
+          SizedBox(height: m.s),
+          // Secondary line: unscaled (30sp) so it never outsizes a shrunk command.
+          MediaQuery.withClampedTextScaling(
+            maxScaleFactor: 1.0,
+            child: Text(
+              english,
+              style: styles.commandEnglish.copyWith(color: c.onWarning),
+            ),
+          ),
+        ],
+      ],
+    );
 
-  @override
-  bool shouldReclip(_TopReveal old) => old.fraction != fraction;
+    return SizedBox(
+      width: double.infinity,
+      child: ColoredBox(
+        color: c.warning,
+        child: _commandOverflows
+            ? ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight * 1.5),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(m.l),
+                  child: band,
+                ),
+              )
+            : ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxHeight),
+                child: Padding(padding: EdgeInsets.all(m.l), child: band),
+              ),
+      ),
+    );
+  }
+
+  Widget _detail(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final m = context.metrics;
+    final text = Theme.of(context).textTheme;
+    final styles = context.jagaText;
+    final content = widget.content;
+    final counterEnglish = content.counterMoveEnglish;
+    final number = content.officialNumber;
+    // Never on the credentials Warning (Q36).
+    final evidence = content.isCredentials || content.evidence.isEmpty
+        ? null
+        : content.evidence.first;
+
+    // Body text is capped at 1.4 on this screen (31sp is still the largest in the app).
+    final texts = MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.4,
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (content.counterMove != null)
+              Text(
+                content.counterMove!,
+                style: text.bodyLarge?.copyWith(color: scheme.onSurface),
+              ),
+            if (number != null) ...[
+              SizedBox(height: m.l),
+              Text(
+                content.agency == null
+                    ? l.warningOfficialNumberLabelNoAgency
+                    : l.warningOfficialNumberLabel(content.agency!),
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              // One line, never wraps; it shrinks instead. Read one numeral at a time.
+              MediaQuery.withClampedTextScaling(
+                maxScaleFactor: 1.2,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    number,
+                    maxLines: 1,
+                    softWrap: false,
+                    semanticsLabel: number.replaceAllMapped(
+                      RegExp(r'\d'),
+                      (d) => '${d[0]} ',
+                    ),
+                    style: styles.officialNumber.copyWith(
+                      color: scheme.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (counterEnglish != null &&
+                counterEnglish != content.counterMove) ...[
+              SizedBox(height: m.m),
+              Text(
+                counterEnglish,
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (evidence != null) ...[
+              Divider(height: m.xl, color: scheme.outlineVariant),
+              Text(
+                l.warningEvidenceLabel,
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                '“$evidence”',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: text.bodyLarge?.copyWith(color: scheme.onSurface),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, box) => Scrollbar(
+        controller: _scroll,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          controller: _scroll,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: box.maxHeight),
+            child: Padding(
+              padding: EdgeInsets.all(m.l),
+              // At 1.0 the dismiss rests just above Hang up; at large text it
+              // follows the content.
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  texts,
+                  SizedBox(height: m.xl),
+                  DismissButton(
+                    tone: HoldTone.calm,
+                    maxTextScale: 1.5,
+                    onConfirmed: widget.onDismiss,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _footer(BuildContext context) {
+    final m = context.metrics;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: m.l, vertical: m.m),
+        child: BigButton(
+          tone: BigButtonTone.hangUp,
+          icon: Icons.call_end,
+          label: AppLocalizations.of(context).warningHangUp,
+          maxTextScale: 1.5,
+          onPressed: widget.onHangUp,
+        ),
+      ),
+    );
+  }
 }

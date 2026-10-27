@@ -47,7 +47,10 @@
   "@cautionBannerText": { "description": "Caution banner text (medium risk), glossary wording." },
 
   "warningSemanticsLabel": "Scam warning",
-  "@warningSemanticsLabel": { "description": "Route name of the full-screen Warning, read by TalkBack." },
+  "@warningSemanticsLabel": { "description": "Visible label in the Warning masthead, next to the Jaga wordmark." },
+
+  "warningFromJaga": "Scam warning from Jaga",
+  "@warningFromJaga": { "description": "Route name of the full-screen Warning, read by TalkBack once. Jaga is never translated." },
 
   "warningOfficialNumberLabel": "{agency}'s official number",
   "@warningOfficialNumberLabel": {

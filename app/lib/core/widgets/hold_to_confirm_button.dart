@@ -30,6 +30,7 @@ class HoldToConfirmButton extends StatefulWidget {
     this.height = 64,
     this.hint,
     this.confirmHint,
+    this.maxTextScale,
   });
 
   final String label;
@@ -44,6 +45,9 @@ class HoldToConfirmButton extends StatefulWidget {
   /// Semantics hints; default to the shared "Hold for 2 seconds" / "Tap again" copy.
   final String? hint;
   final String? confirmHint;
+
+  /// Caps the label's text scale; null follows the system.
+  final double? maxTextScale;
 
   @override
   State<HoldToConfirmButton> createState() => _HoldToConfirmButtonState();
@@ -116,17 +120,17 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
     final m = context.metrics;
     final (bg, fill, fg, border) = switch (widget.tone) {
       HoldTone.calm => (
-          scheme.surface,
-          scheme.primaryContainer,
-          scheme.onPrimaryContainer,
-          scheme.outline
-        ),
+        scheme.surface,
+        scheme.primaryContainer,
+        scheme.onPrimaryContainer,
+        scheme.outline,
+      ),
       HoldTone.onWarning => (
-          c.warning,
-          c.onWarning.withValues(alpha: 0.22),
-          c.onWarning,
-          c.onWarning
-        ),
+        c.warning,
+        c.onWarning.withValues(alpha: 0.22),
+        c.onWarning,
+        c.onWarning,
+      ),
     };
     final radius = BorderRadius.circular(m.radiusMedium);
 
@@ -168,23 +172,30 @@ class _HoldToConfirmButtonState extends State<HoldToConfirmButton>
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(
-                        horizontal: m.m, vertical: m.s + m.xs),
+                      horizontal: m.m,
+                      vertical: m.s + m.xs,
+                    ),
                     child: SizedBox(
                       width: double.infinity,
                       child: AnimatedBuilder(
                         animation: _controller,
                         builder: (_, _) {
                           final active = _controller.value > 0 || _armed;
-                          return Text(
+                          final label = Text(
                             active && widget.secondLabel != null
                                 ? widget.secondLabel!
                                 : widget.label,
                             textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelLarge
+                            style: Theme.of(context).textTheme.labelLarge
                                 ?.copyWith(color: fg),
                           );
+                          final cap = widget.maxTextScale;
+                          return cap == null
+                              ? label
+                              : MediaQuery.withClampedTextScaling(
+                                  maxScaleFactor: cap,
+                                  child: label,
+                                );
                         },
                       ),
                     ),

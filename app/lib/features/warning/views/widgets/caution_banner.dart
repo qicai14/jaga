@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/gen/app_localizations.dart';
 import '../../../../core/theme/theme_context.dart';
 import '../../../../core/widgets/hold_to_confirm_button.dart';
+import '../../../../core/widgets/jaga_wordmark.dart';
 import '../../../../core/widgets/reconnecting_dot.dart';
 import 'dismiss_button.dart';
 
@@ -62,31 +63,24 @@ class CautionBanner extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ExcludeSemantics(
-                                  child: Icon(
-                                    Icons.hearing,
-                                    size: 32,
-                                    color: c.onCaution,
-                                  ),
+                                JagaWordmark(
+                                  color: c.onCaution,
+                                  size: JagaWordmarkSize.small,
                                 ),
-                                SizedBox(width: m.s),
-                                Expanded(
-                                  child: Text(
-                                    l.cautionBannerText,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleLarge
-                                        ?.copyWith(color: c.onCaution),
-                                  ),
-                                ),
+                                const Spacer(),
                                 if (reconnecting)
                                   ReconnectingDot(
                                     visible: true,
                                     color: c.onCaution,
                                   ),
                               ],
+                            ),
+                            SizedBox(height: m.s),
+                            Text(
+                              l.cautionBannerText,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(color: c.onCaution),
                             ),
                             SizedBox(height: m.m),
                             DismissButton(

@@ -18,6 +18,7 @@
   "stageStepSemantics": "第 {step} 步，共 {total} 步：{label}",
   "cautionBannerText": "这通电话有诈骗迹象",
   "warningSemanticsLabel": "诈骗警告",
+  "warningFromJaga": "来自 Jaga 的诈骗警告",
   "warningOfficialNumberLabel": "{agency}的官方电话",
   "warningOfficialNumberLabelNoAgency": "官方电话",
   "warningEvidenceLabel": "来电者说",
