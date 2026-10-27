@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/models/family_alert.dart';
@@ -66,8 +68,46 @@ class _FamilyAlertDemoState extends State<_FamilyAlertDemo> {
   }
 }
 
+/// An alert opened from a notification: the screen on a real dialer, so the
+/// Call action can be followed by hand all the way to the phone app.
+class _OpenedAlert extends StatefulWidget {
+  const _OpenedAlert(this.open);
+
+  final AlertOpen open;
+
+  @override
+  State<_OpenedAlert> createState() => _OpenedAlertState();
+}
+
+class _OpenedAlertState extends State<_OpenedAlert> {
+  final _push = FakeAlertPushService();
+  late final _repository = FamilyAlertRepository(
+    push: _push,
+    notifier: FakeAlertNotifier(),
+    person: familyPerson,
+  );
+  late final _vm = FamilyAlertViewModel(
+    repository: _repository,
+    dialer: const UrlDialerService(),
+    initial: widget.open.alert,
+  );
+
+  @override
+  void dispose() {
+    _vm.dispose();
+    _repository.dispose();
+    _push.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      FamilyAlertScreen(vm: _vm, autoDial: widget.open.autoDial);
+}
+
 /// Sends a real notification through [LocalAlertNotifier], to check the
-/// heads-up, the lock screen and the Call action on the emulator.
+/// heads-up, the lock screen and the Call action on the emulator. Opening the
+/// notification, or its Call action, shows the alert screen.
 class _NotificationTest extends StatefulWidget {
   const _NotificationTest();
 
@@ -77,22 +117,46 @@ class _NotificationTest extends StatefulWidget {
 
 class _NotificationTestState extends State<_NotificationTest> {
   LocalAlertNotifier? _notifier;
+  StreamSubscription<AlertOpen>? _opens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ready before the first tap, so a notification from an earlier run that
+    // relaunches the app is routed too. Off a device there is no plugin.
+    unawaited(_ready().then<void>((_) {}, onError: _noPlugin));
+  }
+
+  void _noPlugin(Object e) => debugPrint('No notifications here: $e');
 
   @override
   void dispose() {
+    _opens?.cancel();
     _notifier?.dispose();
     super.dispose();
   }
 
-  /// Created on the first tap: the plugin only exists on a device.
-  Future<void> _send(String raw) async {
+  Future<LocalAlertNotifier> _ready() async {
     var notifier = _notifier;
-    if (notifier == null) {
-      notifier = _notifier = LocalAlertNotifier(
-        locale: () => Localizations.localeOf(context),
-      );
-      await notifier.init();
-    }
+    if (notifier != null) return notifier;
+    notifier = _notifier = LocalAlertNotifier(
+      locale: () => Localizations.localeOf(context),
+    );
+    _opens = notifier.opens.listen(_show);
+    await notifier.init();
+    final launched = await notifier.launchOpen();
+    if (launched != null && mounted) _show(launched);
+    return notifier;
+  }
+
+  void _show(AlertOpen open) {
+    if (!mounted) return;
+    Navigator.of(context)
+        .push(MaterialPageRoute<void>(builder: (_) => _OpenedAlert(open)));
+  }
+
+  Future<void> _send(String raw) async {
+    final notifier = await _ready();
     await notifier.show(FamilyAlert.parse(raw), familyPerson);
   }
 
