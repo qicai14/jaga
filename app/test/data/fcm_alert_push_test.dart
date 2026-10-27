@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:ui' show Locale;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/bootstrap.dart';
+import 'package:jaga/data/models/linked_person.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
 import 'package:jaga/data/repositories/onboarding_repository.dart';
+import 'package:jaga/data/services/alert_notifier.dart';
 import 'package:jaga/data/services/fcm_alert_push_service.dart';
 import 'package:jaga/data/services/key_value_store.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
@@ -28,16 +31,55 @@ void main() {
   });
 
   group('showBackgroundAlert', () {
-    test('without a linked person nothing is read or shown', () async {
-      // No link: returns before any notification plugin is touched.
-      final store = InMemoryStore();
-      await showBackgroundAlert({familyAlertDataKey: familyMoney}, store);
-      store.values[onboardingProgressKey] = const OnboardingProgress().toJson();
-      await showBackgroundAlert({familyAlertDataKey: familyMoney}, store);
+    late FakeAlertNotifier notifier;
+    Locale? locale;
+    Future<AlertNotifier> create(Locale l) async {
+      locale = l;
+      return notifier;
+    }
+
+    setUp(() {
+      notifier = FakeAlertNotifier();
+      locale = null;
+    });
+
+    Future<void> run(KeyValueStore store, [String payload = familyMoney]) =>
+        showBackgroundAlert(
+          {familyAlertDataKey: payload},
+          store,
+          createNotifier: create,
+        );
+
+    test('a linked person gets the notification in her language', () async {
+      await run(
+        InMemoryStore()
+          ..values[onboardingProgressKey] = const OnboardingProgress(
+            language: 'zh',
+            link: LinkedPerson(name: 'Mum'),
+          ).toJson(),
+      );
+      expect(notifier.shown, hasLength(1));
+      expect(notifier.shown.single.$1.callId, 'call-1');
+      expect(notifier.shown.single.$2.name, 'Mum');
+      expect(locale, const Locale('zh'));
+    });
+
+    test('no link: nothing is shown', () async {
+      await run(
+        InMemoryStore()
+          ..values[onboardingProgressKey] = const OnboardingProgress().toJson(),
+      );
+      expect(notifier.shown, isEmpty);
+    });
+
+    test('unreadable progress: nothing is shown', () async {
+      await run(InMemoryStore()..values[onboardingProgressKey] = 'garbage');
+      expect(notifier.shown, isEmpty);
     });
 
     test('a bad payload is dropped before the store is read', () async {
-      await showBackgroundAlert({familyAlertDataKey: 'x'}, _ThrowingStore());
+      await run(_ThrowingStore(), 'x');
+      expect(notifier.shown, isEmpty);
     });
   });
 

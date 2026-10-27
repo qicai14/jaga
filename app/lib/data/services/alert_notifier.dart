@@ -103,7 +103,7 @@ AlertOpen? alertOpenFrom(NotificationResponse r) {
       autoDial: r.actionId == callActionId,
     );
   } catch (e) {
-    debugPrint('Ignoring a notification with a bad payload: $e');
+    debugPrint('Ignoring a notification with a bad payload: ${e.runtimeType}');
     return null;
   }
 }

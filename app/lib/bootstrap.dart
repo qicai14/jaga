@@ -12,10 +12,10 @@ import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
 import 'data/services/auth_service.dart';
-import 'data/services/fcm_alert_push_service.dart';
-import 'data/services/device_setup_service.dart';
 import 'data/services/copilot_pause_service.dart';
+import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
+import 'data/services/fcm_alert_push_service.dart';
 import 'data/services/key_value_store.dart';
 import 'data/services/onboarding_api_service.dart';
 import 'data/services/share_service.dart';
@@ -80,7 +80,6 @@ Future<AppDependencies> createDependencies() async {
     pause: FakeCopilotPauseService(),
     timeline: FakeTimelineService(),
     initAlerts: notifier.init,
-    auth: auth,
   );
 }
 
