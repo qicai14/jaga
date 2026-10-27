@@ -53,7 +53,6 @@ class _WarningScreenState extends State<WarningScreen> {
     final content = widget.content;
     final instant = MediaQuery.disableAnimationsOf(context);
     // Big text: the counter-move clamps so the official number is reachable.
-    final bigText = MediaQuery.textScalerOf(context).scale(10) >= 15;
 
     final command = content.command ?? l.warningCommandFallback;
     final english = content.command == null ? null : content.commandEnglish;
@@ -104,8 +103,6 @@ class _WarningScreenState extends State<WarningScreen> {
           if (content.counterMove != null)
             Text(
               content.counterMove!,
-              maxLines: bigText ? 2 : null,
-              overflow: bigText ? TextOverflow.ellipsis : null,
               style: text.bodyLarge?.copyWith(color: c.onWarning),
             ),
           if (counterEnglish != null &&
@@ -113,8 +110,6 @@ class _WarningScreenState extends State<WarningScreen> {
             SizedBox(height: m.s),
             Text(
               counterEnglish,
-              maxLines: bigText ? 2 : null,
-              overflow: bigText ? TextOverflow.ellipsis : null,
               style: text.bodyMedium?.copyWith(color: c.onWarning),
             ),
           ],

@@ -126,6 +126,29 @@ void main() {
     expect(tester.getRect(find.text('+60 3-2266 2222')).bottom, lessThan(hang));
   });
 
+  testWidgets(
+    '3c high at 2.0: counter-move is never clamped, number scrolls into view',
+    (tester) async {
+      final rig = await pump(tester, 2.0);
+      await emit(tester, rig, extHigh);
+      for (final t in tester.widgetList<Text>(
+        find.textContaining('Hubungi PDRM sendiri'),
+      )) {
+        expect(t.maxLines, isNull);
+        expect(t.overflow, isNot(TextOverflow.ellipsis));
+      }
+      await tester.scrollUntilVisible(
+        find.text('+60 3-2266 2222'),
+        50,
+        scrollable: find.descendant(
+          of: find.byType(WarningScreen),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      expect(find.text('+60 3-2266 2222'), findsOneWidget);
+    },
+  );
+
   // Note: flutter_test lays text out in Ahem (every glyph 1em wide), roughly 1.6x
   // wider than Noto Sans, so these are worst-case sizes.
   forEachScale('4 high, 73-character command and English: never below 32sp', (
