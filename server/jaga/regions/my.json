@@ -1,0 +1,28 @@
+{
+  "_placeholder": "command and counterMove are stand-ins pending the phrase library (#6); phrases are a first pass for the Macau script pack",
+  "command": "Letak telefon. Hang up.",
+  "counterMove": "Say you will call back, then phone the official number yourself. Beritahu anda akan telefon semula.",
+  "phrases": {
+    "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked"],
+    "authority": ["pdrm", "polis diraja", "inspektor", "lhdn", "bank negara", "mahkamah", "police officer"],
+    "fear": ["waran tangkap", "arrest warrant", "akan ditangkap", "dibekukan", "money laundering", "wang haram"],
+    "isolation": ["jangan letak telefon", "do not hang up", "rahsia siasatan", "keep this confidential"],
+    "handoff": ["sambungkan anda kepada", "transfer you to", "video call", "skype"],
+    "money": ["pindahkan wang", "transfer the money", "bayar jaminan", "wang jaminan"],
+    "credentials": ["kata laluan", "password", "nombor kad", "card number"]
+  },
+  "hardTriggers": {
+    "akaun selamat": "money",
+    "safe account": "money",
+    "nombor tac": "credentials",
+    "kod tac": "credentials",
+    "tac code": "credentials",
+    "jangan beritahu sesiapa": "isolation",
+    "don't tell anyone": "isolation"
+  },
+  "userDisclosure": {
+    "TAC read out": "(?<!\\d)\\d(?:[ -]?\\d){5}(?!\\d)",
+    "account number read out": "(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
+    "IC read out": "(?<!\\d)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])-?\\d{2}-?\\d{4}(?!\\d)"
+  }
+}
