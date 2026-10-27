@@ -8,12 +8,15 @@ import asyncio
 import base64
 import json
 import logging
+import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from xml.sax.saxutils import escape, quoteattr
 
-from fastapi import APIRouter, WebSocket, status
+from fastapi import APIRouter, HTTPException, Request, WebSocket, status
+from fastapi.responses import Response
 
-from jaga import asr
+from jaga import asr, twilio_auth
 from jaga.stages import StageTracker, load_pack
 
 router = APIRouter()
@@ -54,11 +57,53 @@ class Call:
 calls: dict[str, Call] = {}
 
 
+@router.post("/twilio/voice")
+async def voice(request: Request) -> Response:
+    await twilio_auth.require_voice(request)
+    # shortcut: every call is the default region's one protected user and rings one app identity, until a
+    # protected-user registry (setup, #12/#19) maps the dialled number to a user.
+    region = os.environ.get("JAGA_DEFAULT_REGION", "")
+    identity = os.environ.get("JAGA_APP_CLIENT_IDENTITY", "")
+    if not identity:
+        raise HTTPException(503, "JAGA_APP_CLIENT_IDENTITY is not set")
+    twiml = (
+        '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
+        f'<Stream url={quoteattr(twilio_auth.stream_url(request))} track="both_tracks">'
+        f'<Parameter name="region" value={quoteattr(region)}/></Stream></Start>'
+        f"<Dial><Client>{escape(identity)}</Client></Dial></Response>"
+    )
+    return Response(twiml, media_type="text/xml")
+
+
+def put(queue: asyncio.Queue, item: bytes | None) -> None:
+    """Queue audio, dropping the oldest when Muse falls behind (its limit is 5 s ahead of processing)."""
+    # shortcut: 250 chunks is 5 s at Twilio's 20 ms; dropped audio is a gap in the transcript, not a stall.
+    if queue.full():
+        queue.get_nowait()
+    queue.put_nowait(item)
+
+
+async def listen(call: Call, transcriber: asr.Transcriber, leg: str, audio: asyncio.Queue) -> None:
+    """One leg's worker: transcribes its audio in order, so reading the stream never waits on Muse."""
+    while (chunk := await audio.get()) is not None:
+        try:
+            line = await transcriber.transcribe(leg, chunk)
+            change = call.tracker.hear(leg, line) if line else None
+            if change:
+                await call.publish(**change)
+        except Exception as e:
+            # Type only: the message could quote a transcript. The call goes on; this chunk is lost.
+            log.warning("call %s %s leg: transcribing failed (%s)", call.call_id, leg, type(e).__name__)
+
+
 @router.websocket("/twilio/media")
 async def media(ws: WebSocket) -> None:
+    if not twilio_auth.check(ws, {}):
+        await ws.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
     await ws.accept()
-    transcriber = asr.transcriber()
-    call = None
+    call, transcriber = None, None
+    legs: dict[str, tuple[asyncio.Queue, asyncio.Task]] = {}
     try:
         async for text in ws.iter_text():
             msg = json.loads(text)
@@ -76,20 +121,37 @@ async def media(ws: WebSocket) -> None:
                         return
                     call = calls[sid] = Call(sid, tracker)
                     await call.publish("none", "low")
+                transcriber = asr.transcriber(call.tracker.pack)
             elif msg["event"] == "media" and call is not None:
                 leg = LEGS.get(msg["media"]["track"])
                 if leg is not None:
-                    line = await transcriber.transcribe(leg, base64.b64decode(msg["media"]["payload"]))
-                    change = call.tracker.hear(leg, line) if line else None
-                    if change:
-                        await call.publish(**change)
+                    if leg not in legs:
+                        queue = asyncio.Queue(maxsize=250)
+                        legs[leg] = queue, asyncio.create_task(listen(call, transcriber, leg, queue))
+                    put(legs[leg][0], base64.b64decode(msg["media"]["payload"]))
             elif msg["event"] == "stop":
                 break
     except (ValueError, KeyError, TypeError):
         pass  # malformed Media Streams message: end the call below instead of a 1011 with a stack trace
     finally:
-        if call is not None:
-            await call.end()
+        for queue, _ in legs.values():
+            put(queue, None)
+        # Let queued audio finish, but not forever if Muse hangs.
+        _, hung = await asyncio.wait([task for _, task in legs.values()], timeout=5) if legs else (None, ())
+        for task in hung:
+            task.cancel()
+        try:
+            if transcriber is not None:
+                async with asyncio.timeout(5):  # whatever Muse does, the call still ends below
+                    for leg, line in await transcriber.close():
+                        change = call.tracker.hear(leg, line)
+                        if change:
+                            await call.publish(**change)
+        except TimeoutError:
+            log.warning("call %s: Muse Voice Transcribe took too long to close", call.call_id)
+        finally:
+            if call is not None:
+                await call.end()
 
 
 @router.websocket("/calls/{call_id}/stages")

@@ -7,6 +7,7 @@ account number or IC. Rules alone reach a Caution; a hard trigger or money/crede
 import json
 import os
 import re
+from collections import deque
 from pathlib import Path
 
 DIR = Path(__file__).parent / "regions"
@@ -36,17 +37,51 @@ class StageTracker:
     def __init__(self, pack: dict):
         self.pack = pack
         self.disclosure = {label: re.compile(rx) for label, rx in pack["userDisclosure"].items()}
+        words = sorted(pack["digitWords"], key=len, reverse=True)
+        self.digit_words = re.compile(rf"\b({'|'.join(map(re.escape, words))})\b")
+        self.code_ask, self.bare_tac = re.compile(pack["codeAsk"]), re.compile(pack["bareTac"])
         self.stage, self.risk = "none", "low"
+        # Each leg's last two lines, so a phrase or number split across up to three lines matches.
+        self.prev: dict[str, deque[str]] = {}
+        self.asked = (
+            0  # user lines left in which a bare six-digit run counts as a TAC (the caller just asked)
+        )
+
+    def digits(self, text: str) -> str:
+        """Spoken digits as numerals, joined into one number: 'empat lapan, dua' -> '482'."""
+        text = self.digit_words.sub(lambda m: str(self.pack["digitWords"][m[1]]), text)
+        return re.sub(r"(?<=\d)[ ,.]+(?=\d)", "", text)
 
     def hear(self, leg: str, line: str) -> dict | None:
         """The new stage-update fields if this line changed the call's stage or risk, else None."""
         text, hard = line.lower(), []
+        if leg == "user":
+            text = self.digits(text)
+        lines = self.prev.setdefault(leg, deque(maxlen=2))
+        prev = " ".join(lines)
+        window = f"{prev} {text}"
+        lines.append(text)
+        if leg == "user":
+            window = self.digits(window)
+        # A match wholly inside the earlier lines already counted.
         if leg == "caller":
-            hits = [(s, p) for s, ps in self.pack["phrases"].items() for p in ps if p in text]
-            hard = [(s, p) for p, s in self.pack["hardTriggers"].items() if p in text]
+            fresh = lambda p: p in window and p not in prev  # noqa: E731
+            hits = [(s, p) for s, ps in self.pack["phrases"].items() for p in ps if fresh(p)]
+            hard = [(s, p) for p, s in self.pack["hardTriggers"].items() if fresh(p)]
+            # shortcut: the ask lasts three user lines, however long they take; fine for a spoken exchange.
+            if any(s == "credentials" for s, _ in hard) or self.code_ask.search(text):
+                self.asked = 3
         else:
+            rxs = dict(self.disclosure)
+            if self.asked:
+                self.asked -= 1
+                rxs["TAC read out"] = self.bare_tac
             # Evidence is the label, never what the user said: it must not echo their digits.
-            hits = [("credentials", label) for label, rx in self.disclosure.items() if rx.search(text)]
+            hits = [
+                ("credentials", label)
+                for label, rx in rxs.items()
+                if rx.search(window) and not rx.search(prev)
+            ]
         found = hits + hard
         # max keeps the first of equals: user disclosure ties up to credentials, a caller never flips it back.
         seen = [s for s, _ in found]
