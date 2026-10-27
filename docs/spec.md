@@ -148,7 +148,9 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - `recommendedHoldMinutes`: 30 at `money`/`credentials`, 15 at `isolation`/`handoff`, 0 otherwise.
 - Only a family co-pilot can clear it early. The protected user's dismissal never clears it.
 
-### Contracts (finalise on 26 Oct by ADR, in their own PR)
+### Contracts (settled in ADR 0007)
+Settled by [ADR 0007](adr/0007-contracts-v1.md): the server sends resolved phrase-library text, not a phrase ID.
+Schemas in `contracts/`, examples in `contracts/fixtures/`. The notes below are the original brief.
 - `stage-update`: `command` and `counterMove` are non-null only when `risk=high`. Add the counter-move phrase ID if the
   app renders text locally, or keep resolved text from the server; decide in the contracts PR.
 - `pause`: add the request shape carrying the pause token.

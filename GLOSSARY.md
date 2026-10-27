@@ -23,6 +23,7 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **Command** | The single instruction shown first in a warning ("Letak telefon. Hang up.") |
 | **Counter-move** | The coached next step that breaks the scam, e.g. "say you'll call back, then phone the station's official number" |
 | **Phrase library** | The fixed, reviewed text for every command and counter-move, per stage and language. Nothing else is shown to the protected user |
+| **Family alert** | A push to a protected user's family co-pilots about one call: an alert when the call reaches `isolation`, then `money` or `credentials`, or a "may be genuine" follow-up when Muse Spark lowers a Warning. A summary, never the transcript |
 | **Link code** | The code shown at setup that a family co-pilot enters to follow a protected user |
 | **Stage timeline** | What's kept after a call: stages, times, risk changes and masked evidence quotes. Never the transcript or audio |
 | **Jaga Pause** | Bank-facing signal: "is this customer mid-scam?". The Demo Bank uses it to hold a transfer |
