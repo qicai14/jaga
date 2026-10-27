@@ -12,12 +12,14 @@ import 'data/services/key_value_store.dart';
 import 'data/services/onboarding_api_service.dart';
 import 'data/services/share_service.dart';
 
-/// The real services. The server and push services are still the fakes: no
-/// contract and no Firebase project yet.
+/// The real services, except the server and push, which are still Fakes.
 Future<AppDependencies> createDependencies() async {
+  // TODO(#1): the real onboarding API and push services replace these Fakes once
+  // contracts v1 and the Firebase project land.
+  debugPrint('Jaga is running on Fake onboarding API and push services.');
   final pin = PinRepository(store: const SecureStore());
   final onboarding = await OnboardingRepository.load(
-    store: PreferencesStore(),
+    store: const SecureStore(),
     api: FakeOnboardingApiService(),
     pin: pin,
   );

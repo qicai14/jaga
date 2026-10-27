@@ -14,21 +14,35 @@ const _progressKey = 'onboarding.progress';
 /// [update] is called and is saved straight after, so the app (locale, which
 /// screen is home) and the setup screens always agree.
 class OnboardingRepository {
-  OnboardingRepository._(this._store, this._api, this._pin, OnboardingProgress start)
-    : progress = ValueNotifier(start);
+  OnboardingRepository._(
+    this._store,
+    this._api,
+    this._pin,
+    OnboardingProgress start,
+  ) : progress = ValueNotifier(start);
 
   static Future<OnboardingRepository> load({
     required KeyValueStore store,
     required OnboardingApiService api,
     required PinRepository pin,
   }) async {
-    final raw = await store.read(_progressKey);
-    return OnboardingRepository._(
-      store,
-      api,
-      pin,
-      raw == null ? const OnboardingProgress() : OnboardingProgress.parse(raw),
-    );
+    return OnboardingRepository._(store, api, pin, await _readProgress(store));
+  }
+
+  /// Unreadable or corrupt progress means a fresh start. The value itself is
+  /// never logged: it can hold the registration.
+  static Future<OnboardingProgress> _readProgress(KeyValueStore store) async {
+    try {
+      final raw = await store.read(_progressKey);
+      return raw == null
+          ? const OnboardingProgress()
+          : OnboardingProgress.parse(raw);
+    } on Object catch (e) {
+      debugPrint(
+        'Starting setup afresh: saved progress is unreadable (${e.runtimeType})',
+      );
+      return const OnboardingProgress();
+    }
   }
 
   final KeyValueStore _store;
@@ -36,9 +50,15 @@ class OnboardingRepository {
   final PinRepository _pin;
   final ValueNotifier<OnboardingProgress> progress;
 
-  Future<void> update(OnboardingProgress next) {
+  /// A failed save is logged, not thrown: the screens carry on with what is in
+  /// memory and the next update tries again.
+  Future<void> update(OnboardingProgress next) async {
     progress.value = next;
-    return _store.write(_progressKey, next.toJson());
+    try {
+      await _store.write(_progressKey, next.toJson());
+    } on Object catch (e) {
+      debugPrint('Could not save setup progress (${e.runtimeType})');
+    }
   }
 
   /// Registers a protected user. Role and region are locked from then on.

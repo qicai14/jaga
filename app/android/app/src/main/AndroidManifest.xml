@@ -6,6 +6,7 @@
     <!-- Jaga hears the caller during a Jaga line call. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
+        android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:label="jaga"
         android:name="${applicationName}"

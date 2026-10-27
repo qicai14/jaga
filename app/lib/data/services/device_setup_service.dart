@@ -4,7 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// What the phone must allow for Jaga to work (onboarding.md section 5).
-enum SetupItem { notifications, microphone, fullScreenAlerts, callingAccount, autostart }
+enum SetupItem {
+  notifications,
+  microphone,
+  fullScreenAlerts,
+  callingAccount,
+  autostart,
+}
 
 /// The items Android can report. A protected phone needs them all; the calling
 /// account waits for #12 and Xiaomi autostart can't be read.
@@ -28,23 +34,21 @@ abstract class DeviceSetupService {
   Future<bool> isXiaomi();
 }
 
-/// Must match `applicationId` in android/app/build.gradle.kts.
-const _appPackage = 'my.jaga.jaga';
-const _fullScreenIntentSdk = 34;
-
 class AndroidDeviceSetupService implements DeviceSetupService {
   const AndroidDeviceSetupService();
 
   static const _channel = MethodChannel('jaga/device_setup');
 
-  Future<int> _sdk() async => (await DeviceInfoPlugin().androidInfo).version.sdkInt;
+  /// Asked of the platform, so it can't drift from the build's `applicationId`.
+  Future<String> _package() async =>
+      (await _channel.invokeMethod<String>('packageName'))!;
 
   @override
   Future<Map<SetupItem, bool>> check() async => {
     SetupItem.notifications: await Permission.notification.isGranted,
     SetupItem.microphone: await Permission.microphone.isGranted,
     SetupItem.fullScreenAlerts:
-        await _sdk() < _fullScreenIntentSdk ||
+        // Below Android 14 the platform side reports true.
         await _channel.invokeMethod<bool>('canUseFullScreenIntent') == true,
     // Waits for #12 (twilio_voice); counted as done until then.
     SetupItem.callingAccount: false,
@@ -58,9 +62,11 @@ class AndroidDeviceSetupService implements DeviceSetupService {
         final status = await Permission.notification.request();
         if (status.isPermanentlyDenied) {
           await _open(
-            const AndroidIntent(
+            AndroidIntent(
               action: 'android.settings.APP_NOTIFICATION_SETTINGS',
-              arguments: {'android.provider.extra.APP_PACKAGE': _appPackage},
+              arguments: {
+                'android.provider.extra.APP_PACKAGE': await _package(),
+              },
             ),
           );
         }
@@ -70,9 +76,9 @@ class AndroidDeviceSetupService implements DeviceSetupService {
         }
       case SetupItem.fullScreenAlerts:
         await _open(
-          const AndroidIntent(
+          AndroidIntent(
             action: 'android.settings.MANAGE_APP_USE_FULL_SCREEN_INTENT',
-            data: 'package:$_appPackage',
+            data: 'package:${await _package()}',
           ),
         );
       case SetupItem.autostart:
@@ -99,7 +105,8 @@ class AndroidDeviceSetupService implements DeviceSetupService {
 
   @override
   Future<bool> isXiaomi() async {
-    final maker = (await DeviceInfoPlugin().androidInfo).manufacturer.toLowerCase();
+    final maker = (await DeviceInfoPlugin().androidInfo).manufacturer
+        .toLowerCase();
     return const ['xiaomi', 'redmi', 'poco'].contains(maker);
   }
 }
