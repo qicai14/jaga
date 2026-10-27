@@ -168,7 +168,7 @@
   "@onboardingPermNotificationsWhy": {"description": "Permission row reason."},
   "onboardingPermMicrophone": "Microphone",
   "@onboardingPermMicrophone": {"description": "Permission row title."},
-  "onboardingPermMicrophoneWhy": "Lets Jaga hear the caller.",
+  "onboardingPermMicrophoneWhy": "Lets you talk on calls through Jaga.",
   "@onboardingPermMicrophoneWhy": {"description": "Permission row reason."},
   "onboardingPermFullScreen": "Full-screen alerts",
   "@onboardingPermFullScreen": {"description": "Permission row title."},

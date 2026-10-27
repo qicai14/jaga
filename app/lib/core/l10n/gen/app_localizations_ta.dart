@@ -252,7 +252,8 @@ class AppLocalizationsTa extends AppLocalizations {
   String get onboardingPermMicrophone => 'ஒலிவாங்கி';
 
   @override
-  String get onboardingPermMicrophoneWhy => 'அழைப்பவரை Jaga கேட்க உதவும்.';
+  String get onboardingPermMicrophoneWhy =>
+      'Jaga மூலம் அழைப்புகளில் பேச உதவும்.';
 
   @override
   String get onboardingPermFullScreen => 'முழுத்திரை எச்சரிக்கைகள்';

@@ -15,7 +15,8 @@ lib/data/models/registration.dart          {protectedUserId, jagaLineNumber, pau
 lib/data/services/onboarding_api_service.dart  abstract register(), join(code, name), copilots(); + Fake (fixtures)
 lib/data/services/device_setup_service.dart   abstract check(): Map<SetupItem, bool>; fix(SetupItem); isXiaomi
                                            MethodChannelDeviceSetupService (Kotlin, MainActivity) + Fake
-lib/data/services/progress_store.dart      shared_preferences; PinStore: salted SHA-256 hash in flutter_secure_storage
+lib/data/services/key_value_store.dart    KeyValueStore: SecureStore (flutter_secure_storage, Keystore-backed) + InMemoryStore for tests
+lib/data/repositories/pin_repository.dart  co-pilot lock: salted SHA-256 hash, wrong-try count and lock expiry, all in SecureStore
 lib/data/repositories/onboarding_repository.dart
 lib/features/onboarding/view_models/onboarding_view_model.dart     one VM, steps as an enum per role
 lib/features/onboarding/views/onboarding_screen.dart, views/steps/<step>_step.dart
@@ -29,7 +30,10 @@ scrolls, `bottomAction` = `BigButton(onboardingContinue)`, disabled until the st
 **Back:** the AppBar arrow and system back go to the previous step (values kept). Step 1 back exits the app. After
 registration (end of step 3) the role and region are locked: going back to step 1–3 shows them read-only. Step 10 has no
 back. **Persistence:** after every Continue, `OnboardingProgress` is saved; a relaunch resumes at the saved step. Step 4
-is re-checked on resume, never trusted from storage. Done clears the progress and stores `onboardingComplete`.
+is re-checked on resume, never trusted from storage. Done keeps the progress and sets its `complete` flag (the status screen and settings read the registration and language
+from it); reset replaces it with a fresh one. The progress is in `SecureStore` (it holds the registration), and an
+unreadable or corrupt record means a fresh start. The PIN hash is not strong on its own (4 digits can be guessed
+offline): the protection is the lockout and the Keystore.
 
 ## 3. Protected flow (10 steps)
 | # | Step | Content and states |
@@ -91,6 +95,9 @@ If a step-4 check fails on resume, the screen shows the `needsAttention` state (
 - `copilots()` → names (status screen, step 8).
 - `join(linkCode, copilotName, fcmToken)` → `protectedUserName`, `protectedUserPhone` (family Call button), or an error
   `invalid | expired | full`.
+- **Contract note for #1:** `checkLinkCode(code)` (the app calls it before asking for names, so the co-pilot sees
+  invalid/expired/full first) must be rate-limited server-side and must **not** consume the code; only `join` does.
+  Without a limit it lets anyone guess six-digit codes.
 **Until then:** `FakeOnboardingApiService` returns fixtures (Jaga line `+15550100199`, token `JAGA-7Q4M-2KXP-9D3F`, code
 `482913`; join code `000000` = full, `111111` = expired, others wrong). Fixtures are Dart, not JSON, until a schema
 exists (no schema test).
@@ -108,7 +115,7 @@ exists (no schema test).
 | `onboardingSettingUp` / `onboardingNetworkError` | Setting up… / Can't reach Jaga. Check the internet and try again. |
 | `onboardingPermissionsTitle` / `onboardingFix` / `onboardingFixedIt` | Phone permissions / Fix / I've done this |
 | `onboardingPerm{Notifications,Microphone,FullScreen,CallingAccount,Autostart}` | Notifications / Microphone / Full-screen alerts / Calling account / Start automatically |
-| `onboardingPerm…Why` (one each) | Shows alerts. / Lets Jaga hear the caller. / Lets the warning fill the screen. / Lets calls ring in Jaga. / Keeps Jaga running on Xiaomi phones. |
+| `onboardingPerm…Why` (one each) | Shows alerts. / Lets you talk on calls through Jaga. / Lets the warning fill the screen. / Lets calls ring in Jaga. / Keeps Jaga running on Xiaomi phones. |
 | `onboardingAfterCallSetup` | Set up later with calls |
 | `onboardingForwardTitle` / `onboardingForwardBody` | Forward calls to Jaga / Dial this code once. Calls to this phone will then ring in Jaga. |
 | `onboardingDialNow` / `onboardingCheckForwarding` / `onboardingForwardDone` | Dial now / Check forwarding / I've dialled it |
@@ -163,3 +170,13 @@ Manifest: `USE_FULL_SCREEN_INTENT`, `RECORD_AUDIO`, `POST_NOTIFICATIONS`.
 6. The call-forwarding step has a "Skip" that appears only under `kDebugMode`.
 7. The lock-screen notification shows the stage and agency.
 8. No battery-optimisation item in the permissions checklist.
+9. Accepted deviations from the first draft of this brief:
+   - `checkLinkCode(code)` is a separate call from `join` (see the contract note in section 7).
+   - Progress is kept with a `complete` flag, not cleared (section 2).
+   - The calling-account row is neutral (clock icon, "Set up later with calls", no Fix), not red: it can't be fixed until #12.
+   - On Xiaomi, Redmi and POCO the autostart row blocks Continue until the family ticks "I've done this".
+   - The forwarding code is shown without spaces (`*21*+15550100199#`) and shrinks to fit one line.
+   - A matching PIN moves on to the next step by itself.
+   - A co-pilot starts in the phone's language when Jaga supports it, otherwise Malay.
+   - A linked co-pilot has no back from step 4 (the code is used up); on the names sub-step, back returns to the code.
+   - The microphone row says "Lets you talk on calls through Jaga": the server hears the caller (ADR 0002), the phone mic carries her own voice.

@@ -73,7 +73,7 @@
   "onboardingPermNotifications": "通知",
   "onboardingPermNotificationsWhy": "显示警报。",
   "onboardingPermMicrophone": "麦克风",
-  "onboardingPermMicrophoneWhy": "让 Jaga 听到来电者的声音。",
+  "onboardingPermMicrophoneWhy": "让您能通过 Jaga 通话。",
   "onboardingPermFullScreen": "全屏警报",
   "onboardingPermFullScreenWhy": "让警告占满整个屏幕。",
   "onboardingPermCallingAccount": "通话账户",

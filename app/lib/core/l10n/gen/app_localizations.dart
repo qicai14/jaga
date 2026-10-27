@@ -519,7 +519,7 @@ abstract class AppLocalizations {
   /// Permission row reason.
   ///
   /// In en, this message translates to:
-  /// **'Lets Jaga hear the caller.'**
+  /// **'Lets you talk on calls through Jaga.'**
   String get onboardingPermMicrophoneWhy;
 
   /// Permission row title.

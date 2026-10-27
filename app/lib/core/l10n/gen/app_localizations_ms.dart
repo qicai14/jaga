@@ -252,7 +252,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get onboardingPermMicrophoneWhy =>
-      'Membolehkan Jaga mendengar pemanggil.';
+      'Membolehkan anda bercakap semasa panggilan melalui Jaga.';
 
   @override
   String get onboardingPermFullScreen => 'Amaran skrin penuh';

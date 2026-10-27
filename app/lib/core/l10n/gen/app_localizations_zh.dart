@@ -245,7 +245,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingPermMicrophone => '麦克风';
 
   @override
-  String get onboardingPermMicrophoneWhy => '让 Jaga 听到来电者的声音。';
+  String get onboardingPermMicrophoneWhy => '让您能通过 Jaga 通话。';
 
   @override
   String get onboardingPermFullScreen => '全屏警报';

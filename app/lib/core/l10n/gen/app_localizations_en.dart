@@ -250,7 +250,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingPermMicrophone => 'Microphone';
 
   @override
-  String get onboardingPermMicrophoneWhy => 'Lets Jaga hear the caller.';
+  String get onboardingPermMicrophoneWhy =>
+      'Lets you talk on calls through Jaga.';
 
   @override
   String get onboardingPermFullScreen => 'Full-screen alerts';
