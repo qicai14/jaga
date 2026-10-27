@@ -50,9 +50,13 @@ async def media(ws: WebSocket) -> None:
     try:
         async for text in ws.iter_text():
             msg = json.loads(text)
-            if msg["event"] == "start":
-                call = calls[msg["start"]["callSid"]] = Call(msg["start"]["callSid"])
-                await call.publish("none", "low")
+            if msg["event"] == "start" and call is None:
+                sid = msg["start"]["callSid"]
+                call = calls.get(sid)
+                # A reconnect keeps a live call's Call, so stage clients following it still get the end.
+                if call is None or call.ended:
+                    call = calls[sid] = Call(sid)
+                    await call.publish("none", "low")
             elif msg["event"] == "media" and call is not None:
                 leg = LEGS.get(msg["media"]["track"])
                 if leg is not None:
@@ -60,6 +64,8 @@ async def media(ws: WebSocket) -> None:
                     await transcriber.transcribe(leg, base64.b64decode(msg["media"]["payload"]))
             elif msg["event"] == "stop":
                 break
+    except (ValueError, KeyError, TypeError):
+        pass  # malformed Media Streams message: end the call below instead of a 1011 with a stack trace
     finally:
         if call is not None:
             await call.end()
@@ -67,6 +73,7 @@ async def media(ws: WebSocket) -> None:
 
 @router.websocket("/calls/{call_id}/stages")
 async def stages(ws: WebSocket, call_id: str) -> None:
+    # shortcut: no auth, anyone with a CallSid can follow its stages; add with the app pairing (#12/#19).
     call = calls.get(call_id)
     if call is None:
         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
