@@ -6,7 +6,7 @@ import '../../../../data/models/onboarding_progress.dart';
 import '../../view_models/onboarding_view_model.dart';
 import '../widgets/choice_card.dart';
 
-/// Step 1, both roles. Read-only once the server knows who the phone is for.
+/// Step 2, both roles. Read-only once the server knows who the phone is for.
 class RoleStep extends StatelessWidget {
   const RoleStep({super.key, required this.vm});
 

@@ -25,23 +25,31 @@ class OnboardingRepository {
     required KeyValueStore store,
     required OnboardingApiService api,
     required PinRepository pin,
+    String firstLanguage = 'ms',
   }) async {
-    return OnboardingRepository._(store, api, pin, await _readProgress(store));
+    return OnboardingRepository._(
+      store,
+      api,
+      pin,
+      await _readProgress(store, firstLanguage),
+    );
   }
 
   /// Unreadable or corrupt progress means a fresh start. The value itself is
   /// never logged: it can hold the registration.
-  static Future<OnboardingProgress> _readProgress(KeyValueStore store) async {
+  static Future<OnboardingProgress> _readProgress(
+    KeyValueStore store,
+    String firstLanguage,
+  ) async {
+    final fresh = OnboardingProgress(language: firstLanguage);
     try {
       final raw = await store.read(_progressKey);
-      return raw == null
-          ? const OnboardingProgress()
-          : OnboardingProgress.parse(raw);
+      return raw == null ? fresh : OnboardingProgress.parse(raw);
     } on Object catch (e) {
       debugPrint(
         'Starting setup afresh: saved progress is unreadable (${e.runtimeType})',
       );
-      return const OnboardingProgress();
+      return fresh;
     }
   }
 
@@ -79,7 +87,7 @@ class OnboardingRepository {
   Future<LinkedPerson> join(String code, {required String copilotName}) =>
       _api.join(linkCode: code, copilotName: copilotName);
 
-  /// Back to step 1: forgets the registration, the link and the co-pilot lock.
+  /// Back to the first step: forgets the registration, the link and the co-pilot lock.
   Future<void> reset() async {
     await _pin.reset();
     await update(OnboardingProgress(language: progress.value.language));

@@ -174,8 +174,8 @@ Future<void> _refused(OnboardingViewModel vm, String code) async {
 }
 
 List<GalleryEntry> onboardingEntries() => [
-  _setup('role', const OnboardingProgress()),
-  _setup('language', _protected.copyWith(step: OnboardingStep.language)),
+  _setup('language', const OnboardingProgress()),
+  _setup('role', const OnboardingProgress(step: OnboardingStep.role)),
   _setup(
     'about',
     const OnboardingProgress(

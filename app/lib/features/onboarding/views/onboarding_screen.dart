@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
@@ -36,16 +35,14 @@ class OnboardingScreen extends StatelessWidget {
         final progress = vm.progress;
         final protectedUser = progress.role != OnboardingRole.copilot;
         final (title, body) = switch (vm.step) {
-          OnboardingStep.role => (l.onboardingRoleTitle, RoleStep(vm: vm)),
           OnboardingStep.language => (
-            protectedUser
-                ? l.onboardingLanguageTitle
-                : l.onboardingAppLanguageTitle,
+            l.onboardingAppLanguageTitle,
             LanguageList(
               selected: progress.language,
               onSelected: vm.selectLanguage,
             ),
           ),
+          OnboardingStep.role => (l.onboardingRoleTitle, RoleStep(vm: vm)),
           OnboardingStep.about => (l.onboardingAboutTitle, AboutStep(vm: vm)),
           OnboardingStep.permissions => (
             l.onboardingPermissionsTitle,
@@ -111,7 +108,7 @@ class OnboardingScreen extends StatelessWidget {
   }
 }
 
-/// Back arrow, "Step n of m", and a thin progress bar.
+/// Back arrow (not on the first step), "Step n of m", and a thin progress bar.
 class _SetupAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _SetupAppBar({required this.vm});
 
@@ -133,9 +130,7 @@ class _SetupAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
               icon: const Icon(Icons.arrow_back),
               tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: () {
-                if (!vm.back()) SystemNavigator.pop();
-              },
+              onPressed: vm.back,
             )
           : null,
       automaticallyImplyLeading: false,

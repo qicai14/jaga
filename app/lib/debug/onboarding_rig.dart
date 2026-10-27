@@ -72,7 +72,6 @@ class OnboardingRig {
 
   OnboardingViewModel onboardingViewModel({
     Duration pollEvery = const Duration(seconds: 5),
-    String phoneLanguage = 'en',
   }) => OnboardingViewModel(
     repository: onboarding,
     pin: pin,
@@ -80,7 +79,6 @@ class OnboardingRig {
     dialer: dialer,
     buzzer: buzzer,
     share: share,
-    phoneLanguage: phoneLanguage,
     pollEvery: pollEvery,
   );
 

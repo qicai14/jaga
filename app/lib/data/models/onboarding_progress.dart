@@ -6,8 +6,8 @@ import 'registration.dart';
 enum OnboardingRole { protectedUser, copilot }
 
 enum OnboardingStep {
-  role,
   language,
+  role,
   about,
   permissions,
   forwarding,
@@ -20,11 +20,21 @@ enum OnboardingStep {
   notifications;
 
   static const _protectedUserSteps = [
-    role, language, about, permissions, forwarding, pin, pauseToken, linkCode, buzz, done,
+    language,
+    role,
+    about,
+    permissions,
+    forwarding,
+    pin,
+    pauseToken,
+    linkCode,
+    buzz,
+    done,
   ];
-  static const _copilotSteps = [role, language, joinCode, notifications, done];
+  static const _copilotSteps = [language, role, joinCode, notifications, done];
 
-  /// The steps of [role], in order; before a role is chosen, the longer list.
+  /// The steps of [role], in order; before a role is chosen, the longer list
+  /// (the screen shows no count until then).
   static List<OnboardingStep> of(OnboardingRole? role) =>
       role == OnboardingRole.copilot ? _copilotSteps : _protectedUserSteps;
 }
@@ -34,7 +44,7 @@ enum OnboardingStep {
 class OnboardingProgress {
   const OnboardingProgress({
     this.role,
-    this.step = OnboardingStep.role,
+    this.step = OnboardingStep.language,
     this.language = 'ms',
     this.personName = '',
     this.pinSet = false,
@@ -69,7 +79,7 @@ class OnboardingProgress {
   final OnboardingRole? role;
   final OnboardingStep step;
 
-  /// App language; on a protected user's phone also the command language.
+  /// App language, chosen first; on a protected user's phone also the command language.
   final String language;
 
   /// What the family calls the protected user.

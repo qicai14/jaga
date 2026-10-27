@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/widgets.dart';
 
 import '../../../core/haptics/buzzer.dart';
-import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../data/models/linked_person.dart';
 import '../../../data/models/onboarding_progress.dart';
 import '../../../data/models/registration.dart';
@@ -29,10 +27,8 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     required this._dialer,
     required this._buzzer,
     required this._share,
-    String? phoneLanguage,
     this.pollEvery = const Duration(seconds: 5),
-  }) : _phoneLanguage =
-           phoneLanguage ?? PlatformDispatcher.instance.locale.languageCode {
+  }) {
     _name = progress.personName;
     WidgetsBinding.instance.addObserver(this);
     _enter(progress.step);
@@ -44,7 +40,6 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   final DialerService _dialer;
   final Buzzer _buzzer;
   final ShareService _share;
-  final String _phoneLanguage;
   final Duration pollEvery;
 
   bool _disposed = false;
@@ -57,7 +52,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   List<OnboardingStep> get steps => progress.steps;
   int get stepNumber => steps.indexOf(step) + 1;
   int get stepCount => steps.length;
-  bool get isFirstStep => step == OnboardingStep.role;
+  bool get isFirstStep => step == OnboardingStep.language;
 
   /// Setting up, or joining: the button shows a spinner.
   bool get busy => _busy;
@@ -72,6 +67,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   /// A linked co-pilot can't return to the link code; the last step of a
   /// protected phone has no back.
   bool get canGoBack =>
+      !isFirstStep &&
       !(progress.link != null && step == OnboardingStep.notifications) &&
       !(progress.role == OnboardingRole.protectedUser &&
           step == OnboardingStep.done);
@@ -93,16 +89,9 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   void selectRole(OnboardingRole role) {
     if (roleLocked) return;
-    // A co-pilot starts in the phone's language when Jaga speaks it.
-    final language = role == OnboardingRole.copilot && _supports(_phoneLanguage)
-        ? _phoneLanguage
-        : progress.language;
-    _repository.update(progress.copyWith(role: role, language: language));
+    _repository.update(progress.copyWith(role: role));
     notifyListeners();
   }
-
-  bool _supports(String code) =>
-      AppLocalizations.supportedLocales.any((l) => l.languageCode == code);
 
   void selectLanguage(String code) {
     _repository.update(progress.copyWith(language: code));

@@ -101,7 +101,7 @@ void main() {
         api: api,
         pin: pin,
       );
-      expect(repo.progress.value.step, OnboardingStep.role);
+      expect(repo.progress.value.step, OnboardingStep.language);
       await repo.update(
         repo.progress.value.copyWith(
           role: OnboardingRole.protectedUser,
@@ -123,6 +123,16 @@ void main() {
       expect(p.registration!.linkCode, fakeLinkCode);
     },
   );
+
+  test('a fresh start preselects the first language it is given', () async {
+    final repo = await OnboardingRepository.load(
+      store: store,
+      api: FakeOnboardingApiService(),
+      pin: pin,
+      firstLanguage: 'zh',
+    );
+    expect(repo.progress.value.language, 'zh');
+  });
 
   test(
     'reset forgets the registration and the PIN but keeps the language',
@@ -167,7 +177,7 @@ void main() {
         final p = repo.progress.value;
         expect(
           (p.role, p.step, p.complete),
-          (null, OnboardingStep.role, false),
+          (null, OnboardingStep.language, false),
           reason: garbage,
         );
       }
@@ -179,7 +189,7 @@ void main() {
         api: FakeOnboardingApiService(),
         pin: pin,
       );
-      expect(repo.progress.value.step, OnboardingStep.role);
+      expect(repo.progress.value.step, OnboardingStep.language);
     });
 
     test(

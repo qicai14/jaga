@@ -47,10 +47,14 @@ const _copilotDone = OnboardingProgress(
 );
 
 void main() {
-  testWidgets('a fresh install starts at step 1 in Malay', (tester) async {
-    await pumpApp(tester);
-    expect(find.text('Telefon ini untuk siapa?'), findsOneWidget);
-  });
+  testWidgets(
+    'a fresh install starts on the language screen, in Malay, with no back arrow',
+    (tester) async {
+      await pumpApp(tester);
+      expect(find.text('Pilih bahasa anda'), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+    },
+  );
 
   testWidgets('choosing a language switches the whole app at once', (
     tester,

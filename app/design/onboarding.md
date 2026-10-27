@@ -27,8 +27,9 @@ lib/core/widgets/pin_pad.dart              shared by step 6 and the settings gat
 segmented `LinearProgressIndicator` (guarded on `surfaceContainerHigh`) under it, `headlineMedium` step title, body
 scrolls, `bottomAction` = `BigButton(onboardingContinue)`, disabled until the step is valid.
 
-**Back:** the AppBar arrow and system back go to the previous step (values kept). Step 1 back exits the app. After
-registration (end of step 3) the role and region are locked: going back to step 1–3 shows them read-only. Step 10 has no
+**Back:** the AppBar arrow and system back go to the previous step (values kept). Step 1 (language) has no back arrow in the AppBar
+and system back exits the app; so do the status and co-pilot homes, which are roots. After
+registration (end of step 3) the role and region are locked: going back to step 2 or 3 shows them read-only (the language stays changeable, and later in settings). Step 10 has no
 back. **Persistence:** after every Continue, `OnboardingProgress` is saved; a relaunch resumes at the saved step. Step 4
 is re-checked on resume, never trusted from storage. Done keeps the progress and sets its `complete` flag (the status screen and settings read the registration and language
 from it); reset replaces it with a fresh one. The progress is in `SecureStore` (it holds the registration), and an
@@ -38,8 +39,8 @@ offline): the protection is the lockout and the Keystore.
 ## 3. Protected flow (10 steps)
 | # | Step | Content and states |
 |---|---|---|
-| 1 | Role | `onboardingRoleTitle`; two large choice cards (min 96dp, `surfaceContainer`, radius 28, selected = 3dp `primary` border + check): `onboardingRoleProtected` / `onboardingRoleCopilot`, each with a one-line body. Same step in both flows |
-| 2 | Command language | Radio list, each option in its own script ("Bahasa Melayu", "English", "中文", "தமிழ்"), Malay preselected. The app switches language live on selection |
+| 1 | Language | `onboardingAppLanguageTitle` ("Choose your language"), the same screen before a role is chosen. Radio list, each option in its own script ("Bahasa Melayu", "English", "中文", "தமிழ்"); the phone's language is preselected if Jaga speaks it, otherwise Malay. The app switches language live on selection. No back arrow (nothing to go back to), and no "Step n of m" until a role is chosen (the total is not known yet). Here the choice is also the command language |
+| 2 | Role | `onboardingRoleTitle`; two large choice cards (min 96dp, `surfaceContainer`, radius 28, selected = 3dp `primary` border + check): `onboardingRoleProtected` / `onboardingRoleCopilot`, each with a one-line body. Same step in both flows. Back returns to Language, value kept |
 | 3 | About her | Text field `onboardingNameLabel` (her name, as the family calls her, max 30), then region row "Malaysia" with `onboardingRegionInfo` (read-only). Continue = **register**: button shows a spinner and "Setting up…"; error → inline `onboardingNetworkError` + retry |
 | 4 | Phone permissions | Checklist (§5). Continue enabled when every required item is green |
 | 5 | Call forwarding (a "Skip" `TextButton` appears only under `kDebugMode`, decision 6) | Body `onboardingForwardBody`; the code `*21*+1 555 010 0199#` in `officialNumber` style inside a `surfaceContainer` box; `BigButton(onboardingDialNow)`; secondary `OutlinedButton(onboardingCheckForwarding)` dials `*#21#`; Continue labelled `onboardingForwardDone` ("I've dialled it"). No live tick: Android can't read forwarding state |
@@ -54,7 +55,7 @@ offline): the protection is the lockout and the Keystore.
 `url_launcher` opens ACTION_DIAL-equivalent: the co-pilot presses call. Strip spaces from the number before building.
 
 ## 4. Co-pilot flow (5 steps)
-1 Role (as above). 2 App language (same list, default = phone language if supported, else ms). 3 Link code: six
+1 Language (as above: here it is the app language). 2 Role (as above). 3 Link code: six
 single-digit boxes (one `TextField`, `keyboardType: number`, autofill off), `onboardingJoinCode`, then on a valid code a
 sub-state asks `onboardingYourName` (shown to her) and `onboardingCallHer` (prefilled with her name, local only, used in
 alerts). Errors inline under the boxes, `error` colour, in a `Semantics(liveRegion)`: `onboardingCodeWrong`,
@@ -109,7 +110,7 @@ exists (no schema test).
 | `onboardingRoleTitle` | Who is this phone for? |
 | `onboardingRoleProtected` / `…ProtectedBody` | The person Jaga protects / Calls to this phone will ring in Jaga. |
 | `onboardingRoleCopilot` / `…CopilotBody` | A family co-pilot / Get alerts about someone you look after. |
-| `onboardingLanguageTitle` / `onboardingAppLanguageTitle` | Which language should warnings use? / Choose your language |
+| `onboardingAppLanguageTitle` | Choose your language (step 1, both roles). `onboardingLanguageTitle` ("Which language should warnings use?") is now only the settings list's title |
 | `onboardingAboutTitle` / `onboardingNameLabel` | About her / What does the family call her? |
 | `onboardingRegionInfo` | Region: Malaysia. Jaga uses Malaysia's official numbers. |
 | `onboardingSettingUp` / `onboardingNetworkError` | Setting up… / Can't reach Jaga. Check the internet and try again. |
@@ -137,7 +138,7 @@ exists (no schema test).
 | `settingsReset` | Hold to reset Jaga |
 
 ## 9. Gallery (`lib/debug/entries/onboarding_entries.dart`)
-One entry per step and sub-state: `role`, `language`, `about`, `about-loading`, `about-error`, `perms-all-red`,
+One entry per step and sub-state: `language`, `role`, `about`, `about-loading`, `about-error`, `perms-all-red`,
 `perms-mixed`, `perms-xiaomi`, `perms-all-green`, `forwarding`, `pin-set`, `pin-confirm`, `pin-mismatch`, `pause-token`,
 `link-code`, `link-code-joined-3`, `buzz`, `done`; co-pilot: `join-empty`, `join-wrong`, `join-expired`, `join-full`,
 `join-names`, `notifications`, `copilot-done`; `status`, `status-no-family`, `status-needs-attention`, `pin-gate`,
@@ -177,6 +178,7 @@ Manifest: `USE_FULL_SCREEN_INTENT`, `RECORD_AUDIO`, `POST_NOTIFICATIONS`.
    - On Xiaomi, Redmi and POCO the autostart row blocks Continue until the family ticks "I've done this".
    - The forwarding code is shown without spaces (`*21*+15550100199#`) and shrinks to fit one line.
    - A matching PIN moves on to the next step by itself.
-   - A co-pilot starts in the phone's language when Jaga supports it, otherwise Malay.
+   - The first screen preselects the phone's language when Jaga supports it, otherwise Malay (superseded by decision 10: it applies to both roles).
    - A linked co-pilot has no back from step 4 (the code is used up); on the names sub-step, back returns to the code.
    - The microphone row says "Lets you talk on calls through Jaga": the server hears the caller (ADR 0002), the phone mic carries her own voice.
+10. Language is step 1 (Preston, 28 Oct): a family member reads every later screen in their chosen language. Role is step 2; step 1 has no back arrow and no step count; the step totals stay 10 and 5.

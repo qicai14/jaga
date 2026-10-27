@@ -110,20 +110,21 @@ void main() {
       await start(_protectedAt.copyWith(step: OnboardingStep.about));
       vm.setName('Mak Cik');
       expect(vm.back(), isTrue);
-      expect(vm.step, OnboardingStep.language);
+      expect(vm.step, OnboardingStep.role);
       await vm.next();
       expect(vm.name, 'Mak Cik');
       expect(vm.roleLocked, isFalse);
 
       await vm.next(); // registers
       vm.back(); // About
-      vm.back(); // language
       vm.back(); // role
       expect(vm.step, OnboardingStep.role);
       expect(vm.roleLocked, isTrue);
       expect(vm.aboutLocked, isTrue);
       vm.selectRole(OnboardingRole.copilot);
       expect(vm.progress.role, OnboardingRole.protectedUser);
+      vm.back();
+      expect(vm.step, OnboardingStep.language);
 
       await vm.next();
       await vm.next();
@@ -134,6 +135,17 @@ void main() {
     test('back on step 1 asks the app to close', () async {
       await start(const OnboardingProgress());
       expect(vm.back(), isFalse);
+      expect(vm.canGoBack, isFalse);
+    });
+
+    test('back from Role returns to the language, kept', () async {
+      await start(const OnboardingProgress());
+      vm.selectLanguage('ta');
+      await vm.next();
+      expect(vm.step, OnboardingStep.role);
+      expect(vm.back(), isTrue);
+      expect(vm.step, OnboardingStep.language);
+      expect(vm.progress.language, 'ta');
     });
 
     test('the last step has no back', () async {
@@ -328,19 +340,14 @@ void main() {
   });
 
   group('co-pilot flow', () {
-    test(
-      'has five steps and starts in the phone language when Jaga speaks it',
-      () async {
-        await start(const OnboardingProgress());
-        vm.selectRole(OnboardingRole.copilot);
-        expect(vm.stepCount, 5);
-        expect(
-          vm.progress.language,
-          'en',
-          reason: 'the rig phone speaks English',
-        );
-      },
-    );
+    test('has five steps and keeps the language chosen first', () async {
+      await start(const OnboardingProgress());
+      vm.selectLanguage('ta');
+      await vm.next();
+      vm.selectRole(OnboardingRole.copilot);
+      expect(vm.stepCount, 5);
+      expect(vm.progress.language, 'ta');
+    });
 
     test(
       'a link code is checked, then the names, then the co-pilot is linked',
@@ -381,7 +388,7 @@ void main() {
         expect(vm.step, OnboardingStep.joinCode);
         expect(vm.code, fakeLinkCode, reason: 'what was typed is kept');
         vm.back();
-        expect(vm.step, OnboardingStep.language);
+        expect(vm.step, OnboardingStep.role);
       },
     );
 

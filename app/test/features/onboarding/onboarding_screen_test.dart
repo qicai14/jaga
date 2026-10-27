@@ -71,8 +71,8 @@ Future<void> tapDigits(WidgetTester tester, String digits) async {
 /// Every step: its title, "Step n of m", and a Continue that stays on screen.
 void main() {
   final protectedSteps = {
+    OnboardingStep.language: 'Choose your language',
     OnboardingStep.role: 'Who is this phone for?',
-    OnboardingStep.language: 'Which language should warnings use?',
     OnboardingStep.about: 'About her',
     OnboardingStep.permissions: 'Phone permissions',
     OnboardingStep.forwarding: 'Forward calls to Jaga',
@@ -83,8 +83,8 @@ void main() {
     OnboardingStep.done: 'Jaga is set up.',
   };
   final copilotSteps = {
-    OnboardingStep.role: 'Who is this phone for?',
     OnboardingStep.language: 'Choose your language',
+    OnboardingStep.role: 'Who is this phone for?',
     OnboardingStep.joinCode: 'Enter the 6-digit code',
     OnboardingStep.notifications: 'Allow alerts',
     OnboardingStep.done: "You'll get alerts about Mak Cik Aminah.",
@@ -130,14 +130,19 @@ void main() {
   });
 
   testWidgets(
-    'before a role is chosen there is no step count and Continue is off',
+    'before a role is chosen there is no step count; Language has no back arrow',
     (tester) async {
       await pumpSetup(tester, const OnboardingProgress());
+      expect(find.textContaining('Step '), findsNothing);
+      expect(find.byIcon(Icons.arrow_back), findsNothing);
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('Who is this phone for?'), findsOneWidget);
       expect(find.textContaining('Step '), findsNothing);
       expect(continueButton(tester).onPressed, isNull);
       await tester.tap(find.text('A family co-pilot'));
       await tester.pumpAndSettle();
-      expect(find.text('Step 1 of 5'), findsOneWidget);
+      expect(find.text('Step 2 of 5'), findsOneWidget);
       expect(continueButton(tester).onPressed, isNotNull);
     },
   );
