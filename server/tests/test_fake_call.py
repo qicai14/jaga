@@ -163,6 +163,9 @@ def test_hard_trigger_is_a_warning_at_once_and_rules_never_lower_it(client):
     warning = updates[-1]
     assert warning["source"] == "rules"
     assert warning["command"] and warning["counterMove"]
+    lib = stages.load_pack("my")["library"][warning["stage"]]
+    assert warning["command"] == lib["command"]["text"]["ms"]
+    assert warning["counterMove"] == lib["counterMoves"][0]["text"]["ms"]
     assert warning["evidence"] == ["jangan beritahu sesiapa"]
 
 
