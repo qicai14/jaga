@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["pytest", "httpx", "ruff", "jsonschema"]
+dev = ["pytest", "httpx", "ruff", "jsonschema", "rfc3339-validator"]
 
 [build-system]
 requires = ["hatchling"]
