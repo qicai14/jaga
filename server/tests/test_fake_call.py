@@ -313,7 +313,8 @@ def refused_for_missing_client(client, caplog, sid):
 
     assert closed.value.code == 1011
     assert sid not in telephony.calls
-    assert "RuntimeError" in caplog.text and "no key here" not in caplog.text
+    assert "RuntimeError" in caplog.text
+    assert "is not set" not in caplog.text and "no key here" not in caplog.text
 
 
 def test_no_meta_key_refuses_the_call_cleanly(client, monkeypatch, caplog):
