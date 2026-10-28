@@ -46,18 +46,14 @@ Everything is drawn in the 24-unit space of the notification glyph, then placed 
 3. `res/drawable/ic_launcher_monochrome.xml`: the same group, with one evenOdd path made of the shield and the J.
 4. `res/mipmap-anydpi-v26/ic_launcher.xml`:
    `<adaptive-icon><background @drawable/ic_launcher_background/><foreground @drawable/ic_launcher_foreground/><monochrome @drawable/ic_launcher_monochrome/></adaptive-icon>`
-5. **Legacy (API 24–25, since `minSdk = flutter.minSdkVersion` = 24):** no raster needed. Delete the five Flutter
-   `mipmap-*dpi/ic_launcher.png` files and add `res/mipmap/ic_launcher.xml`. This is a 48dp vector with a 108 viewport:
-   a teal circle with r 50 at (54,54), and the same shield and J at `scale 3.0, translate 18`, which makes the shield
-   54×66 units with its corners 34 from the centre. Stock launchers on 24–25 render vector mipmaps. **Fallback:** only if
-   a reviewer's API 24 launcher shows it blank, add `flutter_launcher_icons` as a dev dependency in its own PR
-   (`docs/delivery.md`) and render the PNGs from a 1024px SVG export of the same paths.
+5. **No legacy icon:** `minSdk` is 29 (Android 10), so every device uses the adaptive icon. Delete the five Flutter
+   `mipmap-*dpi/ic_launcher.png` files.
 6. `AndroidManifest.xml`: add `android:roundIcon="@mipmap/ic_launcher"` and change `android:label="jaga"` to **`"Jaga"`**.
    It is a proper noun and matches the `JagaWordmark`. Don't localise it: "Jaga" is the brand in ms, zh and en.
 7. There is no Dart change and no widget test. The splash (`launch_background.xml`) is out of scope; it could become a
    `#FBF8F2` window background later.
 
-## 4. Acceptance checks (emulator, API 34 plus one API 24 image)
+## 4. Acceptance checks (emulator, API 34)
 - [ ] **Masks** (Settings > Wallpaper and style > app grid / icon shape, or a Pixel launcher with the shape changed):
   circle, squircle, rounded square and teardrop. The shield's corners and point are never clipped, and the gap from
   the tile edge looks even.
@@ -67,7 +63,6 @@ Everything is drawn in the 24-unit space of the notification glyph, then placed 
   Also check it in the app drawer and Recents.
 - [ ] **Wallpapers:** solid white, solid black, a busy photo and a teal-ish wallpaper. The shield silhouette is
   identifiable in under a second on every one.
-- [ ] **Legacy (API 24):** the round teal icon shows in the launcher with no blank or default icon.
 - [ ] **Label:** shows as "Jaga" under the icon; Settings > Apps lists "Jaga".
 - [ ] **Brand:** no gradient, shadow, tick or extra colour. Put it next to a real antivirus icon: it should read as a bank
   or post office, not as security software.
@@ -77,5 +72,5 @@ Everything is drawn in the 24-unit space of the notification glyph, then placed 
 - Splash: both `launch_background.xml` files and all four `windowBackground` entries (`LaunchTheme`/`NormalTheme`, day and
   night) use `jaga_paper`, so nothing flashes white or black. The app is light-only (`ThemeMode.light`).
 - No centred logo on the splash: the foreground layer is a paper shield, which would vanish on a paper background.
-- Legacy API 24-25 uses the vector `mipmap/ic_launcher.xml` (VectorDrawable is valid from API 21); the five PNGs are deleted.
+- No legacy icon (`minSdk` 29); the five PNGs are deleted.
 - `ic_stat_jaga.xml` is unchanged. Emulator acceptance checks (section 4) are still to be run.
