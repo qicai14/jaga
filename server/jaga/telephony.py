@@ -16,7 +16,7 @@ from xml.sax.saxutils import escape, quoteattr
 from fastapi import APIRouter, HTTPException, Request, WebSocket, status
 from fastapi.responses import Response
 
-from jaga import asr, spark, twilio_auth
+from jaga import alerts, asr, spark, twilio_auth
 from jaga.stages import RANK, StageTracker, load_pack
 
 router = APIRouter()
@@ -33,6 +33,10 @@ class Call:
     sparked: int = 0
     updates: list[dict] = field(default_factory=list)
     ended: bool = False
+    push: alerts.Push | None = field(default_factory=alerts.push)
+    alerted: int = 0  # the highest alerts.tier pushed
+    genuine: bool = False  # the follow-up went out
+    warning: bool = False  # the stage on screen is a Warning
     changed: asyncio.Condition = field(default_factory=asyncio.Condition)
 
     async def publish(self, stage, risk, evidence=(), command=None, counterMove=None, source="rules") -> None:
@@ -48,6 +52,24 @@ class Call:
         async with self.changed:
             self.updates.append(update | {"at": datetime.now(UTC).isoformat()})
             self.changed.notify_all()
+        await self.alert(update)
+
+    async def alert(self, update: dict) -> None:
+        """Family alerts: one on isolation or higher, one more on money or credentials, and a "may be genuine"
+        follow-up the first time Muse Spark lowers a Warning after an alert."""
+        lowered = self.warning and update["risk"] != "high" and update["source"] == "spark"
+        self.warning = update["risk"] == "high"
+        if self.push is None:
+            return
+        if alerts.tier(update["stage"]) > self.alerted:
+            self.alerted, kind = alerts.tier(update["stage"]), "alert"
+        elif lowered and self.alerted and not self.genuine:
+            kind, self.genuine = "mayBeGenuine", True
+        else:
+            return
+        await alerts.send_all(
+            self.push, alerts.alert(kind, self.call_id, update["stage"], self.tracker.snippet())
+        )
 
     async def end(self) -> None:
         async with self.changed:
