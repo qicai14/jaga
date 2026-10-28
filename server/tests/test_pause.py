@@ -1,32 +1,21 @@
 """Seam 1: scripted calls go through play_call, the bank asks Jaga Pause over HTTP."""
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import pytest
 from jsonschema import Draft202012Validator
+from tests.conftest import PAUSE, START
 from tests.test_fake_call import CONTRACTS, media_headers, play_call, wait_for_start
 from tests.test_fake_call import client as client
 
 from jaga import telephony
 from jaga.fakes.twilio import media_stream
 
-PAUSE = "test-pause-token"
 RESPONSE = Draft202012Validator(
     json.loads((CONTRACTS / "pause.schema.json").read_text(encoding="utf-8")) | {"$ref": "#/$defs/response"},
     format_checker=Draft202012Validator.FORMAT_CHECKER,
 )
-START = datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
-
-
-@pytest.fixture
-def clock(monkeypatch):
-    """The one clock the server reads; tests move it."""
-    now = [START]
-    monkeypatch.setattr(telephony, "now", lambda: now[0])
-    monkeypatch.setattr(telephony, "calls", {})
-    monkeypatch.setenv("JAGA_PAUSE_TOKEN", PAUSE)
-    return now
 
 
 def ask(client, token=PAUSE):
