@@ -88,7 +88,7 @@ def load(path, transcripts=None) -> list[Call]:
         if not any(m.get("role") == "user" for m in r["prompt"]):
             raise ValueError(f"record {i} has no user message")
     if transcripts is not None:
-        # shortcut: diarized, but every turn is the caller leg (tracker matches caller phrases); map A/B later.
+        # shortcut: diarized, but every turn is the caller leg; map A/B later.
         return [
             Call(
                 parse_label(r["answer"]),
