@@ -75,3 +75,36 @@ def test_cli_writes_local_report_and_summary_without_text(tmp_path):
     summary = (out / "teleantifraud.md").read_text(encoding="utf-8")
     assert "n = 3" in summary and "Apache-2.0" in summary
     assert "bungkusan" not in summary and "bungkusan" not in json.dumps(report)
+
+
+@pytest.mark.parametrize(
+    ("answer", "label"),
+    [("不是诈骗", "normal"), ("没有诈骗", "normal"), ("no fraud", "normal"), ("not a fraud call", "normal"),
+     ("非正常", "fraud"), ("非诈骗", "normal"), ("Fraud", "fraud")],
+)  # fmt: skip
+def test_label_negations(answer, label):
+    assert t.parse_label(answer) == label
+
+
+def test_empty_file_and_missing_user_message_fail_loudly(tmp_path):
+    f = tmp_path / "t.json"
+    f.write_text("[]", encoding="utf-8")
+    with pytest.raises(ValueError, match="no calls"):
+        t.load(f)
+    f.write_text(
+        json.dumps([{"prompt": [{"role": "system", "content": "x"}], "answer": "fraud"}]), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="record 0"):
+        t.load(f)
+
+
+def test_summary_names_input_target_and_caveat(tmp_path):
+    t.main([str(SAMPLE), "--out", str(tmp_path)])
+    text = (tmp_path / "teleantifraud.md").read_text(encoding="utf-8")
+    assert "teleantifraud_sample.json" in text and "binary_classification/test.json" not in text
+    assert "MVP target 0.75: missed" in text and "stretch 0.80: missed" in text
+    assert "first tag = caller" in text
+
+
+def test_default_out_is_repo_relative():
+    assert t.DEFAULT_OUT.is_absolute() and t.DEFAULT_OUT.parts[-2:] == ("eval", "reports")

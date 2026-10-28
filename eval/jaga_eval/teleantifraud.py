@@ -24,6 +24,7 @@ from jaga.main import app
 
 CLASSES = ("fraud", "normal")
 TOKEN = "eval-auth-token"
+DEFAULT_OUT = Path(__file__).resolve().parents[1] / "reports"
 TAG = re.compile(r"^([^\s:：]{1,20})[:：]\s*(.*)$")
 
 
@@ -42,7 +43,10 @@ class Result:
 def parse_label(answer) -> str:
     text = str(answer).lower()
     # normal markers first: "非诈骗" and "non-fraud" contain the fraud words
-    if any(w in text for w in ("normal", "正常", "非诈骗", "non-fraud", "not fraud")):
+    if "非正常" in text:
+        return "fraud"
+    negations = ("normal", "正常", "非诈骗", "non-fraud", "not fraud", "不是", "没有", "no ", "not a")
+    if any(w in text for w in negations):
         return "normal"
     if any(w in text for w in ("fraud", "诈骗")):
         return "fraud"
@@ -68,7 +72,14 @@ def to_script(text: str) -> list[tuple[str, str]]:
 
 def load(path) -> list[Call]:
     records = json.loads(Path(path).read_text(encoding="utf-8"))
-    return [Call(parse_label(r["answer"]), to_script(transcript(r["prompt"]))) for r in records]
+    if not records:
+        raise ValueError("no calls")
+    calls = []
+    for i, r in enumerate(records):
+        if not any(m.get("role") == "user" for m in r["prompt"]):
+            raise ValueError(f"record {i} has no user message")
+        calls.append(Call(parse_label(r["answer"]), to_script(transcript(r["prompt"]))))
+    return calls
 
 
 def replay(call: Call, index: int) -> Result:
@@ -125,21 +136,25 @@ def macro_f1_ci(truth, pred, resamples=1000, seed=0) -> tuple[float, float]:
     return scores[int(0.025 * resamples)], scores[int(0.975 * resamples) - 1]
 
 
-def summary(m: dict, ci: tuple[float, float]) -> str:
+def summary(m: dict, ci: tuple[float, float], source: str) -> str:
     c = m["confusion"]
+    mvp, stretch = ("met" if m["macro_f1"] >= x else "missed" for x in (0.75, 0.80))
     rows = "\n".join(
         f"| {k} | {m[k]['precision']:.3f} | {m[k]['recall']:.3f} | {m[k]['f1']:.3f} | {m[k]['n']} |"
         for k in CLASSES
     )
     return f"""# TeleAntiFraud-28k binary test (text path)
 
-Data: TeleAntiFraud-28k `binary_classification/test.json`
+Data: TeleAntiFraud-28k binary test, file `{source}`
 (Hugging Face JimmyMa99/TeleAntiFraud, Apache-2.0, gated access).
 Jaga says fraud if the call reaches `isolation` or higher, or any update is a Warning. Fraud type ignored.
 Fakes only (rules, no Muse Spark). The Malaysia pack has no Mandarin phrases yet (#36),
 so a low score is expected.
 
 n = {m["n"]}
+MVP target 0.75: {mvp}; stretch 0.80: {stretch}
+Caveat: speakers are mapped first tag = caller; if a call opens with the callee,
+scam lines go to the user leg and are ignored.
 
 | Metric | Value |
 |---|---|
@@ -160,7 +175,7 @@ n = {m["n"]}
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("test_json")
-    ap.add_argument("--out", default="eval/reports")
+    ap.add_argument("--out", default=str(DEFAULT_OUT))
     args = ap.parse_args(argv)
     calls = load(args.test_json)
     results = [replay(c, i) for i, c in enumerate(calls)]
@@ -172,7 +187,7 @@ def main(argv=None):
         for i, (t, p, r) in enumerate(zip(truth, pred, results, strict=True))
     ]
     (out / "teleantifraud.local.json").write_text(json.dumps({"calls": rows}, indent=1), encoding="utf-8")
-    text = summary(metrics(truth, pred), macro_f1_ci(truth, pred))
+    text = summary(metrics(truth, pred), macro_f1_ci(truth, pred), Path(args.test_json).name)
     (out / "teleantifraud.md").write_text(text, encoding="utf-8")
     print(text)
 
