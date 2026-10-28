@@ -1,15 +1,18 @@
 """TeleAntiFraud-28k binary test (#18): text transcripts through the real app with fakes, fraud vs normal.
 
-Usage: python -m jaga_eval.teleantifraud <path-to-test.json> [--out eval/reports]
+Usage: python -m jaga_eval.teleantifraud <test.json> --transcribe <audio-root> [--limit N]  (paid, resumable)
+       python -m jaga_eval.teleantifraud <test.json> --transcripts <cache> [--out eval/reports]  (score)
 Data is gated on Hugging Face (JimmyMa99/TeleAntiFraud, Apache-2.0); it stays under eval/data/teleantifraud/.
 Never print or write transcript text.
 """
 
 import argparse
+import asyncio
 import json
 import os
 import random
 import re
+import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +28,7 @@ from jaga.main import app
 CLASSES = ("fraud", "normal")
 TOKEN = "eval-auth-token"
 DEFAULT_OUT = Path(__file__).resolve().parents[1] / "reports"
+DEFAULT_CACHE = DEFAULT_OUT.parent / "data" / "teleantifraud" / "transcripts.local.json"
 TAG = re.compile(r"^([^\s:：]{1,20})[:：]\s*(.*)$")
 
 
@@ -63,19 +67,64 @@ def to_script(text: str) -> list[tuple[str, str]]:
     return [("caller", ln) for ln in lines]
 
 
-def load(path) -> list[Call]:
+def audio_path(prompt) -> str:
+    for m in prompt:
+        if isinstance(m.get("content"), list):
+            for item in m["content"]:
+                if item.get("type") == "audio":
+                    return item["audio_url"]
+    raise ValueError("record has no audio item")
+
+
+def load(path, transcripts=None) -> list[Call]:
+    """`transcripts` (audio path -> ASR lines) replace the prompt text; records not in it are skipped."""
     records = json.loads(Path(path).read_text(encoding="utf-8"))
     if not records:
         raise ValueError("no calls")
-    calls = []
-    texts = {transcript(r["prompt"]) for r in records if any(m.get("role") == "user" for m in r["prompt"])}
-    if len(records) > 1 and len(texts) == 1:
-        raise ValueError("no transcripts: every record has the same text (audio only, needs ASR)")
     for i, r in enumerate(records):
         if not any(m.get("role") == "user" for m in r["prompt"]):
             raise ValueError(f"record {i} has no user message")
-        calls.append(Call(parse_label(r["answer"]), to_script(transcript(r["prompt"]))))
-    return calls
+    if transcripts is not None:
+        # shortcut: ASR gives no speakers, so every line is the caller leg; diarise if scam lines get lost.
+        return [
+            Call(parse_label(r["answer"]), [("caller", ln) for ln in transcripts[audio_path(r["prompt"])]])
+            for r in records
+            if audio_path(r["prompt"]) in transcripts
+        ]
+    if len(records) > 1 and len({transcript(r["prompt"]) for r in records}) == 1:
+        raise ValueError("no transcripts: every record has the same text (audio only, needs ASR)")
+    return [Call(parse_label(r["answer"]), to_script(transcript(r["prompt"]))) for r in records]
+
+
+def decode(path) -> bytes:
+    """Audio file to 8 kHz mono mu-law, the bytes the server's transcriber takes from Twilio."""
+    cmd = ["ffmpeg", "-v", "error", "-i", str(path), "-ar", "8000", "-ac", "1", "-f", "mulaw", "-"]
+    return subprocess.run(cmd, check=True, capture_output=True).stdout
+
+
+CHUNK = (
+    8000  # mu-law bytes (1 s) per send: pcm16k repeats a sample at each chunk edge, so fewer edges than 20 ms
+)
+
+
+async def _asr_lines(audio: bytes) -> list[str]:
+    transcriber = asr.transcriber(stages.load_pack("my"))  # the real Muse client, or the fake
+    lines = []
+    for i in range(0, len(audio), CHUNK):
+        if line := await transcriber.transcribe("caller", audio[i : i + CHUNK]):
+            lines.append(line)
+    return lines + [line for _, line in await transcriber.close()]
+
+
+def transcribe(test_json, audio_root, cache, limit=None, decode=decode) -> None:
+    """Paid ASR, once per audio path: skips cached paths and saves after each call, so a crash resumes."""
+    cache = Path(cache)
+    done = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
+    paths = [audio_path(r["prompt"]) for r in json.loads(Path(test_json).read_text(encoding="utf-8"))]
+    for path in paths[:limit]:
+        if path not in done:
+            done[path] = asyncio.run(_asr_lines(decode(Path(audio_root) / path)))
+            cache.write_text(json.dumps(done, ensure_ascii=False), encoding="utf-8")
 
 
 def replay(call: Call, index: int) -> Result:
@@ -132,8 +181,14 @@ def macro_f1_ci(truth, pred, resamples=1000, seed=0) -> tuple[float, float]:
     return scores[int(0.025 * resamples)], scores[int(0.975 * resamples) - 1]
 
 
-def summary(m: dict, ci: tuple[float, float], source: str) -> str:
+def summary(m: dict, ci: tuple[float, float], source: str, total: int, asr_text: bool) -> str:
     c = m["confusion"]
+    caveat = (
+        "Muse Voice Transcribe text; ASR gives no speakers, so every line goes to the caller leg."
+        if asr_text
+        else "speakers are mapped first tag = caller; if a call opens with the callee, "
+        "scam lines go to the user leg and are ignored."
+    )
     mvp, stretch = ("met" if m["macro_f1"] >= x else "missed" for x in (0.75, 0.80))
     rows = "\n".join(
         f"| {k} | {m[k]['precision']:.3f} | {m[k]['recall']:.3f} | {m[k]['f1']:.3f} | {m[k]['n']} |"
@@ -147,10 +202,9 @@ Jaga says fraud if the call reaches `isolation` or higher, or any update is a Wa
 Fakes only (rules, no Muse Spark). The Malaysia pack has no Mandarin phrases yet (#36),
 so a low score is expected.
 
-n = {m["n"]}
+n = {m["n"]} of {total} records
 MVP target 0.75: {mvp}; stretch 0.80: {stretch}
-Caveat: speakers are mapped first tag = caller; if a call opens with the callee,
-scam lines go to the user leg and are ignored.
+Caveat: {caveat}
 
 | Metric | Value |
 |---|---|
@@ -172,8 +226,18 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("test_json")
     ap.add_argument("--out", default=str(DEFAULT_OUT))
+    ap.add_argument("--transcribe", metavar="AUDIO_ROOT", help="run (resumable) ASR on the audio, then exit")
+    ap.add_argument("--transcripts", help=f"ASR cache to score from (--transcribe default: {DEFAULT_CACHE})")
+    ap.add_argument("--limit", type=int, help="only the first N records when transcribing")
     args = ap.parse_args(argv)
-    calls = load(args.test_json)
+    if args.transcribe:
+        cache = args.transcripts or DEFAULT_CACHE
+        transcribe(args.test_json, args.transcribe, cache, args.limit)
+        print(f"transcripts cached in {Path(cache).name}")
+        return
+    cached = json.loads(Path(args.transcripts).read_text(encoding="utf-8")) if args.transcripts else None
+    total = len(json.loads(Path(args.test_json).read_text(encoding="utf-8")))
+    calls = load(args.test_json, cached)
     results = [replay(c, i) for i, c in enumerate(calls)]
     truth, pred = [c.label for c in calls], [r.predicted for r in results]
     out = Path(args.out)
@@ -183,7 +247,8 @@ def main(argv=None):
         for i, (t, p, r) in enumerate(zip(truth, pred, results, strict=True))
     ]
     (out / "teleantifraud.local.json").write_text(json.dumps({"calls": rows}, indent=1), encoding="utf-8")
-    text = summary(metrics(truth, pred), macro_f1_ci(truth, pred), Path(args.test_json).name)
+    ci, name = macro_f1_ci(truth, pred), Path(args.test_json).name
+    text = summary(metrics(truth, pred), ci, name, total, cached is not None)
     (out / "teleantifraud.md").write_text(text, encoding="utf-8")
     print(text)
 

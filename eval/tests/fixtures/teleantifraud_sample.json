@@ -19,7 +19,10 @@
     "answer": "normal"
   },
   {
-    "prompt": [{"role": "user", "content": "甲：你好，这里是快递。\n乙：谢谢。"}],
+    "prompt": [{"role": "user", "content": [
+      {"type": "audio", "audio_url": "audio/synthetic_3.wav"},
+      {"type": "text", "text": "甲：你好，这里是快递。\n乙：谢谢。"}
+    ]}],
     "answer": "fraud"
   }
 ]

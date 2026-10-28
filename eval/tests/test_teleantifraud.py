@@ -1,4 +1,6 @@
 import json
+import shutil
+import wave
 from pathlib import Path
 
 import pytest
@@ -117,3 +119,58 @@ def test_summary_names_input_target_and_caveat(tmp_path):
 
 def test_default_out_is_repo_relative():
     assert t.DEFAULT_OUT.is_absolute() and t.DEFAULT_OUT.parts[-2:] == ("eval", "reports")
+
+
+def fake_decode(path):
+    return f"line from {Path(path).stem}".encode()  # the fake transcriber reads audio bytes as text
+
+
+@pytest.fixture
+def fakes(monkeypatch):
+    monkeypatch.setenv("JAGA_USE_FAKES", "true")
+
+
+def test_transcribe_caches_per_audio_path_limits_and_resumes(tmp_path, fakes):
+    cache = tmp_path / "transcripts.local.json"
+
+    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=fake_decode)
+    assert json.loads(cache.read_text(encoding="utf-8")) == {
+        "audio/synthetic_1.wav": ["line from synthetic_1"]
+    }
+
+    def boom(path):
+        raise AssertionError("already cached")
+
+    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=boom)  # resumes: nothing left within the limit
+    t.transcribe(SAMPLE, tmp_path, cache, decode=lambda p: fake_decode(p) if "1" not in str(p) else boom(p))
+    assert set(json.loads(cache.read_text(encoding="utf-8"))) == {
+        f"audio/synthetic_{i}.wav" for i in (1, 2, 3)
+    }
+
+
+def test_loader_uses_cached_transcripts_instead_of_prompt_text():
+    cache = {"audio/synthetic_2.wav": ["Ada bungkusan haram.", "Jangan beritahu sesiapa ya."]}
+
+    calls = t.load(SAMPLE, transcripts=cache)
+
+    assert len(calls) == 1 and calls[0].label == "normal"
+    assert calls[0].script == [("caller", "Ada bungkusan haram."), ("caller", "Jangan beritahu sesiapa ya.")]
+
+
+def test_replay_of_transcribed_call_and_asr_caveat(tmp_path, fakes):
+    cache = tmp_path / "transcripts.local.json"
+    cache.write_text(json.dumps({"audio/synthetic_2.wav": ["Jangan beritahu sesiapa ya."]}), encoding="utf-8")
+    t.main([str(SAMPLE), "--transcripts", str(cache), "--out", str(tmp_path)])
+    text = (tmp_path / "teleantifraud.md").read_text(encoding="utf-8")
+    assert "n = 1 of 3" in text and "ASR gives no speakers" in text and "first tag = caller" not in text
+
+
+@pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not on PATH")
+def test_ffmpeg_decode_gives_8k_mulaw(tmp_path):
+    wav = tmp_path / "a.wav"
+    with wave.open(str(wav), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(16000)
+        w.writeframes(bytes(2 * 16000))  # 1 s of silence
+    assert abs(len(t.decode(wav)) - 8000) < 200
