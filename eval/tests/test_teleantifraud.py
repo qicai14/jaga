@@ -27,7 +27,9 @@ def test_loader_parses_labels_and_speakers():
 
 def test_unknown_label_fails_loudly(tmp_path):
     bad = tmp_path / "t.json"
-    bad.write_text(json.dumps([{"prompt": [], "answer": "maybe"}]), encoding="utf-8")
+    bad.write_text(
+        json.dumps([{"prompt": [{"role": "user", "content": "x"}], "answer": "maybe"}]), encoding="utf-8"
+    )
     with pytest.raises(ValueError, match="label"):
         t.load(bad)
 
