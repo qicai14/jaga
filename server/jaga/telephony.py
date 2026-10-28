@@ -25,6 +25,11 @@ log = logging.getLogger(__name__)
 LEGS = {"inbound": "caller", "outbound": "user"}
 
 
+def now() -> datetime:
+    """The server's one clock (call end times, Jaga Pause); tests replace it."""
+    return datetime.now(UTC)
+
+
 @dataclass
 class Call:
     call_id: str
@@ -33,6 +38,7 @@ class Call:
     sparked: int = 0
     updates: list[dict] = field(default_factory=list)
     ended: bool = False
+    ended_at: datetime | None = None
     push: alerts.Push | None = field(default_factory=alerts.push)
     warning: bool = False  # the stage on screen is a Warning
     changed: asyncio.Condition = field(default_factory=asyncio.Condition)
@@ -73,6 +79,7 @@ class Call:
     async def end(self) -> None:
         async with self.changed:
             self.ended = True
+            self.ended_at = now()
             self.changed.notify_all()
 
 
