@@ -37,9 +37,10 @@ A big "Jaga is protecting you" with a green check, and the names of her co-pilot
 forwarding, pause token, reset) sit behind a long-press plus the co-pilot lock PIN.
 
 ### Call screen (#12)
-Our own Flutter screen once a Jaga line call connects: caller number, timer, mute, speaker and hang up (no hold). The
-Caution and Warning are layers on this screen. **Fallback**, if the #12 telephony test shows `twilio_voice` can't host
-it: Android's own call screen, with the Warning as a full-screen notification opening the same Warning widget.
+**Own incoming-call screen: not available** (Preston, 28 Oct). `twilio_voice` uses a system-managed ConnectionService,
+so the phone's own dialer draws the ring and answer screen (system ringtone, OEM look). **Ours:** the in-call screen after
+answer (guarded masthead, caller number, timer, speaker, hang up; no mute, no hold), the Caution and Warning layered on
+it, and our notifications (bring the in-call screen forward at answer, Warning fallback). Detail in `call.md`.
 
 ### Caution and Warning (#9, live in #19)
 | Risk | What she sees |
@@ -125,10 +126,10 @@ change.
 ## 7. Open dependencies (not ours to decide)
 - **#1 contracts v1** (Lane A): phrase IDs vs resolved text, the "may be genuine" alert kind, the stage-timeline shape,
   and the pause request.
-- **#2 telephony test** (Lane A): blocks #12, and the call screen vs fallback choice.
+- **#2 telephony test** (Lane A): blocks a real #12 call (mic in background, issue #316).
 - **Phrase library content** in 3 languages (Lane D), and the official contacts table (Lane D).
 - **Physical test phones** (team).
-- **`twilio_voice` vs our Android Gradle Plugin 9.1**: it targets AGP 8.9.1. Check with a test build in #12.
+- **`twilio_voice` vs our Android Gradle Plugin 9.1**: builds at git ref `f0522381` (spike, 28 Oct); move to 0.5.1 when it ships.
 
 ## 8. Decisions
 - Tamil removed from the app (Preston, 28 Oct): project scope change. Languages are ms, en, zh.
