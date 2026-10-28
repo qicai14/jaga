@@ -90,7 +90,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 48. As an evaluator, I want false alarms per 10 hours of genuine calls, with Cautions reported separately, so that I can check the false-alarm target.
 49. As an evaluator, I want p50 and p95 time from trigger line to Warning, so that I can check the 2 s target.
 50. As an evaluator, I want an ablation of rules only, rules plus Spark, and Spark only, so that I can show what each part adds in accuracy, latency and cost.
-51. As an evaluator, I want TeleAntiFraud near-domain Macro-F1, so that our results compare with published systems.
+51. As an evaluator, I want TeleAntiFraud-28k binary test Macro-F1, so that our results compare with published systems.
 52. As an evaluator, I want red-team paraphrase, Manglish and injection variants as test data, so that I know how robust the rules are.
 53. As an evaluator, I want Spark failures and timeouts counted, so that the fail-safe path is part of the numbers.
 54. As a judge, I want an evidence table fixed before building, so that I can trust the results weren't tuned to look good.

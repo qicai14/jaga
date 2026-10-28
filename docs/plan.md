@@ -62,8 +62,10 @@ aimed at younger people; a later **script pack**, the stage tracker ships with t
 - **Malaysian corpus:** real scam recordings (PDRM and CCID clips, news audio, victim and scambaiter uploads), court
   judgments quoting scripts, genuine bank, courier and LHDN calls. Every source gets a usage note. Audio stays local.
 - **Labels:** stage per line; a second person labels the held-out set; agreement measured with Cohen's kappa. Split by source.
-- **Public benchmark:** TeleAntiFraud-28k (Apache 2.0) and TeleAntiFraud 2.0 near-domain sets, where published systems
-  score 0.65 to 0.68 Macro-F1. Text path first, audio on a subset (about $5 of transcription).
+- **Public benchmark:** TeleAntiFraud-28k binary test (Apache 2.0, gated on Hugging Face; 400 calls, fraud vs normal).
+  The paper (arXiv:2503.24115, Table 4) reports weighted F1 on fraud detection, e.g. Qwen2.5-72B ASR+LLM 51.44,
+  DeepSeek-R1 79.25, AntiFraud-Qwen2-Audio 84.78. We report Macro-F1 and weighted F1. Text path first, audio on a
+  subset (about $5 of transcription).
 - **Replay harness:** recorded audio through the real pipeline at real-time speed.
 - **Ablation:** rules only vs rules plus Spark vs Spark only (accuracy, latency, cost).
 - **Red team:** paraphrase, Manglish and injection variants, used as test data only.
@@ -77,7 +79,7 @@ aimed at younger people; a later **script pack**, the stage tracker ships with t
 | Scams caught before the `money` stage | at least 90% | at least 95% |
 | False alarms on genuine calls | at most 1 per 10 hours | 0 in the trial set |
 | Warning after the trigger line (p95) | within 2 s | within 1.5 s |
-| TeleAntiFraud 2.0 near-domain Macro-F1 | at least 0.75 | at least 0.80 |
+| TeleAntiFraud-28k binary test Macro-F1 | at least 0.75 | at least 0.80 |
 | Completed transfers in protected role-play | 0 | 0 |
 
 ## 6. Privacy (ADR 0003)
