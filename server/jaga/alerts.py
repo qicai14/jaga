@@ -30,8 +30,11 @@ def push() -> Push | None:
         from jaga.fakes.push import FakePush
 
         return FakePush()
-    # shortcut: no real FCM client yet, so a live call sends no family alerts; add it with the FCM
-    # ticket (#12/#19).
+    if os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        from jaga.fcm import FcmPush
+
+        return FcmPush()
+    log.warning("GOOGLE_APPLICATION_CREDENTIALS is not set: this call sends no family alerts")
     return None
 
 
