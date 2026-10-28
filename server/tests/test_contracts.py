@@ -3,11 +3,17 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
 CONTRACTS = Path(__file__).resolve().parents[2] / "contracts"
 FIXTURES = CONTRACTS / "fixtures"
 VALID = sorted(p for p in FIXTURES.glob("*/*.json") if p.parent.name != "invalid")
 INVALID = sorted(FIXTURES.glob("invalid/*/*.json"))
+# every schema under its $id, so one contract can $ref another (stage-timeline-list -> stage-timeline)
+REGISTRY = Registry().with_resources(
+    (s["$id"], Resource.from_contents(s))
+    for s in (json.loads(p.read_text(encoding="utf-8")) for p in CONTRACTS.glob("*.schema.json"))
+)
 
 
 def validator(path: Path) -> Draft202012Validator:
@@ -15,7 +21,7 @@ def validator(path: Path) -> Draft202012Validator:
     if path.parent.name == "pause":
         # pause holds both bodies in $defs; the file name says which one (request-*, response-*)
         schema = schema | {"$ref": "#/$defs/" + path.name.split("-")[0]}
-    return Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER)
+    return Draft202012Validator(schema, registry=REGISTRY, format_checker=Draft202012Validator.FORMAT_CHECKER)
 
 
 def load(path: Path):

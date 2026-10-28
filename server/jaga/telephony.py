@@ -25,6 +25,11 @@ log = logging.getLogger(__name__)
 LEGS = {"inbound": "caller", "outbound": "user"}
 
 
+def now() -> datetime:
+    """The server's one clock (call end times, Jaga Pause); tests replace it."""
+    return datetime.now(UTC)
+
+
 @dataclass
 class Call:
     call_id: str
@@ -33,6 +38,7 @@ class Call:
     sparked: int = 0
     updates: list[dict] = field(default_factory=list)
     ended: bool = False
+    ended_at: datetime | None = None
     push: alerts.Push | None = field(default_factory=alerts.push)
     warning: bool = False  # the stage on screen is a Warning
     changed: asyncio.Condition = field(default_factory=asyncio.Condition)
@@ -44,7 +50,7 @@ class Call:
             "risk": risk,
             "command": command,
             "counterMove": counterMove,
-            "evidence": list(evidence),
+            "evidence": [self.tracker.mask(q) for q in evidence],  # kept in the stage timeline
             "source": source,
         }
         async with self.changed:
@@ -72,11 +78,14 @@ class Call:
 
     async def end(self) -> None:
         async with self.changed:
+            self.ended_at = now()  # before `ended`: Jaga Pause treats an end time as ended
             self.ended = True
+            self.tracker.prev.clear()  # no transcript text outlives the call
             self.changed.notify_all()
 
 
-# shortcut: in memory and never evicted, single server process; move to storage with the stage timeline (#16).
+# shortcut: in memory, single server process. Stage timelines (#16) are derived from this dict and expire
+# 30 days after the call ends; move to storage with #12/#19.
 calls: dict[str, Call] = {}
 
 

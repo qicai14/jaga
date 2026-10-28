@@ -77,12 +77,16 @@ class StageTracker:
         text = self.digit_words.sub(lambda m: str(self.pack["digitWords"][m[1]]), text)
         return re.sub(r"(?<=\d)[ ,.]+(?=\d)", "", text)
 
+    def mask(self, text: str) -> str:
+        """Every run of 4+ digits (IC, account, TAC) masked, spoken or typed."""
+        return re.sub(r"\d(?:[ \-–/_.]?\d){3,}", "[number]", self.digits(text))
+
     def snippet(self) -> str:
         """Each leg's latest lines, for Muse Spark, with every run of 4+ digits (IC, account, TAC) masked,
         spoken or typed."""
         # shortcut: legs are listed one after the other, not in conversation order; fine for a masked hint.
         text = "\n".join(f"{leg}: {' '.join(lines)}" for leg, lines in self.prev.items())
-        return re.sub(r"\d(?:[ \-–/_.]?\d){3,}", "[number]", self.digits(text))
+        return self.mask(text)
 
     def hear(self, leg: str, line: str) -> dict | None:
         """The new stage-update fields if this line changed the call's stage or risk, else None."""
