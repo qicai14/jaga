@@ -34,6 +34,11 @@ git -C $repo fetch -q origin preston/firebase-push; Run 'git fetch'
 if (Test-Path $tree) { git -C $repo worktree remove --force $tree; Run 'git worktree remove' }
 git -C $repo worktree add -q --detach $tree $branch; Run 'git worktree add'
 try {
+    # shortcut: the SDK ships platform 37 only as "android-37.0", which AGP 9 finds only through release(37)
+    # { minorApiLevel = 0 }; patched in the throwaway worktree until PR #48 does the same.
+    $gradle = "$tree\app\android\app\build.gradle.kts"
+    (Get-Content $gradle) -replace 'compileSdk = maxOf\(flutter\.compileSdkVersion, 37\)',
+        'compileSdk { version = release(37) { minorApiLevel = 0 } }' | Set-Content $gradle
     Push-Location "$tree\app"
     try { fvm flutter build apk --debug; Run 'flutter build' } finally { Pop-Location }
     $apk = "$tree\app\build\app\outputs\flutter-apk\app-debug.apk"
