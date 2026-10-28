@@ -30,8 +30,18 @@ $package = 'my.jaga.jaga'
 
 function Run($what) { if ($LASTEXITCODE -ne 0) { throw "$what failed (exit $LASTEXITCODE)" } }
 
+# The Gradle daemon outlives the build and locks files in the worktree, so stop it before deleting.
+function Remove-Tree {
+    $ErrorActionPreference = 'Continue'  # PowerShell 5.1 turns git's stderr into a terminating error
+    $env:GIT_ASK_YESNO = 'false'  # no "Unlink failed. Try again? (y/n)" loop on a locked file
+    if (Test-Path "$tree\app\android\gradlew.bat") { & "$tree\app\android\gradlew.bat" -p "$tree\app\android" --stop | Out-Null }
+    git -C $repo worktree remove --force $tree 2>$null
+    if (Test-Path $tree) { Remove-Item -Recurse -Force $tree }
+    git -C $repo worktree prune
+}
+
 git -C $repo fetch -q origin preston/firebase-push; Run 'git fetch'
-if (Test-Path $tree) { git -C $repo worktree remove --force $tree; Run 'git worktree remove' }
+Remove-Tree
 git -C $repo worktree add -q --detach $tree $branch; Run 'git worktree add'
 try {
     # shortcut: the SDK ships platform 37 only as "android-37.0", which AGP 9 finds only through release(37)
@@ -87,5 +97,5 @@ except Exception as e:
     if ($LASTEXITCODE -ne 0) { Write-Host 'FAILED: FCM did not accept the alert'; exit 1 }
     Write-Host 'SUCCESS: FCM accepted the alert. Check the phone shows it.'
 } finally {
-    git -C $repo worktree remove --force $tree
+    Remove-Tree
 }
