@@ -7,17 +7,18 @@ Never print or write transcript text.
 """
 
 import argparse
-import asyncio
 import json
 import os
 import random
 import re
 import subprocess
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from unittest import mock
 
+import httpx
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
@@ -29,6 +30,8 @@ CLASSES = ("fraud", "normal")
 TOKEN = "eval-auth-token"
 DEFAULT_OUT = Path(__file__).resolve().parents[1] / "reports"
 DEFAULT_CACHE = DEFAULT_OUT.parent / "data" / "teleantifraud" / "transcripts.local.json"
+RETRIES = 3  # 429 backoff: 1, 2, 4 s
+sleep = time.sleep
 TAG = re.compile(r"^([^\s:：]{1,20})[:：]\s*(.*)$")
 
 
@@ -85,9 +88,12 @@ def load(path, transcripts=None) -> list[Call]:
         if not any(m.get("role") == "user" for m in r["prompt"]):
             raise ValueError(f"record {i} has no user message")
     if transcripts is not None:
-        # shortcut: ASR gives no speakers, so every line is the caller leg; diarise if scam lines get lost.
+        # shortcut: diarized, but every turn is the caller leg (tracker matches caller phrases); map A/B later.
         return [
-            Call(parse_label(r["answer"]), [("caller", ln) for ln in transcripts[audio_path(r["prompt"])]])
+            Call(
+                parse_label(r["answer"]),
+                [("caller", text) for _, text in transcripts[audio_path(r["prompt"])]],
+            )
             for r in records
             if audio_path(r["prompt"]) in transcripts
         ]
@@ -97,33 +103,54 @@ def load(path, transcripts=None) -> list[Call]:
 
 
 def decode(path) -> bytes:
-    """Audio file to 8 kHz mono mu-law, the bytes the server's transcriber takes from Twilio."""
-    cmd = ["ffmpeg", "-v", "error", "-i", str(path), "-ar", "8000", "-ac", "1", "-f", "mulaw", "-"]
-    return subprocess.run(cmd, check=True, capture_output=True).stdout
+    """Audio file to mono 16-bit 16 kHz WAV (Muse batch limits: 32 MB, 10 min)."""
+    with tempfile.TemporaryDirectory() as tmp:  # a WAV on a pipe has no length in its header
+        out = Path(tmp) / "a.wav"
+        subprocess.run(
+            ["ffmpeg", "-v", "error", "-i", str(path), "-ar", "16000", "-ac", "1", str(out)], check=True
+        )
+        return out.read_bytes()
 
 
-CHUNK = (
-    8000  # mu-law bytes (1 s) per send: pcm16k repeats a sample at each chunk edge, so fewer edges than 20 ms
-)
+def batch_transcribe(audio: bytes, name: str, client: httpx.Client) -> list[list[str]]:
+    """Muse batch transcribe, diarized: [[speaker, text], ...]. Logs only the status and file name."""
+    pack = stages.load_pack("my")
+    request = {
+        "mode": "DIARIZATION",
+        "model": "muse-voice-transcribe-1.0",
+        "audioEncoding": "WAV",
+        "languageBias": pack["languageBias"],
+        "keywords": pack["keywords"],
+    }
+    for attempt in range(RETRIES + 1):
+        files = {
+            "request": (None, json.dumps(request), "application/json"),
+            "audio": (name, audio, "audio/wav"),
+        }
+        response = client.post("/asr/transcribe", files=files)
+        if response.status_code != 429 or attempt == RETRIES:
+            break
+        sleep(2**attempt)
+    if response.status_code != 200:
+        raise RuntimeError(f"Muse transcribe failed: HTTP {response.status_code} for {name}")
+    return [[t["speaker"], t["transcript"]] for t in response.json()["turns"]]
 
 
-async def _asr_lines(audio: bytes) -> list[str]:
-    transcriber = asr.transcriber(stages.load_pack("my"))  # the real Muse client, or the fake
-    lines = []
-    for i in range(0, len(audio), CHUNK):
-        if line := await transcriber.transcribe("caller", audio[i : i + CHUNK]):
-            lines.append(line)
-    return lines + [line for _, line in await transcriber.close()]
-
-
-def transcribe(test_json, audio_root, cache, limit=None, decode=decode) -> None:
+def transcribe(test_json, audio_root, cache, limit=None, decode=decode, post=None) -> None:
     """Paid ASR, once per audio path: skips cached paths and saves after each call, so a crash resumes."""
+    if post is None:
+        base = os.environ.get("META_API_BASE_URL", "https://api.meta.ai/v1").rstrip("/")
+        key = os.environ.get("META_API_KEY", "")
+        if not key:
+            raise SystemExit("META_API_KEY is not set")
+        client = httpx.Client(base_url=base, headers={"Authorization": f"Bearer {key}"}, timeout=300)
+        post = lambda audio, name: batch_transcribe(audio, name, client)  # noqa: E731
     cache = Path(cache)
     done = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
     paths = [audio_path(r["prompt"]) for r in json.loads(Path(test_json).read_text(encoding="utf-8"))]
     for path in paths[:limit]:
-        if path not in done:
-            done[path] = asyncio.run(_asr_lines(decode(Path(audio_root) / path)))
+        if not done.get(path):  # an empty entry (a failed or silent run) is done again
+            done[path] = post(decode(Path(audio_root) / path), Path(path).name)
             cache.write_text(json.dumps(done, ensure_ascii=False), encoding="utf-8")
 
 
@@ -184,7 +211,7 @@ def macro_f1_ci(truth, pred, resamples=1000, seed=0) -> tuple[float, float]:
 def summary(m: dict, ci: tuple[float, float], source: str, total: int, asr_text: bool) -> str:
     c = m["confusion"]
     caveat = (
-        "Muse Voice Transcribe text; ASR gives no speakers, so every line goes to the caller leg."
+        "Muse Voice Transcribe batch, diarized, but every turn goes to the caller leg."
         if asr_text
         else "speakers are mapped first tag = caller; if a call opens with the callee, "
         "scam lines go to the user leg and are ignored."

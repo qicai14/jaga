@@ -1,8 +1,10 @@
+import io
 import json
 import shutil
 import wave
 from pathlib import Path
 
+import httpx
 import pytest
 
 from jaga_eval import teleantifraud as t
@@ -122,7 +124,11 @@ def test_default_out_is_repo_relative():
 
 
 def fake_decode(path):
-    return f"line from {Path(path).stem}".encode()  # the fake transcriber reads audio bytes as text
+    return Path(path).stem.encode()
+
+
+def fake_post(audio, name):
+    return [["A", f"turn from {audio.decode()}"], ["B", "reply"]]
 
 
 @pytest.fixture
@@ -130,50 +136,104 @@ def fakes(monkeypatch):
     monkeypatch.setenv("JAGA_USE_FAKES", "true")
 
 
-def test_transcribe_caches_per_audio_path_limits_and_resumes(tmp_path, fakes):
+def test_transcribe_caches_per_audio_path_limits_and_resumes(tmp_path):
     cache = tmp_path / "transcripts.local.json"
 
-    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=fake_decode)
+    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=fake_decode, post=fake_post)
     assert json.loads(cache.read_text(encoding="utf-8")) == {
-        "audio/synthetic_1.wav": ["line from synthetic_1"]
+        "audio/synthetic_1.wav": [["A", "turn from synthetic_1"], ["B", "reply"]]
     }
 
-    def boom(path):
+    def boom(*args):
         raise AssertionError("already cached")
 
-    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=boom)  # resumes: nothing left within the limit
-    t.transcribe(SAMPLE, tmp_path, cache, decode=lambda p: fake_decode(p) if "1" not in str(p) else boom(p))
+    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=boom, post=boom)  # resumes: nothing left to do
+    t.transcribe(SAMPLE, tmp_path, cache, decode=fake_decode, post=fake_post)
     assert set(json.loads(cache.read_text(encoding="utf-8"))) == {
         f"audio/synthetic_{i}.wav" for i in (1, 2, 3)
     }
 
 
-def test_loader_uses_cached_transcripts_instead_of_prompt_text():
-    cache = {"audio/synthetic_2.wav": ["Ada bungkusan haram.", "Jangan beritahu sesiapa ya."]}
+def test_empty_cache_entries_are_transcribed_again(tmp_path):
+    cache = tmp_path / "transcripts.local.json"
+    cache.write_text(json.dumps({"audio/synthetic_1.wav": []}), encoding="utf-8")
+
+    t.transcribe(SAMPLE, tmp_path, cache, limit=1, decode=fake_decode, post=fake_post)
+
+    assert json.loads(cache.read_text(encoding="utf-8"))["audio/synthetic_1.wav"][0] == [
+        "A",
+        "turn from synthetic_1",
+    ]
+
+
+def test_loader_uses_cached_turns_instead_of_prompt_text():
+    cache = {"audio/synthetic_2.wav": [["A", "Ada bungkusan haram."], ["B", "Apa?"]]}
 
     calls = t.load(SAMPLE, transcripts=cache)
 
     assert len(calls) == 1 and calls[0].label == "normal"
-    assert calls[0].script == [("caller", "Ada bungkusan haram."), ("caller", "Jangan beritahu sesiapa ya.")]
+    assert calls[0].script == [("caller", "Ada bungkusan haram."), ("caller", "Apa?")]
 
 
-def test_replay_of_transcribed_call_and_asr_caveat(tmp_path, fakes):
+def test_scoring_from_transcripts_and_asr_caveat(tmp_path):
     cache = tmp_path / "transcripts.local.json"
-    cache.write_text(json.dumps({"audio/synthetic_2.wav": ["Jangan beritahu sesiapa ya."]}), encoding="utf-8")
+    cache.write_text(
+        json.dumps({"audio/synthetic_2.wav": [["A", "Jangan beritahu sesiapa ya."]]}), encoding="utf-8"
+    )
     t.main([str(SAMPLE), "--transcripts", str(cache), "--out", str(tmp_path)])
     text = (tmp_path / "teleantifraud.md").read_text(encoding="utf-8")
-    assert "n = 1 of 3" in text and "ASR gives no speakers" in text and "first tag = caller" not in text
+    assert "n = 1 of 3" in text and "diarized, but every turn goes to the caller leg" in text
+    assert "first tag = caller" not in text
+
+
+def client_for(handler):
+    return httpx.Client(transport=httpx.MockTransport(handler), base_url="https://muse.test/v1")
+
+
+def test_batch_post_sends_multipart_and_returns_speaker_turns():
+    seen = {}
+
+    def handler(request):
+        seen["url"], seen["body"] = str(request.url), request.read()
+        return httpx.Response(200, json={"transcript": "x", "turns": [{"speaker": "A", "transcript": "hi"}]})
+
+    turns = t.batch_transcribe(b"RIFFdata", "a.wav", client_for(handler))
+
+    assert turns == [["A", "hi"]]
+    assert seen["url"] == "https://muse.test/v1/asr/transcribe"
+    body = seen["body"]
+    assert b'name="request"' in body and b"application/json" in body and b'"mode": "DIARIZATION"' in body
+    assert b'"audioEncoding": "WAV"' in body and b'"languageBias"' in body and b"RIFFdata" in body
+
+
+def test_batch_post_backs_off_on_429_then_fails_without_body_text(monkeypatch):
+    monkeypatch.setattr(t, "sleep", lambda s: None)
+    statuses = iter([429, 429, 200])
+
+    def ok_after_429(request):
+        status = next(statuses)
+        return httpx.Response(status, json={"turns": [{"speaker": "A", "transcript": "ok"}]})
+
+    assert t.batch_transcribe(b"x", "a.wav", client_for(ok_after_429)) == [["A", "ok"]]
+
+    secret = "SECRET CALL TEXT"
+    with pytest.raises(RuntimeError) as e:
+        t.batch_transcribe(b"x", "a.wav", client_for(lambda r: httpx.Response(400, text=secret)))
+    assert "400" in str(e.value) and "a.wav" in str(e.value) and secret not in str(e.value)
 
 
 @pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg not on PATH")
-def test_ffmpeg_decode_gives_8k_mulaw(tmp_path):
+def test_ffmpeg_decode_gives_16k_mono_wav(tmp_path):
     wav = tmp_path / "a.wav"
     with wave.open(str(wav), "wb") as w:
-        w.setnchannels(1)
+        w.setnchannels(2)
         w.setsampwidth(2)
-        w.setframerate(16000)
-        w.writeframes(bytes(2 * 16000))  # 1 s of silence
-    assert abs(len(t.decode(wav)) - 8000) < 200
+        w.setframerate(8000)
+        w.writeframes(bytes(4 * 8000))  # 1 s of stereo silence
+    out = t.decode(wav)
+    assert out[:4] == b"RIFF"
+    with wave.open(io.BytesIO(out)) as w:
+        assert (w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()) == (1, 2, 16000, 16000)
 
 
 def test_cli_transcribe_refuses_the_fake_transcriber(tmp_path, fakes):
