@@ -131,11 +131,6 @@ def fake_post(audio, name):
     return [["A", f"turn from {audio.decode()}"], ["B", "reply"]]
 
 
-@pytest.fixture
-def fakes(monkeypatch):
-    monkeypatch.setenv("JAGA_USE_FAKES", "true")
-
-
 def test_transcribe_caches_per_audio_path_limits_and_resumes(tmp_path):
     cache = tmp_path / "transcripts.local.json"
 
@@ -236,7 +231,86 @@ def test_ffmpeg_decode_gives_16k_mono_wav(tmp_path):
         assert (w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()) == (1, 2, 16000, 16000)
 
 
-def test_cli_transcribe_refuses_the_fake_transcriber(tmp_path, fakes):
-    with pytest.raises(SystemExit, match="JAGA_USE_FAKES"):
-        t.main([str(SAMPLE), "--transcribe", str(tmp_path), "--transcripts", str(tmp_path / "c.json")])
-    assert not (tmp_path / "c.json").exists()
+def test_crash_on_call_two_leaves_call_one_readable(tmp_path):
+    cache = tmp_path / "transcripts.local.json"
+    calls = []
+
+    def crashing(audio, name):
+        calls.append(name)
+        if len(calls) == 2:
+            raise ValueError("crash")
+        return fake_post(audio, name)
+
+    with pytest.raises(ValueError, match="crash"):
+        t.transcribe(SAMPLE, tmp_path, cache, decode=fake_decode, post=crashing)
+
+    assert list(json.loads(cache.read_text(encoding="utf-8"))) == ["audio/synthetic_1.wav"]
+    assert not list(tmp_path.glob("*.tmp"))
+
+
+def test_a_failing_file_is_skipped_and_counted_without_its_message(tmp_path, capsys):
+    cache = tmp_path / "transcripts.local.json"
+
+    def post(audio, name):
+        if name == "synthetic_2.wav":
+            raise RuntimeError("SECRET detail")
+        return fake_post(audio, name)
+
+    failed = t.transcribe(SAMPLE, tmp_path, cache, decode=fake_decode, post=post)
+
+    assert failed == 1
+    assert set(json.loads(cache.read_text(encoding="utf-8"))) == {
+        "audio/synthetic_1.wav",
+        "audio/synthetic_3.wav",
+    }
+    out = capsys.readouterr().out
+    assert "synthetic_2.wav" in out and "SECRET" not in out
+
+
+def test_summary_wording_for_asr_and_all_none():
+    m = t.metrics(["fraud", "normal"], ["normal", "normal"])
+    asr_text = t.summary(m, (0.0, 1.0), "test.json", 2, True, True)
+    assert "(audio, via ASR)" in asr_text
+    assert "Audio transcribed by Muse Voice Transcribe (batch, diarized)" in asr_text
+    assert "FakeSpark (rules only, no Muse Spark call)" in asr_text
+    assert "Every call ended at stage none, so this is the all-normal baseline." in asr_text
+    prompt_text = t.summary(m, (0.0, 1.0), "test.json", 2, False, False)
+    assert "(text path)" in prompt_text and "ASR" not in prompt_text and "stage none" not in prompt_text
+
+
+def test_batch_retries_500_503_transport_errors_and_honours_retry_after(monkeypatch):
+    sleeps = []
+    monkeypatch.setattr(t, "sleep", sleeps.append)
+    ok = httpx.Response(200, json={"turns": [{"transcript": "ok"}]})
+    slow_down = httpx.Response(429, headers={"Retry-After": "7"})
+    steps = iter([httpx.Response(503), httpx.ConnectTimeout("slow"), slow_down, httpx.Response(500), ok])
+
+    def handler(request):
+        step = next(steps)
+        if isinstance(step, Exception):
+            raise step
+        return step
+
+    assert t.batch_transcribe(b"x", "a.wav", client_for(handler)) == [["?", "ok"]]
+    assert 7 in sleeps and len(sleeps) == 4
+
+
+def test_batch_gives_up_after_retries_on_429(monkeypatch):
+    monkeypatch.setattr(t, "sleep", lambda s: None)
+    hits = []
+
+    def handler(request):
+        hits.append(1)
+        return httpx.Response(429)
+
+    with pytest.raises(RuntimeError, match="429"):
+        t.batch_transcribe(b"x", "a.wav", client_for(handler))
+    assert len(hits) == t.RETRIES + 1 == 6
+
+
+def test_turn_without_speaker_is_question_mark():
+    body = {"turns": [{"transcript": "hi"}, {"speaker": "B", "transcript": "yo"}]}
+    assert t.batch_transcribe(b"x", "a.wav", client_for(lambda r: httpx.Response(200, json=body))) == [
+        ["?", "hi"],
+        ["B", "yo"],
+    ]

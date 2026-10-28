@@ -30,7 +30,8 @@ CLASSES = ("fraud", "normal")
 TOKEN = "eval-auth-token"
 DEFAULT_OUT = Path(__file__).resolve().parents[1] / "reports"
 DEFAULT_CACHE = DEFAULT_OUT.parent / "data" / "teleantifraud" / "transcripts.local.json"
-RETRIES = 3  # 429 backoff: 1, 2, 4 s
+RETRIES = 5  # backoff 1, 2, 4, 8, 16 s unless Retry-After says more
+RETRY_STATUS = {429, 500, 503}
 sleep = time.sleep
 TAG = re.compile(r"^([^\s:：]{1,20})[:：]\s*(.*)$")
 
@@ -127,18 +128,24 @@ def batch_transcribe(audio: bytes, name: str, client: httpx.Client) -> list[list
             "request": (None, json.dumps(request), "application/json"),
             "audio": (name, audio, "audio/wav"),
         }
-        response = client.post("/asr/transcribe", files=files)
-        if response.status_code != 429 or attempt == RETRIES:
+        try:
+            response, why = client.post("/asr/transcribe", files=files), None
+        except httpx.TransportError as e:  # includes timeouts
+            response, why = None, type(e).__name__
+        if response is not None and response.status_code not in RETRY_STATUS:
             break
-        sleep(2**attempt)
-    if response.status_code != 200:
-        raise RuntimeError(f"Muse transcribe failed: HTTP {response.status_code} for {name}")
+        if attempt < RETRIES:
+            retry_after = response.headers.get("Retry-After", "") if response is not None else ""
+            sleep(int(retry_after) if retry_after.isdigit() else 2**attempt)
+    if response is None or response.status_code != 200:
+        raise RuntimeError(f"Muse transcribe failed: {why or f'HTTP {response.status_code}'} for {name}")
     # Muse leaves `speaker` off some diarized turns; scoring sends every turn to the caller leg anyway.
     return [[t.get("speaker", "?"), t["transcript"]] for t in response.json()["turns"]]
 
 
-def transcribe(test_json, audio_root, cache, limit=None, decode=decode, post=None) -> None:
-    """Paid ASR, once per audio path: skips cached paths and saves after each call, so a crash resumes."""
+def transcribe(test_json, audio_root, cache, limit=None, decode=decode, post=None) -> int:
+    """Paid ASR, once per audio path: skips cached paths and saves after each call, so a crash resumes.
+    A file Muse rejects is skipped and counted; returns that count."""
     if post is None:
         base = os.environ.get("META_API_BASE_URL", "https://api.meta.ai/v1").rstrip("/")
         key = os.environ.get("META_API_KEY", "")
@@ -149,10 +156,19 @@ def transcribe(test_json, audio_root, cache, limit=None, decode=decode, post=Non
     cache = Path(cache)
     done = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
     paths = [audio_path(r["prompt"]) for r in json.loads(Path(test_json).read_text(encoding="utf-8"))]
+    failed = 0
     for path in paths[:limit]:
         if not done.get(path):  # an empty entry (a failed or silent run) is done again
-            done[path] = post(decode(Path(audio_root) / path), Path(path).name)
-            cache.write_text(json.dumps(done, ensure_ascii=False), encoding="utf-8")
+            try:
+                done[path] = post(decode(Path(audio_root) / path), Path(path).name)
+            except RuntimeError:  # the message names the file and status only; print just the file
+                print(f"skipped {Path(path).name}")
+                failed += 1
+                continue
+            tmp = cache.with_name(cache.name + ".tmp")
+            tmp.write_text(json.dumps(done, ensure_ascii=False), encoding="utf-8")
+            os.replace(tmp, cache)  # atomic: a crash never leaves a half-written cache
+    return failed
 
 
 def replay(call: Call, index: int) -> Result:
@@ -209,7 +225,7 @@ def macro_f1_ci(truth, pred, resamples=1000, seed=0) -> tuple[float, float]:
     return scores[int(0.025 * resamples)], scores[int(0.975 * resamples) - 1]
 
 
-def summary(m: dict, ci: tuple[float, float], source: str, total: int, asr_text: bool) -> str:
+def summary(m: dict, ci: tuple[float, float], source: str, total: int, asr_text: bool, all_none: bool) -> str:
     c = m["confusion"]
     caveat = (
         "Muse Voice Transcribe batch, diarized, but every turn goes to the caller leg."
@@ -222,13 +238,23 @@ def summary(m: dict, ci: tuple[float, float], source: str, total: int, asr_text:
         f"| {k} | {m[k]['precision']:.3f} | {m[k]['recall']:.3f} | {m[k]['f1']:.3f} | {m[k]['n']} |"
         for k in CLASSES
     )
-    return f"""# TeleAntiFraud-28k binary test (text path)
+    title, how = (
+        (
+            "audio, via ASR",
+            "Audio transcribed by Muse Voice Transcribe (batch, diarized); replay uses the fake transcriber "
+            "and FakeSpark (rules only, no Muse Spark call).",
+        )
+        if asr_text
+        else ("text path", "Fakes only (rules, no Muse Spark).")
+    )
+    none_line = "\nEvery call ended at stage none, so this is the all-normal baseline." if all_none else ""
+    return f"""# TeleAntiFraud-28k binary test ({title})
 
 Data: TeleAntiFraud-28k binary test, file `{source}`
 (Hugging Face JimmyMa99/TeleAntiFraud, Apache-2.0, gated access).
 Jaga says fraud if the call reaches `isolation` or higher, or any update is a Warning. Fraud type ignored.
-Fakes only (rules, no Muse Spark). The Malaysia pack has no Mandarin phrases yet (#36),
-so a low score is expected.
+{how} The Malaysia pack has no Mandarin phrases yet (#36),
+so a low score is expected.{none_line}
 
 n = {m["n"]} of {total} records
 MVP target 0.75: {mvp}; stretch 0.80: {stretch}
@@ -259,13 +285,9 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, help="only the first N records when transcribing")
     args = ap.parse_args(argv)
     if args.transcribe:
-        if os.environ.get("JAGA_USE_FAKES", "").lower() == "true":  # the fake would cache junk as transcripts
-            raise SystemExit(
-                "--transcribe needs the real Muse Voice Transcribe: unset JAGA_USE_FAKES, set META_API_KEY"
-            )
         cache = args.transcripts or DEFAULT_CACHE
-        transcribe(args.test_json, args.transcribe, cache, args.limit)
-        print(f"transcripts cached in {Path(cache).name}")
+        failed = transcribe(args.test_json, args.transcribe, cache, args.limit)
+        print(f"transcripts cached in {Path(cache).name}; {failed} failed")
         return
     cached = json.loads(Path(args.transcripts).read_text(encoding="utf-8")) if args.transcripts else None
     total = len(json.loads(Path(args.test_json).read_text(encoding="utf-8")))
@@ -280,7 +302,8 @@ def main(argv=None):
     ]
     (out / "teleantifraud.local.json").write_text(json.dumps({"calls": rows}, indent=1), encoding="utf-8")
     ci, name = macro_f1_ci(truth, pred), Path(args.test_json).name
-    text = summary(metrics(truth, pred), ci, name, total, cached is not None)
+    all_none = all(r.stage == "none" for r in results)
+    text = summary(metrics(truth, pred), ci, name, total, cached is not None, all_none)
     (out / "teleantifraud.md").write_text(text, encoding="utf-8")
     print(text)
 
