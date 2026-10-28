@@ -95,7 +95,7 @@ def test_a_blocking_credential_load_does_not_stall_past_the_push_timeout(monkeyp
     monkeypatch.setattr(alerts, "PUSH_TIMEOUT", 0.1)
     monkeypatch.setenv("JAGA_FAMILY_TOKENS", "tok")
 
-    async def timed():  # asyncio.run itself waits for the sleeping thread at shutdown, so time inside the loop
+    async def timed():  # asyncio.run waits for the sleeping thread at exit, so time inside
         started = time.monotonic()
         await alerts.send_all(fcm.FcmPush(), ALERT)
         return time.monotonic() - started
