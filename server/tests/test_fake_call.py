@@ -304,6 +304,34 @@ def test_unknown_region_closes_the_stream_and_logs_it(client, caplog):
     assert "'zz'" in caplog.text
 
 
+def refused_for_missing_client(client, caplog, sid):
+    start = media_stream(sid, [])[1]
+    with client.websocket_connect("/twilio/media", headers=media_headers()) as twilio:
+        twilio.send_text(start)
+        with pytest.raises(WebSocketDisconnect) as closed:
+            twilio.receive_text()
+
+    assert closed.value.code == 1011
+    assert sid not in telephony.calls
+    assert "RuntimeError" in caplog.text and "no key here" not in caplog.text
+
+
+def test_no_meta_key_refuses_the_call_cleanly(client, monkeypatch, caplog):
+    monkeypatch.setenv("JAGA_USE_FAKES", "false")
+    monkeypatch.delenv("META_API_KEY", raising=False)
+
+    refused_for_missing_client(client, caplog, "CA_nokey")
+
+
+def test_a_transcriber_that_cannot_be_built_leaves_no_call_behind(client, monkeypatch, caplog):
+    def broken(pack):
+        raise RuntimeError("no key here")
+
+    monkeypatch.setattr(asr, "transcriber", broken)
+
+    refused_for_missing_client(client, caplog, "CA_notranscriber")
+
+
 def voice(client, signed_with=TOKEN, base="https://testserver", query="", **params):
     form = {"CallSid": ["CA_v"], "From": ["+60123456789"]} | params
     sig = twilio_auth.signature(f"{base}/twilio/voice{query}", form, signed_with)
