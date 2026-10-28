@@ -133,7 +133,8 @@ def batch_transcribe(audio: bytes, name: str, client: httpx.Client) -> list[list
         sleep(2**attempt)
     if response.status_code != 200:
         raise RuntimeError(f"Muse transcribe failed: HTTP {response.status_code} for {name}")
-    return [[t["speaker"], t["transcript"]] for t in response.json()["turns"]]
+    # Muse leaves `speaker` off some diarized turns; scoring sends every turn to the caller leg anyway.
+    return [[t.get("speaker", "?"), t["transcript"]] for t in response.json()["turns"]]
 
 
 def transcribe(test_json, audio_root, cache, limit=None, decode=decode, post=None) -> None:
