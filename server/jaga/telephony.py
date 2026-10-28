@@ -50,7 +50,7 @@ class Call:
             "risk": risk,
             "command": command,
             "counterMove": counterMove,
-            "evidence": list(evidence),
+            "evidence": [self.tracker.mask(q) for q in evidence],  # kept in the stage timeline
             "source": source,
         }
         async with self.changed:
@@ -80,6 +80,7 @@ class Call:
         async with self.changed:
             self.ended_at = now()  # before `ended`: Jaga Pause treats an end time as ended
             self.ended = True
+            self.tracker.prev.clear()  # no transcript text outlives the call
             self.changed.notify_all()
 
 
