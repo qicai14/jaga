@@ -69,7 +69,8 @@ async def send_all(client: Push, alert: dict) -> None:
         async with asyncio.timeout(PUSH_TIMEOUT):
             results = await asyncio.gather(*(client.send(t, alert) for t in tokens), return_exceptions=True)
     except TimeoutError:
-        return log.warning("call %s: family alert timed out", alert["callId"])
+        log.warning("call %s: family alert timed out", alert["callId"])
+        return
     for e in results:
         if isinstance(e, Exception):  # type only: the message could quote a transcript. The call goes on.
             log.warning("call %s: family alert failed (%s)", alert["callId"], type(e).__name__)
