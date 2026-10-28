@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from jsonschema import Draft202012Validator
 from starlette.websockets import WebSocketDisconnect
 
-from jaga import asr, spark, stages, telephony, twilio_auth
+from jaga import alerts, asr, spark, stages, telephony, twilio_auth
 from jaga.fakes.push import FakePush
 from jaga.fakes.spark import FakeSpark
 from jaga.fakes.transcribe import FakeTranscriber
@@ -932,6 +932,7 @@ def test_may_be_genuine_follows_when_spark_lowers_a_warning(client, pushed, monk
 
 
 def test_the_app_dismissing_the_warning_does_not_stop_pushes(client, pushed):
+    """Regression guard: dismissal is app-local, and the stage stream ignores whatever the app sends."""
     start, *media, stop = media_stream("CA_fam_8", [ISOLATION, MONEY])[1:]
     with client.websocket_connect("/twilio/media", headers=media_headers()) as twilio:
         twilio.send_text(start)
@@ -953,3 +954,69 @@ def test_a_failing_push_does_not_break_the_call(client, pushed, monkeypatch, cap
     updates = play_call(client, "CA_fam_9", [ISOLATION])
 
     assert updates and "RuntimeError" in caplog.text and "1234567890123" not in caplog.text
+
+
+def test_a_reconnect_to_the_same_call_does_not_alert_again(client, pushed):
+    play_call(client, "CA_fam_10", [ISOLATION, MONEY])
+    old = telephony.calls["CA_fam_10"]
+    start, *media, stop = media_stream("CA_fam_10", [ISOLATION, MONEY])[1:]
+    with client.websocket_connect("/twilio/media", headers=media_headers()) as twilio:
+        twilio.send_text(start)
+        deadline = time.monotonic() + 5
+        while telephony.calls["CA_fam_10"] is old:  # the reconnect builds a fresh Call
+            assert time.monotonic() < deadline
+            time.sleep(0.01)
+        for msg in [*media, stop]:
+            twilio.send_text(msg)
+        while not telephony.calls["CA_fam_10"].ended:
+            assert time.monotonic() < deadline
+            time.sleep(0.01)
+
+    assert [a["stage"] for a in alerts_of(pushed)] == ["isolation", "money"]
+
+
+def test_a_slow_push_does_not_stall_the_call(client, pushed, monkeypatch, caplog):
+    async def slow(self, token, alert):
+        await asyncio.sleep(30)
+
+    monkeypatch.setattr(FakePush, "send", slow)
+    monkeypatch.setattr(alerts, "PUSH_TIMEOUT", 0.1)
+    started = time.monotonic()
+    updates = play_call(client, "CA_fam_11", [ISOLATION, MONEY])
+
+    assert time.monotonic() - started < 5
+    assert ("money", "high") in stages_of(updates)
+    assert "CA_fam_11" in caplog.text and "timed out" in caplog.text
+
+
+def lowered(stage):
+    move = stages.load_pack("my")["library"][stage]["counterMoves"][0]["id"]
+    return {"stage": stage, "risk": "low", "counterMove": move}
+
+
+def test_may_be_genuine_is_sent_once_however_often_spark_lowers(client, pushed, monkeypatch):
+    spark_says(monkeypatch, lowered("isolation"), lowered("money"))
+    play_call(client, "CA_fam_12", [ISOLATION, ("caller", "Ini akaun selamat.")])
+
+    assert [a["kind"] for a in alerts_of(pushed)] == ["alert", "mayBeGenuine", "alert"]
+
+
+def test_spark_lowering_a_call_never_alerted_sends_nothing(client, pushed, monkeypatch):
+    spark_says(monkeypatch, lowered("authority"))
+    play_call(client, "CA_fam_13", [("caller", "Saya Inspektor Ali.")])
+
+    assert pushed == []
+
+
+def test_an_unset_user_name_gets_a_neutral_label(client, pushed, monkeypatch):
+    monkeypatch.delenv("JAGA_PROTECTED_USER_NAME")
+    play_call(client, "CA_fam_14", [ISOLATION])
+
+    assert alerts_of(pushed)[0]["summary"].startswith("Your family member's call")
+
+
+def test_a_long_quote_is_cut_at_a_word(client, pushed):
+    play_call(client, "CA_fam_15", [("caller", "Jangan beritahu sesiapa " + "panjang " * 20)])
+
+    quote = alerts_of(pushed)[0]["quotes"][0]
+    assert len(quote) <= 80 and quote.endswith("panjang")
