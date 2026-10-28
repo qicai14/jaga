@@ -174,3 +174,9 @@ def test_ffmpeg_decode_gives_8k_mulaw(tmp_path):
         w.setframerate(16000)
         w.writeframes(bytes(2 * 16000))  # 1 s of silence
     assert abs(len(t.decode(wav)) - 8000) < 200
+
+
+def test_cli_transcribe_refuses_the_fake_transcriber(tmp_path, fakes):
+    with pytest.raises(SystemExit, match="JAGA_USE_FAKES"):
+        t.main([str(SAMPLE), "--transcribe", str(tmp_path), "--transcripts", str(tmp_path / "c.json")])
+    assert not (tmp_path / "c.json").exists()

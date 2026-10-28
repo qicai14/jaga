@@ -231,6 +231,10 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, help="only the first N records when transcribing")
     args = ap.parse_args(argv)
     if args.transcribe:
+        if os.environ.get("JAGA_USE_FAKES", "").lower() == "true":  # the fake would cache junk as transcripts
+            raise SystemExit(
+                "--transcribe needs the real Muse Voice Transcribe: unset JAGA_USE_FAKES, set META_API_KEY"
+            )
         cache = args.transcripts or DEFAULT_CACHE
         transcribe(args.test_json, args.transcribe, cache, args.limit)
         print(f"transcripts cached in {Path(cache).name}")
