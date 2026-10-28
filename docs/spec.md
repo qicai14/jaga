@@ -150,7 +150,8 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 
 ### Contracts (settled in ADR 0007)
 Settled by [ADR 0007](adr/0007-contracts-v1.md): the server sends resolved phrase-library text, not a phrase ID.
-Schemas in `contracts/`, examples in `contracts/fixtures/`. The notes below are the original brief.
+Schemas in `contracts/`, examples in `contracts/fixtures/`. `stage-timeline-list` and the family co-pilot's timeline
+endpoints are settled in [ADR 0008](adr/0008-copilot-timeline-api.md). The notes below are the original brief.
 - `stage-update`: `command` and `counterMove` are non-null only when `risk=high`. Add the counter-move phrase ID if the
   app renders text locally, or keep resolved text from the server; decide in the contracts PR.
 - `pause`: add the request shape carrying the pause token.
