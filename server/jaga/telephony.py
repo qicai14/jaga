@@ -78,8 +78,8 @@ class Call:
 
     async def end(self) -> None:
         async with self.changed:
+            self.ended_at = now()  # before `ended`: Jaga Pause treats an end time as ended
             self.ended = True
-            self.ended_at = now()
             self.changed.notify_all()
 
 

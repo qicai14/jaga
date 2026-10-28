@@ -110,6 +110,38 @@ def test_a_live_call_at_isolation_is_in_scam(client, clock):
         with client.websocket_connect("/calls/CA_live/stages") as app_stream:
             for msg in media:
                 twilio.send_text(msg)
-            while app_stream.receive_json()["stage"] != "isolation":
-                pass
+            for _ in range(10):  # bounded, so a regression fails instead of hanging
+                if app_stream.receive_json()["stage"] == "isolation":
+                    break
+            else:
+                pytest.fail("the live call never reached isolation")
             assert ask(client).json()["inScam"] is True
+
+
+@pytest.mark.parametrize(
+    ("line", "stage", "hold"),
+    [
+        ("Sila sertai video call dengan polis.", "handoff", 15),
+        ("Give me your password.", "credentials", 30),
+    ],
+)
+def test_handoff_holds_15_and_credentials_30(client, clock, line, stage, hold):
+    play_call(client, "CA_" + stage, [("caller", line)])
+
+    answer = ask(client).json()
+    assert (answer["stage"], answer["recommendedHoldMinutes"]) == (stage, hold)
+
+
+def test_after_the_window_an_old_money_call_no_longer_shows_its_stage(client, clock):
+    play_call(client, "CA_old", MONEY)
+
+    clock[0] = START + timedelta(minutes=31)
+    answer = ask(client).json()
+    assert (answer["inScam"], answer["stage"], answer["recommendedHoldMinutes"]) == (False, "none", 0)
+
+
+def test_a_call_still_at_pretext_reports_pretext_but_is_not_in_scam(client, clock):
+    play_call(client, "CA_pre", [("caller", "Ada bungkusan haram atas nama puan.")])
+
+    answer = ask(client).json()
+    assert (answer["inScam"], answer["stage"]) == (False, "pretext")

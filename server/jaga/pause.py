@@ -26,17 +26,16 @@ def pause(ask: Ask) -> dict:
     if not token or not hmac.compare_digest(ask.pauseToken.encode(), token.encode()):
         raise HTTPException(404)
     now = telephony.now()
-    calls = list(telephony.calls.values())  # in start order
     # shortcut: all calls are the one protected user's and never evicted; upgrade with #12/#19.
-    counting = [
-        c.tracker.stage
-        for c in calls
-        if RANK[c.tracker.stage] >= RANK["isolation"] and (not c.ended or now - c.ended_at <= WINDOW)
+    # A call is current while live (no end time) and for 30 minutes after it ends.
+    current = [
+        c.tracker.stage for c in telephony.calls.values() if c.ended_at is None or now - c.ended_at <= WINDOW
     ]
-    stage = max(counting, key=RANK.get) if counting else calls[-1].tracker.stage if calls else "none"
-    hold = 0 if not counting else 30 if RANK[stage] >= RANK["money"] else 15
+    stage = max(current, key=RANK.get, default="none")
+    in_scam = RANK[stage] >= RANK["isolation"]
+    hold = 0 if not in_scam else 30 if RANK[stage] >= RANK["money"] else 15
     return {
-        "inScam": bool(counting),
+        "inScam": in_scam,
         "stage": stage,
         "recommendedHoldMinutes": hold,
         "checkedAt": now.isoformat(),
