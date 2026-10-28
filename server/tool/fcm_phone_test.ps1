@@ -14,13 +14,16 @@ You do by hand:
      without a linked person. Then press Enter in this window.
   3. Check the phone shows the family alert.
 
+.PARAMETER SkipPrompt
+Do not wait for Enter before sending (onboarding persists across adb install -r, so reruns can skip it).
+
 .PARAMETER BuildOnly
 Build the APK and stop (no phone needed).
 
 .EXAMPLE
 powershell -ExecutionPolicy Bypass -File server\tool\fcm_phone_test.ps1
 #>
-param([switch]$BuildOnly)
+param([switch]$BuildOnly, [switch]$SkipPrompt)
 $ErrorActionPreference = 'Stop'
 
 $repo = (Resolve-Path "$PSScriptRoot\..\..").Path
@@ -76,21 +79,13 @@ try {
         ForEach-Object { ($_ -split '=', 2)[1].Trim().Trim('"', "'") } | Select-Object -First 1
     if (-not $cred -or -not (Test-Path $cred)) { throw 'GOOGLE_APPLICATION_CREDENTIALS in .env is unset or the file is missing' }
 
-    Read-Host 'Finish co-pilot onboarding on the phone, then press Enter to send the alert'
+    if (-not $SkipPrompt) { Read-Host 'Finish co-pilot onboarding on the phone, then press Enter to send the alert' }
+    # Foreground alerts go to the in-app stream; the notification is the background path, so send from the home screen.
+    adb shell input keyevent KEYCODE_HOME; Start-Sleep 2
     $env:GOOGLE_APPLICATION_CREDENTIALS = $cred
     $env:JAGA_TEST_FCM_TOKEN = $token  # passed by env so it never appears in a command line or output
-    $send = @'
-import asyncio, os, sys
-from jaga import alerts
-from jaga.fcm import FcmPush
-alert = alerts.build("alert", "phone-test", "money", "Caller: Pindahkan duit ke akaun selamat sekarang")
-try:
-    asyncio.run(FcmPush().send(os.environ["JAGA_TEST_FCM_TOKEN"], alert))
-except Exception as e:
-    sys.exit(f"Send failed ({type(e).__name__})")
-'@
     Push-Location "$repo\server"
-    try { uv run python -c $send } finally {
+    try { uv run python tool\fcm_send_one.py } finally {
         Pop-Location
         Remove-Item Env:JAGA_TEST_FCM_TOKEN, Env:GOOGLE_APPLICATION_CREDENTIALS
     }
