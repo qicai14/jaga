@@ -41,16 +41,9 @@ class Result:
 
 
 def parse_label(answer) -> str:
-    text = str(answer).lower()
-    # normal markers first: "非诈骗" and "non-fraud" contain the fraud words
-    if "非正常" in text:
-        return "fraud"
-    negations = ("normal", "正常", "非诈骗", "non-fraud", "not fraud", "不是", "没有", "no ", "not a")
-    if any(w in text for w in negations):
-        return "normal"
-    if any(w in text for w in ("fraud", "诈骗")):
-        return "fraud"
-    raise ValueError(f"unknown label {answer!r}")
+    if answer not in CLASSES:
+        raise ValueError(f"unknown label {answer!r}")
+    return answer
 
 
 def transcript(prompt) -> str:
@@ -75,6 +68,9 @@ def load(path) -> list[Call]:
     if not records:
         raise ValueError("no calls")
     calls = []
+    texts = {transcript(r["prompt"]) for r in records if any(m.get("role") == "user" for m in r["prompt"])}
+    if len(records) > 1 and len(texts) == 1:
+        raise ValueError("no transcripts: every record has the same text (audio only, needs ASR)")
     for i, r in enumerate(records):
         if not any(m.get("role") == "user" for m in r["prompt"]):
             raise ValueError(f"record {i} has no user message")

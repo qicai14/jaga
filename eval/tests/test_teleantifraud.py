@@ -79,13 +79,20 @@ def test_cli_writes_local_report_and_summary_without_text(tmp_path):
     assert "bungkusan" not in summary and "bungkusan" not in json.dumps(report)
 
 
-@pytest.mark.parametrize(
-    ("answer", "label"),
-    [("不是诈骗", "normal"), ("没有诈骗", "normal"), ("no fraud", "normal"), ("not a fraud call", "normal"),
-     ("非正常", "fraud"), ("非诈骗", "normal"), ("Fraud", "fraud")],
-)  # fmt: skip
-def test_label_negations(answer, label):
-    assert t.parse_label(answer) == label
+@pytest.mark.parametrize("answer", ["不是诈骗", "no fraud", "Fraud", "maybe", ""])
+def test_label_is_exactly_fraud_or_normal(answer):
+    with pytest.raises(ValueError, match="label"):
+        t.parse_label(answer)
+    assert (t.parse_label("fraud"), t.parse_label("normal")) == ("fraud", "normal")
+
+
+def test_file_without_transcripts_fails_loudly(tmp_path):
+    # the real test.json holds one constant instruction as the text of every record, audio only
+    rec = {"prompt": [{"role": "user", "content": [{"type": "text", "text": "same"}]}], "answer": "fraud"}
+    f = tmp_path / "t.json"
+    f.write_text(json.dumps([rec, rec]), encoding="utf-8")
+    with pytest.raises(ValueError, match="no transcripts"):
+        t.load(f)
 
 
 def test_empty_file_and_missing_user_message_fail_loudly(tmp_path):
