@@ -77,8 +77,8 @@ through with no false alarm. We finish on our evidence table.
 ## 4. How we prove it works (judged by data, not by us)
 - **Malaysian test set:** real scam recordings (PDRM and CCID clips, news, victim uploads), court judgments quoting
   scripts, and genuine bank and courier calls. Labelled by stage, with a second person checking.
-- **Public benchmark:** TeleAntiFraud (28k Mandarin scam calls, free to use). Published systems score only 0.65 to 0.68 on
-  its hardest set.
+- **Public benchmark:** the TeleAntiFraud-28k binary test (Mandarin scam calls, Apache 2.0). In the paper
+  (arXiv:2503.24115, Table 4) published systems score 51 to 85 weighted F1 on fraud detection.
 - **Targets, fixed before we build:**
 
 | Target | MVP |
@@ -86,7 +86,7 @@ through with no false alarm. We finish on our evidence table.
 | Scams caught before the money stage | at least 90% |
 | False alarms on genuine calls | at most 1 per 10 hours |
 | Warning after the trigger line | within 2 s |
-| TeleAntiFraud hard-set score (Macro-F1) | at least 0.75 |
+| TeleAntiFraud-28k binary test (Macro-F1) | at least 0.75 |
 | Completed transfers in our role-play trial | 0 |
 
 Judging criteria: impact 30%, use of Meta AI tools 25%, demo 25%, technical depth 20%.
