@@ -1,4 +1,4 @@
-"""Family alerts over Firebase Cloud Messaging; the service account comes from GOOGLE_APPLICATION_CREDENTIALS."""
+"""Family alerts over Firebase Cloud Messaging, with the service account from the environment."""
 
 import json
 
