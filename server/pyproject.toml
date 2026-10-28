@@ -8,6 +8,7 @@ dependencies = [
   "uvicorn[standard]",
   "pydantic-settings",
   "websockets",  # client for the Muse Voice Transcribe realtime socket (#20)
+  "httpx",  # HTTP client for the Muse Spark chat API (#21)
 ]
 
 [dependency-groups]
