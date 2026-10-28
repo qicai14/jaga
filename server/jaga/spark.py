@@ -27,17 +27,22 @@ class Spark(Protocol):
         ...
 
 
+_http: httpx.AsyncClient | None = None
+
+
 class MuseSpark:
     """Muse Spark over the Responses API. The caller's timeout and Verdict check apply."""
 
     MODEL = "muse-spark-1.3"  # Standard tier, never the -contributor models (ADR 0003)
 
     def __init__(self, pack: dict, key: str, base: str, transport: httpx.AsyncBaseTransport | None = None):
-        self.pack = pack
-        self.url = base + "/responses"
-        self.http = httpx.AsyncClient(
-            headers={"Authorization": f"Bearer {key}"}, timeout=TIMEOUT, transport=transport
-        )
+        global _http
+        self.pack, self.key, self.url = pack, key, base + "/responses"
+        if transport:
+            self.http = httpx.AsyncClient(timeout=TIMEOUT, transport=transport)
+        else:
+            _http = _http or httpx.AsyncClient(timeout=TIMEOUT)  # one pool: calls are never evicted
+            self.http = _http
 
     async def assess(self, stage: str, risk: str, snippet: str) -> dict:
         moves = [m["id"] for m in self.pack["library"][stage]["counterMoves"]]
@@ -52,6 +57,7 @@ class MuseSpark:
             "model": self.MODEL,
             # We request no storage per call; account-level ZDR needs an enterprise account (ADR 0003).
             "store": False,
+            "reasoning": {"effort": "minimal"},  # fits the timeout; "none" is a 400 on Muse Spark
             "input": [
                 {"role": "developer", "content": [{"type": "input_text", "text": rules}]},
                 {"role": "user", "content": [{"type": "input_text", "text": snippet}]},
@@ -60,9 +66,12 @@ class MuseSpark:
                 "format": {"type": "json_schema", "name": "Verdict", "schema": Verdict.model_json_schema()}
             },
         }
-        response = await self.http.post(self.url, json=body)
+        response = await self.http.post(self.url, json=body, headers={"Authorization": f"Bearer {self.key}"})
         response.raise_for_status()
-        return json.loads(response.json()["output"][0]["content"][0]["text"])
+        # reasoning and web_search_call items can come before the message and have no content
+        message = next(item for item in response.json()["output"] if item.get("type") == "message")
+        part = next(part for part in message["content"] if part.get("type") == "output_text")
+        return json.loads(part["text"])
 
 
 def spark(pack: dict) -> Spark:

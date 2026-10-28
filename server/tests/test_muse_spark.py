@@ -37,6 +37,7 @@ def test_sends_one_standard_stateless_structured_request():
     assert request.headers["authorization"] == "Bearer key-123"
     assert body["model"] == "muse-spark-1.3"
     assert body["store"] is False
+    assert body["reasoning"] == {"effort": "minimal"}
     fmt = body["text"]["format"]
     assert fmt["type"] == "json_schema" and fmt["schema"] == Verdict.model_json_schema()
 
@@ -55,6 +56,22 @@ def test_snippet_only_in_the_user_item_and_counter_moves_in_the_developer_item()
     assert SNIPPET not in json.dumps(dev) and "fear-2" in json.dumps(dev)
 
 
+def test_skips_reasoning_items_before_the_message():
+    text = json.dumps(ANSWER)
+    output = [
+        {"type": "reasoning", "summary": []},
+        {"type": "message", "content": [{"type": "output_text", "text": text}]},
+    ]
+    handler = lambda request: httpx.Response(200, json={"output": output})  # noqa: E731
+    assert asyncio.run(client(handler).assess("fear", "medium", SNIPPET)) == ANSWER
+
+
+def test_real_clients_share_one_connection_pool():
+    assert (
+        MuseSpark(PACK, "k", "https://api.test/v1").http is MuseSpark(PACK, "k", "https://api.test/v1").http
+    )
+
+
 @pytest.mark.parametrize(
     "response",
     [
@@ -65,7 +82,7 @@ def test_snippet_only_in_the_user_item_and_counter_moves_in_the_developer_item()
     ],
 )
 def test_failures_raise_so_the_fail_safe_applies(response):
-    with pytest.raises((httpx.HTTPError, ValueError, KeyError, IndexError)):
+    with pytest.raises((httpx.HTTPError, ValueError, KeyError, IndexError, RuntimeError)):
         asyncio.run(client(lambda request: response).assess("fear", "medium", SNIPPET))
 
 
