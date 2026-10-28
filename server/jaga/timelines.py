@@ -28,7 +28,8 @@ router = APIRouter(prefix="/timelines", dependencies=[Depends(copilot)])
 
 def kept() -> dict[str, telephony.Call]:
     """Calls still inside their 30 days; older ones are dropped here."""
-    # shortcut: lost on Fly restart, move to Firestore with #12/#19
+    # shortcut: lost on Fly restart, move to Firestore with #12/#19. Eviction runs only when a timeline is
+    # requested, so an unread call stays in memory past 30 days.
     now = telephony.now()
     for sid in [s for s, c in telephony.calls.items() if c.ended_at and now - c.ended_at > KEEP]:
         del telephony.calls[sid]
@@ -46,13 +47,13 @@ def timeline(call: telephony.Call) -> dict:
 
 
 @router.get("")
-def list_timelines() -> list[dict]:
+async def list_timelines() -> list[dict]:
     done = [timeline(c) for c in kept().values() if c.updates]
     return sorted(done, key=lambda t: t["startedAt"], reverse=True)
 
 
 @router.get("/{call_id}")
-def get_timeline(call_id: str) -> dict:
+async def get_timeline(call_id: str) -> dict:
     call = kept().get(call_id)
     if call is None or not call.updates:
         raise HTTPException(404)
@@ -60,6 +61,9 @@ def get_timeline(call_id: str) -> dict:
 
 
 @router.delete("/{call_id}", status_code=204)
-def delete_timeline(call_id: str) -> None:
-    if kept().pop(call_id, None) is None:
+async def delete_timeline(call_id: str) -> None:
+    call = kept().get(call_id)
+    # Clear the timeline, never the Call: Jaga Pause reads `calls` and a deleted call must still hold a bank.
+    if call is None or not call.updates or call.ended_at is None:
         raise HTTPException(404)
+    call.updates.clear()

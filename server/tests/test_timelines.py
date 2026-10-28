@@ -10,7 +10,7 @@ from referencing import Registry, Resource
 from tests import test_fake_call
 from tests.test_fake_call import client as client
 from tests.test_fake_call import play_call
-from tests.test_pause import clock as clock
+from tests.test_pause import ask
 
 from jaga import stages, telephony
 
@@ -129,3 +129,38 @@ def test_a_timeline_is_kept_for_30_days_after_the_call_ends(copilot, clock):
     clock[0] = ended + timedelta(days=30, seconds=1)
     assert copilot.get("/timelines/CA_old", headers=AUTH).status_code == 404
     assert copilot.get("/timelines", headers=AUTH).json() == []
+
+
+def test_delete_does_not_lift_a_bank_hold(copilot):
+    play_call(copilot, "CA_hold", MONEY)
+    assert ask(copilot).json()["inScam"] is True
+
+    copilot.delete("/timelines/CA_hold", headers=AUTH)
+
+    assert (held := ask(copilot).json())["inScam"] is True and held["stage"] == "money"
+
+
+def test_a_live_call_cannot_be_deleted(copilot):
+    play_call(copilot, "CA_live", MONEY)
+    telephony.calls["CA_live"].ended_at = None  # as if still ringing
+
+    assert copilot.delete("/timelines/CA_live", headers=AUTH).status_code == 404
+    assert copilot.get("/timelines/CA_live", headers=AUTH).status_code == 200
+
+
+def test_a_trailing_slash_is_a_404_not_a_redirect(copilot):
+    assert copilot.get("/timelines/", follow_redirects=False).status_code == 404
+
+
+@pytest.mark.parametrize(
+    ("said", "masked"),
+    [
+        ("900101-14-5678", "[number]"),
+        ("1234 5678 9012", "[number]"),
+        ("123456", "[number]"),
+        ("tac empat lapan dua satu tujuh lima", "tac [number]"),
+    ],
+)
+def test_mask_hides_ic_account_and_otp_numbers(said, masked):
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    assert tracker.mask(said) == masked

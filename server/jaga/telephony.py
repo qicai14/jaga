@@ -84,7 +84,8 @@ class Call:
             self.changed.notify_all()
 
 
-# shortcut: in memory and never evicted, single server process; move to storage with the stage timeline (#16).
+# shortcut: in memory, single server process. Stage timelines (#16) are derived from this dict and expire
+# 30 days after the call ends; move to storage with #12/#19.
 calls: dict[str, Call] = {}
 
 
