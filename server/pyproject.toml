@@ -9,6 +9,7 @@ dependencies = [
   "pydantic-settings",
   "websockets",  # client for the Muse Voice Transcribe realtime socket (#20)
   "httpx",  # HTTP client for the Muse Spark chat API (#21)
+  "firebase-admin",  # FCM client for family alert pushes (#54)
 ]
 
 [dependency-groups]
