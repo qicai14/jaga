@@ -8,7 +8,7 @@ endpoints. A new contract, `stage-timeline-list`, is a JSON array of `stage-time
 - `GET /timelines/{callId}` returns one `stage-timeline`.
 - `DELETE /timelines/{callId}` returns 204. This is "family can delete sooner".
 - Every request carries `Authorization: Bearer <JAGA_COPILOT_TOKEN>`, compared in constant time (`hmac.compare_digest`).
-  A missing or wrong token, and an unknown `callId`, all get the same bare 404 with no body, so the protected user's app
+  A missing or wrong token, and an unknown `callId`, all get the same 404 that any unknown path gets (`{"detail":"Not Found"}`), so the protected user's app
   (which has no token) gets nothing, and nobody can probe which calls exist.
 - The store is in memory and drops a timeline 30 days after the call. **Shortcut:** one token, no per-user scoping, and a
   restart loses everything; upgrade to a real store and per-co-pilot auth after #12 and #19.
