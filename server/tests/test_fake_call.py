@@ -666,7 +666,7 @@ def test_spark_asks_stop_at_five_a_call_and_the_sixth_stage_gets_the_fail_safe(c
 
 
 def test_the_spark_limits_are_a_second_and_a_half_and_five_asks():
-    assert (spark.TIMEOUT, spark.MAX_CALLS) == (1.5, 5)
+    assert (spark.TIMEOUT, spark.MAX_CALLS) == (2.5, 5)
 
 
 def test_a_slow_verdict_for_an_older_stage_cannot_lower_a_newer_warning(client, monkeypatch):

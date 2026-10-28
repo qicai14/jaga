@@ -130,7 +130,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - Risk is `low`, `medium` (Caution) or `high` (Warning) and can go down.
 - Rules alone raise risk to medium at most (ADR 0005). A **hard trigger** raises a Warning at once with `source=rules`;
   Spark checks it afterwards.
-- Spark is called on each new stage from `authority` up, at most 5 times per call, with a 1.5 s timeout.
+- Spark is called on each new stage from `authority` up, at most 5 times per call, with a 2.5 s timeout.
 - Spark may lower a rules-only Caution to low. It may lower a hard-trigger Warning to a Caution, never to low.
 - Fail-safe: if Spark times out or fails, a call at `money` or `credentials` gets a Warning; below that it stays a Caution.
 - The protected user sees only phrase-library text (ADR 0006). Spark writes free text only for the family summary
