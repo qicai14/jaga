@@ -35,6 +35,16 @@ def test_a_listed_origin_gets_the_allow_headers(client, monkeypatch):
     assert "access-control-allow-credentials" not in reply.headers
 
 
+def test_a_trailing_slash_in_the_env_still_matches(client, monkeypatch):
+    monkeypatch.setenv("DEMO_BANK_ORIGINS", f"{BANK}/")
+    assert preflight(client).headers["access-control-allow-origin"] == BANK
+
+
+def test_get_pause_gets_no_cors_headers(client, monkeypatch):
+    monkeypatch.setenv("DEMO_BANK_ORIGINS", BANK)
+    assert "access-control-allow-origin" not in client.get("/pause", headers={"Origin": BANK}).headers
+
+
 def test_an_unlisted_origin_is_refused(client, monkeypatch):
     monkeypatch.setenv("DEMO_BANK_ORIGINS", BANK)
     reply = preflight(client, origin="http://evil.example")

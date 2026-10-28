@@ -13,8 +13,14 @@ class PauseCORS:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        origins = [o.strip() for o in os.environ.get("DEMO_BANK_ORIGINS", "").split(",") if o.strip()]
-        if origins and scope["type"] == "http" and scope["path"] == "/pause":
+        raw = os.environ.get("DEMO_BANK_ORIGINS", "").split(",")
+        origins = [o.strip().rstrip("/") for o in raw if o.strip().rstrip("/")]
+        if (
+            origins
+            and scope["type"] == "http"
+            and scope["path"] == "/pause"
+            and scope["method"] in ("POST", "OPTIONS")
+        ):
             # shortcut: built per request so the env is read live; upgrade if /pause gets hot
             cors = CORSMiddleware(
                 self.app, allow_origins=origins, allow_methods=["POST"], allow_headers=["content-type"]
