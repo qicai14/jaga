@@ -165,9 +165,16 @@ async def media(ws: WebSocket) -> None:
                         log.warning("call %s refused: %s", sid, e)
                         await ws.close(code=status.WS_1008_POLICY_VIOLATION)
                         return
-                    call = calls[sid] = Call(sid, tracker, spark.spark(tracker.pack))
+                    try:  # both before `calls`, so a refused call leaves nothing behind
+                        client, transcriber = spark.spark(tracker.pack), asr.transcriber(tracker.pack)
+                    except RuntimeError as e:  # e.g. no META_API_KEY; type only, never the message
+                        log.warning("call %s refused: Meta client unavailable (%s)", sid, type(e).__name__)
+                        await ws.close(code=status.WS_1011_INTERNAL_ERROR)
+                        return
+                    call = calls[sid] = Call(sid, tracker, client)
                     await call.publish("none", "low")
-                transcriber = asr.transcriber(call.tracker.pack)
+                else:
+                    transcriber = asr.transcriber(call.tracker.pack)
             elif msg["event"] == "media" and call is not None:
                 leg = LEGS.get(msg["media"]["track"])
                 if leg is not None:
