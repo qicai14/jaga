@@ -1,0 +1,25 @@
+[
+  {
+    "prompt": [
+      {"role": "system", "content": "Decide if the call is fraud or normal."},
+      {"role": "user", "content": [
+        {"type": "audio_url", "audio_url": {"url": "synthetic_1.wav"}},
+        {"type": "text", "text": "A: Ada bungkusan haram atas nama puan.\nB: Apa?\nA: Jangan beritahu sesiapa ya.\n"}
+      ]}
+    ],
+    "answer": "fraud"
+  },
+  {
+    "prompt": [
+      {"role": "user", "content": [
+        {"type": "audio_url", "audio_url": {"url": "synthetic_2.wav"}},
+        {"type": "text", "text": "Hello, your table is booked for seven.\n\nSee you then, thank you."}
+      ]}
+    ],
+    "answer": "normal"
+  },
+  {
+    "prompt": [{"role": "user", "content": "甲：你好，这里是快递。\n乙：谢谢。"}],
+    "answer": "这是诈骗"
+  }
+]
