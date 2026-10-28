@@ -8,7 +8,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 
 MAX_CALLS = 5  # per call
-TIMEOUT = 1.5  # seconds
+TIMEOUT = 2.5  # seconds; live Muse Spark asks took 1.6-2.1 s (#21)
 
 
 class Verdict(BaseModel):

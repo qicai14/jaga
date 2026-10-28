@@ -40,7 +40,7 @@ helping the user verify, pulling in family and slowing the transfer are the rest
    - **Family co-pilot:** on first reaching isolation, and again at money or credentials, an FCM push with a summary and up to two masked quotes.
    - **Jaga Pause:** a bank app asks "is this customer mid-scam?"; the Demo Bank holds the transfer.
    - Jaga never hangs up or reports by itself. The user and family decide.
-   - **Safety rules:** if Muse Spark times out (1.5 s) or fails, a call at `money` or `credentials` still gets a Warning;
+   - **Safety rules:** if Muse Spark times out (2.5 s) or fails, a call at `money` or `credentials` still gets a Warning;
      below that it stays a Caution. Spark can lower a hard-trigger Warning to a Caution, never to nothing, and a follow-up
      push tells the family. The protected user can dismiss a Caution or Warning on their own screen only: it doesn't stop
      family alerts, clear Jaga Pause or stop tracking, because scammers coach victims to tap "okay". Only a family co-pilot
