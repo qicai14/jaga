@@ -50,7 +50,7 @@ class Call:
             "risk": risk,
             "command": command,
             "counterMove": counterMove,
-            "evidence": list(evidence),
+            "evidence": [self.tracker.mask(q) for q in evidence],  # kept in the stage timeline
             "source": source,
         }
         async with self.changed:
@@ -80,10 +80,12 @@ class Call:
         async with self.changed:
             self.ended_at = now()  # before `ended`: Jaga Pause treats an end time as ended
             self.ended = True
+            self.tracker.prev.clear()  # no transcript text outlives the call
             self.changed.notify_all()
 
 
-# shortcut: in memory and never evicted, single server process; move to storage with the stage timeline (#16).
+# shortcut: in memory, single server process. Stage timelines (#16) are derived from this dict and expire
+# 30 days after the call ends; move to storage with #12/#19.
 calls: dict[str, Call] = {}
 
 
