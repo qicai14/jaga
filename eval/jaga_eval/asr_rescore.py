@@ -106,17 +106,31 @@ def pack_terms(region="my") -> list[str]:
     return terms
 
 
-def count(term: str, hyp: str) -> int:
-    return len(re.findall(rf"(?<!\w){re.escape(normalise(term))}(?!\w)", normalise(hyp)))
+def _spelled(text: str) -> str:
+    """Joins runs of single-character tokens ("9 9 7", "l h d n") so spelled-out terms match.
+    Keyword counting only, so WER/CER are unchanged. shortcut: joins stray "a" runs too, upgrade if noisy."""
+    return re.sub(r"(?<!\S)\w(?: \w)+(?!\S)", lambda m: m.group().replace(" ", ""), normalise(text))
+
+
+def occurrences(terms, hyp: str) -> dict:
+    """Times each term is in the hypothesis. Longest term first, and its span is blanked, so "kod tac"
+    does not also count for "TAC"."""
+    text, out = _spelled(hyp), {}
+    for t in sorted(terms, key=lambda t: -len(normalise(t))):
+        pat = rf"(?<!\w){re.escape(_spelled(t))}(?!\w)"
+        out[t] = len(re.findall(pat, text))
+        text = re.sub(pat, " # ", text)
+    return out
 
 
 def _tally(said: dict, hyp: dict, picks: list) -> tuple[dict, float, float]:
+    """In keywords.csv, mark only the longest term said ("kod tac" is not also "TAC")."""
     terms = {}
     for c in picks:
+        occ = occurrences(said[c], hyp[c])
         for t, n in said[c].items():
             s, h, f = terms.get(t, (0, 0, 0))
-            occ = count(t, hyp[c])
-            terms[t] = (s + n, h + min(n, occ), f + max(0, occ - n))
+            terms[t] = (s + n, h + min(n, occ[t]), f + max(0, occ[t] - n))
     said_total = sum(s for s, _, _ in terms.values())
     hit = sum(h for _, h, _ in terms.values()) / said_total if said_total else 0.0
     return terms, hit, sum(f for _, _, f in terms.values()) / len(picks)
@@ -131,6 +145,16 @@ def keyword_scores(said: dict, hyp: dict, resamples=1000, seed=0) -> dict:
     """said: clip -> {term: times said}; hyp: clip -> Muse text. Clips without a hypothesis are skipped.
     CIs are a percentile bootstrap over calls."""
     clips = [c for c in said if c in hyp]
+    if not clips:
+        return {
+            "n": 0,
+            "terms": {},
+            "hit_rate": 0.0,
+            "false_per_call": 0.0,
+            "hit_ci": (0.0, 0.0),
+            "false_ci": (0.0, 0.0),
+            "go": False,
+        }
     terms, hit, false = _tally(said, hyp, clips)
     rng, hits, falses = random.Random(seed), [], []
     for _ in range(resamples):

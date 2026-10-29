@@ -1,4 +1,5 @@
 import csv
+import io
 import json
 import shutil
 import wave
@@ -54,7 +55,7 @@ def test_split_chunks_with_overlap(tmp_path):
     chunks = r.split_wav(p.read_bytes())
     sizes = []
     for c in chunks:
-        with wave.open(__import__("io").BytesIO(c)) as w:
+        with wave.open(io.BytesIO(c)) as w:
             sizes.append(w.getnframes() / 16000)
     assert sizes == [30, 30, 12]  # starts 0, 29, 58: the last runs 58..70
 
@@ -66,7 +67,7 @@ def test_phone_path_gives_16k_wav(tmp_path):
         w.setnchannels(1), w.setsampwidth(2), w.setframerate(44100)
         w.writeframes(b"\1\0" * 44100)
     out = r.phone_wav(p)
-    with wave.open(__import__("io").BytesIO(out)) as w:
+    with wave.open(io.BytesIO(out)) as w:
         assert (w.getframerate(), w.getnchannels(), w.getsampwidth()) == (16000, 1, 2)
 
 
@@ -106,3 +107,32 @@ def test_run_caches_muse_and_reports(tmp_path, capsys):
     assert json.loads((tmp_path / "muse.local.json").read_text())["call_01.mp3"] == "hello tac code"
     r.run(tmp_path, transcribe=fake, phone=lambda p: b"wav", split=lambda b: [b])
     assert len(calls) == 1  # cached, no second paid call
+
+
+@pytest.mark.parametrize(
+    "hyp,term",
+    [
+        ("nine nine seven", "997"),
+        ("sembilan sembilan tujuh", "997"),
+        ("9 9 7", "997"),
+        ("L H D N", "LHDN"),
+        ("L.H.D.N", "LHDN"),
+    ],
+)
+def test_spelled_out_terms_hit(hyp, term):
+    assert r.keyword_scores({"c": {term: 1}}, {"c": f"call {hyp} now"})["hit_rate"] == 1.0
+
+
+def test_collapse_is_keyword_only():
+    assert r.normalise("L H D N") == "l h d n"
+
+
+def test_longest_term_takes_the_span():
+    k = r.keyword_scores({"c": {"kod tac": 1, "TAC": 0}}, {"c": "beri kod tac"})
+    assert k["terms"]["kod tac"] == (1, 1, 0)
+    assert k["terms"]["TAC"] == (0, 0, 0)
+
+
+def test_no_overlap_between_keywords_and_cache():
+    k = r.keyword_scores({"a": {"TAC": 1}}, {"b": "tac"})
+    assert k["n"] == 0 and k["go"] is False
