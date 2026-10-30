@@ -191,3 +191,13 @@ def test_bias_reaches_the_muse_request():
     client = httpx.Client(base_url="http://t", transport=httpx.MockTransport(handler))
     tafd.batch_transcribe(b"w", "a.wav", client, bias=["Mandarin Chinese"])
     assert b'"languageBias": ["Mandarin Chinese"]' in sent["body"]
+
+
+def test_stages_fired_ignores_punctuation_and_order():
+    # money before authority, no punctuation: the tracker alone would report only one rise
+    assert r.stages_fired("Pindahkan Wang sekarang saya pegawai PDRM") == {"money", "authority"}
+
+
+def test_cjk_needs_a_mostly_chinese_reference():
+    s = r.score("Encik Lim 林 minta kod tac anda sekarang juga", "Encik Lim minta kod tac anda")
+    assert s.words[1] > 0

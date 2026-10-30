@@ -18,10 +18,10 @@ Clips, references and the keyword sheet live outside git in <clip_dir>; never co
 
   uv run python -m jaga_eval.asr_rescore <clip_dir> --bias "Mandarin Chinese"
       a Mandarin clip dir is its own run: Muse languageBias is just that language, and a reference with
-      Chinese characters is scored by CER only (no word spaces, so no WER)
+      mostly Chinese characters is scored by CER only (no word spaces, so no WER)
 
-The report also runs the real stage tracker on each reference and on the Muse text: which stages fire on
-each, stage recall, and extra stages per call (clips without a reference show their stages as-is, so a
+The report also checks the real stage pack (phrases and hard triggers; both speakers are in one mono
+text, same on reference and Muse) on each reference and on the Muse text: which stages fire on each, stage recall, and extra stages per call (clips without a reference show their stages as-is, so a
 genuine-speech run reads false stages per call off the same table).
 
 Muse path: the batch endpoint from #18 (`batch_transcribe`): one POST per chunk, no socket pacing or flush,
@@ -100,7 +100,7 @@ CJK = re.compile(r"[一-鿿]")
 def score(ref: str, hyp: str) -> Score:
     """Chinese has no word spaces, so a CJK reference is scored by CER only (spaces dropped, no WER)."""
     ref, hyp = normalise(ref), normalise(hyp)
-    if CJK.search(ref):
+    if len(CJK.findall(ref)) > len(ref.replace(" ", "")) / 2:  # mostly Chinese
         ref, hyp = ref.replace(" ", ""), hyp.replace(" ", "")
         return Score((0, 0), (edits(list(ref), list(hyp)), len(ref)))
     return Score((edits(ref.split(), hyp.split()), len(ref.split())), (edits(list(ref), list(hyp)), len(ref)))
@@ -145,11 +145,12 @@ def occurrences(terms, hyp: str) -> dict:
 
 
 def stages_fired(text: str) -> set[str]:
-    """Stages the real tracker reaches on a text read as the caller. Sentence by sentence, so every rise
-    shows. shortcut: only rises are seen (a lower stage after a higher one is not), fine for recall."""
-    tracker = stages.StageTracker(stages.load_pack("my"))
-    ups = (tracker.hear("caller", s) for s in re.split(r"[.!?。！？\n]+", text) if s.strip())
-    return {u["stage"] for u in ups if u}
+    """Stages whose phrases or hard triggers are anywhere in the text (lowercase substring, as the tracker
+    matches). Both speakers are in one mono text, same on reference and Muse. shortcut: no leg or order logic
+    and no user-disclosure rules, so it can differ from a live call; fine for recall."""
+    pack, text = stages.load_pack("my"), text.lower()
+    found = {s for s, ps in pack["phrases"].items() if any(p in text for p in ps)}
+    return found | {s for p, s in pack["hardTriggers"].items() if p in text}
 
 
 def stage_scores(ref: dict, muse: dict, resamples=1000, seed=0) -> dict:
