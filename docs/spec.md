@@ -111,7 +111,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - **telephony**: accepts Twilio Media Streams for both legs (`caller`, `user`) of a call through the Jaga line, converts
   8 kHz mu-law to 16 kHz PCM, and owns the call's lifecycle (start, end, `callId`).
 - **asr**: streams each leg to Muse Voice Transcribe with the region pack's `languageBias` and keyword list
-  (Malaysia: Malay, English, Mandarin Chinese, Tamil; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997). Emits transcript turns per leg.
+  (Malaysia: Malay, English, Mandarin Chinese, Tamil; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC; not 997, which made Muse write it into normal speech, #69). Emits transcript turns per leg.
 - **stages**: the stage tracker. Deterministic rules from the region pack's **script pack** (Malaysia: Macau) (stages, hard triggers, keyword
   rules). Reads the caller leg for stages; reads the user leg only to detect the protected user disclosing a TAC,
   account number or IC, which moves the call to `credentials`.
