@@ -15,3 +15,8 @@
   the real APIs (needs `META_API_KEY`, paid); `fake` replays the call's `script` lines for cheap runs. Family alerts go
   to a recording fake, never a real push. The per-call report (stage updates, alerts, timings) holds masked quotes, so
   it is `reports/replay.local.json` (untracked); never print or commit it.
+- Metrics report (`python -m jaga_eval.report <calls.json> [--arms rules rules+spark rules+open spark-only]`): the plan
+  targets with n and bootstrap CIs, written numbers-only to `reports/metrics-<split>.md`. Each call carries `label`
+  (scam|genuine) and `split` (dev|heldout) in calls.json. Held-out runs need `--final`; one run, never read the misses
+  to change rules, prompts or thresholds. `rules+open` needs `BASETEN_API_KEY`/`BASETEN_BASE_URL` (Muse Spark Open);
+  prices (`--spark-usd`, `--asr-usd-per-min`) are inputs, so cost is "n/a" unless given.
