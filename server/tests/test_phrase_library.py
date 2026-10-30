@@ -114,3 +114,19 @@ def test_pretext_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(
 )
 def test_authority_phrases_in_malay_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("authority", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Kalau tak settle hari ini, polis akan datang ke rumah puan.",
+        "Encik akan ditahan dan boleh masuk penjara kalau tak bekerjasama.",
+        "Lepas ni kami keluarkan waran dan polis datang tangkap you.",
+        "If you refuse, you will be arrested and may go to jail.",
+        "Your account will be frozen by tonight.",
+        "你再不配合就会被逮捕，还要坐牢。",
+        "您的帳戶會被凍結，也會被拘留。",
+    ],
+)
+def test_fear_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("fear", "medium")
