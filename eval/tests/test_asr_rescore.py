@@ -37,7 +37,7 @@ def test_keyword_hits_and_false_hits():
 def test_terms_from_pack_deduped():
     terms = r.pack_terms()
     assert len(terms) == len({t.lower() for t in terms})
-    assert "TAC" in terms and "997" in terms
+    assert "TAC" in terms and "OTP" in terms
 
 
 def test_merge_drops_overlap_at_seam():
@@ -220,7 +220,7 @@ def test_keywords_override_reaches_the_muse_request():
     tafd.batch_transcribe(b"w", "a.wav", client)
     assert b'"keywords": ["LHDN"]' in sent[0]
     assert b'"keywords": []' in sent[1]  # empty means none, not the pack's
-    assert b"997" in sent[2]  # default still the pack's
+    assert b"OTP" in sent[2]  # default still the pack's
 
 
 def test_override_uses_its_own_cache_file(tmp_path, capsys):
