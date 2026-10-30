@@ -1,0 +1,115 @@
+clip_file,source_id,split,line_id,text,draft_label,needs_review
+call_01.wav,src_01,train,call_01_L01,"So, amang ini tujuh balu agar saya dah pergi kerja waktu.",none,yes
+call_01.wav,src_01,train,call_01_L02,"Hello? Hello? Ya, siapa ni?",none,
+call_01.wav,src_01,train,call_01_L03,"Saya, Iki, Maulah, Jafri, Demota. Saya selalu bergawai operasi jukai daripada HQ LHDN Tiba Jaya Selangor.",authority,yes
+call_01.wav,src_01,train,call_01_L04,HQ mana? Tiba Jaya Selangor.,authority,yes
+call_01.wav,src_01,train,call_01_L05,"Oh, saya pun LHDN juga. Bagaimana LHDN? Saya LHDN dekat KL. Saya LHDN Selangor.",none,yes
+call_01.wav,src_01,train,call_01_L06,"Jadi, saya cuma banggilah daripada situa operasi, awak bergawai? Saya tak tahu. Dia suruh saya tekan buzzatu saya tekan.",none,yes
+call_01.wav,src_01,train,call_01_L07,Boleh saya dapatkan Cik punya ID pekerja tak? Saya nak cek kejap.,none,
+call_01.wav,src_01,train,call_01_L08,"Cik, Cik, Cik untuk saya berjaya. 2164, itu adalah lombongan moongan saya. Ah, dan Cik, saya berjaya 2164. 64. 641. 641. Okey. Saya cek.",authority,yes
+call_01.wav,src_01,train,call_01_L09,"Tolong. Saya nak cek. Cik, Cik, Cik, Demota. Cik, Cik, Cik, Demota. Saya cek. Bagaimana daripada bagian cuka? Bagaian cuka. Okey. Saya tak tahu. Kalau saya cek ke sini tak ada.",none,yes
+call_01.wav,src_01,train,call_01_L10,"Ada cik di kata kerja saya, Atee? Ya betul. Takkanlah tak ada darah sistem ni.",none,yes
+call_01.wav,src_01,train,call_01_L11,"Okey, Mama, saya cek ke Moksa. Kejap saya panggil pergawa saya. Cik tengokkan kokok saya salah tekan. Kau hari pertama kerja di sini. Kejap, ya.",none,yes
+call_02.wav,src_02,dev,call_02_L01,Selamat tinggal.,none,yes
+call_02.wav,src_02,dev,call_02_L02,Ini adalah notis amaran terakhir dari lembaga hasil dalam negeri.,authority,
+call_02.wav,src_02,dev,call_02_L03,Anda mempunyai satu tugakan cukai yang masih belum dijelaskan.,pretext,
+call_02.wav,src_02,dev,call_02_L04,Sila tekan sembilan untuk bercakap dengan pegawai kami.,handoff,
+call_02.wav,src_02,dev,call_02_L05,panggilan ini akan . Bergilan anda akan.,none,yes
+call_02.wav,src_02,dev,call_02_L06,"Hello , selamat pagi HQ LHDN .",authority,
+call_02.wav,src_02,dev,call_02_L07,"Hello, ini siapa?.",none,
+call_02.wav,src_02,dev,call_02_L08,"Helo, nama saya, Mohammed Libiin Abdullah .",authority,
+call_02.wav,src_02,dev,call_02_L09,Jadi puan menerima pangillan daripada pengawai....,pretext,yes
+call_02.wav,src_02,dev,call_02_L10,Pegawai apa? pe-pe-pe . Pegawai pun tersangkut ke macam ni. Bergawah. Apadia? Pegawai ape ni ? untuk cukai. Aha ye then kenapa call saya?,none,
+call_02.wav,src_02,dev,call_02_L11,Ok jadi puan menerima panggilan daripada sistem ke tadi? Ok then? Kita tak de panggilan keluar puan.,none,yes
+call_02.wav,src_02,dev,call_02_L12,"Ah ok then panggilan ini kol saya ada tunggakan cukai, tunggakkan apa itu? Okey, jadi dia ada bagi nombor Rujukan tak 109.",none,
+call_02.wav,src_02,dev,call_02_L13,"Ah Tak ada. Jadi Puan, kita baca nombor KAD pengenalan untuk saya semakan dalam sistem kalau adapape saya teruskan kepada....",credentials,
+call_02.wav,src_02,dev,call_02_L14,"Tahu saya, kalau ada pengawai kol, Kerajaan ke apa nidia akan ada kita punya nombor IC. Puan, kalau saya panggilan keluar, saya mesti ada detil sama Puan. Jelas. Tapi tak ada detil kan? Jadi, macam mana awak tahu saya ada tugakan cukai?",none,
+call_02.wav,src_02,dev,call_02_L15,"Masalah, bukan saya terima. Sebab ini sistem yang terima sama Puan. Tapi saya tak boleh simpili bagi nombor IC lah.",credentials,yes
+call_02.wav,src_02,dev,call_02_L16,"Okey, kalau Puan tak nak bagi... ...saya dimatikan panggilan. Okey. Bye, skamer. Okey, selamat tinggal. Okey, selamat tinggal.",none,
+call_03.wav,src_03,train,call_03_L01,"Ya, halo? Halo? Is this...speaking? Ya, I am.",none,
+call_03.wav,src_03,train,call_03_L02,"We are calling from Makamah Terengganu,",authority,
+call_03.wav,src_03,train,call_03_L03,failure to show up in court yesterday at 10.30 am.,fear,
+call_03.wav,src_03,train,call_03_L04,What court case?,none,
+call_03.wav,src_03,train,call_03_L05,This is about a loan settlement that you borrowed 3 months ago and failed to pay the minimum payment.,pretext,
+call_03.wav,src_03,train,call_03_L06,Why did you not show up in court yesterday morning?,fear,
+call_03.wav,src_03,train,call_03_L07,What loan?,none,
+call_03.wav,src_03,train,call_03_L08,This loan settlement is from Public Bank.,pretext,
+call_03.wav,src_03,train,call_03_L09,Public Bank ah?,none,
+call_03.wav,src_03,train,call_03_L10,Why did you not show up?,fear,
+call_03.wav,src_03,train,call_03_L11,Let me call Public Bank first. Ya hello?,none,
+call_04.wav,src_04,train,call_04_L01,"Salam sejata, ini adalah beringatan daripada SKMM.",authority,yes
+call_04.wav,src_04,train,call_04_L02,Kalian anda akan ditamatkan perhibmatan sebentar lagi.,fear,yes
+call_04.wav,src_04,train,call_04_L03,Sila tunggu sebentar untuk beri jakab dengan pegawai kani.,handoff,yes
+call_04.wav,src_04,train,call_04_L04,"Salam sejata, ini adalah beringatan daripada...",authority,yes
+call_04.wav,src_04,train,call_04_L05,"Helo, Assalamualaikum warahmatullahi wabarakatuh. Salam selamat datang. Nama saya Hamdan Antulah daripada Suruhan Jaya.",authority,yes
+call_04.wav,src_04,train,call_04_L06,Dibuat di mana? Suruhan Jaya berkomunikasi dengan media. Nama saya Suruhan Jaya 10 sahaja. Nama saya ada terima apa yang saya tahu? Apa yang saya tahu? Perkembangan kekakanga di sejuta Kedungan Janis. SAJKM Berita yang terima kaki sejuta itu. Berita yang itu diperkenalkan. Sejuta diperkenalkan. Berita yang terima kaki diperkenalkan. Berita yang ada diperkenalkan. Terima kasih. Berita yang ada diperkenalkan.,none,yes
+call_04.wav,src_04,train,call_04_L07,"Sebenarnya boleh saya memakai cema kanan lancat? Ya, ya, ya. Boleh ya? Boleh, bolehlah. Apa dia? Awak nak tanya apa? Boleh saya dapatkan panggilan ala cek. Nomur apa? Nomur panggilan ala cek.",credentials,yes
+call_04.wav,src_04,train,call_04_L08,"Untuk cema apa ni? Ya, cek cema kenal dengan nautis apa cek? Ialah, saya makan apa? Nautis apa dia? Apa dia nak kena letak? Itu saya saya makan dalam sistem cek. Sama ada cek, ada perumahan nautis tunggakan ke?",pretext,yes
+call_04.wav,src_04,train,call_04_L09,Tunggakan apa panggilan? SKM ini dia tunggakan apa ya? SKM ni cek.,pretext,yes
+call_04.wav,src_04,train,call_04_L10,"SKM ni adalah satu agensi kerajaan yang kawan seorang kain ramai cek. Saya tak pasti tunggakan apa. Dan sini SKM-M tunggakan apa panggilan? Tunggakan apa ya? Tunggakan, dan sini tunggakan bil cek. Bil cek? Bil apa? Bil telefon ke? Bilai ke? Biletrik? Akhir cek, sama ada bil telefon ke? Bil JM ke? Bil... Bila ada Tiga saya dikong ke?",authority,yes
+call_04.wav,src_04,train,call_04_L11,"Sekarang kalau bil memang SKM-M yang potong? Bukan SKM yang potong cek. Sama kita yang kawan seluruh ramai ramai cek. Sebab kita agensi cek yang kawan seluruh ramai ramai dalam Malaysia ya? Saya lihat, awak agensi yang kawan seluruh. So yang potong pun awak lah? Yang potong cek, yang potong bukan kita. Yang potong berkenan dengan Pengguna dari Mata Jan apa ya? Cik ada tunggakan ya?",none,yes
+call_04.wav,src_04,train,call_04_L12,"Boleh saya mula mula makan dulu cek? Saya kalau ada tunggakan pun tunggakan bayar bulan kereta dia lah. Takkan SKM-M nak potong bulan kereta saya? Saya pinjam ke bank. Oh ya, ke bank. Okey baik. Sebelum itu boleh saya mula makan dulu cek? Cik berkenan dengan nautis apa ya? Itu lah saya terkenal. Takkanlah saya ada utang. Apa ni? Bulan kereta SKM-M nak potong kan? Ya betul cek. Itu saya heran tu. Okey boleh saya bantuan. Ya? Itu lah saya. Itu ya saya. Confused. Saya tak ada buat beli apa-apa dengan SKM-M. Okey, baiklah cek. Itu kan saya kat sini membuat satu saya makan atau masalah.",none,yes
+call_04.wav,src_04,train,call_04_L13,Cik gunakan nombor lepo sekarang ini lah. Hah? Gunakan sekarang ni? Pahannya? Gunakan sekarang ni. Ya cik gunakan nombor lepo ni. Tapi sekarang ni saya kalau tak silap saya pakai topak. Saya tak pakai bil macam mana belakang ada tunggakam lah.,credentials,yes
+call_04.wav,src_04,train,call_04_L14,Okey cek. Cik saya dengar macam nak lari saja apa daripada tunggakam. Boleh saya macam makan dulu cek? Saya tak lari pun. Saya diri je kat sini. Saya ada duduk dengan tak kata. Dia pernah lari baik-baik.,fear,yes
+call_04.wav,src_04,train,call_04_L15,Tak nak macam mana cek? Awak kata lari mana ada lari? Saya duduk je ni. Dibuat tadi ni tak kata. Tak ada lari mana pun. Okey baik. Boleh saya bantu cik itu macam makan cek? Boleh cik. Boleh ya? Cik. Ya? Boleh. Kejap cik.,none,yes
+call_05.wav,src_05,train,call_05_L01,"Helo, boleh saya bercakap dengan Madam Lee? Ya, siapa ini?",none,
+call_05.wav,src_05,train,call_05_L02,"Saya, Kostai Bekheri dari IPD Putar Jaya.",authority,
+call_05.wav,src_05,train,call_05_L03,Saya nak maklumkan yang nama Madam Lee ada terlibat dengan kes pengubahan wang haram.,pretext,
+call_05.wav,src_05,train,call_05_L04,"Eh, apa ini?",none,
+call_06.wav,src_06,heldout,call_06_L01,"Helo Injik, nama Injik ada digunakan dalam penjaman dalam akong bank kita.",pretext,
+call_06.wav,src_06,heldout,call_06_L02,Saya daripada volume bank.,authority,
+call_06.wav,src_06,heldout,call_06_L03,Nama Injik terlibat di dalam seseitan yang sedang kita jalankan.,pretext,
+call_07.wav,src_06,heldout,call_07_L01,Hello J!,none,
+call_07.wav,src_06,heldout,call_07_L02,Nama INJE ada dikunakan dalam hijaman dalam e-commerce kita INJE perhutang sebanyak 1000 ribu dengan kita,pretext,
+call_08.wav,src_06,heldout,call_08_L01,"Saya Micah, daripada cepat-capatan bangga negara, saya ini baharu sistem akal bangga.",authority,yes
+call_09.wav,src_06,heldout,call_09_L01,Sila berikan nombor ekon bank anda dan maklumkan baki dalam ekon bank supaya kita dapat pindahkan baki ekon ke dalam PIDM sementara siasatan dijalankan.,money,
+call_09.wav,src_06,heldout,call_09_L02,Boleh anda nyatakan bank-bank lain yang anda miliki? Kerana kita kotiri bank-bank lain juga terlibat dengan siasatan ini.,credentials,
+call_09.wav,src_06,heldout,call_09_L03,Sila baca kan nombor TAC yang anda terima kepada saya.,credentials,
+call_10.wav,src_06,heldout,call_10_L01,Boleh anda perikan nombor kartu bank?,credentials,
+call_10.wav,src_06,heldout,call_10_L02,Sila perikan TSE number supaya PIDM Insurance boleh lindungi akal penganda.,credentials,
+call_11.wav,src_11,train,call_11_L01,How you doing?,none,
+call_11.wav,src_11,train,call_11_L02,Our make-up service is going to take care of that as soon as possible before it's on criminal.,fear,yes
+call_11.wav,src_11,train,call_11_L03,"We'll provide you with a 10-digit bond ID number, your input thing, your sale.",pretext,yes
+call_11.wav,src_11,train,call_11_L04,Can I just bring like a money order down with me when I come to see you? Because I can be there in 30 minutes.,money,yes
+call_12.wav,src_12,train,call_12_L01,Hello? This is Inspector Lim.,authority,
+call_12.wav,src_12,train,call_12_L02,We need your bank password urgently.,credentials,
+call_12.wav,src_12,train,call_12_L03,My password is...,none,
+call_13.wav,src_13,heldout,call_13_L01,Are you there ma'am?,none,
+call_13.wav,src_13,heldout,call_13_L02,"Hang on, I'm talking to my niece on the upper line love. She said it's very strange that you're ringing me out. I'm sorry ma'am. She said normally the bank doesn't ring.",none,
+call_13.wav,src_13,heldout,call_13_L03,"Ah, listen to me ma'am, I'm not ringing you ma'am. Have to press 2, this is called connected, it's a Lloyd's bank.",authority,yes
+call_13.wav,src_13,heldout,call_13_L04,"You're right? He said it's called connected for Lloyd's bank twice. Okay, so where is it? What is the problem darling?",none,
+call_13.wav,src_13,heldout,call_13_L05,"Ma'am, it's a one suspicious charge on your visa debit card that you're without knowledge and without authorization.",pretext,
+call_13.wav,src_13,heldout,call_13_L06,"I'm telling you ma'am, it's a two suspicious card.",pretext,yes
+call_13.wav,src_13,heldout,call_13_L07,Somebody's been using my visa card without my knowledge.,none,
+call_13.wav,src_13,heldout,call_13_L08,"I tell you what love, I'll hang out and I'll ring the bank. I'm sorry?",none,
+call_14.wav,src_14,dev,call_14_L01,Hello. Yes?,none,
+call_14.wav,src_14,dev,call_14_L02,This is Stephen from AT&T Underactive. How are you sir? AT&T Underactive.,authority,
+call_14.wav,src_14,dev,call_14_L03,"You're calling me from AT&T? Yeah. Actually sir... Yeah, your Polar ID does not represent AT&T my friend. Actually sir, I'm...",none,
+call_14.wav,src_14,dev,call_14_L04,Are you really an AT&T employee? Do you have ID numbers for me to verify?,none,
+call_14.wav,src_14,dev,call_14_L05,Actually I'm scammer. I'm scammer.,none,
+call_15.wav,src_15,train,call_15_L01,你好 我是金辉 資本的投資顧問 專門負責高收益投資項目的推薦,authority,
+call_15.wav,src_15,train,call_15_L02,最近我們發現了一款 投資回報率非常高的項目 就是專門優質客戶準備 想了解一下您是否有興趣,pretext,
+call_15.wav,src_15,train,call_15_L03,你好 聽起來挺不錯的 我最近確實有點先前想投資 能具體介紹一下這個項目嗎,none,
+call_15.wav,src_15,train,call_15_L04,當然可以 這個項目是關於 綠色能源的開發 目前非常熱門 市場現有非常好的 我們預計在未來的12個月內 年化收益率可以達到15% 甚至更高 而且現在加入的話 我們還有額外的優惠活動 應該什麼時候方便想提來了,pretext,
+call_15.wav,src_15,train,call_15_L05,哇 15%的年化收益率 聽起來真的很誘人 我這段時間正好有時間 你可以給我詳細介紹一下這個項目嗎 我其實對綠色能源也很感興趣,none,
+call_15.wav,src_15,train,call_15_L06,太好了 我這個點點解謾介紹一下 那這個項目主要是投資風能 和太陽能發電站的建設 這些能源項目 不僅符合全球環保趨勢 還有政府的政策支持 目前已經有多個項目 重複設計收益非常穩定,pretext,
+call_15.wav,src_15,train,call_15_L07,我要確保您的資金安全 我們還提供了第三方監管張副,pretext,
+call_15.wav,src_15,train,call_15_L08,您只需要提供一些基本信息 我們就可以為您開通上誤了 您看方便提供您的信明和聯繫方式嗎 這樣我們就可以進一步溝通,credentials,
+call_15.wav,src_15,train,call_15_L09,好的我這叫張偉 這個電話是G812345678 那具體需要我做些什麼呢 我確實很想了解一下這個項目,none,
+call_15.wav,src_15,train,call_15_L10,張先生非常感謝您的信任 我這邊已經記錄下您的信息了 稍後我會有專門的客服人員聯繫您 為您詳細講解項目的具體細節和投資流程 請保持見話暢通 祝您投資順利吧,none,yes
+call_15.wav,src_15,train,call_15_L11,謝謝您的介紹 我會留意電話的 然後期待進一步的溝通,none,
+call_16.wav,src_15,train,call_16_L01,"您好,我是来自财富增长公共团队的小李 我们专注于为投资者提供最佳的投资机会",authority,
+call_16.wav,src_15,train,call_16_L02,近期我们发现一个非常具有潜力的投资项目 我想您可能会敢进去 不知道您现在方便大概了解分钟吗?,pretext,
+call_16.wav,src_15,train,call_16_L03,"您好,小李先生 我是教师 您是对投资了解不多,但听起来挺有意思的 您能简单介绍一下这个项目",none,
+call_17.wav,src_15,train,call_17_L01,当您好我是来自京公投资的李经理,authority,
+call_17.wav,src_15,train,call_17_L02,最近我们发现了一项非常有潜力的投资项目 想邀请您猜这个项目的回报率非常高 而且风险控制的非常好 您有兴趣了解一下吗,pretext,
+call_17.wav,src_15,train,call_17_L03,李经理您好 投资项目听起来很不错 我最近正好有点嫌弃 想找点赚钱的机会吧 能具体说说是什么项目吗,none,
+call_17.wav,src_15,train,call_17_L04,好 太好了 是这样的 我们发现了一个新兴市场的黄金交易机会 太好了,pretext,
+call_17.wav,src_15,train,call_17_L05,只需要您先投入20万 作为这个启动资金预计三个月内就能翻倍 太好了 然后您看要不要先开过,money,
+call_17.wav,src_15,train,call_17_L06,20万这个项目对我来说很大 不过听您自媒说我也挺心动的 这个开户就是说需要做一下,none,
+call_17.wav,src_15,train,call_17_L07,理解您的顾虑 但投资嘛有时候不是要大胆一点,pretext,
+call_17.wav,src_15,train,call_17_L08,开户非常简单 就是您只需要提供身份证附资件 和银行账户信息 然后将启动资金转到指定的账户即可 然后我们这边有专业的团队 会帮您操作确保收益最大化 然后您看什么时候方便 我们可以进一步详细沟通,money,
+call_17.wav,src_15,train,call_17_L09,听起来挺专业的 我也想了解更多 不过我现在手头没那么多现金 可能需要先跟家人商量一下 您能给我一些这个时间吗,none,
+call_17.wav,src_15,train,call_17_L10,三天时间确实有点紧 我就得想想办法 那您能先发个项目 介绍给我看看吗 我想仔细研究一下这些决定,none,
+call_17.wav,src_15,train,call_17_L11,完全理解 但这个机会真的非常难得 市场上好的投资项目不多 而且这种高回报的项目名额有限 随时可能满缘,fear,
+call_17.wav,src_15,train,call_17_L12,那您看这样吧 我先帮您预留一个名额 您抓紧时间考虑 最好能在三天内给我回复 怎么样,fear,
