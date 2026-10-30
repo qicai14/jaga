@@ -262,6 +262,12 @@ def test_stage_stream_for_unknown_call_is_refused(client):
         "This is the bank, your card statement is ready, we will never ask for your password, "
         "let me transfer you to a colleague.",
         "Ini LHDN, peringatan bayaran cukai melalui portal rasmi.",
+        "Ini Maybank, penyata kad kredit anda sudah sedia, kami tidak akan minta kata laluan anda.",
+        "This is LHDN, a reminder that your tax payment is due through the official MyTax portal.",
+        "这里是银行，您的信用卡账单已经出来了，我们绝不会向您索取密码。",
+        "這裡是銀行，您的信用卡帳單已經出來了，我們絕不會要求您提供密碼。",
+        "呢度係銀行，你嘅信用卡月結單已經出咗，我哋唔會問你拎密碼。",
+        "இது வங்கி, உங்கள் கடன் அட்டை அறிக்கை தயாராக உள்ளது, உங்கள் கடவுச்சொல்லை நாங்கள் ஒருபோதும் கேட்க மாட்டோம்.",
     ],
 )
 def test_genuine_bank_and_tax_calls_stay_at_none(client, line):
@@ -1049,3 +1055,16 @@ def test_a_long_quote_is_cut_at_a_word(client, pushed):
 
     quote = alerts_of(pushed)[0]["quotes"][0]
     assert len(quote) <= 80 and quote.endswith("panjang")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "你的包裹是非法包裹，涉嫌洗钱。",
+        "你的包裹是非法包裹，涉嫌洗錢。",
+        "你嘅包裹有問題，我係警察。",
+        "சட்டவிரோத பார்சல் உங்கள் பெயரில் உள்ளது.",
+    ],
+)
+def test_mandarin_cantonese_and_tamil_scam_lines_are_caught(client, line):
+    assert stages_of(trail(client, "CA_zh", [("caller", line)]))[-1][0] != "none"
