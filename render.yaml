@@ -1,0 +1,50 @@
+# Render Blueprint: the Jaga server on a Free web service (it spins down after 15 minutes without inbound traffic).
+# Secret values are set in the dashboard (sync: false). The Firebase service-account JSON can't be declared here:
+# add it as a Secret File named firebase.json (it appears at /etc/secrets/firebase.json).
+services:
+  - type: web
+    name: jaga-server
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    buildFilter:
+      paths:
+        - server/**
+        - eval/pyproject.toml
+        - pyproject.toml
+        - uv.lock
+        - .python-version
+        - render.yaml
+    envVars:
+      - key: PORT # the Dockerfile CMD listens on 8000; Render's default is 10000
+        value: "8000"
+      - key: GOOGLE_APPLICATION_CREDENTIALS # set to /etc/secrets/firebase.json once the Secret File exists; unset = no family alerts
+        sync: false
+      - key: JAGA_USE_FAKES # true until the Meta and Twilio keys are in; unset = real clients
+        sync: false
+      - key: META_API_KEY
+        sync: false
+      - key: META_API_BASE_URL
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: JAGA_PUBLIC_URL
+        sync: false
+      - key: JAGA_APP_CLIENT_IDENTITY
+        sync: false
+      - key: JAGA_DEFAULT_REGION
+        sync: false
+      - key: JAGA_FAMILY_TOKENS
+        sync: false
+      - key: JAGA_PROTECTED_USER_NAME
+        sync: false
+      - key: JAGA_PAUSE_TOKEN
+        sync: false
+      - key: JAGA_COPILOT_TOKEN
+        sync: false
+      - key: DEMO_BANK_ORIGINS
+        sync: false

@@ -107,12 +107,16 @@ async def voice(request: Request) -> Response:
     return Response(twiml, media_type="text/xml")
 
 
-def put(queue: asyncio.Queue, item: bytes | None) -> None:
-    """Queue audio, dropping the oldest when Muse falls behind (its limit is 5 s ahead of processing)."""
+def put(queue: asyncio.Queue, item: bytes | None) -> bool:
+    """Queue audio, dropping the oldest when Muse falls behind (its limit is 5 s ahead of processing).
+
+    True if a chunk was dropped."""
     # shortcut: 250 chunks is 5 s at Twilio's 20 ms; dropped audio is a gap in the transcript, not a stall.
-    if queue.full():
+    full = queue.full()
+    if full:
         queue.get_nowait()
     queue.put_nowait(item)
+    return full
 
 
 async def hear(call: Call, leg: str, line: str) -> None:
@@ -159,6 +163,7 @@ async def media(ws: WebSocket) -> None:
     await ws.accept()
     call, transcriber = None, None
     legs: dict[str, tuple[asyncio.Queue, asyncio.Task]] = {}
+    dropped = 0
     try:
         async for text in ws.iter_text():
             msg = json.loads(text)
@@ -190,12 +195,14 @@ async def media(ws: WebSocket) -> None:
                     if leg not in legs:
                         queue = asyncio.Queue(maxsize=250)
                         legs[leg] = queue, asyncio.create_task(listen(call, transcriber, leg, queue))
-                    put(legs[leg][0], base64.b64decode(msg["media"]["payload"]))
+                    dropped += put(legs[leg][0], base64.b64decode(msg["media"]["payload"]))
             elif msg["event"] == "stop":
                 break
     except (ValueError, KeyError, TypeError):
         pass  # malformed Media Streams message: end the call below instead of a 1011 with a stack trace
     finally:
+        if dropped:  # a count only: how far behind Muse fell
+            log.warning("call %s: %d audio chunks dropped", call.call_id if call else "?", dropped)
         for queue, _ in legs.values():
             put(queue, None)
         # Let queued audio finish, but not forever if Muse hangs.

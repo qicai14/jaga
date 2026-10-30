@@ -28,8 +28,8 @@ router = APIRouter(prefix="/timelines", dependencies=[Depends(copilot)])
 
 def kept() -> dict[str, telephony.Call]:
     """Calls still inside their 30 days; older ones are dropped here."""
-    # shortcut: lost on Fly restart, move to Firestore with #12/#19. Eviction runs only when a timeline is
-    # requested, so an unread call stays in memory past 30 days.
+    # shortcut: lost on any restart or Render spin-down (accepted), move to Firestore with #12/#19. Eviction
+    # runs only when a timeline is requested, so an unread call stays in memory past 30 days.
     now = telephony.now()
     for sid in [s for s, c in telephony.calls.items() if c.ended_at and now - c.ended_at > KEEP]:
         del telephony.calls[sid]

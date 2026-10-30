@@ -105,14 +105,26 @@ jaga/
 ├─ server/                   # Python FastAPI: telephony, listening, rules, AI   → Lane A (Qi Cai), tools + pause Lane D
 ├─ eval/                     # test sets, replay harness, metrics               → Lane C
 ├─ .claude/                  # agents, skills, safety hooks (shared by Copilot too)
-└─ .github/                  # CI, APK build, server deploy, PR template, code owners
+└─ .github/                  # CI, APK build, PR template, code owners
 ```
 **Same versions on every machine:** Flutter **3.47.7** (via FVM), Python **3.13** and uv **0.12.24**, with lock files for
 every package (`pubspec.lock`, `uv.lock`, `skills-lock.json`). The server runs in the **same Docker image** locally and in
 production. Line endings are forced to LF so Windows and Mac don't fight.
 
-**Stack:** Flutter (Android) · FastAPI on Fly.io · Firebase (push notifications, auth) · Twilio (calls) · Meta Model API
+**Stack:** Flutter (Android) · FastAPI on Render · Firebase (push notifications, auth) · Twilio (calls) · Meta Model API
 (Muse Voice Transcribe, Muse Spark, SAM 3.1).
+
+**Deploy and wake step:** the server runs on Render Free (`render.yaml`, auto-deploys from `main` once CI passes; no repo
+secret). It spins down after 15 minutes without inbound traffic and takes about a minute to wake, but Twilio's voice
+webhook gives up after 15 seconds, so a sleeping server fails the first call. Before a call or demo, hit `/health` and
+wait for the JSON 200 (there is no keep-awake pinger, on purpose):
+```powershell
+$u = 'https://jaga-server.onrender.com'; $t = Get-Date
+do { try { $ok = (Invoke-RestMethod "$u/health").status -eq 'ok' } catch { $ok = $false }; if (-not $ok) { Start-Sleep 3 } } until ($ok)
+"awake after $([int]((Get-Date) - $t).TotalSeconds) s"
+```
+Calls, stage timelines and Jaga Pause state live in memory, so a spin-down or restart (including setting an
+environment variable) loses them. This is accepted for the hackathon.
 
 **AI-assisted workflow (works with Claude Code or GitHub Copilot):**
 - Shared skills: **Matt Pocock's skills** (spec, tickets, implement, TDD, code review, PR, handoff), **Ponytail** (smallest
@@ -169,7 +181,7 @@ structured output, prompt-injection defences.
 - Draft the **scam-phrase list** in Malay, English and Mandarin (from PDRM, NSRC and Semak Mule advisories).
 - Draft the **official hotlines table** (PDRM, LHDN, Bank Negara, major banks, NSRC 997).
 - Check whether PDRM **Semak Mule** has any public API.
-- Create the **Firebase** and **Fly.io** accounts (free tiers).
+- Create the **Firebase** and **Render** accounts (free tiers).
 - Storyboard the demo video.
 - Plan the Truecaller head-to-head (a phone with Truecaller receiving our "PDRM" call).
 
