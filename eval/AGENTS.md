@@ -10,3 +10,8 @@
 - TeleAntiFraud-28k (`python -m jaga_eval.teleantifraud <test.json>`): Hugging Face JimmyMa99/TeleAntiFraud, Apache-2.0,
   gated access. Files stay in `data/teleantifraud/` (gitignored); never log transcript text. The full per-call report is
   `reports/teleantifraud.local.json` (untracked); only the numbers-only `reports/teleantifraud.md` is committed.
+- Replay harness (`python -m jaga_eval.replay <calls.json> [--transcriber muse|fake] [--spark meta|fake] [--speed X]`):
+  recorded calls go through the Twilio Media Streams seam in 20 ms mu-law chunks at real-time speed. `muse`/`meta` use
+  the real APIs (needs `META_API_KEY`, paid); `fake` replays the call's `script` lines for cheap runs. Family alerts go
+  to a recording fake, never a real push. The per-call report (stage updates, alerts, timings) holds masked quotes, so
+  it is `reports/replay.local.json` (untracked); never print or commit it.

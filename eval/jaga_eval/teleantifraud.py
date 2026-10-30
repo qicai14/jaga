@@ -113,15 +113,17 @@ def decode(path) -> bytes:
         return out.read_bytes()
 
 
-def batch_transcribe(audio: bytes, name: str, client: httpx.Client) -> list[list[str]]:
+def batch_transcribe(
+    audio: bytes, name: str, client: httpx.Client, bias=None, keywords=None
+) -> list[list[str]]:
     """Muse batch transcribe, diarized: [[speaker, text], ...]. Logs only the status and file name."""
     pack = stages.load_pack("my")
     request = {
         "mode": "DIARIZATION",
         "model": "muse-voice-transcribe-1.0",
         "audioEncoding": "WAV",
-        "languageBias": pack["languageBias"],
-        "keywords": pack["keywords"],
+        "languageBias": bias or pack["languageBias"],
+        "keywords": pack["keywords"] if keywords is None else keywords,
     }
     for attempt in range(RETRIES + 1):
         files = {

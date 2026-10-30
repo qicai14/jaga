@@ -7,7 +7,7 @@ import pytest
 from jaga.stages import RANK, load_pack, official_contact, phrase
 
 STAGES = [s for s in RANK if s != "none"]
-LANGS = ["ms", "en", "zh", "ta"]
+LANGS = ["ms", "en", "zh"]
 
 
 def entries(pack):
@@ -18,7 +18,7 @@ def entries(pack):
             yield stage, move, False
 
 
-def test_every_stage_has_a_command_and_counter_move_in_four_languages():
+def test_every_stage_has_a_command_and_counter_move_in_three_languages():
     pack = load_pack("my")
     assert set(pack["library"]) == set(STAGES)
     for stage in STAGES:
@@ -43,12 +43,12 @@ def test_the_command_is_followed_by_english_in_every_language():
     for _, entry, is_command in entries(pack):
         if is_command:
             en = entry["text"]["en"]
-            assert all(entry["text"][lang].endswith(f" {en}") for lang in ("ms", "zh", "ta"))
+            assert all(entry["text"][lang].endswith(f" {en}") for lang in ("ms", "zh"))
 
 
 def test_machine_drafted_languages_are_marked_for_native_review():
     review = load_pack("my")["libraryReview"]
-    assert all(review[lang].strip() for lang in ("ms", "zh", "ta"))
+    assert all(review[lang].strip() for lang in ("ms", "zh"))
     assert "en" not in review
 
 

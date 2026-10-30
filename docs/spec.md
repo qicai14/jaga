@@ -9,7 +9,7 @@ Source: `docs/plan.md`, `GLOSSARY.md`, ADRs 0001 to 0006, and the grilling sessi
 An elderly Malaysian parent answers a call from what their phone shows as a real police station number. The caller says
 they're from the bank, then "transfers" them to a PDRM or Bank Negara officer who accuses them of money laundering, tells
 them to tell no one, and walks them through moving their savings to a "safe account". Caller-ID apps trust the spoofed
-number. Content-based scam detectors don't work in code-switched Malay, English, Mandarin and Tamil, and don't know the
+number. Content-based scam detectors don't work in code-switched Malay, English and Mandarin, and don't know the
 Macau scam script. The family finds out after the money is gone, and very little of it ever comes back.
 
 ## Solution
@@ -111,7 +111,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - **telephony**: accepts Twilio Media Streams for both legs (`caller`, `user`) of a call through the Jaga line, converts
   8 kHz mu-law to 16 kHz PCM, and owns the call's lifecycle (start, end, `callId`).
 - **asr**: streams each leg to Muse Voice Transcribe with the region pack's `languageBias` and keyword list
-  (Malaysia: Malay, English, Mandarin Chinese, Tamil; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997). Emits transcript turns per leg.
+  (Malaysia: Malay, English, Mandarin Chinese; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, OTP; not 997, which made Muse write it into normal speech, #69). Emits transcript turns per leg.
 - **stages**: the stage tracker. Deterministic rules from the region pack's **script pack** (Malaysia: Macau) (stages, hard triggers, keyword
   rules). Reads the caller leg for stages; reads the user leg only to detect the protected user disclosing a TAC,
   account number or IC, which moves the call to `credentials`.
