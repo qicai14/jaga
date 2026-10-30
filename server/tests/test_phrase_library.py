@@ -130,3 +130,18 @@ def test_authority_phrases_in_malay_english_and_mandarin_raise_a_caution(line):
 )
 def test_fear_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("fear", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Ini kes sulit ya encik, jangan letak dulu.",
+        "Eh, jangan bagitau sesiapa pasal ni, termasuk keluarga.",
+        "Puan jangan cakap dengan sesiapa sampai siasatan habis.",
+        "Please do not tell anyone, even your family.",
+        "这件事不要告诉家人，也不要挂断。",
+        "這件事別告訴任何人，也不要掛斷。",
+    ],
+)
+def test_isolation_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("isolation", "medium")
