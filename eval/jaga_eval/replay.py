@@ -164,7 +164,7 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
         "timedOut": 0,
     }  # what the pipeline swallows, counted by a wrapper
     make = {"fake": FakeSpark, "off": FakeSpark, "open": open_spark, "meta": spark.spark}[spark_client]
-    patches.append(mock.patch.object(spark, "spark", lambda pack: CountingSpark(make(pack), counts)))
+    patches.append(mock.patch.object(spark, "spark", lambda pack: CountingSpark(make(pack), counts, pack)))
     if spark_client == "off":  # rules only: the cap is 0, so telephony never asks Spark
         patches.append(mock.patch.object(spark, "MAX_CALLS", 0))
     updates, failure = [], []

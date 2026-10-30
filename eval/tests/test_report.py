@@ -76,6 +76,11 @@ def test_open_spark_speaks_chat_completions_with_the_servers_prompt():
     assert seen["body"]["model"] == "meta-models/muse-spark-open-1026"
     assert [m["role"] for m in seen["body"]["messages"]] == ["system", "user"]
     assert seen["body"]["messages"][1]["content"] == "snippet"
+    fmt = seen["body"]["response_format"]
+    assert fmt["type"] == "json_schema" and fmt["json_schema"]["name"] == "Verdict"
+    assert (
+        "money" in fmt["json_schema"]["schema"]["properties"]["stage"]["enum"]
+    )  # the model learns the stages
 
 
 def test_open_spark_needs_its_keys(monkeypatch):
@@ -85,7 +90,9 @@ def test_open_spark_needs_its_keys(monkeypatch):
 
 
 def test_counting_spark_counts_what_the_pipeline_swallows():
-    good = {"stage": "fear", "risk": "low", "counterMove": "x"}
+    pack = stages.load_pack("my")
+    good = {"stage": "fear", "risk": "low", "counterMove": pack["library"]["fear"]["counterMoves"][0]["id"]}
+    other_stage = pack["library"]["money"]["counterMoves"][0]["id"]
 
     class Inner:
         def __init__(self, act):
@@ -106,6 +113,9 @@ def test_counting_spark_counts_what_the_pipeline_swallows():
     async def bad():
         return {"stage": "nonsense"}
 
+    async def wrong_stage_move():
+        return good | {"counterMove": other_stage}
+
     async def fine():
         return good
 
@@ -113,12 +123,19 @@ def test_counting_spark_counts_what_the_pipeline_swallows():
         counts = {"failed": 0, "timedOut": 0}
         try:
             async with asyncio.timeout(0.01):
-                await CountingSpark(Inner(act), counts).assess("fear", "low", "x")
+                await CountingSpark(Inner(act), counts, pack).assess("fear", "low", "x")
         except Exception:  # noqa: BLE001
             pass
         return counts
 
-    cases = [(hang, 1, 1), (httpx_timeout, 1, 1), (boom, 1, 0), (bad, 1, 0), (fine, 0, 0)]
+    cases = [
+        (hang, 1, 1),
+        (httpx_timeout, 1, 1),
+        (boom, 1, 0),
+        (bad, 1, 0),
+        (wrong_stage_move, 1, 0),
+        (fine, 0, 0),
+    ]
     for act, failed, timed_out in cases:
         assert asyncio.run(run(act)) == {"failed": failed, "timedOut": timed_out}
 

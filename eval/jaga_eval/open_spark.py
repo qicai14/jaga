@@ -34,10 +34,11 @@ class OpenSpark:
             await self.prompt.assess(stage, risk, snippet)
         except _Captured as c:
             system, user = (m["content"][0]["text"] for m in c.body["input"])
+            schema = c.body["text"]["format"]["schema"]  # the prompt names the stages only through it
         body = {
             "model": MODEL,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-            "response_format": {"type": "json_object"},
+            "response_format": {"type": "json_schema", "json_schema": {"name": "Verdict", "schema": schema}},
         }
         r = await self.http.post(self.url, json=body, headers={"Authorization": f"Bearer {self.key}"})
         r.raise_for_status()
@@ -53,15 +54,18 @@ def open_spark(pack: dict) -> Spark:
 
 class CountingSpark:
     """Wraps a Spark client and counts what the pipeline swallows: failures, timeouts (the pipeline's own
-    asyncio timeout cancels us; an httpx timeout raises) and verdicts that are not a valid Verdict."""
+    asyncio timeout cancels us; an httpx timeout raises), verdicts that are not a valid Verdict and a
+    counterMove that is not of the stage asked about (the server treats it as Spark failing too)."""
 
-    def __init__(self, inner: Spark, counts: dict):
-        self.inner, self.counts = inner, counts
+    def __init__(self, inner: Spark, counts: dict, pack: dict):
+        self.inner, self.counts, self.pack = inner, counts, pack
 
     async def assess(self, stage: str, risk: str, snippet: str) -> dict:
         try:
             raw = await self.inner.assess(stage, risk, snippet)
             Verdict.model_validate(raw)
+            if raw["counterMove"] not in [m["id"] for m in self.pack["library"][stage]["counterMoves"]]:
+                raise ValueError("counterMove is not of this stage")
             return raw
         except (asyncio.CancelledError, TimeoutError, httpx.TimeoutException):
             self.counts["failed"] += 1
