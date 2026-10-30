@@ -136,3 +136,58 @@ def test_longest_term_takes_the_span():
 def test_no_overlap_between_keywords_and_cache():
     k = r.keyword_scores({"a": {"TAC": 1}}, {"b": "tac"})
     assert k["n"] == 0 and k["go"] is False
+
+
+def test_stray_letters_are_not_joined():
+    known = {"lhdn", "997"}
+    assert r._spelled("call l h d n now", known) == "call lhdn now"
+    assert r._spelled("call 9 9 7 now", known) == "call 997 now"
+    assert r._spelled("a b c d", known) == "a b c d"  # not a term, left alone
+    assert r.occurrences(["LHDN"], "x l h d n")["LHDN"] == 0  # stray letter in the run: no false join
+
+
+def test_chinese_scores_cer_only():
+    s = r.score("你好 吗", "你好吗")
+    assert s.words == (0, 0) and s.chars == (0, 3)
+    s = r.score("你好吗", "你好马")
+    assert s.chars == (1, 3) and r.pooled([s], "words") == 0.0
+
+
+def test_stages_fired_reads_the_real_tracker():
+    assert r.stages_fired("Ini pegawai PDRM. Ada waran tangkap atas nama anda.") == {"authority", "fear"}
+    assert r.stages_fired("selamat pagi, apa khabar") == set()
+
+
+def test_stage_scores_recall_and_extras():
+    s = r.stage_scores(
+        {"a": {"authority", "fear"}, "b": {"money"}}, {"a": {"authority", "money"}, "b": set()}
+    )
+    assert s["recall"] == 1 / 3  # 1 of 3 reference stages also on Muse
+    assert s["extra_per_call"] == 0.5  # money on a, not on the reference
+
+
+def test_run_reports_stages_and_passes_bias(tmp_path, capsys):
+    (tmp_path / "call_01.mp3").write_bytes(b"x")
+    (tmp_path / "call_01.ref.txt").write_text("Ini pegawai PDRM. Ada waran tangkap.")
+    (tmp_path / "call_02.mp3").write_bytes(b"x")  # no reference: stages as-is
+    texts = {"call_01.mp3": "Ini pegawai PDRM.", "call_02.mp3": "Ada waran tangkap."}
+    r.run(tmp_path, transcribe=lambda wav, name: texts[name], phone=lambda p: b"w", split=lambda b: [b])
+    out = capsys.readouterr().out
+    assert "## Stage recall" in out and "authority" in out and "fear" in out
+    assert "Recall 0.500" in out and "Extra stages per call 0.50" in out
+
+
+def test_bias_reaches_the_muse_request():
+    import httpx
+
+    from jaga_eval import teleantifraud as tafd
+
+    sent = {}
+
+    def handler(req):
+        sent["body"] = req.read()
+        return httpx.Response(200, json={"turns": [{"transcript": "x"}]})
+
+    client = httpx.Client(base_url="http://t", transport=httpx.MockTransport(handler))
+    tafd.batch_transcribe(b"w", "a.wav", client, bias=["Mandarin Chinese"])
+    assert b'"languageBias": ["Mandarin Chinese"]' in sent["body"]

@@ -16,6 +16,14 @@ Clips, references and the keyword sheet live outside git in <clip_dir>; never co
   uv run python -m jaga_eval.asr_rescore <clip_dir>
       paid Muse run (cached in muse.local.json), prints the report
 
+  uv run python -m jaga_eval.asr_rescore <clip_dir> --bias "Mandarin Chinese"
+      a Mandarin clip dir is its own run: Muse languageBias is just that language, and a reference with
+      Chinese characters is scored by CER only (no word spaces, so no WER)
+
+The report also runs the real stage tracker on each reference and on the Muse text: which stages fire on
+each, stage recall, and extra stages per call (clips without a reference show their stages as-is, so a
+genuine-speech run reads false stages per call off the same table).
+
 Muse path: the batch endpoint from #18 (`batch_transcribe`): one POST per chunk, no socket pacing or flush,
 and the chunk length is ours to control (#3 hit HTTP 400 on long calls). Audio goes through an 8 kHz mu-law
 round-trip first, as a phone line would. Needs META_API_KEY in the environment.
@@ -86,8 +94,15 @@ class Score:
         return self.chars[0] / self.chars[1] if self.chars[1] else 0.0
 
 
+CJK = re.compile(r"[一-鿿]")
+
+
 def score(ref: str, hyp: str) -> Score:
+    """Chinese has no word spaces, so a CJK reference is scored by CER only (spaces dropped, no WER)."""
     ref, hyp = normalise(ref), normalise(hyp)
+    if CJK.search(ref):
+        ref, hyp = ref.replace(" ", ""), hyp.replace(" ", "")
+        return Score((0, 0), (edits(list(ref), list(hyp)), len(ref)))
     return Score((edits(ref.split(), hyp.split()), len(ref.split())), (edits(list(ref), list(hyp)), len(ref)))
 
 
@@ -106,21 +121,60 @@ def pack_terms(region="my") -> list[str]:
     return terms
 
 
-def _spelled(text: str) -> str:
-    """Joins runs of single-character tokens ("9 9 7", "l h d n") so spelled-out terms match.
-    Keyword counting only, so WER/CER are unchanged. shortcut: joins stray "a" runs too, upgrade if noisy."""
-    return re.sub(r"(?<!\S)\w(?: \w)+(?!\S)", lambda m: m.group().replace(" ", ""), normalise(text))
+def _spelled(text: str, known: set) -> str:
+    """Joins a run of single-character tokens ("9 9 7", "l h d n") only when the joined run is a term, so
+    stray letters make no false hits. Keyword counting only. shortcut: a stray letter touching a spelled
+    term spoils that run (a miss), upgrade to joining sub-runs if it shows up."""
+    return re.sub(
+        r"(?<!\S)\w(?: \w)+(?!\S)",
+        lambda m: j if (j := m.group().replace(" ", "")) in known else m.group(),
+        normalise(text),
+    )
 
 
 def occurrences(terms, hyp: str) -> dict:
     """Times each term is in the hypothesis. Longest term first, and its span is blanked, so "kod tac"
     does not also count for "TAC"."""
-    text, out = _spelled(hyp), {}
+    known = {normalise(t).replace(" ", "") for t in terms}
+    text, out = _spelled(hyp, known), {}
     for t in sorted(terms, key=lambda t: -len(normalise(t))):
-        pat = rf"(?<!\w){re.escape(_spelled(t))}(?!\w)"
+        pat = rf"(?<!\w){re.escape(_spelled(t, known))}(?!\w)"
         out[t] = len(re.findall(pat, text))
         text = re.sub(pat, " # ", text)
     return out
+
+
+def stages_fired(text: str) -> set[str]:
+    """Stages the real tracker reaches on a text read as the caller. Sentence by sentence, so every rise
+    shows. shortcut: only rises are seen (a lower stage after a higher one is not), fine for recall."""
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    ups = (tracker.hear("caller", s) for s in re.split(r"[.!?。！？\n]+", text) if s.strip())
+    return {u["stage"] for u in ups if u}
+
+
+def stage_scores(ref: dict, muse: dict, resamples=1000, seed=0) -> dict:
+    """ref, muse: clip -> set of stages. Recall = reference stages also on Muse; extras = Muse stages not on
+    the reference (all of them for a clip without one). CIs are a percentile bootstrap over clips."""
+    clips = list(muse)
+
+    def tally(picks):
+        got = sum(len(ref.get(c, set()) & muse[c]) for c in picks)
+        total = sum(len(ref.get(c, set())) for c in picks)
+        extra = sum(len(muse[c] - ref.get(c, set())) for c in picks)
+        return (got / total if total else 0.0), extra / len(picks)
+
+    rng, boots = random.Random(seed), []
+    if not clips:
+        return {"n": 0, "recall": 0.0, "extra_per_call": 0.0, "recall_ci": (0.0, 0.0), "extra_ci": (0.0, 0.0)}
+    boots = [tally([rng.choice(clips) for _ in clips]) for _ in range(resamples)]
+    recall, extra = tally(clips)
+    return {
+        "n": len(clips),
+        "recall": recall,
+        "extra_per_call": extra,
+        "recall_ci": _ci([b[0] for b in boots]),
+        "extra_ci": _ci([b[1] for b in boots]),
+    }
 
 
 def _tally(said: dict, hyp: dict, picks: list) -> tuple[dict, float, float]:
@@ -239,13 +293,13 @@ def phone_wav(path) -> bytes:
         return out.read_bytes()
 
 
-def muse_post():
+def muse_post(bias=None):
     key = os.environ.get("META_API_KEY", "")
     if not key:
         raise SystemExit("META_API_KEY is not set")
     base = os.environ.get("META_API_BASE_URL", "https://api.meta.ai/v1").rstrip("/")
     client = httpx.Client(base_url=base, headers={"Authorization": f"Bearer {key}"}, timeout=300)
-    return lambda wav, name: " ".join(t for _, t in tafd.batch_transcribe(wav, name, client))
+    return lambda wav, name: " ".join(t for _, t in tafd.batch_transcribe(wav, name, client, bias))
 
 
 def clips_in(d: Path) -> list[Path]:
@@ -273,14 +327,18 @@ def templates(d: Path, names: list[str]):
             w.writerows([c.stem] + [""] * len(pack_terms()) for c in clips_in(d))
 
 
-def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print):
+def _wer(s: Score) -> str:
+    return f"{s.wer:.3f}" if s.words[1] else "n/a"
+
+
+def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print, bias=None):
     d = Path(d)
     cache_path = d / "muse.local.json"
     cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
     for clip in clips_in(d):
         if cache.get(clip.name):  # an empty entry is done again
             continue
-        transcribe = transcribe or muse_post()
+        transcribe = transcribe or muse_post(bias)
         cache[clip.name] = merge([transcribe(c, clip.name) for c in split(phone(clip))])
         tmp = cache_path.with_name(cache_path.name + ".tmp")
         tmp.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
@@ -297,14 +355,35 @@ def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print):
     lines += ["| System | Clip | WER | CER |", "|---|---|---|---|"]
     for name, hyps in {"Muse": muse, "Whisper": whisper}.items():
         rows = {k: score(refs[k], hyps[k]) for k in refs if k in hyps}
-        lines += [f"| {name} | {k} | {s.wer:.3f} | {s.cer:.3f} |" for k, s in rows.items()]
+        lines += [f"| {name} | {k} | {_wer(s)} | {s.cer:.3f} |" for k, s in rows.items()]
         if rows:
             r = list(rows.values())
             w, c = boot_pooled(r, "words"), boot_pooled(r, "chars")
+            has_words = any(x.words[1] for x in r)
+            wp = f"{pooled(r, 'words'):.3f} (95% CI {w[0]:.3f} to {w[1]:.3f})" if has_words else "n/a"
             lines.append(
-                f"| {name} | pooled (n={len(r)}) | {pooled(r, 'words'):.3f} (95% CI {w[0]:.3f} to {w[1]:.3f})"
+                f"| {name} | pooled (n={len(r)}) | {wp}"
                 f" | {pooled(r, 'chars'):.3f} (95% CI {c[0]:.3f} to {c[1]:.3f}) |"
             )
+    if muse:
+        fired = {k: stages_fired(t) for k, t in muse.items()}
+        ref_fired = {k: stages_fired(t) for k, t in refs.items() if k in muse}
+        st = stage_scores(ref_fired, fired)
+        lines += ["", f"## Stage recall, real stage tracker (n = {st['n']} calls)", ""]
+        lines += ["| Clip | On reference | On Muse | Extra on Muse |", "|---|---|---|---|"]
+        for k, f in fired.items():
+            ref_f = ref_fired.get(k)
+            ref_txt = "no reference"
+            show = lambda x: ", ".join(sorted(x)) or "-"  # noqa: E731
+            on_ref = ref_txt if ref_f is None else show(ref_f)
+            lines.append(f"| {k} | {on_ref} | {show(f)} | {show(f - (ref_f or set()))} |")
+        lines += [
+            "",
+            f"Recall {st['recall']:.3f} (95% CI {st['recall_ci'][0]:.3f} to {st['recall_ci'][1]:.3f}), "
+            "reference stages also on Muse.",
+            f"Extra stages per call {st['extra_per_call']:.2f} (95% CI {st['extra_ci'][0]:.2f} to "
+            f"{st['extra_ci'][1]:.2f}), Muse stages not on the reference (all of them without one).",
+        ]
     if (d / "keywords.csv").exists():
         k = keyword_scores(read_said(d), muse)
         lines += ["", f"## Keyword flagging, Muse (n = {k['n']} calls)", ""]
@@ -325,11 +404,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("clip_dir")
     ap.add_argument("--templates", nargs="+", metavar="CLIP", help="write empty refs + keywords.csv, no Muse")
+    ap.add_argument("--bias", help='Muse languageBias for this run, e.g. "Mandarin Chinese"')
     args = ap.parse_args(argv)
     if args.templates:
         templates(Path(args.clip_dir), args.templates)
     else:
-        run(args.clip_dir)
+        run(args.clip_dir, bias=[args.bias] if args.bias else None)
 
 
 if __name__ == "__main__":
