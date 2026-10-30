@@ -26,7 +26,7 @@ from unittest import mock
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
-from jaga import asr, spark, stages, telephony, twilio_auth
+from jaga import alerts, asr, spark, stages, telephony, twilio_auth
 from jaga.fakes.push import FakePush
 from jaga.fakes.spark import FakeSpark
 from jaga.fakes.transcribe import FakeTranscriber
@@ -51,7 +51,7 @@ class Call:
     # Ground truth for the metrics report (#25): label scam|genuine, split dev|heldout, reference = human
     # transcript file (outside git), seconds = length of a script call, triggerAt = trigger second.
     label: str = ""
-    split: str = "dev"
+    split: str = ""  # dev|heldout; the report refuses anything else
     reference: Path | None = None
     seconds: float | None = None
     triggerAt: float | None = None
@@ -90,7 +90,7 @@ def load(path) -> list[Call]:
                 audio,
                 script,
                 r.get("label", ""),
-                r.get("split", "dev"),
+                r.get("split", ""),
                 path.parent / ref if ref else None,
                 r.get("seconds"),
                 r.get("triggerAt"),
@@ -139,6 +139,8 @@ def script_plan(sid: str, script, region: str) -> tuple[str, list[tuple[float, s
 def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: float) -> dict:
     """Plays one call through the real app and returns its report (updates, family alerts, timings)."""
     sid = f"CA_replay_{index}"
+    telephony.calls.pop(sid, None)  # the sid repeats across arms: never meet an earlier arm's ended Call
+    alerts.sent.pop(sid, None)
     if transcriber == "muse":
         if not call.audio:
             raise ValueError(f"call {call.id}: the Muse transcriber needs audio")
@@ -154,7 +156,7 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
     headers = {"X-Twilio-Signature": twilio_auth.signature("wss://testserver/twilio/media", {}, TOKEN)}
     env = {"TWILIO_AUTH_TOKEN": TOKEN, "JAGA_FAMILY_TOKENS": "eval-co-pilot"}
     env["JAGA_USE_FAKES"] = "false"  # the clients below are chosen here, one by one
-    patches = []
+    patches = [mock.patch.object(spark, "_http", None)]  # a client is bound to one event loop: one per replay
     if transcriber == "fake":
         patches.append(mock.patch.object(asr, "transcriber", lambda pack: FakeTranscriber()))
     counts = {
@@ -182,7 +184,8 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
     def follow(stream):
         try:
             while True:
-                updates.append((clock(), stream.receive_json()))
+                msg = stream.receive_json()  # stamp after the wait: when it arrived
+                updates.append((clock(), msg))
         except WebSocketDisconnect:
             pass
         except Exception as e:  # noqa: BLE001 - type only, the message could quote a transcript
@@ -274,10 +277,14 @@ def main(argv=None):
     ap.add_argument("--limit", type=int, help="only the first N calls")
     ap.add_argument("--out", default=str(DEFAULT_OUT))
     args = ap.parse_args(argv)
+    calls = load(args.calls_json)[: args.limit]
+    if any(c.split == "heldout" for c in calls):
+        raise SystemExit(
+            "held-out rows: run them once through `python -m jaga_eval.report --split heldout --final`"
+        )
     if (args.transcriber == "muse" or args.spark == "meta") and not os.environ.get("META_API_KEY"):
         raise SystemExit("META_API_KEY is not set")
     speed = args.speed if args.speed is not None else (1.0 if args.transcriber == "muse" else 0.0)
-    calls = load(args.calls_json)[: args.limit]
     reports = []
     for i, call in enumerate(calls):
         reports.append(replay(call, i, args.transcriber, args.spark, speed))
