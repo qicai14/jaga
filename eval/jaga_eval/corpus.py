@@ -12,6 +12,7 @@ The prompt never sees the 17 test clips; my.json terms are offered as optional v
 import argparse
 import asyncio
 import csv
+import hashlib
 import json
 import os
 import random
@@ -19,6 +20,8 @@ import re
 import sys
 from datetime import date
 from pathlib import Path
+
+import httpx
 
 from jaga import spark as spark_module
 from jaga import stages
@@ -156,7 +159,7 @@ def prompt(seed: dict, pack: dict) -> tuple[str, str]:
     return rules, user
 
 
-def validate(raw: str) -> list[dict]:
+def validate(raw: str, scam: bool = True) -> list[dict]:
     lines = json.loads(raw)["lines"]
     if not lines:
         raise ValueError("no lines")
@@ -165,6 +168,8 @@ def validate(raw: str) -> list[dict]:
             raise ValueError("bad line")
         if not isinstance(ln["text"], str) or not ln["text"].strip() or ln["stage"] not in (*STAGES, "none"):
             raise ValueError("bad line")
+        if not scam and ln["stage"] != "none":
+            raise ValueError("genuine call has a stage")
     return lines
 
 
@@ -189,22 +194,32 @@ async def generate(out_dir, spark, pack, limit=None) -> dict:
     cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
     todo = seeds()[:limit]
     for seed in todo:
-        if seed["id"] in cache:
-            continue
         rules, user = prompt(seed, pack)
+        key = hashlib.sha256(f"{rules}|{user}".encode()).hexdigest()[:8]
+        if cache.get(seed["id"], {}).get("key") == key:  # a changed prompt regenerates
+            continue
         usage = {"input_tokens": 0, "output_tokens": 0}
+        raw, error, transient = "", None, False
         for _ in range(2):
-            raw, u = await spark.generate(rules, user, SCHEMA)
+            try:
+                raw, u = await spark.generate(rules, user, SCHEMA)
+            except httpx.HTTPError as e:  # 429, 5xx, timeout: a failed attempt, not cached
+                error, transient = f"{type(e).__name__}: {e}", True
+                continue
+            transient = False
             for k in usage:
                 usage[k] += u.get(k, 0)
             try:
-                validate(raw)
+                validate(raw, seed["scam"])
                 error = None
                 break
             except (ValueError, KeyError, TypeError) as e:  # JSONDecodeError is a ValueError
                 error = f"{type(e).__name__}: {e}"
+        if transient:
+            continue
         model = getattr(spark, "MODEL", "fake")
         cache[seed["id"]] = {
+            "key": key,
             "raw": raw,
             "error": error,
             "usage": usage,
@@ -214,11 +229,11 @@ async def generate(out_dir, spark, pack, limit=None) -> dict:
         save(cache_path, cache)  # a failed seed stays cached too; delete its entry to retry
     rows, skipped = [], []
     for seed in todo:
-        entry = cache[seed["id"]]
-        if entry["error"]:
+        entry = cache.get(seed["id"])
+        if entry is None or entry["error"]:
             skipped.append(seed["id"])
             continue
-        lines = validate(entry["raw"])
+        lines = validate(entry["raw"], seed["scam"])
         present = sorted({ln["stage"] for ln in lines} - {"none"}, key=lambda s: stages.RANK[s])
         n = sum(len(ln["text"].split()) for ln in lines)
         rows.append(
@@ -256,9 +271,10 @@ async def generate(out_dir, spark, pack, limit=None) -> dict:
 
 
 def pick(rows, scam: bool, n: int, hard_first: bool = False) -> list[dict]:
-    """Greedy over one-minute scripts (120-160 words): most uncovered stages next; ties by id."""
+    """Greedy over one-minute scripts (120-160 words): a new kind, then most new stages; ties by id."""
     pool = [r for r in rows if r["scam"] == scam and 120 <= r["words"] <= 160]
     covered: set = set()
+    kinds: set = set()
     chosen = []
     for i in range(n):
         want = [r for r in pool if r["hard_negative"]] if hard_first and i == 0 else pool
@@ -266,15 +282,18 @@ def pick(rows, scam: bool, n: int, hard_first: bool = False) -> list[dict]:
             raise ValueError(
                 f"not enough 120-160 word {'scam' if scam else 'genuine'} scripts: run more seeds"
             )
-        best = max(want, key=lambda r: (len(set(r["stages"]) - covered), r["id"]))
+        best = max(want, key=lambda r: (r["kind"] not in kinds, len(set(r["stages"]) - covered), r["id"]))
         chosen.append(best)
         pool.remove(best)
         covered |= set(best["stages"])
+        kinds.add(best["kind"])
     return chosen
 
 
 def count_terms(text: str, terms: list[str]) -> dict:
     """Occurrences per term, longest first; matched text is blanked so 'TAC' skips 'kod TAC'."""
+    # shortcut: literal match, switch to asr_rescore.occurrences once #70 merges
+    text = text.translate({0x2018: "'", 0x2019: "'"})
     counts = {}
     for t in sorted(terms, key=len, reverse=True):
         pattern = re.compile(rf"(?<!\w){re.escape(t)}(?!\w)", re.IGNORECASE)

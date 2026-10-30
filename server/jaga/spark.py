@@ -74,7 +74,7 @@ class MuseSpark:
         return json.loads(part["text"])
 
     async def generate(self, rules: str, prompt: str, schema: dict, timeout: float = 60) -> tuple[str, dict]:
-        """Generic JSON-schema call for offline tools (eval corpus): (reply text, token usage). Not in the live path."""
+        """Generic JSON-schema call for offline tools (eval corpus): (reply text, usage). Not live."""
         body = {
             "model": self.MODEL,
             "store": False,

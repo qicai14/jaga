@@ -68,6 +68,7 @@ def script(i, scam, stages_, hard=False, words=140):
     line = {"speaker": "caller", "text": " ".join(["kata"] * (words - 2)) + " kod TAC", "stage": "none"}
     return {
         "id": f"s{i:02d}",
+        "kind": f"k{i}",
         "scam": scam,
         "hard_negative": hard,
         "stages": stages_,
@@ -99,3 +100,39 @@ def test_pick_reading_covers_stages_and_never_overwrites(tmp_path):
     (reading / "rec_01.ref.txt").write_text("mine", encoding="utf-8")
     corpus.pick_reading(tmp_path, PACK)
     assert (reading / "rec_01.ref.txt").read_text(encoding="utf-8") == "mine"
+
+
+def test_http_errors_are_failed_attempts_not_crashes_or_cache(tmp_path):
+    import httpx
+
+    class Down(Counting):
+        async def generate(self, rules, prompt, schema, timeout=60):
+            self.calls.append(1)
+            raise httpx.ReadTimeout("slow")
+
+    spark = Down()
+    result = run(tmp_path, spark, 1)
+    assert len(spark.calls) == 2 and result["skipped"] == [corpus.seeds()[0]["id"]]
+    assert not (tmp_path / "spark.local.json").exists()
+
+
+def test_changed_prompt_regenerates_and_genuine_with_a_stage_is_rejected(tmp_path):
+    seed = next(s for s in corpus.seeds() if not s["scam"])
+    staged = json.dumps({"lines": [{"speaker": "caller", "text": "Hi", "stage": "fear"}]})
+    with pytest.raises(ValueError):
+        corpus.validate(staged, scam=False)
+    corpus.validate(staged, scam=True)
+    spark = Counting()
+    run(tmp_path, spark, 1)
+    cache = tmp_path / "spark.local.json"
+    data = json.loads(cache.read_text(encoding="utf-8"))
+    data[corpus.seeds()[0]["id"]]["key"] = "stale"
+    cache.write_text(json.dumps(data), encoding="utf-8")
+    run(tmp_path, spark, 1)
+    assert len(spark.calls) == 2 and seed
+
+
+def test_pick_prefers_unchosen_kinds_and_curly_quotes_count():
+    rows = [{**script(i, True, ["fear"]), "kind": "a" if i < 3 else "b"} for i in range(4)]
+    assert {r["kind"] for r in corpus.pick(rows, True, 2)} == {"a", "b"}
+    assert corpus.count_terms("it’s", ["it's"]) == {"it's": 1}
