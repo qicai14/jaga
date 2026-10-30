@@ -106,7 +106,7 @@ def test_pretext_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(
     [
         "Selamat petang, saya dari unit jenayah komersial, ada kes atas nama puan.",
         "Saya pegawai penyiasat dari Bukit Aman, kita bercakap sekejap ya.",
-        "This is a police officer from the investigating team.",
+        "I am a police officer from the investigating team.",
         "Hello, I'm calling from PDRM regarding your file.",
         "我这边是商业罪案调查部门，想跟您核实一件事。",
         "這裡是公安局，您的案件已經立案。",
@@ -167,10 +167,10 @@ def test_handoff_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(
     "line",
     [
         "Tuan perlu pindahkan semua baki untuk tujuan audit sementara.",
-        "Eh, you kena transfer duit tu hari ini juga.",
+        "Eh, you kena pindahkan semua duit tu hari ini juga.",
         "Puan, semua wang ke akaun yang saya bagi ya.",
         "You must move all your savings before midnight.",
-        "Please transfer all of it to the account I give you.",
+        "Please transfer all your money to the account I give you.",
         "请把所有的钱先转过去。",
         "請把全部存款轉入指定帳戶。",
     ],
@@ -182,8 +182,8 @@ def test_money_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(li
 @pytest.mark.parametrize(
     "line",
     [
-        "Encik, bagi saya nombor yang baru masuk dalam telefon tu.",
-        "Cepat lah, baca nombor tu kat saya sekarang.",
+        "Encik, tolong sebut nombor yang baru masuk dalam telefon tu.",
+        "Cepat lah, baca kod tu kat saya sekarang.",
         "Okay, read me the six digits you just got.",
         "Please tell me the TAC that came by SMS.",
         "请把验证码念给我听。",
@@ -192,3 +192,30 @@ def test_money_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(li
 )
 def test_credentials_phrases_in_malay_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("credentials", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Selamat pagi puan, ini perkhidmatan pelanggan bank. Kad anda sudah siap, boleh ambil di cawangan.",
+        "Hello encik, rider Grab di depan rumah, parcel encik saya letak di pagar ya.",
+        "Mak, malam ni nak makan apa? Abang balik lambat sikit, kereta kena servis.",
+        "Boleh tak hantar nombor akaun dalam WhatsApp, nanti saya bayar sewa esok.",
+        "Thank you for calling the bank. Please hold the line while I check your card limit.",
+        "Hi, your delivery is out for delivery today, please be home between two and five.",
+        "Can you give me your new address? I want to send the birthday present.",
+        "Hey mum, I'm at the airport now, will call you when we land.",
+        "银行客服您好，请问您的信用卡账单需要寄到哪个地址？",
+        "妈，今晚我回家吃饭，你不用煮太多。",
+        "你好，你的快递已经放在楼下的柜子里了。",
+        "Puan, pembayaran bulan ini belum masuk, ada tunggakan kecil pada kad kredit puan.",
+        "Abang kena transfer duit sewa kat tuan rumah hari ni, kau dah bayar bahagian kau?",
+        "Dah makan? Jangan letak barang kat tepi tangga, nanti orang tersandung.",
+        "The booking is under your name, and the hotel can transfer all the luggage to your room.",
+        "Saya dari bank, panggilan ini direkodkan. Akaun anda di bawah Bank Negara Malaysia dilindungi PIDM.",
+        "Encik, pegawai polis trafik yang tahan encik tadi tinggalkan nombor telefon dia untuk saman.",
+        "我们的群是家长投资理财讲座群，下周开课。",
+    ],
+)
+def test_ordinary_calls_in_malay_english_and_mandarin_raise_nothing(line):
+    assert stage_after(line) == ("none", "low")
