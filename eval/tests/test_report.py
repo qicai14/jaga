@@ -334,4 +334,34 @@ def test_open_arm_cost_uses_its_own_price(tmp_path, monkeypatch):
 def test_the_report_states_how_caught_is_graded(tmp_path):
     m = report.metrics([rep("s", [up("fear", "high")], seconds=60, warned=1.0)], {"s": "scam"})
     text = " ".join(report.markdown({"rules": m}, "dev", "c.json").split())
-    assert "behaves as if Spark failed" in text and "not a labelled line" in text
+    assert "behaves as if Spark failed" in text and "graded against the labelled `moneyAt`" in text
+    assert "Caught graded against a labelled line: 0 of 1 scams." in text
+
+
+@pytest.mark.parametrize(("warned", "want"), [(9.0, True), (10.0, False), (None, False)])
+def test_caught_against_a_labelled_money_line(warned, want):
+    r = rep("s", [up("money", "high")], warned=warned) | {"moneyWall": 10.0}
+    assert report.caught(r) is want
+
+
+def test_label_beats_the_detector_both_ways():
+    early = rep("s", [up("money", "high")], warned=9.0) | {"moneyWall": 10.0}  # stages alone say late
+    late = rep("s", [up("fear", "high")], warned=11.0) | {"moneyWall": 10.0}  # no money stage detected
+    assert report.caught(early) and not report.caught(late)
+    assert report.caught(late | {"moneyWall": None})  # unlabelled: today's stage logic
+
+
+def test_moneyat_becomes_moneywall_on_paced_runs_only(tmp_path, monkeypatch):
+    path = calls_file(tmp_path)
+    recs = json.loads(path.read_text(encoding="utf-8"))
+    recs[0]["moneyAt"] = 10
+    path.write_text(json.dumps(recs), encoding="utf-8")
+    calls = [c for c in replay.load(path) if c.split == "dev"]
+    assert [c.moneyAt for c in calls] == [10, None]
+    monkeypatch.setattr(report.replay, "replay", lambda c, *a: rep(c.id, [up("fear", "high")], warned=1.0))
+    walls = lambda speed: [r.get("moneyWall") for r in report.run_arm(calls, "rules", "fake", speed)]  # noqa: E731
+    assert walls(2) == [5.0, None]
+    assert walls(0) == [None, None]
+    m = report.metrics(report.run_arm(calls, "rules", "fake", 2), {"s1": "scam", "g1": "genuine"})
+    assert m["caught_labelled"] == 1
+    assert "1 of 1 scams" in report.markdown({"rules": m}, "dev", "c.json")

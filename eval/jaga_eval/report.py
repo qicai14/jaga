@@ -8,7 +8,9 @@ one Spark call, not comparable with the pipeline arms. ASR is scored once (first
 Arms: rules (Spark off), rules+spark, rules+open (Muse Spark Open on Baseten), spark-only (the Spark client
 judges every caller line of a `script`, no rules). Each call in calls.json needs `label` (scam|genuine) and
 `split` (dev|heldout; any other value is refused, never dropped). A script call needs `seconds` (its length)
-when the script is played (spark-only, fake transcriber); `triggerAt`, `reference` are optional (replay.Call).
+when the script is played (spark-only, fake transcriber); `triggerAt`, `reference` are optional
+(replay.Call), as is `moneyAt`
+(audio second of the caller's first money or credentials line; grades Caught on paced runs).
 Prices are inputs, never guessed: --spark-usd prices a Muse Spark call, --open-usd a Muse Spark Open call
 (rules+open only; that arm's cost is n/a without it).
 
@@ -51,7 +53,10 @@ def quantile(xs, q):
 
 
 def caught(rep) -> bool:
-    """GLOSSARY: a Warning before the first money or credentials stage (one raised by that line is late)."""
+    """GLOSSARY: a Warning before the first money or credentials line: the labelled `moneyWall` when the
+    report has one, else the first such stage the arm detected (one raised by that line is late)."""
+    if rep.get("moneyWall") is not None:
+        return rep["firstWarningAt"] is not None and rep["firstWarningAt"] < rep["moneyWall"]
     ups = rep["updates"]
     high = next((i for i, u in enumerate(ups) if u["risk"] == "high"), None)
     money = next((i for i, u in enumerate(ups) if stages.RANK[u["stage"]] >= stages.RANK["money"]), None)
@@ -92,6 +97,7 @@ def metrics(reps: list[dict], labels: dict[str, str], spark_usd=None, asr_usd_pe
         "genuine_n": len(genuine),
         "caught": rate([caught(r) for r in scam]),
         "caught_ci": ci(scam, lambda s: rate([caught(r) for r in s])),
+        "caught_labelled": sum(r.get("moneyWall") is not None for r in scam),
         "missed": len([r for r in scam if not caught(r)]),
         "genuine_hours": sum(r["audioSeconds"] for r in genuine) / 3600,
         "false_alarms": false_alarms,
@@ -172,6 +178,8 @@ def run_arm(calls, arm, transcriber, speed) -> list[dict]:
         r["ttw"] = (
             wall - c.triggerAt / speed if wall is not None and c.triggerAt is not None and speed > 0 else None
         )
+        # a label in audio seconds only means something against a paced wall clock
+        r["moneyWall"] = c.moneyAt / speed if c.moneyAt is not None and speed > 0 else None
     return reps
 
 
@@ -205,8 +213,9 @@ def markdown(results: dict[str, dict], split: str, source: str) -> str:
         "line is clamped to 0 s and counted. With zero false alarms the CI upper bound is 3 / hours.",
         "The rules arm has Spark off and behaves as if Spark failed: hard triggers warn, and a call at",
         "`money` or `credentials` gets the fail-safe Warning.",
-        "Caught is graded against the first `money` or `credentials` stage the arm itself detected, not a",
-        "labelled line; a Warning on a scam where none was detected counts as caught.",
+        "Caught is graded against the labelled `moneyAt` where a paced run has one; otherwise against the",
+        "first `money` or `credentials` stage the arm itself detected, where a Warning with none detected",
+        "counts as caught. Each arm says how many.",
         "Spark-only asks about every caller line with a fixed placeholder (stage pretext, risk low), so its",
         "latency is one Spark call, not comparable with the pipeline arms. Transcription is scored once,",
         "in the first arm (every arm hears the same audio); rows are absent without `--transcriber muse`.",
@@ -242,6 +251,7 @@ def markdown(results: dict[str, dict], split: str, source: str) -> str:
             f"| Genuine calls with only a Caution | {m['genuine_n']} | {m['genuine_cautions']} | | |",
             "",
             f"Caught scams with a Warning before the trigger line: {m['ttw_early']}.",
+            f"Caught graded against a labelled line: {m['caught_labelled']} of {m['scam_n']} scams.",
             f"Scams missed: {m['missed']} of {m['scam_n']}. Spark asked {m['spark_asked']} times, "
             f"failed {m['spark_failed']}, timed out {m['spark_timed_out']}.",
             "",

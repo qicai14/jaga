@@ -51,12 +51,14 @@ class Call:
     audio: dict[str, Path] = field(default_factory=dict)  # leg -> recording
     script: list[tuple[str, str]] = field(default_factory=list)
     # Ground truth for the metrics report (#25): label scam|genuine, split dev|heldout, reference = human
-    # transcript file (outside git), seconds = length of a script call, triggerAt = trigger second.
+    # transcript file (outside git), seconds = length of a script call, triggerAt = trigger second,
+    # moneyAt = audio second where the caller's first money or credentials line starts (a human label).
     label: str = ""
     split: str = ""  # dev|heldout; the report refuses anything else
     reference: Path | None = None
     seconds: float | None = None
     triggerAt: float | None = None
+    moneyAt: float | None = None
 
 
 class RecordingPush(FakePush):
@@ -96,6 +98,7 @@ def load(path) -> list[Call]:
                 path.parent / ref if ref else None,
                 r.get("seconds"),
                 r.get("triggerAt"),
+                r.get("moneyAt"),
             )
         )
     return calls

@@ -21,4 +21,4 @@
   (scam|genuine) and `split` (dev|heldout, required: any other value is refused) in calls.json. Held-out runs need `--final`; one run,
   never read the misses to change rules, prompts or thresholds. `rules+open` needs `BASETEN_API_KEY`/`BASETEN_BASE_URL` (Muse Spark Open);
   prices (`--spark-usd`, `--open-usd` for the rules+open arm, `--asr-usd-per-min`) are inputs, so cost is "n/a"
-  unless given.
+  unless given. Optional `moneyAt` (second of the caller's first money/credentials line) grades Caught on paced runs.
