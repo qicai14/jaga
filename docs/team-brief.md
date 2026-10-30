@@ -66,7 +66,7 @@ the transcript; Meta's Standard mode (data not used for training) with zero data
 - **Built for more than Malaysia:** everything country-specific (scam scripts, hotlines, official numbers, languages,
   keywords) lives in a **region pack**. We ship Malaysia only; a new country is a new pack plus its own test data.
 - **Not doing:** iOS (needs a Mac and a paid Apple account), real forwarding from a Malaysian SIM (a +60 number needs
-  company registration), deepfake detection, Cantonese or Hokkien, job and trafficking-recruitment scams (mostly over messaging; a
+  company registration), deepfake detection, Hokkien, Cantonese audio (open question #36: phrases are in the pack, transcriber support unconfirmed), job and trafficking-recruitment scams (mostly over messaging; a
   later script pack).
 
 **The 3-minute demo:** a spoofed "PDRM" number calls grandma, and Truecaller trusts it. The scammer goes through the script

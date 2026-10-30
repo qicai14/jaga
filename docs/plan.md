@@ -54,8 +54,7 @@ region pack plus its own corpus, not code changes.
 **Stretch, in order:** golden-hour pack, document check, family code-word challenge, monthly scam fire drill, script
 intelligence (anonymised stage patterns), cooling-off flow, Nenek decoy line, a **Singapore** region pack (demo only, no evaluation numbers; verify its
 official contacts and hotline before use).
-**Out:** iOS, real carrier forwarding from a Malaysian SIM (needs a +60 number), deepfake-voice detection, Cantonese and
-Hokkien (not supported by Muse Voice Transcribe), job and trafficking-recruitment scams (mostly over messaging and
+**Out:** iOS, real carrier forwarding from a Malaysian SIM (needs a +60 number), deepfake-voice detection, Hokkien (not supported by Muse Voice Transcribe), Cantonese audio (open question #36: phrases are in the pack, transcriber support unconfirmed), job and trafficking-recruitment scams (mostly over messaging and
 aimed at younger people; a later **script pack**, the stage tracker ships with the Macau pack only).
 
 ## 5. Evidence: judged by data, not by us

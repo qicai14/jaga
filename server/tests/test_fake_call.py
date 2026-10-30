@@ -1058,13 +1058,52 @@ def test_a_long_quote_is_cut_at_a_word(client, pushed):
 
 
 @pytest.mark.parametrize(
-    "line",
+    ("line", "stage"),
     [
-        "你的包裹是非法包裹，涉嫌洗钱。",
-        "你的包裹是非法包裹，涉嫌洗錢。",
-        "你嘅包裹有問題，我係警察。",
-        "சட்டவிரோத பார்சல் உங்கள் பெயரில் உள்ளது.",
+        ("你的包裹是非法包裹。", "pretext"),
+        ("你的包裹是非法包裹，我是警察。", "authority"),
+        ("你有逮捕令，涉嫌洗钱。", "fear"),
+        ("你有拘捕令，涉嫌洗錢。", "fear"),
+        ("你嘅包裹有問題，我係警察。", "authority"),
+        ("不要掛電話，保密調查。", "isolation"),
+        ("要交保證金，轉錢入去。", "money"),
+        ("請轉接給警方。", "handoff"),
+        ("சட்டவிரோத பார்சல் உங்கள் பெயரில் உள்ளது.", "pretext"),
+        ("கைது ஆணை உள்ளது.", "fear"),
+        ("கடவுச்சொல்லைச் சொல்லுங்கள்.", "credentials"),
     ],
 )
-def test_mandarin_cantonese_and_tamil_scam_lines_are_caught(client, line):
-    assert stages_of(trail(client, "CA_zh", [("caller", line)]))[-1][0] != "none"
+def test_mandarin_cantonese_and_tamil_scam_lines_reach_their_stage(client, line, stage):
+    assert stages_of(trail(client, "CA_zh", [("caller", line)]))[-1][0] == stage
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "我们绝不会要求您把验证码给我们。",
+        "我們絕不會要求您把驗證碼給我們。",
+        "銀行唔會叫你將驗證碼俾我哋。",
+        "வங்கி உங்கள் OTP-ஐ ஒருபோதும் கேட்காது.",
+        "银行提醒：我们已安排视频通话预约，请带身份证。",
+        "我們已安排視頻通話預約，並寄出保證金收據。",
+        "銀行熱線：視像通話預約已確認，保證金收據已寄出。",
+        "வீடியோ அழைப்பு நாளை நடைபெறும்.",
+        "您的账户将被冻结的说法是诈骗，请忽略。",
+    ],
+)
+def test_negated_credential_warnings_and_routine_calls_in_each_script_stay_at_none(client, line):
+    assert stages_of(trail(client, "CA_notice", [("caller", line)])) == [("none", "low")]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "我们绝不会叫您转入安全账户，请勿告诉任何人您的验证码。",
+        "我們絕不會叫您轉入安全帳戶，請勿告訴任何人您的驗證碼。",
+        "銀行唔會叫你轉去安全戶口，亦唔好話俾人知你嘅驗證碼。",
+        "பாதுகாப்பான கணக்கிற்கு பணம் மாற்றச் சொல்லாது; யாரிடமும் சொல்லாதீர்கள் என்று வங்கி கேட்காது.",
+    ],
+)
+def test_bank_notices_naming_a_safe_account_are_at_most_a_caution_before_spark(line):
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    assert (tracker.hear("caller", line) or {})["risk"] != "high"
