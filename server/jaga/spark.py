@@ -73,6 +73,27 @@ class MuseSpark:
         part = next(part for part in message["content"] if part.get("type") == "output_text")
         return json.loads(part["text"])
 
+    async def generate(self, rules: str, prompt: str, schema: dict, timeout: float = 60) -> tuple[str, dict]:
+        """Generic JSON-schema call for offline tools (eval corpus): (reply text, usage). Not live."""
+        body = {
+            "model": self.MODEL,
+            "store": False,
+            "reasoning": {"effort": "minimal"},
+            "input": [
+                {"role": "developer", "content": [{"type": "input_text", "text": rules}]},
+                {"role": "user", "content": [{"type": "input_text", "text": prompt}]},
+            ],
+            "text": {"format": {"type": "json_schema", "name": "Reply", "schema": schema}},
+        }
+        response = await self.http.post(
+            self.url, json=body, headers={"Authorization": f"Bearer {self.key}"}, timeout=timeout
+        )
+        response.raise_for_status()
+        data = response.json()
+        message = next(item for item in data["output"] if item.get("type") == "message")
+        part = next(part for part in message["content"] if part.get("type") == "output_text")
+        return part["text"], data.get("usage", {})
+
 
 def spark(pack: dict) -> Spark:
     if os.environ.get("JAGA_USE_FAKES", "").lower() == "true":

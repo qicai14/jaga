@@ -93,3 +93,23 @@ def test_spark_is_real_without_fakes_and_needs_a_key(monkeypatch):
     monkeypatch.delenv("META_API_KEY")
     with pytest.raises(RuntimeError):
         spark.spark(PACK)
+
+
+def test_generate_sends_the_schema_stateless_and_returns_text_and_usage():
+    seen = []
+
+    def handler(request):
+        seen.append(request)
+        body = {
+            "output": [{"type": "message", "content": [{"type": "output_text", "text": "{}"}]}],
+            "usage": {"input_tokens": 3, "output_tokens": 4},
+        }
+        return httpx.Response(200, json=body)
+
+    schema = {"type": "object"}
+    out = asyncio.run(client(handler).generate("rules", "prompt", schema))
+    assert out == ("{}", {"input_tokens": 3, "output_tokens": 4})
+    (request,) = seen
+    body = json.loads(request.content)
+    assert body["store"] is False and body["text"]["format"]["schema"] == schema
+    assert request.extensions["timeout"]["read"] == 60

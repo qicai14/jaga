@@ -1,3 +1,5 @@
+import json
+
 from jaga.stages import RANK
 
 
@@ -15,3 +17,7 @@ class FakeSpark:
             "risk": risk,
             "counterMove": self.pack["library"][stage]["counterMoves"][0]["id"],
         }
+
+    async def generate(self, rules: str, prompt: str, schema: dict, timeout: float = 60) -> tuple[str, dict]:
+        lines = [{"speaker": "caller", "text": "Hello, this is a test call.", "stage": "none"}]
+        return json.dumps({"lines": lines}), {"input_tokens": 10, "output_tokens": 20}
