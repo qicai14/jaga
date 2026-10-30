@@ -3,6 +3,8 @@
 **Question:** does `<Start><Stream track="both_tracks">` plus `<Dial><Client>` give us both legs' audio and ring a
 Voice SDK client fast enough for the Jaga line (ADR 0002)?
 
+> Hosting has since moved from Fly to Render (`render.yaml`); the commands and results below are the Fly-era record.
+
 **Rig:** `server/jaga/spike.py`, deployed to Fly (`jaga-server`). The Twilio number and the TwiML App already point at
 `POST /twilio/voice`. The Voice SDK client is the Twilio JS SDK in a browser at `/spike`, identity `spike`. Android
 ringing through `twilio_voice` and FCM is the app lane's own day-1 test, not this one.

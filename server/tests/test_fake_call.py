@@ -388,6 +388,21 @@ def test_signature_matches_twilios_documented_example():
     assert not twilio_auth.valid(url, params, "0/KCTR6DLpKmkAf8muzZqo1nDgQ=", "")
 
 
+def test_chunks_dropped_when_muse_falls_behind_are_counted_in_the_log(client, monkeypatch, caplog):
+    caplog.set_level("WARNING")
+
+    async def held(self, leg, audio):  # the listener stays stuck until the call-end log appears
+        while "audio chunks dropped" not in caplog.text:
+            await asyncio.sleep(0.01)
+
+    monkeypatch.setattr(FakeTranscriber, "transcribe", held)
+
+    trail(client, "CA_behind", [("caller", "x")] * 300)
+
+    dropped = [int(m.split()[2]) for m in caplog.messages if "audio chunks dropped" in m]
+    assert dropped in ([49], [50])  # 300 sent, 250 queued, 1 or 0 already taken by the listener
+
+
 def test_a_slow_leg_does_not_hold_up_the_other_and_every_line_still_lands(client, monkeypatch):
     done, transcribe = [], FakeTranscriber.transcribe
 

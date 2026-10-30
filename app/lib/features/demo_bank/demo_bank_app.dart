@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 import 'pause_client.dart';
 
-// An origin only, e.g. https://jaga-server.fly.dev (any path is dropped).
+// An origin only, e.g. https://jaga-server.onrender.com (any path is dropped).
 const _serverUrl = String.fromEnvironment('JAGA_SERVER_URL');
 const _pauseToken = String.fromEnvironment('JAGA_PAUSE_TOKEN');
 

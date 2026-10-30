@@ -94,7 +94,7 @@ caller --> Twilio number --(both legs, Media Streams)--> server: telephony -> as
                     \--(Voice SDK, FCM)--> Jaga app (protected user)  <--stage-update--/        \--> alerts --> family app
 Demo Bank (Flutter web) --> server: pause API
 ```
-Server: FastAPI on Fly.io (always-on WebSocket). Push, auth, small data: Firebase. Contracts: `contracts/*.schema.json`.
+Server: FastAPI on Render Free (WebSocket; sleeps when idle, see docs/team-brief.md). Push, auth, small data: Firebase. Contracts: `contracts/*.schema.json`.
 
 ## 8. Team lanes
 | Lane | Owner | Folders | Owns |
