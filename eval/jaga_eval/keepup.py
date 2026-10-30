@@ -7,6 +7,8 @@ Streams both Twilio tracks every 20 ms (100 messages/s) on an absolute clock, wi
 evenly spaced and the last at the end, while following /calls/{id}/stages and sampling /health every 5 s.
 The fake transcriber reads each chunk as UTF-8 text, so the server's mu-law to PCM step is not exercised;
 everything before it (socket, JSON, base64, the 250-chunk queue that drops the oldest) is the real call path.
+Passes if every marker arrives within 2 s, the socket stays open, p95 sender slip is under 1 s and
+99% of the messages were sent; the report's `failed` lists what did not hold.
 """
 
 import argparse
@@ -32,7 +34,8 @@ MARKERS = {  # one phrase per stage the rules move through, from server/jaga/reg
     "handoff": "sambungkan anda kepada polis",
     "money": "pindahkan wang",
 }
-QUEUE_SECONDS = 5  # 250 chunks at 20 ms; the server drops the oldest beyond it
+MAX_LAG = 2  # seconds; well inside the 5 s (250 chunks) after which the server drops the oldest audio
+MAX_SLIP = 1  # seconds, p95 sender slip: beyond it the test itself is not streaming at line rate
 FILLER = b" " * CHUNK  # blank text: the fake transcriber hears nothing, the server still queues the chunk
 
 
@@ -65,8 +68,24 @@ def stats(values: list[float]) -> dict:
     return {"p50": v[len(v) // 2], "p95": v[min(len(v) - 1, int(len(v) * 0.95))], "max": v[-1]} if v else {}
 
 
-def verdict(lags: dict[str, float | None], closed: bool) -> bool:
-    return not closed and all(lag is not None and lag < QUEUE_SECONDS for lag in lags.values())
+def verdict(
+    lags: dict[str, float | None], closed: bool, slip_p95: float, sent: int, expected: int
+) -> list[str]:
+    """What failed; empty = pass."""
+    failed = []
+    if closed:
+        failed.append("socket closed")
+    failed += [f"marker {s} never arrived" for s, lag in lags.items() if lag is None]
+    failed += [
+        f"marker {s} lag {lag} s >= {MAX_LAG} s"
+        for s, lag in lags.items()
+        if lag is not None and lag >= MAX_LAG
+    ]
+    if slip_p95 > MAX_SLIP:
+        failed.append(f"sender slip p95 {slip_p95:.2f} s > {MAX_SLIP} s")
+    if sent < expected * 0.99:
+        failed.append(f"sent {sent} of {expected} messages")
+    return failed
 
 
 async def wake(http: httpx.AsyncClient, base: str, limit: float = 180) -> float:
@@ -142,12 +161,13 @@ async def run(base: str, public: str, minutes: float, token: str) -> dict:
                         break
                     await asyncio.sleep(0.1)
                 await ws.send(stop)
-        except (ConnectionClosed, OSError):
+        except (ConnectionClosed, WebSocketException, OSError):
             closed = True
         pinger.cancel()
         await asyncio.wait([reader], timeout=5)
         reader.cancel()
     lags = {s: round(seen[s] - sent_at[s], 3) if s in seen and s in sent_at else None for s in MARKERS}
+    failed = verdict(lags, closed, stats(slips).get("p95", 0), len(slips) * 2, len(ticks) * 2)
     return {
         "wakeSeconds": round(woke, 1),
         "messagesSent": len(slips) * 2,
@@ -156,7 +176,8 @@ async def run(base: str, public: str, minutes: float, token: str) -> dict:
         "healthRoundTripMs": {k: round(v * 1000) for k, v in stats(health).items()}
         | {"samples": len(health)},
         "senderSlipMs": {k: round(v * 1000, 1) for k, v in stats(slips).items()},
-        "pass": verdict(lags, closed),
+        "failed": failed,
+        "pass": not failed,
     }
 
 

@@ -22,8 +22,8 @@ services:
     envVars:
       - key: PORT # the Dockerfile CMD listens on 8000; Render's default is 10000
         value: "8000"
-      - key: GOOGLE_APPLICATION_CREDENTIALS
-        value: /etc/secrets/firebase.json
+      - key: GOOGLE_APPLICATION_CREDENTIALS # set to /etc/secrets/firebase.json once the Secret File exists; unset = no family alerts
+        sync: false
       - key: JAGA_USE_FAKES # true until the Meta and Twilio keys are in; unset = real clients
         sync: false
       - key: META_API_KEY

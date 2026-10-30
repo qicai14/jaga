@@ -25,8 +25,15 @@ def test_plan_streams_both_tracks_every_20ms_with_evenly_spaced_markers_ending_t
 
 def test_stats_and_verdict():
     assert k.stats([1, 2, 3, 4, 100]) == {"p50": 3, "p95": 100, "max": 100}
-    ok = {"pretext": 0.3, "money": 4.9}
-    assert k.verdict(ok, closed=False)
-    assert not k.verdict(ok, closed=True)  # the socket closed
-    assert not k.verdict({**ok, "money": None}, closed=False)  # a marker never arrived
-    assert not k.verdict({**ok, "money": 5.0}, closed=False)  # the 5 s queue
+    ok = {"pretext": 0.3, "money": 1.9}
+
+    def failed(lags=ok, closed=False, slip=0.1, sent=1000):
+        return k.verdict(lags, closed, slip, sent, expected=1000)
+
+    assert failed() == []
+    assert failed(closed=True) == ["socket closed"]
+    assert failed({**ok, "money": None}) == ["marker money never arrived"]
+    assert "marker money lag 2.0 s >= 2 s" in failed({**ok, "money": 2.0})
+    assert failed(slip=1.5) == ["sender slip p95 1.50 s > 1 s"]
+    assert failed(sent=989) == ["sent 989 of 1000 messages"]
+    assert failed(sent=990) == []
