@@ -10,7 +10,9 @@ from pathlib import Path
 
 STAGES = {"none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"}
 SPARK_STAGES = STAGES - {"none", "pretext"}
-TYPES = {"paraphrase", "manglish", "injection", "evasion", "near_miss", "ambiguous", "coverage", "output_attack"}
+TYPES = {
+    "paraphrase", "manglish", "injection", "evasion", "near_miss", "ambiguous", "coverage", "output_attack",
+}
 TARGETS = {"rules", "spark", "both"}
 YESNO = {"yes", "no"}
 
@@ -82,7 +84,11 @@ def main(base):
         c = ls[0]["caught_before_line"]
         if c:
             first = next(
-                (int(r["line_no"]) for r in ls if r["leg"] == "caller" and r["label"] in {"money", "credentials"}),
+                (
+                    int(r["line_no"])
+                    for r in ls
+                    if r["leg"] == "caller" and r["label"] in {"money", "credentials"}
+                ),
                 None,
             )
             if first is None or int(c) != first:

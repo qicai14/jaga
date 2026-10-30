@@ -8,7 +8,7 @@
 - `variants.csv`: 75 single-line cases, each treated as the start of a fresh call.
 - `sequences.csv`: 5 short calls (24 lines) for the stateful tracker, with a `leg` column (caller or user).
 - `check_variants.py`: structure checks (ids, labels, parents, Spark expectations, `caught_before_line`). Run `python3 -I check_variants.py`; it does not run the detector.
-- `labels_first_pass.csv` and `annotation_guide.md`: the corpus labels the variants derive from, and the labelling rules.
+- `labels_first_pass.csv` and `annotation_guide.md`: the corpus labels (ids and labels only) the variants derive from, and the labelling rules. The `text` column was removed because it held real call transcripts; to re-label, read the line text from the local transcripts outside git (keyed by `line_id`). `check_variants.py` does not use it.
 
 ## Types in `variants.csv`
 | Type | Target | What it tests |
