@@ -30,7 +30,7 @@
       "counterMoves": [{"id": "my.credentials.counter.1", "text": {"ms": "Jangan kongsi TAC, OTP atau kata laluan anda. Hubungi talian penipuan bank anda sendiri.", "en": "Never share your TAC, OTP or password. Call your bank's fraud line yourself.", "zh": "切勿透露验证码（TAC、OTP）或密码。请自己致电银行的防诈热线。"}}]
     }
   },
-  "libraryReview": {"ms": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-30.", "en": "Reviewed by Qi Cai (qicai14), 2026-10-30.", "zh": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-28."},
+  "libraryReview": {"ms": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-30.", "zh": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-28."},
   "contacts": {
     "nsrc": {"name": "National Scam Response Centre (NSRC)", "number": "997", "purpose": "Real-time help for online financial scams; call within 24 hours so the money can be blocked", "hours": "Daily, 24 hours (some bank and government pages still list 8am-8pm; treat those as stale)", "source": "https://www.malaysia.gov.my/en/categories/safety-and-community/cybersecurity/nsrc-997-hotline", "checked": "2026-10-28"},
     "pdrm": {"name": "PDRM (MERS 999)", "number": "999", "purpose": "Emergencies only, shared with Bomba, hospitals, APM and Maritim", "hours": "Not stated", "source": "https://999.gov.my/mers-999/apa-itu-mers-999/", "checked": "2026-10-28"},
