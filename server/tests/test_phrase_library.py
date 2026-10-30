@@ -145,3 +145,19 @@ def test_fear_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(lin
 )
 def test_isolation_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("isolation", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Sekejap ya, saya sambungkan tuan kepada pegawai polis yang uruskan kes ini.",
+        "Okay, sekarang saya handoff you kepada tuan inspektor, dia akan guide you.",
+        "Saya sambungkan puan kepada pegawai atasan kami.",
+        "Hold on, I will handoff you to the senior inspector now.",
+        "I am handing over your case to the officer in charge.",
+        "我现在帮你转接给警官，请稍等。",
+        "我現在轉接給警察，請稍等。",
+    ],
+)
+def test_handoff_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("handoff", "medium")
