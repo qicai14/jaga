@@ -67,8 +67,9 @@
     "don't tell anyone": "isolation"
   },
   "negation": {
-    "before": "(?:never|do not|don't|jangan|tidak akan|tak akan)\\s+(?:ever\\s+)?(?:share|give|tell|disclose|reveal|ask|kongsi|beri|berikan|beritahu|dedah|minta|meminta)\\b[^.,;!?]{0,30}$",
-    "after": "[^.,;!?]{0,20}\\b(?:tac|otp|pin|password|kod|kata laluan)\\b"
+    "before": "(?:never|do not|don't|jangan|tidak akan|tak akan)\\s+(?:ever\\s+)?(?:share|give|tell|disclose|reveal|kongsi|beri|berikan|beritahu|dedah)\\b[^.,;!?]{0,12}$",
+    "after": "\\s*(?:(?:kod|nombor)\\s+)?(?:tac|otp)\\b",
+    "money": "transfer|pindah|akaun selamat|safe account|wang|money"
   },
   "digitWords": {
     "kosong": 0, "sifar": 0, "zero": 0, "oh": 0,

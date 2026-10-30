@@ -1132,7 +1132,6 @@ def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):
         "Jangan beritahu sesiapa kod TAC anda, bank tidak akan meminta.",
         "Never share your TAC code with anyone, even bank staff.",
         "Jangan beritahu sesiapa nombor TAC anda.",
-        "We will never ask you to give us your safe account details.",
     ],
 )
 def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
@@ -1146,9 +1145,24 @@ def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
         "Don't tell anyone about this call.",
         "Tell me the TAC code now.",
         "Pindahkan wang ke akaun selamat sekarang.",
+        "Do not ask why transfer it to the safe account",
+        "Jangan beri alasan pindahkan ke akaun selamat",
+        "Please use the safe account password I give you",
+        "Do not tell your family share the TAC code with me",
+        "Jangan beritahu sesiapa tentang kod ini",
+        "Don't tell anyone the OTP we sent",
+        "Don’t tell anyone about this call.",
+        "Never share your TAC code. Now tell me the TAC code",
     ],
 )
 def test_the_scam_versions_of_those_lines_still_raise_a_warning(line):
     update = stages.StageTracker(stages.load_pack("my")).hear("caller", line)
 
     assert update["risk"] == "high"
+
+
+def test_a_cue_in_an_earlier_line_does_not_negate_a_later_ask():
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    tracker.hear("caller", "Do not give me trouble")
+
+    assert tracker.hear("caller", "tell me your TAC code")["risk"] == "high"

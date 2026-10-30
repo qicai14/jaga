@@ -37,7 +37,7 @@ CJK_GAP = re.compile(r"(?<=[㐀-鿿])[\s，。、！？；：,.!?;:]+(?=[㐀-鿿
 
 def norm(text: str) -> str:
     """Lowercase, full-width folded (NFKC) and with nothing between two CJK characters."""
-    return CJK_GAP.sub("", unicodedata.normalize("NFKC", text).lower())
+    return CJK_GAP.sub("", unicodedata.normalize("NFKC", text).lower().replace("’", "'"))
 
 
 def load_pack(region: str | None) -> dict:
@@ -102,13 +102,18 @@ class StageTracker:
         text = "\n".join(f"{leg}: {' '.join(lines)}" for leg, lines in self.prev.items())
         return self.mask(text)
 
-    def negated(self, window: str, trigger: str) -> bool:
-        """True if a bank is warning against the trigger ("never share your TAC"), not asking for it."""
-        start = window.find(trigger)
-        return bool(
-            self.negation["before"].search(window[:start])
-            or self.negation["after"].match(window[start + len(trigger) :])
-        )
+    def negated(self, window: str, trigger: str, stage: str) -> bool:
+        """True if a bank is warning against the code ("never share your TAC"), not asking for it.
+
+        Only the last occurrence counts, and never on a line that mentions money: a missed scam is worse
+        than a false alarm. shortcut: Malay and English cues only; other languages stay at a Caution.
+        """
+        if self.negation["money"].search(window):
+            return False
+        start = window.rfind(trigger)
+        if stage == "credentials":
+            return bool(self.negation["before"].search(window[:start]))
+        return stage == "isolation" and bool(self.negation["after"].match(window[start + len(trigger) :]))
 
     def hear(self, leg: str, line: str) -> dict | None:
         """The new stage-update fields if this line changed the call's stage or risk, else None."""
@@ -125,7 +130,9 @@ class StageTracker:
         if leg == "caller":
             fresh = lambda p: p in window and p not in prev  # noqa: E731
             hits = [(s, p) for s, ps in self.phrases.items() for p in ps if fresh(p)]
-            hard = [(s, p) for p, s in self.hard_triggers.items() if fresh(p) and not self.negated(window, p)]
+            hard = [
+                (s, p) for p, s in self.hard_triggers.items() if fresh(p) and not self.negated(window, p, s)
+            ]
             # shortcut: the ask lasts three user lines, however long they take; fine for a spoken exchange.
             if any(s == "credentials" for s, _ in hard) or self.code_ask.search(text):
                 self.asked = 3
