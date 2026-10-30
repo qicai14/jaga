@@ -161,3 +161,19 @@ def test_isolation_phrases_in_malay_manglish_english_and_mandarin_raise_a_cautio
 )
 def test_handoff_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("handoff", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Tuan perlu pindahkan semua baki untuk tujuan audit sementara.",
+        "Eh, you kena transfer duit tu hari ini juga.",
+        "Puan, semua wang ke akaun yang saya bagi ya.",
+        "You must move all your savings before midnight.",
+        "Please transfer all of it to the account I give you.",
+        "请把所有的钱先转过去。",
+        "請把全部存款轉入指定帳戶。",
+    ],
+)
+def test_money_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("money", "medium")
