@@ -228,6 +228,7 @@ def test_region_comes_from_the_call_or_the_default(client, monkeypatch, tmp_path
             "command": "c",
             "counterMove": "m",
             "hardTriggers": {},
+            "negation": {"before": "x", "after": "x"},
             "userDisclosure": {},
             "digitWords": {"nol": 0},
             "codeAsk": "x",
@@ -262,6 +263,10 @@ def test_stage_stream_for_unknown_call_is_refused(client):
         "This is the bank, your card statement is ready, we will never ask for your password, "
         "let me transfer you to a colleague.",
         "Ini LHDN, peringatan bayaran cukai melalui portal rasmi.",
+        "Ini Maybank, penyata kad kredit anda sudah sedia, kami tidak akan minta kata laluan anda.",
+        "This is LHDN, a reminder that your tax payment is due through the official MyTax portal.",
+        "这里是银行，您的信用卡账单已经出来了，我们绝不会向您索取密码。",
+        "這裡是銀行，您的信用卡帳單已經出來了，我們絕不會要求您提供密碼。",
     ],
 )
 def test_genuine_bank_and_tax_calls_stay_at_none(client, line):
@@ -1050,3 +1055,103 @@ def test_a_long_quote_is_cut_at_a_word(client, pushed):
 
     quote = alerts_of(pushed)[0]["quotes"][0]
     assert len(quote) <= 80 and quote.endswith("panjang")
+
+
+@pytest.mark.parametrize(
+    ("line", "stage"),
+    [
+        ("你的包裹是非法包裹。", "pretext"),
+        ("你的包裹是非法包裹，我是警察。", "authority"),
+        ("你有逮捕令，涉嫌洗钱。", "fear"),
+        ("你有拘捕令，涉嫌洗錢。", "fear"),
+        ("不要掛電話，保密調查。", "isolation"),
+        ("要交保證金，把錢轉過去。", "money"),
+        ("請轉接給警方。", "handoff"),
+        ("告訴我驗證碼。", "credentials"),
+    ],
+)
+def test_mandarin_scam_lines_reach_their_stage(client, line, stage):
+    assert stages_of(trail(client, "CA_zh", [("caller", line)]))[-1][0] == stage
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "我们绝不会要求您把验证码给我们。",
+        "我們絕不會要求您把驗證碼給我們。",
+        "银行提醒：我们已安排视频通话预约，请带身份证。",
+        "我們已安排視頻通話預約，並寄出保證金收據。",
+        "您的账户将被冻结的说法是诈骗，请忽略。",
+    ],
+)
+def test_negated_credential_warnings_and_routine_calls_in_each_script_stay_at_none(client, line):
+    assert stages_of(trail(client, "CA_notice", [("caller", line)])) == [("none", "low")]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "我们绝不会叫您转入安全账户，请勿告诉任何人您的验证码。",
+        "我們絕不會叫您轉入安全帳戶，請勿告訴任何人您的驗證碼。",
+    ],
+)
+def test_bank_notices_naming_a_safe_account_are_at_most_a_caution_before_spark(line):
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    assert (tracker.hear("caller", line) or {})["risk"] != "high"
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        ["不要 挂 电话"],  # a transcriber may space out CJK characters
+        ["不要，挂电话"],  # or punctuate inside a phrase
+        ["不要掛", "電話"],  # or split it across lines
+    ],
+)
+def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    updates = [tracker.hear("caller", line) for line in lines]
+
+    assert [u for u in updates if u][-1]["stage"] == "isolation"
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Jangan beritahu sesiapa kod TAC anda, bank tidak akan meminta.",
+        "Never share your TAC code with anyone, even bank staff.",
+        "Jangan beritahu sesiapa nombor TAC anda.",
+    ],
+)
+def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
+    assert stages.StageTracker(stages.load_pack("my")).hear("caller", line) is None
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Jangan beritahu sesiapa, pindahkan ke akaun selamat.",
+        "Don't tell anyone about this call.",
+        "Tell me the TAC code now.",
+        "Pindahkan wang ke akaun selamat sekarang.",
+        "Do not ask why transfer it to the safe account",
+        "Jangan beri alasan pindahkan ke akaun selamat",
+        "Please use the safe account password I give you",
+        "Do not tell your family share the TAC code with me",
+        "Jangan beritahu sesiapa tentang kod ini",
+        "Don't tell anyone the OTP we sent",
+        "Don’t tell anyone about this call.",
+        "Never share your TAC code. Now tell me the TAC code",
+    ],
+)
+def test_the_scam_versions_of_those_lines_still_raise_a_warning(line):
+    update = stages.StageTracker(stages.load_pack("my")).hear("caller", line)
+
+    assert update["risk"] == "high"
+
+
+def test_a_cue_in_an_earlier_line_does_not_negate_a_later_ask():
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    tracker.hear("caller", "Do not give me trouble")
+
+    assert tracker.hear("caller", "tell me your TAC code")["risk"] == "high"

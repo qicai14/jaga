@@ -8,6 +8,7 @@ Muse Spark confirms or lowers it.
 import json
 import os
 import re
+import unicodedata
 from collections import deque
 from pathlib import Path
 
@@ -28,6 +29,15 @@ RANK = {
     "credentials": 6,
 }
 RISK = {"low": 0, "medium": 1, "high": 2}
+
+
+# A transcriber may space out or punctuate CJK text; none of that is part of a phrase.
+CJK_GAP = re.compile(r"(?<=[㐀-鿿])[\s，。、！？；：,.!?;:]+(?=[㐀-鿿])")
+
+
+def norm(text: str) -> str:
+    """Lowercase, full-width folded (NFKC) and with nothing between two CJK characters."""
+    return CJK_GAP.sub("", unicodedata.normalize("NFKC", text).lower().replace("’", "'"))
 
 
 def load_pack(region: str | None) -> dict:
@@ -62,6 +72,10 @@ class StageTracker:
         self.disclosure = {label: re.compile(rx) for label, rx in pack["userDisclosure"].items()}
         words = sorted(pack["digitWords"], key=len, reverse=True)
         self.digit_words = re.compile(rf"\b({'|'.join(map(re.escape, words))})\b")
+        # Phrases are matched in the same normal form as the transcript.
+        self.phrases = {s: [norm(p) for p in ps] for s, ps in pack["phrases"].items()}
+        self.hard_triggers = {norm(p): s for p, s in pack["hardTriggers"].items()}
+        self.negation = {k: re.compile(rx) for k, rx in pack["negation"].items()}
         self.code_ask, self.bare_tac = re.compile(pack["codeAsk"]), re.compile(pack["bareTac"])
         self.stage, self.risk = "none", "low"
         self.evidence: list[str] = []
@@ -88,22 +102,37 @@ class StageTracker:
         text = "\n".join(f"{leg}: {' '.join(lines)}" for leg, lines in self.prev.items())
         return self.mask(text)
 
+    def negated(self, window: str, trigger: str, stage: str) -> bool:
+        """True if a bank is warning against the code ("never share your TAC"), not asking for it.
+
+        Only the last occurrence counts, and never on a line that mentions money: a missed scam is worse
+        than a false alarm. shortcut: Malay and English cues only; other languages stay at a Caution.
+        """
+        if self.negation["money"].search(window):
+            return False
+        start = window.rfind(trigger)
+        if stage == "credentials":
+            return bool(self.negation["before"].search(window[:start]))
+        return stage == "isolation" and bool(self.negation["after"].match(window[start + len(trigger) :]))
+
     def hear(self, leg: str, line: str) -> dict | None:
         """The new stage-update fields if this line changed the call's stage or risk, else None."""
-        text, hard = line.lower(), []
+        text, hard = norm(line), []
         if leg == "user":
             text = self.digits(text)
         lines = self.prev.setdefault(leg, deque(maxlen=2))
-        prev = " ".join(lines)
-        window = f"{prev} {text}"
+        prev = norm(" ".join(lines))
+        window = norm(f"{prev} {text}")
         lines.append(text)
         if leg == "user":
             window = self.digits(window)
         # A match wholly inside the earlier lines already counted.
         if leg == "caller":
             fresh = lambda p: p in window and p not in prev  # noqa: E731
-            hits = [(s, p) for s, ps in self.pack["phrases"].items() for p in ps if fresh(p)]
-            hard = [(s, p) for p, s in self.pack["hardTriggers"].items() if fresh(p)]
+            hits = [(s, p) for s, ps in self.phrases.items() for p in ps if fresh(p)]
+            hard = [
+                (s, p) for p, s in self.hard_triggers.items() if fresh(p) and not self.negated(window, p, s)
+            ]
             # shortcut: the ask lasts three user lines, however long they take; fine for a spoken exchange.
             if any(s == "credentials" for s, _ in hard) or self.code_ask.search(text):
                 self.asked = 3
