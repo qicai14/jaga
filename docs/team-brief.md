@@ -7,7 +7,7 @@ Team: Qi Cai (lead), Preston, Foon, Joshua
 
 ## TL;DR
 Jaga is an Android app that protects people, especially our parents and grandparents, from **phone scams**. Calls ring
-inside Jaga, so Jaga can listen to **what the caller is saying** in Malay, English, Mandarin or Tamil. When the call follows
+inside Jaga, so Jaga can listen to **what the caller is saying** in Malay, English or Mandarin. When the call follows
 the Macau-scam script, Jaga tells the user **"Letak telefon. Hang up."**, coaches them what to say, alerts a family member,
 and can make the bank **hold the transfer**. Our goal: **no money leaves the account.**
 
@@ -32,7 +32,7 @@ and can make the bank **hold the transfer**. Our goal: **no money leaves the acc
 1. **Calls ring inside Jaga.** The user's SIM forwards calls to a "Jaga line" (a Twilio number), which rings our app.
    Android and iOS don't let apps hear normal phone calls, so this is how Hiya does it too.
 2. **Jaga listens.** Meta's **Muse Voice Transcribe** turns both sides of the call into text live, even with mixed
-   Malay, English, Mandarin and Tamil.
+   Malay, English and Mandarin.
 3. **Jaga tracks the script (free, no AI).** Simple rules spot which stage the caller has reached: pretext, authority,
    fear, isolation ("tell no one"), handoff, money or credentials.
 4. **Jaga thinks only when needed.** When the rules fire, Meta's **Muse Spark** checks the situation and can use tools:
@@ -129,9 +129,9 @@ Lanes C and D are interchangeable between Foon and Joshua. Tell me your pick.
 | Lane | Who | Folder | Your job |
 |---|---|---|---|
 | **A. Core pipeline + lead** | **Qi Cai** | `server/` core, `contracts/` | Twilio audio in, live transcription, the script tracker, Muse Spark escalation, sending stage updates to the app, merging and unblocking everyone |
-| **B. The app** | **Preston** | `app/` | Receiving calls in the app (`twilio_voice`), the warning screen (big command, counter-move), family mode with push alerts, onboarding, 4 languages, elderly-friendly design |
+| **B. The app** | **Preston** | `app/` | Receiving calls in the app (`twilio_voice`), the warning screen (big command, counter-move), family mode with push alerts, onboarding, 3 languages, elderly-friendly design |
 | **C. The evidence** | **Foon / Joshua** | `eval/` | Build the test sets, labelling, the replay harness, run the TeleAntiFraud benchmark, produce the numbers for the demo |
-| **D. Product edges + shipping** | **Joshua / Foon** | `server/jaga/tools`, `server/jaga/pause`, Demo Bank, CI | Scam-phrase library in 4 languages, official-hotline table, mule-account mock, Jaga Pause and the Demo Bank, golden-hour report, CI and deployment, the demo video |
+| **D. Product edges + shipping** | **Joshua / Foon** | `server/jaga/tools`, `server/jaga/pause`, Demo Bank, CI | Scam-phrase library in 3 languages, official-hotline table, mule-account mock, Jaga Pause and the Demo Bank, golden-hour report, CI and deployment, the demo video |
 
 **Tickets are ready:** 26 of them in GitHub Issues (#1 to #26), each one lane, with "blocked by" links.
 Day-1 starters with no blockers: A `001` contracts, `002` telephony test; C `003` transcription test, `005` corpus; D `004`
@@ -153,7 +153,7 @@ structured output, prompt-injection defences.
 - `twilio_voice` on pub.dev: incoming calls on Android (ConnectionService, Firebase setup, Android 14/15 permissions such as
   full-screen intent and foreground-service types).
 - FCM data messages, and a WebSocket client in Flutter.
-- `flutter_localizations` (Malay, English, Mandarin, Tamil).
+- `flutter_localizations` (Malay, English, Mandarin).
 - Accessibility for elderly users: large text and high contrast.
 
 **Lane C:**
@@ -166,7 +166,7 @@ structured output, prompt-injection defences.
 - Look up WER (`jiwer`), Cohen's kappa and bootstrap confidence intervals.
 
 **Lane D:**
-- Draft the **scam-phrase list** in Malay, English, Mandarin and Tamil (from PDRM, NSRC and Semak Mule advisories).
+- Draft the **scam-phrase list** in Malay, English and Mandarin (from PDRM, NSRC and Semak Mule advisories).
 - Draft the **official hotlines table** (PDRM, LHDN, Bank Negara, major banks, NSRC 997).
 - Check whether PDRM **Semak Mule** has any public API.
 - Create the **Firebase** and **Fly.io** accounts (free tiers).
