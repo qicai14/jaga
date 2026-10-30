@@ -21,8 +21,9 @@ Clips, references and the keyword sheet live outside git in <clip_dir>; never co
       mostly Chinese characters is scored by CER only (no word spaces, so no WER)
 
 The report also checks the real stage pack (phrases and hard triggers; both speakers are in one mono
-text, same on reference and Muse) on each reference and on the Muse text: which stages fire on each, stage recall, and extra stages per call (clips without a reference show their stages as-is, so a
-genuine-speech run reads false stages per call off the same table).
+text, same on reference and Muse) on each reference and on the Muse text: which stages fire on each,
+stage recall, and extra stages per call. Clips without a reference show their stages as-is, so a
+genuine-speech run reads false stages per call off the same table.
 
 Muse path: the batch endpoint from #18 (`batch_transcribe`): one POST per chunk, no socket pacing or flush,
 and the chunk length is ours to control (#3 hit HTTP 400 on long calls). Audio goes through an 8 kHz mu-law
