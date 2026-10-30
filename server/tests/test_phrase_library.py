@@ -177,3 +177,18 @@ def test_handoff_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(
 )
 def test_money_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("money", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Encik, bagi saya nombor yang baru masuk dalam telefon tu.",
+        "Cepat lah, baca nombor tu kat saya sekarang.",
+        "Okay, read me the six digits you just got.",
+        "Please tell me the TAC that came by SMS.",
+        "请把验证码念给我听。",
+        "麻煩你報一下驗證碼。",
+    ],
+)
+def test_credentials_phrases_in_malay_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("credentials", "medium")
