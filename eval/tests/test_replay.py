@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import math
@@ -8,6 +9,8 @@ import wave
 
 import pytest
 
+from jaga import spark
+from jaga.fakes.spark import FakeSpark
 from jaga_eval import replay as r
 
 SCRIPT = [
@@ -106,3 +109,57 @@ def test_load_rejects_empty_and_unknown_legs(tmp_path):
         r.load(write_calls(tmp_path, [{"id": "x"}]))
     with pytest.raises(ValueError, match="leg"):
         r.load(write_calls(tmp_path, [{"id": "x", "audio": {"agent": "a.wav"}}]))
+
+
+MONEY = [["caller", "Sila pindahkan wang ke akaun ini."]]  # money at a Caution: only Spark raises the Warning
+
+
+def test_a_warning_is_stamped_when_it_arrives_not_when_the_reader_began_waiting(tmp_path, monkeypatch):
+    class Slow(FakeSpark):
+        async def assess(self, *a):
+            await asyncio.sleep(0.3)
+            return await super().assess(*a)
+
+    monkeypatch.setattr(r, "FakeSpark", Slow)
+    calls = r.load(write_calls(tmp_path, [{"id": "slow", "script": MONEY}]))
+
+    rep = r.replay(calls[0], 0, "fake", "fake", speed=0)
+
+    assert rep["firstWarningAt"] >= 0.25
+
+
+def test_each_replay_builds_its_own_http_client(tmp_path, monkeypatch):
+    seen = []
+
+    class Watching(FakeSpark):
+        def __init__(self, pack):
+            seen.append(spark._http)
+            super().__init__(pack)
+
+    monkeypatch.setattr(r, "FakeSpark", Watching)
+    monkeypatch.setattr(spark, "_http", "left by an earlier event loop")
+    calls = r.load(write_calls(tmp_path, [{"id": "x", "script": SCRIPT}]))
+
+    r.replay(calls[0], 0, "fake", "fake", speed=0)
+
+    assert seen == [None]
+
+
+def test_a_second_replay_of_the_same_index_gets_its_own_family_alert(tmp_path):
+    calls = r.load(write_calls(tmp_path, [{"id": "scam-1", "script": SCRIPT}]))
+
+    first = r.replay(calls[0], 0, "fake", "fake", speed=0)
+    second = r.replay(calls[0], 0, "fake", "fake", speed=0)
+
+    assert [a["kind"] for a in first["familyAlerts"]] == ["alert"]
+    assert [a["kind"] for a in second["familyAlerts"]] == ["alert"]
+
+
+def test_a_row_without_a_split_keeps_it_empty(tmp_path):
+    assert r.load(write_calls(tmp_path, [{"id": "x", "script": SCRIPT}]))[0].split == ""
+
+
+def test_replay_main_refuses_held_out_rows(tmp_path):
+    path = write_calls(tmp_path, [{"id": "x", "script": SCRIPT, "split": "heldout"}])
+    with pytest.raises(SystemExit, match="report"):
+        r.main([str(path), "--out", str(tmp_path)])

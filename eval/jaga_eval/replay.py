@@ -1,14 +1,16 @@
 """Replay harness (#24): recorded calls through seam 1 exactly as live calls go, with real or fake clients.
 
-Usage: python -m jaga_eval.replay <calls.json> [--transcriber muse|fake] [--spark meta|fake] [--speed X]
-                                  [--limit N] [--out eval/reports]
-`calls.json` is a list of {"id", "region"?, "audio"?: {"caller": p, "user"?: p}, "script"?: [[leg, line]]}.
+Usage: python -m jaga_eval.replay <calls.json> [--transcriber muse|fake] [--spark meta|fake|open|off]
+                                  [--speed X] [--limit N] [--out eval/reports]
+`calls.json` is a list of {"id", "split"?, "region"?, "audio"?: {"caller": p, "user"?: p},
+"script"?: [[leg, line]]}.
 Audio paths are relative to the file; it is decoded to 8 kHz mu-law and streamed in 20 ms Twilio chunks at
 `speed` x real time (default 1.0 with Muse, 0 = unpaced with the fake). The fake transcriber hears `script`
 lines instead of audio (cheap runs); Muse needs `audio`. Muse and Spark need META_API_KEY.
 Per call it records every `stage-update`, every family alert and the timings. The full report holds masked
 transcript quotes, so it stays in `eval/reports/replay.local.json` (untracked); only numbers are printed.
-Never print or write transcript text.
+Never print or write transcript text. Held-out rows (`split` heldout) are refused: they only go through
+`jaga_eval.report --final`. A row's `split` stays empty unless the file sets it; the report refuses that.
 """
 
 import argparse
@@ -26,12 +28,14 @@ from unittest import mock
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
-from jaga import asr, spark, stages, telephony, twilio_auth
+from jaga import alerts, asr, spark, stages, telephony, twilio_auth
 from jaga.fakes.push import FakePush
 from jaga.fakes.spark import FakeSpark
 from jaga.fakes.transcribe import FakeTranscriber
 from jaga.fakes.twilio import media_stream
 from jaga.main import app
+from jaga_eval.asr_rescore import score
+from jaga_eval.open_spark import CountingSpark, open_spark
 
 DEFAULT_OUT = Path(__file__).resolve().parents[1] / "reports"
 TOKEN = "eval-auth-token"
@@ -46,6 +50,15 @@ class Call:
     region: str = "my"
     audio: dict[str, Path] = field(default_factory=dict)  # leg -> recording
     script: list[tuple[str, str]] = field(default_factory=list)
+    # Ground truth for the metrics report (#25): label scam|genuine, split dev|heldout, reference = human
+    # transcript file (outside git), seconds = length of a script call, triggerAt = trigger second,
+    # moneyAt = audio second where the caller's first money or credentials line starts (a human label).
+    label: str = ""
+    split: str = ""  # dev|heldout; the report refuses anything else
+    reference: Path | None = None
+    seconds: float | None = None
+    triggerAt: float | None = None
+    moneyAt: float | None = None
 
 
 class RecordingPush(FakePush):
@@ -73,7 +86,21 @@ def load(path) -> list[Call]:
         script = [(leg, line) for leg, line in r.get("script", [])]
         if not audio and not script:
             raise ValueError(f"call {r['id']} has neither audio nor script")
-        calls.append(Call(r["id"], r.get("region", "my"), audio, script))
+        ref = r.get("reference")
+        calls.append(
+            Call(
+                r["id"],
+                r.get("region", "my"),
+                audio,
+                script,
+                r.get("label", ""),
+                r.get("split", ""),
+                path.parent / ref if ref else None,
+                r.get("seconds"),
+                r.get("triggerAt"),
+                r.get("moneyAt"),
+            )
+        )
     return calls
 
 
@@ -117,6 +144,8 @@ def script_plan(sid: str, script, region: str) -> tuple[str, list[tuple[float, s
 def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: float) -> dict:
     """Plays one call through the real app and returns its report (updates, family alerts, timings)."""
     sid = f"CA_replay_{index}"
+    telephony.calls.pop(sid, None)  # the sid repeats across arms: never meet an earlier arm's ended Call
+    alerts.sent.pop(sid, None)
     if transcriber == "muse":
         if not call.audio:
             raise ValueError(f"call {call.id}: the Muse transcriber needs audio")
@@ -132,19 +161,27 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
     headers = {"X-Twilio-Signature": twilio_auth.signature("wss://testserver/twilio/media", {}, TOKEN)}
     env = {"TWILIO_AUTH_TOKEN": TOKEN, "JAGA_FAMILY_TOKENS": "eval-co-pilot"}
     env["JAGA_USE_FAKES"] = "false"  # the clients below are chosen here, one by one
-    patches = []
+    patches = [mock.patch.object(spark, "_http", None)]  # a client is bound to one event loop: one per replay
     if transcriber == "fake":
         patches.append(mock.patch.object(asr, "transcriber", lambda pack: FakeTranscriber()))
-    if spark_client == "fake":
-        patches.append(mock.patch.object(spark, "spark", lambda pack: FakeSpark(pack)))
+    counts = {
+        "failed": 0,
+        "timedOut": 0,
+    }  # what the pipeline swallows, counted by a wrapper
+    make = {"fake": FakeSpark, "off": FakeSpark, "open": open_spark, "meta": spark.spark}[spark_client]
+    patches.append(mock.patch.object(spark, "spark", lambda pack: CountingSpark(make(pack), counts, pack)))
+    if spark_client == "off":  # rules only: the cap is 0, so telephony never asks Spark
+        patches.append(mock.patch.object(spark, "MAX_CALLS", 0))
     updates, failure = [], []
     heard: dict[str, list[int]] = {}  # leg -> [lines, characters]: how much was transcribed, never what
+    text: list[str] = []  # in memory only, to score against the reference; never written
     real_hear = telephony.hear
 
     async def counting_hear(call, leg, line):
         seen = heard.setdefault(leg, [0, 0])
         seen[0] += 1
         seen[1] += len(line)
+        text.append(line)
         await real_hear(call, leg, line)
 
     patches.append(mock.patch.object(telephony, "hear", counting_hear))
@@ -152,7 +189,8 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
     def follow(stream):
         try:
             while True:
-                updates.append((clock(), stream.receive_json()))
+                msg = stream.receive_json()  # stamp after the wait: when it arrived
+                updates.append((clock(), msg))
         except WebSocketDisconnect:
             pass
         except Exception as e:  # noqa: BLE001 - type only, the message could quote a transcript
@@ -182,7 +220,16 @@ def replay(call: Call, index: int, transcriber: str, spark_client: str, speed: f
                 reader.join()
     if failure:
         raise RuntimeError(f"call {call.id}: the stage stream failed ({failure[0]})")
-    return report(call, updates, push, streamed, clock(), media[-1][0] if media else 0.0, heard)
+    live = telephony.calls[sid]
+    rep = report(
+        call, updates, push, streamed, clock(), call.seconds or (media[-1][0] if media else 0.0), heard
+    )
+    rep["speed"] = speed
+    rep["spark"] = {"asked": live.sparked, **counts}
+    if call.reference:
+        s = score(call.reference.read_text(encoding="utf-8"), " ".join(text))
+        rep["asr"] = {"words": s.words, "chars": s.chars}  # edit counts only
+    return rep
 
 
 def report(call, updates, push, streamed, wall, audio_seconds, heard) -> dict:
@@ -230,15 +277,19 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("calls_json")
     ap.add_argument("--transcriber", choices=["muse", "fake"], default="fake")
-    ap.add_argument("--spark", choices=["meta", "fake"], default="fake")
+    ap.add_argument("--spark", choices=["meta", "fake", "open", "off"], default="fake")
     ap.add_argument("--speed", type=float, help="x real time; 0 = unpaced (default: 1 with Muse, else 0)")
     ap.add_argument("--limit", type=int, help="only the first N calls")
     ap.add_argument("--out", default=str(DEFAULT_OUT))
     args = ap.parse_args(argv)
+    calls = load(args.calls_json)[: args.limit]
+    if any(c.split == "heldout" for c in calls):
+        raise SystemExit(
+            "held-out rows: run them once through `python -m jaga_eval.report --split heldout --final`"
+        )
     if (args.transcriber == "muse" or args.spark == "meta") and not os.environ.get("META_API_KEY"):
         raise SystemExit("META_API_KEY is not set")
     speed = args.speed if args.speed is not None else (1.0 if args.transcriber == "muse" else 0.0)
-    calls = load(args.calls_json)[: args.limit]
     reports = []
     for i, call in enumerate(calls):
         reports.append(replay(call, i, args.transcriber, args.spark, speed))
