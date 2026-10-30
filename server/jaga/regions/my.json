@@ -50,7 +50,7 @@
   "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC", "OTP"],
   "phrases": {
     "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked", "非法包裹", "涉嫌包裹", "你的名字涉及", "您的姓名涉及", "syarikat kurier", "parcel atas nama", "pihak kastam", "ada tunggakan", "tunggakan cukai", "dari bank negara", "from bank negara", "whatsapp investment", "investment group", "parcel under", "unpaid tax", "under your name", "atas nama you", "海关扣留", "海關扣留", "包裹被扣", "包裹涉及", "投资群", "投資群"],
-    "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "police officer", "我是警察", "警官", "国家银行官员", "國家銀行官員", "检察官", "檢察官"],
+    "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "police officer", "我是警察", "警官", "国家银行官员", "國家銀行官員", "检察官", "檢察官", "unit jenayah", "jenayah komersial", "commercial crime", "pegawai penyiasat", "investigating officer", "pegawai polis", "bukit aman", "dari pdrm", "from pdrm", "dari mahkamah", "from the court", "pendakwa raya", "商业罪案", "商業罪案", "公安局", "刑事调查", "刑事調查"],
     "fear": ["waran tangkap", "arrest warrant", "akan ditangkap", "dibekukan", "money laundering", "wang haram", "逮捕令", "拘捕令", "通缉令", "通緝令", "涉嫌洗钱", "涉嫌洗錢", "涉案账户将被冻结", "涉案帳戶將被凍結"],
     "isolation": ["jangan letak telefon", "do not hang up", "rahsia siasatan", "keep this confidential", "不要挂电话", "不要掛電話", "保密调查", "保密調查", "不要告诉任何人", "不要告訴任何人"],
     "handoff": ["sambungkan anda kepada polis", "transfer you to the police", "video call", "skype", "转接给警方", "轉接給警方", "视频通话调查", "視頻通話調查"],

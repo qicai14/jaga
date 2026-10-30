@@ -99,3 +99,18 @@ def stage_after(*lines):
 )
 def test_pretext_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
     assert stage_after(line) == ("pretext", "medium")
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Selamat petang, saya dari unit jenayah komersial, ada kes atas nama puan.",
+        "Saya pegawai penyiasat dari Bukit Aman, kita bercakap sekejap ya.",
+        "This is a police officer from the investigating team.",
+        "Hello, I'm calling from PDRM regarding your file.",
+        "我这边是商业罪案调查部门，想跟您核实一件事。",
+        "這裡是公安局，您的案件已經立案。",
+    ],
+)
+def test_authority_phrases_in_malay_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("authority", "medium")
