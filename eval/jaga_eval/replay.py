@@ -2,13 +2,15 @@
 
 Usage: python -m jaga_eval.replay <calls.json> [--transcriber muse|fake] [--spark meta|fake|open|off]
                                   [--speed X] [--limit N] [--out eval/reports]
-`calls.json` is a list of {"id", "region"?, "audio"?: {"caller": p, "user"?: p}, "script"?: [[leg, line]]}.
+`calls.json` is a list of {"id", "split"?, "region"?, "audio"?: {"caller": p, "user"?: p},
+"script"?: [[leg, line]]}.
 Audio paths are relative to the file; it is decoded to 8 kHz mu-law and streamed in 20 ms Twilio chunks at
 `speed` x real time (default 1.0 with Muse, 0 = unpaced with the fake). The fake transcriber hears `script`
 lines instead of audio (cheap runs); Muse needs `audio`. Muse and Spark need META_API_KEY.
 Per call it records every `stage-update`, every family alert and the timings. The full report holds masked
 transcript quotes, so it stays in `eval/reports/replay.local.json` (untracked); only numbers are printed.
-Never print or write transcript text.
+Never print or write transcript text. Held-out rows (`split` heldout) are refused: they only go through
+`jaga_eval.report --final`. A row's `split` stays empty unless the file sets it; the report refuses that.
 """
 
 import argparse
