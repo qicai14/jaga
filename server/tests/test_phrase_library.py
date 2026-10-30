@@ -4,7 +4,7 @@ from datetime import date
 
 import pytest
 
-from jaga.stages import RANK, load_pack, official_contact, phrase
+from jaga.stages import RANK, StageTracker, load_pack, official_contact, phrase
 
 STAGES = [s for s in RANK if s != "none"]
 LANGS = ["ms", "en", "zh"]
@@ -75,3 +75,27 @@ def test_unknown_agency_or_region_fails_loudly():
         official_contact("my", "ccid")
     with pytest.raises(ValueError):
         official_contact("xx", "nsrc")
+
+
+def stage_after(*lines):
+    tracker = StageTracker(load_pack("my"))
+    for line in lines:
+        tracker.hear("caller", line)
+    return tracker.stage, tracker.risk
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Hello encik, saya dari syarikat kurier, ada satu bungkusan untuk encik.",
+        "Eh, parcel atas nama you tersangkut kat pejabat, boleh cakap sekejap?",
+        "Puan, ada tunggakan cukai yang belum dijelaskan.",
+        "I'm calling from Bank Negara about your account.",
+        "You were added to a WhatsApp investment group last week.",
+        "There is a parcel under your name and it has unpaid tax.",
+        "您好，您的包裹被海关扣留了。",
+        "你好，你的包裹被海關扣留了。",
+    ],
+)
+def test_pretext_phrases_in_malay_manglish_english_and_mandarin_raise_a_caution(line):
+    assert stage_after(line) == ("pretext", "medium")
