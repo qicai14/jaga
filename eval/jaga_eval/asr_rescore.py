@@ -20,6 +20,11 @@ Clips, references and the keyword sheet live outside git in <clip_dir>; never co
       a Mandarin clip dir is its own run: Muse languageBias is just that language, and a reference with
       mostly Chinese characters is scored by CER only (no word spaces, so no WER)
 
+  uv run python -m jaga_eval.asr_rescore <clip_dir>
+      --keywords "LHDN,PDRM,Bank Negara,akaun selamat,waran tangkap,TAC"
+      replaces the Muse keyword bias for this run only ("" = none), e.g. 997 left out; the keyword table
+      still counts every pack term. --bias/--keywords write muse.<hash>.local.json, never the default cache.
+
 The report also checks the real stage pack (phrases and hard triggers; both speakers are in one mono
 text, same on reference and Muse) on each reference and on the Muse text: which stages fire on each,
 stage recall, and extra stages per call. Clips without a reference show their stages as-is, so a
@@ -32,6 +37,7 @@ round-trip first, as a phone line would. Needs META_API_KEY in the environment.
 
 import argparse
 import csv
+import hashlib
 import io
 import json
 import os
@@ -295,13 +301,13 @@ def phone_wav(path) -> bytes:
         return out.read_bytes()
 
 
-def muse_post(bias=None):
+def muse_post(bias=None, keywords=None):
     key = os.environ.get("META_API_KEY", "")
     if not key:
         raise SystemExit("META_API_KEY is not set")
     base = os.environ.get("META_API_BASE_URL", "https://api.meta.ai/v1").rstrip("/")
     client = httpx.Client(base_url=base, headers={"Authorization": f"Bearer {key}"}, timeout=300)
-    return lambda wav, name: " ".join(t for _, t in tafd.batch_transcribe(wav, name, client, bias))
+    return lambda wav, name: " ".join(t for _, t in tafd.batch_transcribe(wav, name, client, bias, keywords))
 
 
 def clips_in(d: Path) -> list[Path]:
@@ -333,14 +339,20 @@ def _wer(s: Score) -> str:
     return f"{s.wer:.3f}" if s.words[1] else "n/a"
 
 
-def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print, bias=None):
+def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print, bias=None, keywords=None):
     d = Path(d)
     cache_path = d / "muse.local.json"
+    if (
+        bias is not None or keywords is not None
+    ):  # own cache, so the default run's transcripts stay as they are
+        tag = hashlib.sha256(json.dumps([bias, keywords]).encode()).hexdigest()[:8]
+        cache_path = d / f"muse.{tag}.local.json"
+    out(f"Muse cache: {cache_path.name}")
     cache = json.loads(cache_path.read_text(encoding="utf-8")) if cache_path.exists() else {}
     for clip in clips_in(d):
         if cache.get(clip.name):  # an empty entry is done again
             continue
-        transcribe = transcribe or muse_post(bias)
+        transcribe = transcribe or muse_post(bias, keywords)
         cache[clip.name] = merge([transcribe(c, clip.name) for c in split(phone(clip))])
         tmp = cache_path.with_name(cache_path.name + ".tmp")
         tmp.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
@@ -407,11 +419,15 @@ def main(argv=None):
     ap.add_argument("clip_dir")
     ap.add_argument("--templates", nargs="+", metavar="CLIP", help="write empty refs + keywords.csv, no Muse")
     ap.add_argument("--bias", help='Muse languageBias for this run, e.g. "Mandarin Chinese"')
+    ap.add_argument(
+        "--keywords", help="comma-separated Muse keywords for this run, '' for none (term table unchanged)"
+    )
     args = ap.parse_args(argv)
     if args.templates:
         templates(Path(args.clip_dir), args.templates)
     else:
-        run(args.clip_dir, bias=[args.bias] if args.bias else None)
+        kw = None if args.keywords is None else [k.strip() for k in args.keywords.split(",") if k.strip()]
+        run(args.clip_dir, bias=[args.bias] if args.bias else None, keywords=kw)
 
 
 if __name__ == "__main__":

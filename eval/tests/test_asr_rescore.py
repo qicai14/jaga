@@ -201,3 +201,39 @@ def test_stages_fired_ignores_punctuation_and_order():
 def test_cjk_needs_a_mostly_chinese_reference():
     s = r.score("Encik Lim 林 minta kod tac anda sekarang juga", "Encik Lim minta kod tac anda")
     assert s.words[1] > 0
+
+
+def test_keywords_override_reaches_the_muse_request():
+    import httpx
+
+    from jaga_eval import teleantifraud as tafd
+
+    sent = []
+
+    def handler(req):
+        sent.append(req.read())
+        return httpx.Response(200, json={"turns": [{"transcript": "x"}]})
+
+    client = httpx.Client(base_url="http://t", transport=httpx.MockTransport(handler))
+    tafd.batch_transcribe(b"w", "a.wav", client, keywords=["LHDN"])
+    tafd.batch_transcribe(b"w", "a.wav", client, keywords=[])
+    tafd.batch_transcribe(b"w", "a.wav", client)
+    assert b'"keywords": ["LHDN"]' in sent[0]
+    assert b'"keywords": []' in sent[1]  # empty means none, not the pack's
+    assert b"997" in sent[2]  # default still the pack's
+
+
+def test_override_uses_its_own_cache_file(tmp_path, capsys):
+    (tmp_path / "call_01.mp3").write_bytes(b"x")
+    (tmp_path / "muse.local.json").write_text(json.dumps({"call_01.mp3": "old"}))
+    args = dict(phone=lambda p: b"w", split=lambda b: [b])
+    r.run(tmp_path, transcribe=lambda w, n: "new", keywords=[], **args)
+    out = capsys.readouterr().out
+    caches = [p.name for p in tmp_path.glob("muse.*.local.json")]
+    assert len(caches) == 1 and len(caches[0].split(".")[1]) == 8 and caches[0] in out
+    assert json.loads((tmp_path / caches[0]).read_text())["call_01.mp3"] == "new"
+    assert json.loads((tmp_path / "muse.local.json").read_text())["call_01.mp3"] == "old"  # untouched
+    r.run(tmp_path, transcribe=lambda w, n: "x", keywords=["LHDN"], **args)
+    assert len(list(tmp_path.glob("muse.*.local.json"))) == 2  # different settings, different file
+    r.run(tmp_path, transcribe=lambda w, n: "x", **args)
+    assert "muse.local.json" in capsys.readouterr().out
