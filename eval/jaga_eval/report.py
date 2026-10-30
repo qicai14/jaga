@@ -1,12 +1,16 @@
 """Metrics report and ablation (#25): the plan.md targets, each with n and a bootstrap 95% CI.
 
 Usage: python -m jaga_eval.report <calls.json> [--transcriber muse|fake] [--speed X] [--arms ...]
-                                  [--spark-usd P] [--asr-usd-per-min P] [--split dev|heldout --final]
+                                  [--spark-usd P] [--open-usd P] [--asr-usd-per-min P]
+                                  [--split dev|heldout --final]
 Spark-only calls Spark on every caller line with a fixed placeholder stage (pretext, risk low); its latency is
 one Spark call, not comparable with the pipeline arms. ASR is scored once (first arm, with Muse only).
 Arms: rules (Spark off), rules+spark, rules+open (Muse Spark Open on Baseten), spark-only (the Spark client
 judges every caller line of a `script`, no rules). Each call in calls.json needs `label` (scam|genuine) and
-`split`; `triggerAt`, `reference`, `seconds` are optional (see replay.Call). Prices are inputs, never guessed.
+`split` (dev|heldout; any other value is refused, never dropped). A script call needs `seconds` (its length)
+when the script is played (spark-only, fake transcriber); `triggerAt`, `reference` are optional (replay.Call).
+Prices are inputs, never guessed: --spark-usd prices a Muse Spark call, --open-usd a Muse Spark Open call
+(rules+open only; that arm's cost is n/a without it).
 
 The held-out split is for one final run: it needs --final, and the report is numbers only. Never read its
 failures to change rules, prompts or thresholds (eval/AGENTS.md). Misses are reported as misses.
@@ -28,7 +32,6 @@ from jaga_eval.asr_rescore import Score, boot_pooled, pooled
 
 ARMS = ["rules", "rules+spark", "rules+open", "spark-only"]
 SPARK_FOR_ARM = {"rules": "off", "rules+spark": "meta", "rules+open": "open"}
-LATE_BEFORE_TRIGGER = 0.0  # a Warning before the labelled trigger line is clamped to 0 s and counted
 MVP = {"caught": 0.90, "false_per_10h": 1.0, "p95_s": 2.0}
 STRETCH = {"caught": 0.95, "false_per_10h": 0.0, "p95_s": 1.5}
 
@@ -76,6 +79,7 @@ def metrics(reps: list[dict], labels: dict[str, str], spark_usd=None, asr_usd_pe
     raw = [r["ttw"] for r in scam if r.get("ttw") is not None and caught(r)]
     ttw = [max(0.0, t) for t in raw]  # a Warning before the trigger line is 0 s, never a negative latency
     asr = [Score(tuple(r["asr"]["words"]), tuple(r["asr"]["chars"])) for r in reps if "asr" in r]
+    words = sum(a.words[1] for a in asr)
     asked = sum(r["spark"]["asked"] for r in reps)
     minutes = sum(r["audioSeconds"] for r in reps) / 60
     priced = spark_usd is not None and asr_usd_per_min is not None and reps
@@ -109,8 +113,8 @@ def metrics(reps: list[dict], labels: dict[str, str], spark_usd=None, asr_usd_pe
         "spark_timed_out": sum(r["spark"]["timedOut"] for r in reps),
         "audio_minutes": minutes,
         "asr_n": len(asr),
-        "wer": pooled(asr, "words") if asr else None,
-        "wer_ci": boot_pooled(asr, "words") if asr else None,
+        "wer": pooled(asr, "words") if words else None,  # a set with no reference words has no WER
+        "wer_ci": boot_pooled(asr, "words") if words else None,
         "cer": pooled(asr, "chars") if asr else None,
         "cer_ci": boot_pooled(asr, "chars") if asr else None,
     }
@@ -124,13 +128,13 @@ async def _spark_only(call, client) -> dict:
     for leg, line in call.script:
         if leg != "caller":
             continue
-        said.append(mask(line))
+        said.append(line)
         asked += 1
         t = time.monotonic()
         try:
             async with asyncio.timeout(spark_module.TIMEOUT):
                 v = spark_module.Verdict.model_validate(
-                    await client.assess("pretext", "low", " ".join(said[-5:]))
+                    await client.assess("pretext", "low", mask(" ".join(said[-5:])))
                 )
         except Exception as e:  # noqa: BLE001 - counted by type, never quoted
             failed += 1
@@ -157,7 +161,11 @@ def run_arm(calls, arm, transcriber, speed) -> list[dict]:
             raise ValueError("spark-only needs script calls (no audio transcription in this arm)")
         os.environ.setdefault("JAGA_USE_FAKES", "false")
         client = spark_module.spark(stages.load_pack("my"))
-        return [asyncio.run(_spark_only(c, client)) for c in calls]
+
+        async def every_call():  # one event loop: the Spark client's connection pool belongs to it
+            return [await _spark_only(c, client) for c in calls]
+
+        return asyncio.run(every_call())
     reps = [replay.replay(c, i, transcriber, SPARK_FOR_ARM[arm], speed) for i, c in enumerate(calls)]
     for c, r in zip(calls, reps, strict=True):
         wall = r["firstWarningAt"]
@@ -195,6 +203,10 @@ def markdown(results: dict[str, dict], split: str, source: str) -> str:
         "Misses are reported as misses; this split is never tuned on.",
         "Time to Warning covers caught scams that have a `triggerAt` only; a Warning before the trigger",
         "line is clamped to 0 s and counted. With zero false alarms the CI upper bound is 3 / hours.",
+        "The rules arm has Spark off and behaves as if Spark failed: hard triggers warn, and a call at",
+        "`money` or `credentials` gets the fail-safe Warning.",
+        "Caught is graded against the first `money` or `credentials` stage the arm itself detected, not a",
+        "labelled line; a Warning on a scam where none was detected counts as caught.",
         "Spark-only asks about every caller line with a fixed placeholder (stage pretext, risk low), so its",
         "latency is one Spark call, not comparable with the pipeline arms. Transcription is scored once,",
         "in the first arm (every arm hears the same audio); rows are absent without `--transcriber muse`.",
@@ -207,7 +219,14 @@ def markdown(results: dict[str, dict], split: str, source: str) -> str:
             ("Scams caught before `money`", m["scam_n"], m["caught"], m["caught_ci"], True, "caught"),
             (fa, m["genuine_n"], m["false_per_10h"], m["false_ci"], False, "false_per_10h"),
             ("Time to Warning p50 (s)", m["ttw_n"], m["p50"], m["p50_ci"], False, None),
-            ("Time to Warning p95 (s)", m["ttw_n"], m["p95"], m["p95_ci"], False, "p95_s"),
+            (
+                "Time to Warning p95 (s)",
+                m["ttw_n"],
+                m["p95"],
+                m["p95_ci"],
+                False,
+                None if arm == "spark-only" else "p95_s",
+            ),
             ("Cost per call (USD, given prices)", n, m["cost_per_call"], m["cost_ci"], False, None),
             ("Transcription WER", m["asr_n"], m["wer"], m["wer_ci"], False, None),
             ("Transcription CER", m["asr_n"], m["cer"], m["cer_ci"], False, None),
@@ -237,6 +256,12 @@ def check_arms(calls, arms, transcriber):
     for arm in arms:
         if arm == "spark-only" and any(not c.script for c in calls):
             raise SystemExit("spark-only needs a script on every call")
+        if (arm == "spark-only" or transcriber == "fake") and (
+            bad := [c.id for c in calls if c.seconds is None]
+        ):
+            raise SystemExit(
+                f"script calls need `seconds` (their length), or hours and cost are wrong: {bad}"
+            )
         for c in calls if arm != "spark-only" else []:
             if not (c.audio if transcriber == "muse" else c.script):
                 raise SystemExit(
@@ -258,13 +283,17 @@ def main(argv=None):
     ap.add_argument("--split", choices=["dev", "heldout"], default="dev")
     ap.add_argument("--final", action="store_true", help="required for the held-out split: one final run")
     ap.add_argument("--spark-usd", type=float, help="price of one Spark call")
+    ap.add_argument("--open-usd", type=float, help="price of one Muse Spark Open call (rules+open only)")
     ap.add_argument("--asr-usd-per-min", type=float, help="price of one audio minute transcribed")
     ap.add_argument("--out", default=str(replay.DEFAULT_OUT))
     args = ap.parse_args(argv)
     if args.split == "heldout" and not args.final:
         raise SystemExit("the held-out split is for one final run: pass --final, and never tune on it")
     speed = args.speed if args.speed is not None else (1.0 if args.transcriber == "muse" else 0.0)
-    calls = [c for c in replay.load(args.calls_json) if c.split == args.split]
+    rows = replay.load(args.calls_json)
+    if bad := [c.id for c in rows if c.split not in ("dev", "heldout")]:
+        raise SystemExit(f"calls without split dev|heldout: {bad}")
+    calls = [c for c in rows if c.split == args.split]
     if bad := [c.id for c in calls if c.label not in ("scam", "genuine")]:
         raise SystemExit(f"calls without label scam|genuine: {bad}")
     if not calls:
@@ -283,7 +312,9 @@ def main(argv=None):
         ):  # scored once: the first arm; fake transcripts are the script itself
             for r in reps:
                 r.pop("asr", None)
-        results[arm] = metrics(reps, labels, args.spark_usd, args.asr_usd_per_min)
+        results[arm] = metrics(
+            reps, labels, args.open_usd if arm == "rules+open" else args.spark_usd, args.asr_usd_per_min
+        )
     out.mkdir(parents=True, exist_ok=True)
     text = markdown(results, args.split, Path(args.calls_json).name)
     target.write_text(text, encoding="utf-8")

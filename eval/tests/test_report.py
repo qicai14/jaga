@@ -244,3 +244,93 @@ def test_heldout_report_is_never_overwritten(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="never overwrite"):
         report.main(args)
     assert (tmp_path / "metrics-heldout.md").read_text(encoding="utf-8") == "first run"
+
+
+class Recording:
+    """A Spark client that notes the loop and snippet of each ask."""
+
+    def __init__(self):
+        self.loops, self.snippets = [], []
+
+    async def assess(self, stage, risk, snippet):
+        self.loops.append(asyncio.get_running_loop())
+        self.snippets.append(snippet)
+        return {"stage": "pretext", "risk": "low", "counterMove": "x"}
+
+
+def spark_only(monkeypatch, calls):
+    client = Recording()
+    monkeypatch.setattr(report.spark_module, "spark", lambda pack: client)
+    report.run_arm(calls, "spark-only", "fake", 0)
+    return client
+
+
+def test_spark_only_runs_every_call_in_one_event_loop(monkeypatch):
+    calls = [replay.Call(f"c{i}", script=[("caller", "Helo")], seconds=10) for i in range(2)]
+    assert len(set(spark_only(monkeypatch, calls).loops)) == 1
+
+
+def test_spark_only_masks_a_number_split_across_lines(monkeypatch):
+    calls = [replay.Call("c", script=[("caller", "kod 123"), ("caller", "456 ya")], seconds=10)]
+    assert spark_only(monkeypatch, calls).snippets[-1] == "kod [number] ya"
+
+
+def test_a_row_with_a_bad_split_is_refused_not_dropped(tmp_path):
+    path = calls_file(tmp_path)
+    recs = json.loads(path.read_text(encoding="utf-8"))
+    recs.append({"id": "t1", "label": "scam", "split": "heldoutt", "script": SCAM, "seconds": 30})
+    path.write_text(json.dumps(recs), encoding="utf-8")
+    with pytest.raises(SystemExit, match="split"):
+        report.main([str(path), "--out", str(tmp_path)])
+
+
+def test_spark_only_p95_has_no_target_verdict():
+    m = report.metrics([rep("s", [up("fear", "high")], ttw=1.0, seconds=60, warned=1.0)], {"s": "scam"})
+    text = report.markdown({"rules": m, "spark-only": m}, "dev", "c.json")
+    p95 = [ln for ln in text.split("## spark-only")[1:] for ln in ln.splitlines() if "p95" in ln]
+    assert p95 and "met" not in p95[0] and "missed" not in p95[0]
+    assert "met MVP" in next(ln for ln in text.split("## spark-only")[0].splitlines() if "p95" in ln)
+
+
+def test_script_calls_need_seconds_when_played_from_the_script(tmp_path, monkeypatch):
+    monkeypatch.setenv("JAGA_USE_FAKES", "true")
+    calls = [replay.Call("a", script=[("caller", "x")], label="scam")]
+    for arm, transcriber in [("spark-only", "fake"), ("rules", "fake")]:
+        with pytest.raises(SystemExit, match="seconds"):
+            report.check_arms(calls, [arm], transcriber)
+    calls[0].seconds = 5
+    report.check_arms(calls, ["spark-only", "rules"], "fake")
+
+
+def test_wer_is_not_measured_without_reference_words():
+    reps = [rep("g", [up("none", "low")]) | {"asr": {"words": [0, 0], "chars": [2, 10]}}]
+    m = report.metrics(reps, {"g": "genuine"})
+    assert (m["wer"], m["wer_ci"]) == (None, None) and m["cer"] == pytest.approx(0.2)
+
+
+def test_open_arm_cost_uses_its_own_price(tmp_path, monkeypatch):
+    monkeypatch.setattr(replay, "open_spark", replay.FakeSpark)
+    monkeypatch.setenv("BASETEN_API_KEY", "k")
+    monkeypatch.setenv("BASETEN_BASE_URL", "https://b.test")
+    cost = {}
+    for name, extra in [("without", []), ("with", ["--open-usd", "0.02"])]:
+        args = [
+            str(calls_file(tmp_path)),
+            "--arms",
+            "rules+open",
+            "--spark-usd",
+            "0.5",
+            "--asr-usd-per-min",
+            "0",
+        ]
+        report.main([*args, *extra, "--out", str(tmp_path / name)])
+        text = (tmp_path / name / "metrics-dev.md").read_text(encoding="utf-8")
+        cost[name] = next(ln for ln in text.splitlines() if ln.startswith("| Cost per call"))
+    assert "n/a" in cost["without"].split("|")[3]
+    assert "n/a" not in cost["with"].split("|")[3] and "0.5" not in cost["with"].split("|")[3]
+
+
+def test_the_report_states_how_caught_is_graded(tmp_path):
+    m = report.metrics([rep("s", [up("fear", "high")], seconds=60, warned=1.0)], {"s": "scam"})
+    text = " ".join(report.markdown({"rules": m}, "dev", "c.json").split())
+    assert "behaves as if Spark failed" in text and "not a labelled line" in text
