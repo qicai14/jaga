@@ -35,6 +35,8 @@ class OpenSpark:
         except _Captured as c:
             system, user = (m["content"][0]["text"] for m in c.body["input"])
             schema = c.body["text"]["format"]["schema"]  # the prompt names the stages only through it
+        # Baseten accepts json_schema here but does not enforce it, so the stages also go in the prompt.
+        system += f" The allowed stages are {schema['properties']['stage']['enum']}."
         body = {
             "model": MODEL,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],

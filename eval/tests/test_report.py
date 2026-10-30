@@ -75,6 +75,7 @@ def test_open_spark_speaks_chat_completions_with_the_servers_prompt():
     assert seen["url"] == "https://baseten.test/v1/chat/completions"
     assert seen["body"]["model"] == "meta-models/muse-spark-open-1026"
     assert [m["role"] for m in seen["body"]["messages"]] == ["system", "user"]
+    assert "'money'" in seen["body"]["messages"][0]["content"]  # the schema is not enforced on this model
     assert seen["body"]["messages"][1]["content"] == "snippet"
     fmt = seen["body"]["response_format"]
     assert fmt["type"] == "json_schema" and fmt["json_schema"]["name"] == "Verdict"
