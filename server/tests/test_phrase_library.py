@@ -169,8 +169,8 @@ def test_money_phrases_in_malay_manglish_and_english_raise_a_caution(line):
     "line",
     [
         "Cepat lah, baca kod tu kat saya sekarang.",
-        "Okay, read me the six digits you just got.",
-        "Please tell me the TAC that came by SMS.",
+        "Quickly give me the TAC that just arrived on your phone.",
+        "Puan, bagi kod itu pada saya sekarang ya.",
     ],
 )
 def test_credentials_phrases_in_malay_and_english_raise_a_caution(line):
@@ -194,7 +194,21 @@ def test_credentials_phrases_in_malay_and_english_raise_a_caution(line):
         "The booking is under your name, and the hotel can transfer all the luggage to your room.",
         "Saya dari bank, panggilan ini direkodkan. Akaun anda di bawah Bank Negara Malaysia dilindungi PIDM.",
         "Encik, pegawai polis trafik yang tahan encik tadi tinggalkan nombor telefon dia untuk saman.",
+        "银行客服您好，请问您的信用卡账单需要寄到哪个地址？",
+        "妈，今晚我回家吃饭，你不用煮太多。",
+        "你好，你的快递已经放在楼下的柜子里了。",
+        "我们的群是家长投资理财讲座群，下周开课。",
+        "A reminder from the bank: if anyone says read me the code on a call, hang up. We never ask.",
+        "Sorry, can you read it to me, the invoice reference number? I can't see the screen.",
+        "Kami buat audit stok kedai hujung bulan, barang dikira untuk audit sementara sebelum stor ditutup.",
+        "Jangan putus asa ya, kau mesti boleh lulus peperiksaan tu.",
+        "Jangan tutup tingkap, hujan belum reda lagi.",
+        "Kod pintu pagar dah ditukar, nanti saya bagi kod baru pada awak.",
+        "Kalau tak settle kerja ni sebelum Jumaat, bos mesti marah.",
+        "Staf baru tu mula Isnin, dia akan guide awak minggu pertama.",
+        "The plumber will come to your house tomorrow morning.",
+        "Everyone is invited to the kenduri, even family from Johor.",
     ],
 )
-def test_ordinary_calls_in_malay_english_and_mandarin_raise_nothing(line):
+def test_ordinary_calls_raise_nothing(line):
     assert stage_after(line) == ("none", "low")
