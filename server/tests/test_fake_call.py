@@ -228,6 +228,7 @@ def test_region_comes_from_the_call_or_the_default(client, monkeypatch, tmp_path
             "command": "c",
             "counterMove": "m",
             "hardTriggers": {},
+            "negation": {"before": "x", "after": "x"},
             "userDisclosure": {},
             "digitWords": {"nol": 0},
             "codeAsk": "x",
@@ -1107,3 +1108,47 @@ def test_negated_credential_warnings_and_routine_calls_in_each_script_stay_at_no
 def test_bank_notices_naming_a_safe_account_are_at_most_a_caution_before_spark(line):
     tracker = stages.StageTracker(stages.load_pack("my"))
     assert (tracker.hear("caller", line) or {})["risk"] != "high"
+
+
+@pytest.mark.parametrize(
+    "lines",
+    [
+        ["不要 挂 电话"],  # a transcriber may space out CJK characters
+        ["不要，挂电话"],  # or punctuate inside a phrase
+        ["不要掛", "電話"],  # or split it across lines
+        ["唔好　收線"],  # full-width space
+    ],
+)
+def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):
+    tracker = stages.StageTracker(stages.load_pack("my"))
+    updates = [tracker.hear("caller", line) for line in lines]
+
+    assert [u for u in updates if u][-1]["stage"] == "isolation"
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Jangan beritahu sesiapa kod TAC anda, bank tidak akan meminta.",
+        "Never share your TAC code with anyone, even bank staff.",
+        "Jangan beritahu sesiapa nombor TAC anda.",
+        "We will never ask you to give us your safe account details.",
+    ],
+)
+def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
+    assert stages.StageTracker(stages.load_pack("my")).hear("caller", line) is None
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "Jangan beritahu sesiapa, pindahkan ke akaun selamat.",
+        "Don't tell anyone about this call.",
+        "Tell me the TAC code now.",
+        "Pindahkan wang ke akaun selamat sekarang.",
+    ],
+)
+def test_the_scam_versions_of_those_lines_still_raise_a_warning(line):
+    update = stages.StageTracker(stages.load_pack("my")).hear("caller", line)
+
+    assert update["risk"] == "high"

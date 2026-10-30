@@ -66,6 +66,10 @@
     "jangan beritahu sesiapa": "isolation",
     "don't tell anyone": "isolation"
   },
+  "negation": {
+    "before": "(?:never|do not|don't|jangan|tidak akan|tak akan)\\s+(?:ever\\s+)?(?:share|give|tell|disclose|reveal|ask|kongsi|beri|berikan|beritahu|dedah|minta|meminta)\\b[^.,;!?]{0,30}$",
+    "after": "[^.,;!?]{0,20}\\b(?:tac|otp|pin|password|kod|kata laluan)\\b"
+  },
   "digitWords": {
     "kosong": 0, "sifar": 0, "zero": 0, "oh": 0,
     "satu": 1, "one": 1, "dua": 2, "two": 2, "tiga": 3, "three": 3, "empat": 4, "four": 4,
