@@ -3,6 +3,7 @@
 Usage: python3 -I check_variants.py [dir]   (default: this file's folder)
 Exits 1 on any problem. Does not run the detector.
 """
+
 import csv
 import sys
 from collections import Counter
@@ -11,7 +12,14 @@ from pathlib import Path
 STAGES = {"none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"}
 SPARK_STAGES = STAGES - {"none", "pretext"}
 TYPES = {
-    "paraphrase", "manglish", "injection", "evasion", "near_miss", "ambiguous", "coverage", "output_attack",
+    "paraphrase",
+    "manglish",
+    "injection",
+    "evasion",
+    "near_miss",
+    "ambiguous",
+    "coverage",
+    "output_attack",
 }
 TARGETS = {"rules", "spark", "both"}
 YESNO = {"yes", "no"}
