@@ -2,35 +2,35 @@
   "defaultLanguage": "ms",
   "library": {
     "pretext": {
-      "command": {"id": "my.pretext.command", "text": {"ms": "Jangan beri sebarang butiran. Letak telefon. Do not give any details. Hang up.", "en": "Do not give any details. Hang up.", "zh": "不要透露任何资料。请挂断电话。 Do not give any details. Hang up.", "ta": "எந்த விவரங்களையும் தர வேண்டாம். தொலைபேசியை வையுங்கள். Do not give any details. Hang up."}},
-      "counterMoves": [{"id": "my.pretext.counter.1", "text": {"ms": "Katakan anda akan telefon semula, kemudian hubungi organisasi itu sendiri melalui nombor rasminya.", "en": "Say you will call back, then phone the organisation yourself using its official number.", "zh": "说你会回电，然后用官方号码自己联系该机构。", "ta": "நான் திரும்ப அழைக்கிறேன் என்று சொல்லி, அதிகாரப்பூர்வ எண்ணில் நீங்களே அந்த அமைப்பை அழையுங்கள்."}}]
+      "command": {"id": "my.pretext.command", "text": {"ms": "Jangan beri sebarang butiran. Letak telefon. Do not give any details. Hang up.", "en": "Do not give any details. Hang up.", "zh": "不要透露任何资料。请挂断电话。 Do not give any details. Hang up."}},
+      "counterMoves": [{"id": "my.pretext.counter.1", "text": {"ms": "Katakan anda akan telefon semula, kemudian hubungi organisasi itu sendiri melalui nombor rasminya.", "en": "Say you will call back, then phone the organisation yourself using its official number.", "zh": "说你会回电，然后用官方号码自己联系该机构。"}}]
     },
     "authority": {
-      "command": {"id": "my.authority.command", "text": {"ms": "Letak telefon. Semak sendiri siapa yang menelefon. Hang up. Check who this is yourself.", "en": "Hang up. Check who this is yourself.", "zh": "请挂断电话，自己核实对方身份。 Hang up. Check who this is yourself.", "ta": "தொலைபேசியை வையுங்கள். யார் அழைத்தார் என்பதை நீங்களே சரிபாருங்கள். Hang up. Check who this is yourself."}},
-      "counterMoves": [{"id": "my.authority.counter.1", "text": {"ms": "Polis, LHDN dan Bank Negara tidak meminta wang atau kod melalui telefon. Hubungi 997 untuk menyemak.", "en": "Real police, LHDN and Bank Negara do not ask for money or codes by phone. Call 997 to check.", "zh": "警方、内陆税收局（LHDN）和国家银行不会通过电话索要钱或验证码。请致电 997 核实。", "ta": "காவல்துறை, LHDN, பேங்க் நெகாரா தொலைபேசியில் பணமோ குறியீடோ கேட்காது. சரிபார்க்க 997-ஐ அழையுங்கள்."}}]
+      "command": {"id": "my.authority.command", "text": {"ms": "Letak telefon. Semak sendiri siapa yang menelefon. Hang up. Check who this is yourself.", "en": "Hang up. Check who this is yourself.", "zh": "请挂断电话，自己核实对方身份。 Hang up. Check who this is yourself."}},
+      "counterMoves": [{"id": "my.authority.counter.1", "text": {"ms": "Polis, LHDN dan Bank Negara tidak meminta wang atau kod melalui telefon. Hubungi 997 untuk menyemak.", "en": "Real police, LHDN and Bank Negara do not ask for money or codes by phone. Call 997 to check.", "zh": "警方、内陆税收局（LHDN）和国家银行不会通过电话索要钱或验证码。请致电 997 核实。"}}]
     },
     "fear": {
-      "command": {"id": "my.fear.command", "text": {"ms": "Jangan tergesa-gesa. Letak telefon. Do not be rushed. Hang up.", "en": "Do not be rushed. Hang up.", "zh": "不要慌张，请挂断电话。 Do not be rushed. Hang up.", "ta": "அவசரப்பட வேண்டாம். தொலைபேசியை வையுங்கள். Do not be rushed. Hang up."}},
-      "counterMoves": [{"id": "my.fear.counter.1", "text": {"ms": "Waran tangkap sebenar tidak diselesaikan melalui telefon. Hubungi 997 atau bank anda sendiri.", "en": "A real arrest warrant is never settled by phone. Call 997 or your bank yourself.", "zh": "真正的拘捕令不会通过电话处理。请自己致电 997 或你的银行。", "ta": "உண்மையான கைது ஆணை தொலைபேசியில் தீர்க்கப்படாது. 997 அல்லது உங்கள் வங்கியை நீங்களே அழையுங்கள்."}}]
+      "command": {"id": "my.fear.command", "text": {"ms": "Jangan tergesa-gesa. Letak telefon. Do not be rushed. Hang up.", "en": "Do not be rushed. Hang up.", "zh": "不要慌张，请挂断电话。 Do not be rushed. Hang up."}},
+      "counterMoves": [{"id": "my.fear.counter.1", "text": {"ms": "Waran tangkap sebenar tidak diselesaikan melalui telefon. Hubungi 997 atau bank anda sendiri.", "en": "A real arrest warrant is never settled by phone. Call 997 or your bank yourself.", "zh": "真正的拘捕令不会通过电话处理。请自己致电 997 或你的银行。"}}]
     },
     "isolation": {
-      "command": {"id": "my.isolation.command", "text": {"ms": "Letak telefon sekarang. Bercakap dengan orang yang anda percayai. Hang up now. Talk to someone you trust.", "en": "Hang up now. Talk to someone you trust.", "zh": "请马上挂断电话，和你信任的人谈谈。 Hang up now. Talk to someone you trust.", "ta": "இப்போதே தொலைபேசியை வையுங்கள். நம்பகமான ஒருவரிடம் பேசுங்கள். Hang up now. Talk to someone you trust."}},
-      "counterMoves": [{"id": "my.isolation.counter.1", "text": {"ms": "Beritahu ahli keluarga sekarang. Pegawai sebenar tidak pernah suruh anda rahsiakan.", "en": "Tell a family member now. A real officer never asks you to keep it secret.", "zh": "现在就告诉家人。真正的官员不会要求你保密。", "ta": "இப்போதே குடும்பத்தினரிடம் சொல்லுங்கள். உண்மையான அதிகாரி ரகசியமாக வைக்கச் சொல்ல மாட்டார்."}}]
+      "command": {"id": "my.isolation.command", "text": {"ms": "Letak telefon sekarang. Bercakap dengan orang yang anda percayai. Hang up now. Talk to someone you trust.", "en": "Hang up now. Talk to someone you trust.", "zh": "请马上挂断电话，和你信任的人谈谈。 Hang up now. Talk to someone you trust."}},
+      "counterMoves": [{"id": "my.isolation.counter.1", "text": {"ms": "Beritahu ahli keluarga sekarang. Pegawai sebenar tidak pernah suruh anda rahsiakan.", "en": "Tell a family member now. A real officer never asks you to keep it secret.", "zh": "现在就告诉家人。真正的官员不会要求你保密。"}}]
     },
     "handoff": {
-      "command": {"id": "my.handoff.command", "text": {"ms": "Jangan terima panggilan yang dipindahkan itu. Letak telefon. Do not accept the transferred call. Hang up.", "en": "Do not accept the transferred call. Hang up.", "zh": "不要接听被转接的电话，请挂断电话。 Do not accept the transferred call. Hang up.", "ta": "மாற்றப்பட்ட அழைப்பை ஏற்க வேண்டாம். தொலைபேசியை வையுங்கள். Do not accept the transferred call. Hang up."}},
-      "counterMoves": [{"id": "my.handoff.counter.1", "text": {"ms": "Jangan sertai panggilan video atau buat pindahan wang. Hubungi 997 sendiri.", "en": "Do not join the video call or make a transfer. Call 997 yourself.", "zh": "不要加入视频通话或转账。请自己致电 997。", "ta": "வீடியோ அழைப்பில் சேரவோ பணம் மாற்றவோ வேண்டாம். 997-ஐ நீங்களே அழையுங்கள்."}}]
+      "command": {"id": "my.handoff.command", "text": {"ms": "Jangan terima panggilan yang dipindahkan itu. Letak telefon. Do not accept the transferred call. Hang up.", "en": "Do not accept the transferred call. Hang up.", "zh": "不要接听被转接的电话，请挂断电话。 Do not accept the transferred call. Hang up."}},
+      "counterMoves": [{"id": "my.handoff.counter.1", "text": {"ms": "Jangan sertai panggilan video atau buat pindahan wang. Hubungi 997 sendiri.", "en": "Do not join the video call or make a transfer. Call 997 yourself.", "zh": "不要加入视频通话或转账。请自己致电 997。"}}]
     },
     "money": {
-      "command": {"id": "my.money.command", "text": {"ms": "Jangan pindahkan wang. Letak telefon. Do not transfer any money. Hang up.", "en": "Do not transfer any money. Hang up.", "zh": "不要转账，请挂断电话。 Do not transfer any money. Hang up.", "ta": "பணம் மாற்ற வேண்டாம். தொலைபேசியை வையுங்கள். Do not transfer any money. Hang up."}},
-      "counterMoves": [{"id": "my.money.counter.1", "text": {"ms": "Jangan alihkan sebarang wang. Hubungi 997 atau talian penipuan bank anda sendiri.", "en": "Do not move any money. Call 997 or your bank's fraud line yourself.", "zh": "不要转移任何钱。请自己致电 997 或银行的防诈热线。", "ta": "எந்தப் பணத்தையும் மாற்ற வேண்டாம். 997 அல்லது உங்கள் வங்கியின் மோசடி எண்ணை நீங்களே அழையுங்கள்."}}]
+      "command": {"id": "my.money.command", "text": {"ms": "Jangan pindahkan wang. Letak telefon. Do not transfer any money. Hang up.", "en": "Do not transfer any money. Hang up.", "zh": "不要转账，请挂断电话。 Do not transfer any money. Hang up."}},
+      "counterMoves": [{"id": "my.money.counter.1", "text": {"ms": "Jangan alihkan sebarang wang. Hubungi 997 atau talian penipuan bank anda sendiri.", "en": "Do not move any money. Call 997 or your bank's fraud line yourself.", "zh": "不要转移任何钱。请自己致电 997 或银行的防诈热线。"}}]
     },
     "credentials": {
-      "command": {"id": "my.credentials.command", "text": {"ms": "Jangan sebut sebarang kod atau nombor. Letak telefon. Do not read out any code or number. Hang up.", "en": "Do not read out any code or number. Hang up.", "zh": "不要说出任何验证码或号码，请挂断电话。 Do not read out any code or number. Hang up.", "ta": "எந்தக் குறியீட்டையும் எண்ணையும் சொல்ல வேண்டாம். தொலைபேசியை வையுங்கள். Do not read out any code or number. Hang up."}},
-      "counterMoves": [{"id": "my.credentials.counter.1", "text": {"ms": "Jangan kongsi TAC, OTP atau kata laluan anda. Hubungi talian penipuan bank anda sendiri.", "en": "Never share your TAC, OTP or password. Call your bank's fraud line yourself.", "zh": "切勿透露验证码（TAC、OTP）或密码。请自己致电银行的防诈热线。", "ta": "TAC, OTP அல்லது கடவுச்சொல்லைப் பகிர வேண்டாம். உங்கள் வங்கியின் மோசடி எண்ணை நீங்களே அழையுங்கள்."}}]
+      "command": {"id": "my.credentials.command", "text": {"ms": "Jangan sebut sebarang kod atau nombor. Letak telefon. Do not read out any code or number. Hang up.", "en": "Do not read out any code or number. Hang up.", "zh": "不要说出任何验证码或号码，请挂断电话。 Do not read out any code or number. Hang up."}},
+      "counterMoves": [{"id": "my.credentials.counter.1", "text": {"ms": "Jangan kongsi TAC, OTP atau kata laluan anda. Hubungi talian penipuan bank anda sendiri.", "en": "Never share your TAC, OTP or password. Call your bank's fraud line yourself.", "zh": "切勿透露验证码（TAC、OTP）或密码。请自己致电银行的防诈热线。"}}]
     }
   },
-  "libraryReview": {"ms": "Machine-drafted, needs native-speaker review. Reviewer: unassigned.", "zh": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-28.", "ta": "Machine-drafted, needs native-speaker review. Reviewer: unassigned."},
+  "libraryReview": {"ms": "Machine-drafted, needs native-speaker review. Reviewer: unassigned.", "zh": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-28."},
   "contacts": {
     "nsrc": {"name": "National Scam Response Centre (NSRC)", "number": "997", "purpose": "Real-time help for online financial scams; call within 24 hours so the money can be blocked", "hours": "Daily, 24 hours (some bank and government pages still list 8am-8pm; treat those as stale)", "source": "https://www.malaysia.gov.my/en/categories/safety-and-community/cybersecurity/nsrc-997-hotline", "checked": "2026-10-28"},
     "pdrm": {"name": "PDRM (MERS 999)", "number": "999", "purpose": "Emergencies only, shared with Bomba, hospitals, APM and Maritim", "hours": "Not stated", "source": "https://999.gov.my/mers-999/apa-itu-mers-999/", "checked": "2026-10-28"},
@@ -46,7 +46,7 @@
     "bank_islam": {"name": "Bank Islam Contact Centre", "number": "+603-26 900 900", "purpose": "Contact centre, also the Fraud Hotline", "hours": "24 hours, 7 days a week", "source": "https://www.bankislam.com/need-assistance/contact-us/", "checked": "2026-10-28"},
     "bsn": {"name": "BSN Contact Centre", "number": "03-2613 1900", "purpose": "Report fraud and scam", "hours": "Not stated", "source": "https://www.bsn.com.my/page/new-bsn-official-telephone-numbers", "checked": "2026-10-28"}
   },
-  "languageBias": ["Malay", "English", "Mandarin Chinese", "Tamil"],
+  "languageBias": ["Malay", "English", "Mandarin Chinese"],
   "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC", "OTP"],
   "phrases": {
     "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked"],

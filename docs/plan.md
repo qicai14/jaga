@@ -15,7 +15,8 @@ helping the user verify, pulling in family and slowing the transfer are the rest
   **Caller ID is spoofed to real station numbers.**
 - **Gap:** caller-ID apps (Truecaller, Whoscall) judge *who* is calling, so spoofed numbers beat them. Content-based
   detectors (Hiya, Google Scam Detection) judge *what* is said, but only in English and French, on Pixel, in the US.
-  Nobody does it in Malay, English, Mandarin and Tamil code-switched speech, tuned to the Malaysian script.
+  Nobody does it in Malay, English and Mandarin code-switched speech, tuned to the Malaysian script.
+  (Tamil was dropped by the lead, Oct 2026.)
 
 ## 3. How it works
 1. **Jaga line (ADR 0002).** The protected user's SIM forwards calls to a Twilio number. Twilio forks both legs' audio to
@@ -23,7 +24,7 @@ helping the user verify, pulling in family and slowing the transfer are the rest
    **Setup:** a family co-pilot installs Jaga on the protected user's phone and sets forwarding, the **region pack**
    (Malaysia only in the MVP), command language (the region's default, Malay for Malaysia; English always after it) and the bank's pause token. Up to 3 family co-pilots join with the link code.
 2. **Hear.** Muse Voice Transcribe realtime: Twilio's 8 kHz mu-law audio converted to 16 kHz PCM; `languageBias` Malay,
-   English, Mandarin Chinese, Tamil; `keywords` LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997. Languages and keywords come
+   English, Mandarin Chinese; `keywords` LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997. Languages and keywords come
    from the region pack; these are Malaysia's.
 3. **Track (free).** A deterministic **stage tracker** maps turns to stages: pretext, authority, fear, isolation, handoff,
    money, credentials. No model call on normal calls.
