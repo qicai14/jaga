@@ -520,7 +520,8 @@ def test_real_muse_transcribe_gets_16khz_audio_and_the_region_packs_hints(client
     assert handshake["authorization"] == {"accessToken": "Bearer muse-key"}
     assert (handshake["audioEncoding"], handshake["mode"]) == ("PCM_16KHZ", "ENDPOINTING")
     assert handshake["languageBias"] == ["Malay", "English", "Mandarin Chinese", "Tamil"]
-    assert {"LHDN", "akaun selamat", "TAC", "997"} <= set(handshake["keywords"])
+    assert {"LHDN", "akaun selamat", "TAC"} <= set(handshake["keywords"])
+    assert "997" not in handshake["keywords"]  # #69: biasing toward 997 made Muse write it into normal speech
     assert [len(frame) for frame in sock.sent[1:]] == [640] * 4 + [32000]  # then 1 s of silence at hangup
     assert stages_of(updates)[-1] == ("pretext", "medium")
     assert sock.closed
