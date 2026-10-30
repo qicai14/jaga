@@ -305,7 +305,7 @@ def muse_post(bias=None):
 
 
 def clips_in(d: Path) -> list[Path]:
-    return sorted(p for p in d.glob("call_*") if p.suffix.lower() in AUDIO)
+    return sorted(p for p in d.glob("*") if p.suffix.lower() in AUDIO)
 
 
 def read_said(d: Path) -> dict:
@@ -346,7 +346,7 @@ def run(d, transcribe=None, phone=phone_wav, split=split_wav, out=print, bias=No
         tmp.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, cache_path)  # a crash never leaves half a cache
     muse = {Path(k).stem: v for k, v in cache.items()}
-    refs = {p.name.removesuffix(".ref.txt"): p.read_text(encoding="utf-8") for p in d.glob("call_*.ref.txt")}
+    refs = {p.name.removesuffix(".ref.txt"): p.read_text(encoding="utf-8") for p in d.glob("*.ref.txt")}
     refs = {k: v for k, v in refs.items() if v.strip()}
     whisper = {
         k: (d / f"{k}.whisper.txt").read_text(encoding="utf-8")
