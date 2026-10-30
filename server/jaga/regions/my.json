@@ -47,7 +47,7 @@
     "bsn": {"name": "BSN Contact Centre", "number": "03-2613 1900", "purpose": "Report fraud and scam", "hours": "Not stated", "source": "https://www.bsn.com.my/page/new-bsn-official-telephone-numbers", "checked": "2026-10-28"}
   },
   "languageBias": ["Malay", "English", "Mandarin Chinese", "Tamil"],
-  "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC"],
+  "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC", "OTP"],
   "phrases": {
     "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked"],
     "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "police officer"],
