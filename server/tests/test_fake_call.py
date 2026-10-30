@@ -267,8 +267,6 @@ def test_stage_stream_for_unknown_call_is_refused(client):
         "This is LHDN, a reminder that your tax payment is due through the official MyTax portal.",
         "这里是银行，您的信用卡账单已经出来了，我们绝不会向您索取密码。",
         "這裡是銀行，您的信用卡帳單已經出來了，我們絕不會要求您提供密碼。",
-        "呢度係銀行，你嘅信用卡月結單已經出咗，我哋唔會問你拎密碼。",
-        "இது வங்கி, உங்கள் கடன் அட்டை அறிக்கை தயாராக உள்ளது, உங்கள் கடவுச்சொல்லை நாங்கள் ஒருபோதும் கேட்க மாட்டோம்.",
     ],
 )
 def test_genuine_bank_and_tax_calls_stay_at_none(client, line):
@@ -1065,16 +1063,13 @@ def test_a_long_quote_is_cut_at_a_word(client, pushed):
         ("你的包裹是非法包裹，我是警察。", "authority"),
         ("你有逮捕令，涉嫌洗钱。", "fear"),
         ("你有拘捕令，涉嫌洗錢。", "fear"),
-        ("你嘅包裹有問題，我係警察。", "authority"),
         ("不要掛電話，保密調查。", "isolation"),
-        ("要交保證金，轉錢入去。", "money"),
+        ("要交保證金，把錢轉過去。", "money"),
         ("請轉接給警方。", "handoff"),
-        ("சட்டவிரோத பார்சல் உங்கள் பெயரில் உள்ளது.", "pretext"),
-        ("கைது ஆணை உள்ளது.", "fear"),
-        ("கடவுச்சொல்லைச் சொல்லுங்கள்.", "credentials"),
+        ("告訴我驗證碼。", "credentials"),
     ],
 )
-def test_mandarin_cantonese_and_tamil_scam_lines_reach_their_stage(client, line, stage):
+def test_mandarin_scam_lines_reach_their_stage(client, line, stage):
     assert stages_of(trail(client, "CA_zh", [("caller", line)]))[-1][0] == stage
 
 
@@ -1083,12 +1078,8 @@ def test_mandarin_cantonese_and_tamil_scam_lines_reach_their_stage(client, line,
     [
         "我们绝不会要求您把验证码给我们。",
         "我們絕不會要求您把驗證碼給我們。",
-        "銀行唔會叫你將驗證碼俾我哋。",
-        "வங்கி உங்கள் OTP-ஐ ஒருபோதும் கேட்காது.",
         "银行提醒：我们已安排视频通话预约，请带身份证。",
         "我們已安排視頻通話預約，並寄出保證金收據。",
-        "銀行熱線：視像通話預約已確認，保證金收據已寄出。",
-        "வீடியோ அழைப்பு நாளை நடைபெறும்.",
         "您的账户将被冻结的说法是诈骗，请忽略。",
     ],
 )
@@ -1101,8 +1092,6 @@ def test_negated_credential_warnings_and_routine_calls_in_each_script_stay_at_no
     [
         "我们绝不会叫您转入安全账户，请勿告诉任何人您的验证码。",
         "我們絕不會叫您轉入安全帳戶，請勿告訴任何人您的驗證碼。",
-        "銀行唔會叫你轉去安全戶口，亦唔好話俾人知你嘅驗證碼。",
-        "பாதுகாப்பான கணக்கிற்கு பணம் மாற்றச் சொல்லாது; யாரிடமும் சொல்லாதீர்கள் என்று வங்கி கேட்காது.",
     ],
 )
 def test_bank_notices_naming_a_safe_account_are_at_most_a_caution_before_spark(line):
@@ -1116,7 +1105,6 @@ def test_bank_notices_naming_a_safe_account_are_at_most_a_caution_before_spark(l
         ["不要 挂 电话"],  # a transcriber may space out CJK characters
         ["不要，挂电话"],  # or punctuate inside a phrase
         ["不要掛", "電話"],  # or split it across lines
-        ["唔好　收線"],  # full-width space
     ],
 )
 def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):

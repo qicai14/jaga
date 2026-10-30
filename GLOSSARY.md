@@ -12,7 +12,6 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **Region pack** | Everything country-specific: script packs, official contacts, scam hotline, languages, keywords and default command language. The MVP ships Malaysia only |
 | **Script pack** | One scam script's stages, hard triggers and phrases, inside a region pack. Malaysia ships the Macau pack only |
 | **Stage tracker** | The free, deterministic rule layer that assigns stages from transcript turns |
-| **Cantonese** | Yue Chinese, written colloquially (嘅, 咗, 唔, 係). Alias **Canton**, the local name. A caller language in the Malaysia pack; whether Muse Voice Transcribe hears it is open (see spec) |
 | **Genuine call** | A real, non-scam call, such as a bank card check or a courier. Every evaluation set includes them |
 | **Caught** | A scam call where a Warning appeared before the caller's first `money` or `credentials` line |
 | **False alarm** | A Warning on a genuine call. A Caution on a genuine call is not one |

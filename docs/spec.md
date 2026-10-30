@@ -9,7 +9,7 @@ Source: `docs/plan.md`, `GLOSSARY.md`, ADRs 0001 to 0006, and the grilling sessi
 An elderly Malaysian parent answers a call from what their phone shows as a real police station number. The caller says
 they're from the bank, then "transfers" them to a PDRM or Bank Negara officer who accuses them of money laundering, tells
 them to tell no one, and walks them through moving their savings to a "safe account". Caller-ID apps trust the spoofed
-number. Content-based scam detectors don't work in code-switched Malay, English, Mandarin, Cantonese and Tamil, and don't know the
+number. Content-based scam detectors don't work in code-switched Malay, English, Mandarin and Tamil, and don't know the
 Macau scam script. The family finds out after the money is gone, and very little of it ever comes back.
 
 ## Solution
@@ -111,7 +111,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - **telephony**: accepts Twilio Media Streams for both legs (`caller`, `user`) of a call through the Jaga line, converts
   8 kHz mu-law to 16 kHz PCM, and owns the call's lifecycle (start, end, `callId`).
 - **asr**: streams each leg to Muse Voice Transcribe with the region pack's `languageBias` and keyword list
-  (Malaysia: Malay, English, Mandarin Chinese, Tamil; the pack also carries Cantonese phrases, but `languageBias` leaves Cantonese out until the transcriber is confirmed; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997). Emits transcript turns per leg.
+  (Malaysia: Malay, English, Mandarin Chinese, Tamil; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997). Emits transcript turns per leg.
 - **stages**: the stage tracker. Deterministic rules from the region pack's **script pack** (Malaysia: Macau) (stages, hard triggers, keyword
   rules). Reads the caller leg for stages; reads the user leg only to detect the protected user disclosing a TAC,
   account number or IC, which moves the call to `credentials`.
@@ -190,8 +190,7 @@ endpoints are settled in [ADR 0008](adr/0008-copilot-timeline-api.md). The notes
 - iOS (ADR 0001).
 - Real carrier forwarding from a Malaysian SIM (needs a +60 number); the demo uses a US Twilio number called directly.
 - Deepfake-voice detection.
-- Hokkien (not supported by Muse Voice Transcribe).
-- Cantonese audio is **an open question** (#36): the pack has Cantonese phrases and command text, but Muse Voice Transcribe is not confirmed to hear Cantonese (earlier notes say unsupported; Meta's 25-language list names Tamil, not Cantonese). If unsupported, the phrases only match when the transcriber writes Cantonese as Mandarin or typed text. Also unconfirmed: which Chinese script it writes (the pack matches both).
+- Cantonese and Hokkien (not supported by Muse Voice Transcribe).
 - Job and trafficking-recruitment scams: a later script pack.
 - Family barge-in to the live call.
 - Jaga hanging up or reporting by itself.
