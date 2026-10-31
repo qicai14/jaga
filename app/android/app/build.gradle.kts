@@ -53,10 +53,10 @@ kotlin {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
-    // JagaMessagingService extends the FlutterFire service; same BOM as firebase_core 5.1.0.
+    // Used by the Jaga line call (#12); same BOM as firebase_core 5.1.0.
     implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     implementation("com.google.firebase:firebase-messaging")
-    // JagaApplication listens for the plugin's local "answered" broadcast.
+    // Used by the Jaga line call (#12).
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 }
 
