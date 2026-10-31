@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'core/config/build_config.dart';
 import 'core/haptics/buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
 import 'core/theme/jaga_theme.dart';
@@ -57,6 +58,7 @@ class AppDependencies {
     required this.stageStream,
     required this.attention,
     required this.initAlerts,
+    this.buildRole = BuildRole.dev,
   });
 
   final OnboardingRepository onboarding;
@@ -76,6 +78,9 @@ class AppDependencies {
 
   /// Creates the notification channels. Only a co-pilot needs it.
   final Future<void> Function() initAlerts;
+
+  /// Which roles onboarding offers (ADR 0010).
+  final BuildRole buildRole;
 }
 
 /// The locale and the home screen both come from the saved setup progress.
@@ -126,6 +131,7 @@ class _JagaAppState extends State<JagaApp> {
           dialer: deps.dialer,
           buzzer: deps.buzzer,
           share: deps.share,
+          buildRole: deps.buildRole,
         ),
         builder: (_, vm) => OnboardingScreen(vm: vm),
       );

@@ -133,3 +133,11 @@ change.
 
 ## 8. Decisions
 - Tamil removed from the app (Preston, 28 Oct): project scope change. Languages are ms, en, zh.
+
+## 9. Builds
+The co-pilot token must not be on the protected user's phone (ADR 0010), so each role is its own APK. The token you pass picks the build:
+- Protected user: `fvm flutter build apk --dart-define=JAGA_SERVER_URL=... --dart-define=JAGA_APP_TOKEN=...` offers only the protected role.
+- Co-pilot: `fvm flutter build apk --dart-define=JAGA_SERVER_URL=... --dart-define=JAGA_COPILOT_TOKEN=...` offers only the co-pilot role.
+- Neither token: a dev build with both roles and all Fakes.
+- Both tokens: the app refuses to start (debug and release).
+- Never put either token in a public build.

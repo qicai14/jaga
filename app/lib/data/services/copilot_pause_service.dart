@@ -34,7 +34,11 @@ class HttpCopilotPauseService implements CopilotPauseService {
   Future<bool> _inScam(String method, String path) async {
     final res = await _api.send(method, path);
     if (res.statusCode != 200) throw _api.refused(res);
-    return (jsonDecode(res.body) as Map<String, dynamic>)['inScam'] as bool;
+    try {
+      return (jsonDecode(res.body) as Map<String, dynamic>)['inScam'] as bool;
+    } on Object {
+      throw const NetworkException();
+    }
   }
 }
 

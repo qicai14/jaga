@@ -1,4 +1,5 @@
 import '../app.dart';
+import '../core/config/build_config.dart';
 import '../core/haptics/fake_buzzer.dart';
 import '../data/models/onboarding_progress.dart';
 import '../data/repositories/call_repository.dart';
@@ -91,6 +92,7 @@ class OnboardingRig {
 
   OnboardingViewModel onboardingViewModel({
     Duration pollEvery = const Duration(seconds: 5),
+    BuildRole buildRole = BuildRole.dev,
   }) => OnboardingViewModel(
     repository: onboarding,
     pin: pin,
@@ -98,6 +100,7 @@ class OnboardingRig {
     dialer: dialer,
     buzzer: buzzer,
     share: share,
+    buildRole: buildRole,
     pollEvery: pollEvery,
   );
 

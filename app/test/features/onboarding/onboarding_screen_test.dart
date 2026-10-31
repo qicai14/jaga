@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jaga/core/config/build_config.dart';
 import 'package:jaga/core/widgets/big_button.dart';
 import 'package:jaga/core/widgets/view_model_host.dart';
 import 'package:jaga/data/models/linked_person.dart';
@@ -39,9 +40,10 @@ Future<SetupRig> pumpSetup(
   OnboardingProgress start, {
   double scale = 1.0,
   FakeDeviceSetupService? device,
+  BuildRole buildRole = BuildRole.dev,
 }) async {
   final rig = await OnboardingRig.create(start: start, device: device);
-  final vm = rig.onboardingViewModel();
+  final vm = rig.onboardingViewModel(buildRole: buildRole);
   addTearDown(rig.dispose);
   // The host disposes the view model with the tree, before the timer check.
   await pumpJaga(
@@ -148,6 +150,21 @@ void main() {
       expect(continueButton(tester).onPressed, isNotNull);
     },
   );
+
+  for (final (role, shown, hidden) in [
+    (BuildRole.copilot, 'A family co-pilot', 'The person Jaga protects'),
+    (BuildRole.protectedUser, 'The person Jaga protects', 'A family co-pilot'),
+  ]) {
+    testWidgets('a $role build offers only its own role', (tester) async {
+      await pumpSetup(
+        tester,
+        const OnboardingProgress(step: OnboardingStep.role),
+        buildRole: role,
+      );
+      expect(find.text(shown), findsOneWidget);
+      expect(find.text(hidden), findsNothing);
+    });
+  }
 
   testWidgets('role is read-only once registered', (tester) async {
     final s = await pumpSetup(

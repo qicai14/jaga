@@ -66,11 +66,30 @@ void main() {
       expect(await timeline(404, _notFound).events('x'), isEmpty);
     });
 
-    test('delete sends DELETE; 204 and 404 both succeed', () async {
+    test('delete sends DELETE; 204 succeeds, 404 is an error', () async {
       await timeline(204).delete('call_1');
       expect(sent.single.method, 'DELETE');
       expect(sent.single.url.path, '/timelines/call_1');
-      await timeline(404, _notFound).delete('call_1');
+      expect(
+        timeline(404, _notFound).delete('call_1'),
+        throwsA(isA<NetworkException>()),
+      );
+    });
+
+    test('a call id is encoded in the path', () async {
+      await timeline(200, '{"events":[]}').events('a/b');
+      expect(sent.single.url.toString(), 'https://jaga.test/timelines/a%2Fb');
+    });
+
+    test('a malformed body throws NetworkException', () {
+      expect(
+        timeline(200, 'not json').calls(),
+        throwsA(isA<NetworkException>()),
+      );
+      expect(
+        timeline(200, '{"events":[{"stage":"nope"}]}').events('x'),
+        throwsA(isA<NetworkException>()),
+      );
     });
 
     test('a refused list or a network failure throws NetworkException', () {
@@ -105,6 +124,11 @@ void main() {
       expect(sent.single.method, 'POST');
       expect(sent.single.url.path, '/copilot/pause/clear');
       expect(sent.single.bodyBytes, isEmpty);
+    });
+
+    test('a malformed body throws NetworkException', () {
+      expect(pause(200, '{}').isActive(), throwsA(isA<NetworkException>()));
+      expect(pause(200, 'x').clear(), throwsA(isA<NetworkException>()));
     });
 
     test('404 throws NetworkException', () {

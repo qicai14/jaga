@@ -18,9 +18,10 @@ class CopilotApi {
     try {
       final req = http.Request(method, _baseUrl.resolve(path))
         ..headers['Authorization'] = 'Bearer $_token';
-      return await http.Response.fromStream(
-        await _http.send(req).timeout(const Duration(seconds: 10)),
-      );
+      return await _http
+          .send(req)
+          .then(http.Response.fromStream)
+          .timeout(const Duration(seconds: 10));
     } on Object {
       throw const NetworkException();
     }

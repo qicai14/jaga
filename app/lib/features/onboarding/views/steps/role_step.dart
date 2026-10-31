@@ -6,7 +6,7 @@ import '../../../../data/models/onboarding_progress.dart';
 import '../../view_models/onboarding_view_model.dart';
 import '../widgets/choice_card.dart';
 
-/// Step 2, both roles. Read-only once the server knows who the phone is for.
+/// Step 2, the roles this build offers (both in a dev build). Read-only once the server knows who the phone is for.
 class RoleStep extends StatelessWidget {
   const RoleStep({super.key, required this.vm});
 
@@ -25,17 +25,20 @@ class RoleStep extends StatelessWidget {
         );
     return Column(
       children: [
-        card(
-          OnboardingRole.protectedUser,
-          l.onboardingRoleProtected,
-          l.onboardingRoleProtectedBody,
-        ),
-        SizedBox(height: m.m),
-        card(
-          OnboardingRole.copilot,
-          l.onboardingRoleCopilot,
-          l.onboardingRoleCopilotBody,
-        ),
+        if (vm.buildRole.offersProtected)
+          card(
+            OnboardingRole.protectedUser,
+            l.onboardingRoleProtected,
+            l.onboardingRoleProtectedBody,
+          ),
+        if (vm.buildRole.offersProtected && vm.buildRole.offersCopilot)
+          SizedBox(height: m.m),
+        if (vm.buildRole.offersCopilot)
+          card(
+            OnboardingRole.copilot,
+            l.onboardingRoleCopilot,
+            l.onboardingRoleCopilotBody,
+          ),
       ],
     );
   }

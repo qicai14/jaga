@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app.dart';
+import 'core/config/build_config.dart';
 import 'core/haptics/vibration_buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
 import 'data/repositories/call_repository.dart';
@@ -52,6 +53,12 @@ Future<bool> initFirebase([Future<void> Function()? init]) async {
 /// The real services, except the onboarding API, which is still a Fake. Pause
 /// and timeline are real with JAGA_SERVER_URL and JAGA_COPILOT_TOKEN. Push and auth are real when Firebase starts.
 Future<AppDependencies> createDependencies() async {
+  // Each token marks its own build, so the other role's HTTP services below
+  // are never created: realCalls needs the app token, realCopilot the co-pilot one.
+  final buildRole = BuildRole.from(
+    appToken: _appToken.isNotEmpty,
+    copilotToken: _copilotToken.isNotEmpty,
+  );
   // TODO(#1): the real onboarding API replaces this Fake once its contract lands.
   final realCopilot = _serverUrl.isNotEmpty && _copilotToken.isNotEmpty;
   debugPrint(
@@ -109,6 +116,7 @@ Future<AppDependencies> createDependencies() async {
         : FakeVoiceTokenService(),
   );
   return AppDependencies(
+    buildRole: buildRole,
     onboarding: onboarding,
     pin: pin,
     deviceSetup: const AndroidDeviceSetupService(),

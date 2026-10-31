@@ -31,30 +31,44 @@ class HttpTimelineService implements TimelineService {
   Future<List<AlertedCall>> calls() async {
     final res = await _api.send('GET', '/timelines');
     if (res.statusCode != 200) throw _api.refused(res);
-    return [
-      for (final j in jsonDecode(res.body) as List)
-        AlertedCall.fromJson(j as Map<String, dynamic>),
-    ];
+    try {
+      return [
+        for (final j in jsonDecode(res.body) as List)
+          AlertedCall.fromJson(j as Map<String, dynamic>),
+      ];
+    } on Object {
+      throw const NetworkException();
+    }
   }
 
   /// A timeline the server no longer has (deleted, or past 30 days) has no events.
   @override
   Future<List<TimelineEvent>> events(String callId) async {
-    final res = await _api.send('GET', '/timelines/$callId');
+    final res = await _api.send(
+      'GET',
+      '/timelines/${Uri.encodeComponent(callId)}',
+    );
     if (res.statusCode == 404) return const [];
     if (res.statusCode != 200) throw _api.refused(res);
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    return [
-      for (final e in json['events'] as List)
-        TimelineEvent.fromJson(e as Map<String, dynamic>),
-    ];
+    try {
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      return [
+        for (final e in json['events'] as List)
+          TimelineEvent.fromJson(e as Map<String, dynamic>),
+      ];
+    } on Object {
+      throw const NetworkException();
+    }
   }
 
-  /// Already gone counts as deleted.
+  /// A 404 is an error: a wrong token gets the same bare 404 (ADR 0008).
   @override
   Future<void> delete(String callId) async {
-    final res = await _api.send('DELETE', '/timelines/$callId');
-    if (res.statusCode != 204 && res.statusCode != 404) throw _api.refused(res);
+    final res = await _api.send(
+      'DELETE',
+      '/timelines/${Uri.encodeComponent(callId)}',
+    );
+    if (res.statusCode != 204) throw _api.refused(res);
   }
 }
 

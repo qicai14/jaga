@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../../../core/config/build_config.dart';
 import '../../../core/haptics/buzzer.dart';
 import '../../../data/models/linked_person.dart';
 import '../../../data/models/onboarding_progress.dart';
@@ -27,6 +28,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     required this._dialer,
     required this._buzzer,
     required this._share,
+    this.buildRole = BuildRole.dev,
     this.pollEvery = const Duration(seconds: 5),
   }) {
     _name = progress.personName;
@@ -40,6 +42,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   final DialerService _dialer;
   final Buzzer _buzzer;
   final ShareService _share;
+  final BuildRole buildRole;
   final Duration pollEvery;
 
   bool _disposed = false;
