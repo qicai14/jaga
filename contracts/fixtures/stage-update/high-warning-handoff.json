@@ -1,0 +1,15 @@
+{
+  "callId": "call_01HZX7K2M4",
+  "stage": "handoff",
+  "risk": "high",
+  "claimedAgency": "PDRM",
+  "command": "Letak telefon. Hang up.",
+  "counterMove": "Katakan anda akan telefon balik, kemudian telefon 997. Say you'll call back, then phone 997.",
+  "evidence": [
+    "akaun puan terlibat dalam kes pengubahan wang haram",
+    "jangan beritahu sesiapa, ini siasatan sulit",
+    "pindahkan duit ke akaun selamat ****1234"
+  ],
+  "source": "rules",
+  "at": "2026-10-27T09:16:48+08:00"
+}
