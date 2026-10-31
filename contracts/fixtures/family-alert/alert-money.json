@@ -1,0 +1,13 @@
+{
+  "kind": "alert",
+  "callId": "call_01HZX7K2M4",
+  "protectedUserName": "Mak Siti",
+  "stage": "money",
+  "claimedAgency": "PDRM",
+  "summary": "Caller claims to be PDRM, says Mak Siti's account is linked to money laundering and is pushing her to move savings to a 'safe account'.",
+  "quotes": [
+    "pindahkan duit ke akaun selamat ****1234",
+    "jangan beritahu anak puan"
+  ],
+  "at": "2026-10-27T09:17:12+08:00"
+}
