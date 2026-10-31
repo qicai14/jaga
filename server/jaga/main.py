@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from jaga import pause, telephony, timelines
+from jaga import pause, telephony, timelines, voice_token
 
 
 class PauseCORS:
@@ -34,6 +34,7 @@ app.add_middleware(PauseCORS)
 app.include_router(telephony.router)
 app.include_router(pause.router)
 app.include_router(timelines.router)
+app.include_router(voice_token.router)
 
 
 @app.get("/health")
