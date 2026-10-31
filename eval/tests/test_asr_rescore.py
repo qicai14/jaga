@@ -198,6 +198,12 @@ def test_stages_fired_ignores_punctuation_and_order():
     assert r.stages_fired("Pindahkan Wang sekarang saya pegawai PDRM") == {"money", "authority"}
 
 
+def test_stages_fired_matches_in_the_trackers_form():
+    assert r.stages_fired("你 有 逮 捕 令 了") == {"fear"}  # spaced CJK
+    assert r.stages_fired("don’t tell anyone") == {"isolation"}  # curly apostrophe
+    assert r.stages_fired("ＰＯＬＩＣＥ ＯＦＦＩＣＥＲ") == {"authority"}  # full-width Latin
+
+
 def test_cjk_needs_a_mostly_chinese_reference():
     s = r.score("Encik Lim 林 minta kod tac anda sekarang juga", "Encik Lim minta kod tac anda")
     assert s.words[1] > 0
