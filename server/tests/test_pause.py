@@ -6,11 +6,20 @@ from datetime import timedelta
 import pytest
 from jsonschema import Draft202012Validator
 from tests.conftest import PAUSE, START
-from tests.test_fake_call import CONTRACTS, media_headers, play_call, wait_for_start
+from tests.test_fake_call import (
+    CONTRACTS,
+    FAMILY_ALERT,
+    alerts_of,
+    media_headers,
+    play_call,
+    wait_for_start,
+)
 from tests.test_fake_call import client as client
+from tests.test_fake_call import pushed as pushed
 
 from jaga import telephony
 from jaga.fakes.twilio import media_stream
+from jaga.telephony import claimed_agency
 
 RESPONSE = Draft202012Validator(
     json.loads((CONTRACTS / "pause.schema.json").read_text(encoding="utf-8")) | {"$ref": "#/$defs/response"},
@@ -56,6 +65,7 @@ def test_money_holds_for_30_minutes_and_calls_below_isolation_do_not_hold(client
     assert ask(client).json() == {
         "inScam": False,
         "stage": "authority",
+        "claimedAgency": "PDRM",
         "recommendedHoldMinutes": 0,
         "checkedAt": START.isoformat(),
     }
@@ -134,3 +144,41 @@ def test_a_call_still_at_pretext_reports_pretext_but_is_not_in_scam(client, cloc
 
     answer = ask(client).json()
     assert (answer["inScam"], answer["stage"]) == (False, "pretext")
+
+
+PDRM_ISOLATION = [("caller", "Saya Inspektor Ali dari PDRM."), ("caller", "Jangan beritahu sesiapa ya.")]
+
+
+def test_a_call_claiming_pdrm_names_it_in_the_pause_and_the_family_alert(client, clock, pushed):
+    play_call(client, "CA_pdrm", PDRM_ISOLATION)
+
+    assert ask(client).json()["claimedAgency"] == "PDRM"
+    (alert,) = alerts_of(pushed)
+    FAMILY_ALERT.validate(alert)
+    assert alert["claimedAgency"] == "PDRM"
+
+
+def test_a_call_with_no_claim_has_no_agency(client, clock, pushed):
+    play_call(client, "CA_none", ISOLATION)
+
+    assert ask(client).json().get("claimedAgency") is None
+    assert alerts_of(pushed)[0]["claimedAgency"] is None
+
+
+def test_claimed_agency_is_a_fixed_name_never_transcript_text():
+    line = "Saya dari PDRM dan nombor akaun saya kad hijau pelanggan istimewa"
+    updates = [{"evidence": ["kad hijau"]}, {"evidence": [line]}, {"evidence": ["pegawai bank negara"]}]
+
+    assert claimed_agency(updates) == "PDRM"  # earliest match wins, and it is the name, not the line
+    assert claimed_agency([{"evidence": ["kad hijau pelanggan istimewa", "mahkamah"]}]) is None
+    assert claimed_agency([{"evidence": ["From LHDN"]}]) == "LHDN"
+    assert claimed_agency([{"evidence": ["國家銀行官員"]}]) == "Bank Negara"
+    assert claimed_agency([]) is None
+
+
+def test_the_agency_is_the_one_behind_the_reported_stage(client, clock):
+    play_call(client, "CA_pdrm_money", [("caller", "Saya Inspektor Ali dari PDRM."), *MONEY])
+    play_call(client, "CA_lhdn_iso", [("caller", "Saya pegawai LHDN."), *ISOLATION])  # the later call
+
+    answer = ask(client).json()
+    assert (answer["stage"], answer["claimedAgency"]) == ("money", "PDRM")
