@@ -30,7 +30,6 @@ TextStyle _style(
 class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
   const JagaTextStyles({
     required this.command,
-    required this.commandEnglish,
     required this.officialNumber,
     required this.linkCode,
   });
@@ -39,7 +38,6 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
     const tabular = [FontFeature.tabularFigures()];
     return JagaTextStyles(
       command: _style(locale, 52, FontWeight.w800, 1.08),
-      commandEnglish: _style(locale, 30, FontWeight.w700, 1.15),
       officialNumber: _style(locale, 40, FontWeight.w800, 1.1,
           letterSpacing: 1.0, features: tabular),
       linkCode: _style(locale, 48, FontWeight.w800, 1.0,
@@ -48,20 +46,17 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
   }
 
   final TextStyle command;
-  final TextStyle commandEnglish;
   final TextStyle officialNumber;
   final TextStyle linkCode;
 
   @override
   JagaTextStyles copyWith({
     TextStyle? command,
-    TextStyle? commandEnglish,
     TextStyle? officialNumber,
     TextStyle? linkCode,
   }) =>
       JagaTextStyles(
         command: command ?? this.command,
-        commandEnglish: commandEnglish ?? this.commandEnglish,
         officialNumber: officialNumber ?? this.officialNumber,
         linkCode: linkCode ?? this.linkCode,
       );
@@ -71,7 +66,6 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
     if (other is! JagaTextStyles) return this;
     return JagaTextStyles(
       command: TextStyle.lerp(command, other.command, t)!,
-      commandEnglish: TextStyle.lerp(commandEnglish, other.commandEnglish, t)!,
       officialNumber: TextStyle.lerp(officialNumber, other.officialNumber, t)!,
       linkCode: TextStyle.lerp(linkCode, other.linkCode, t)!,
     );

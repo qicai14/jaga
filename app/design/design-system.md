@@ -58,8 +58,7 @@ theme builder raises `height` by +0.15 on every style (Tamil vowel signs are tal
 | Style | Where | sp | Weight | Height |
 |---|---|---|---|---|
 | `JagaTextStyles.command` | Warning command (shrinks to floor 32) | 52 | 800 | 1.08 |
-| `JagaTextStyles.commandEnglish` | English line under the command | 30 | 700 | 1.15 |
-| `JagaTextStyles.officialNumber` | number on Warning / after call | 40 | 800, tabular figures, +1.0 letter spacing | 1.1 |
+| `JagaTextStyles.officialNumber` | long number: Jaga forwarding code (onboarding) | 40 | 800, tabular figures, +1.0 letter spacing | 1.1 |
 | `JagaTextStyles.linkCode` | 6-digit link code | 48 | 800, tabular, +6 letter spacing | 1.0 |
 | `displaySmall` | status hero ("Jaga is protecting you") | 36 | 700 | 1.15 |
 | `headlineMedium` | screen titles | 28 | 700 | 1.2 |
@@ -101,8 +100,7 @@ jaga_theme.dart     ThemeData buildJagaTheme(Locale locale)
   extensions: [JagaColors.light, JagaMetrics.standard, JagaTextStyles.of(locale)]
 jaga_colors.dart    class JagaColors extends ThemeExtension<JagaColors> (fields from §2, copyWith, lerp)
 jaga_metrics.dart   class JagaMetrics extends ThemeExtension<JagaMetrics> (spacing, radii, targets)
-jaga_text_styles.dart class JagaTextStyles extends ThemeExtension<JagaTextStyles> (command, commandEnglish,
-                    officialNumber, linkCode)
+jaga_text_styles.dart class JagaTextStyles extends ThemeExtension<JagaTextStyles> (command, officialNumber, linkCode)
 theme_context.dart  extension on BuildContext: context.jagaColors, context.metrics, context.jagaText
 ```
 `MaterialApp` passes `theme: buildJagaTheme(locale)` only (no `darkTheme`, `themeMode: ThemeMode.light`).
