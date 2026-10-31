@@ -31,7 +31,7 @@ token: a family co-pilot's install of the same app that registered as this ident
 - Tests need no real keys: they set test values in the environment, run the real signing path and decode the result with PyJWT.
 
 **Logging.** The token, `JAGA_APP_TOKEN` and `TWILIO_API_KEY_SECRET` never appear in logs or error details, on the server
-or in the app. A 503 names the variable, never a value, and a failure is logged by exception type only.
+or in the app. A 503 names the variable, never a value.
 
 **Amends ADR 0008.** The protected user's app now holds a token: `JAGA_APP_TOKEN`, and the Voice access tokens it fetches.
 ADR 0008's keep-out still holds, because the app does not hold `JAGA_COPILOT_TOKEN` and `/timelines` still answers it 404. The
