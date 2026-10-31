@@ -9,7 +9,7 @@ Source: `docs/plan.md`, `GLOSSARY.md`, ADRs 0001 to 0006, and the grilling sessi
 An elderly Malaysian parent answers a call from what their phone shows as a real police station number. The caller says
 they're from the bank, then "transfers" them to a PDRM or Bank Negara officer who accuses them of money laundering, tells
 them to tell no one, and walks them through moving their savings to a "safe account". Caller-ID apps trust the spoofed
-number. Content-based scam detectors don't work in code-switched Malay, English, Mandarin and Tamil, and don't know the
+number. Content-based scam detectors don't work in code-switched Malay, English and Mandarin, and don't know the
 Macau scam script. The family finds out after the money is gone, and very little of it ever comes back.
 
 ## Solution
@@ -90,7 +90,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 48. As an evaluator, I want false alarms per 10 hours of genuine calls, with Cautions reported separately, so that I can check the false-alarm target.
 49. As an evaluator, I want p50 and p95 time from trigger line to Warning, so that I can check the 2 s target.
 50. As an evaluator, I want an ablation of rules only, rules plus Spark, and Spark only, so that I can show what each part adds in accuracy, latency and cost.
-51. As an evaluator, I want TeleAntiFraud near-domain Macro-F1, so that our results compare with published systems.
+51. As an evaluator, I want TeleAntiFraud-28k binary test Macro-F1, so that our results compare with published systems.
 52. As an evaluator, I want red-team paraphrase, Manglish and injection variants as test data, so that I know how robust the rules are.
 53. As an evaluator, I want Spark failures and timeouts counted, so that the fail-safe path is part of the numbers.
 54. As a judge, I want an evidence table fixed before building, so that I can trust the results weren't tuned to look good.
@@ -111,7 +111,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - **telephony**: accepts Twilio Media Streams for both legs (`caller`, `user`) of a call through the Jaga line, converts
   8 kHz mu-law to 16 kHz PCM, and owns the call's lifecycle (start, end, `callId`).
 - **asr**: streams each leg to Muse Voice Transcribe with the region pack's `languageBias` and keyword list
-  (Malaysia: Malay, English, Mandarin Chinese, Tamil; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, 997). Emits transcript turns per leg.
+  (Malaysia: Malay, English, Mandarin Chinese; LHDN, PDRM, Bank Negara, akaun selamat, waran tangkap, TAC, OTP; not 997, which made Muse write it into normal speech, #69). Emits transcript turns per leg.
 - **stages**: the stage tracker. Deterministic rules from the region pack's **script pack** (Malaysia: Macau) (stages, hard triggers, keyword
   rules). Reads the caller leg for stages; reads the user leg only to detect the protected user disclosing a TAC,
   account number or IC, which moves the call to `credentials`.
@@ -130,7 +130,7 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - Risk is `low`, `medium` (Caution) or `high` (Warning) and can go down.
 - Rules alone raise risk to medium at most (ADR 0005). A **hard trigger** raises a Warning at once with `source=rules`;
   Spark checks it afterwards.
-- Spark is called on each new stage from `authority` up, at most 5 times per call, with a 1.5 s timeout.
+- Spark is called on each new stage from `authority` up, at most 5 times per call, with a 2.5 s timeout.
 - Spark may lower a rules-only Caution to low. It may lower a hard-trigger Warning to a Caution, never to low.
 - Fail-safe: if Spark times out or fails, a call at `money` or `credentials` gets a Warning; below that it stays a Caution.
 - The protected user sees only phrase-library text (ADR 0006). Spark writes free text only for the family summary
@@ -148,7 +148,10 @@ Evidence that it works comes from a Malaysian corpus and the TeleAntiFraud bench
 - `recommendedHoldMinutes`: 30 at `money`/`credentials`, 15 at `isolation`/`handoff`, 0 otherwise.
 - Only a family co-pilot can clear it early. The protected user's dismissal never clears it.
 
-### Contracts (finalise on 26 Oct by ADR, in their own PR)
+### Contracts (settled in ADR 0007)
+Settled by [ADR 0007](adr/0007-contracts-v1.md): the server sends resolved phrase-library text, not a phrase ID.
+Schemas in `contracts/`, examples in `contracts/fixtures/`. `stage-timeline-list` and the family co-pilot's timeline
+endpoints are settled in [ADR 0008](adr/0008-copilot-timeline-api.md). The notes below are the original brief.
 - `stage-update`: `command` and `counterMove` are non-null only when `risk=high`. Add the counter-move phrase ID if the
   app renders text locally, or keep resolved text from the server; decide in the contracts PR.
 - `pause`: add the request shape carrying the pause token.
