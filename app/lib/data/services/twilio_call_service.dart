@@ -54,6 +54,7 @@ class TwilioCallService implements CallService {
     return label == null || label.isEmpty ? null : label;
   }
 
+  // TODO(#19): callId has no contract field yet; null means "accept any call".
   static String? _callId(ActiveCall? call) =>
       call?.customParams?['callId'] as String?;
 
@@ -120,6 +121,8 @@ CallSnapshot reduceCallEvent(
   switch (event) {
     case CallEvent.incoming:
     case CallEvent.ringing:
+      // A late ring event must not knock a live call back to ringing.
+      if (snapshot.live) return snapshot;
       return CallSnapshot(phase: CallPhase.ringing, callerLabel: label);
     case CallEvent.answer:
       return CallSnapshot(
@@ -145,6 +148,8 @@ CallSnapshot reduceCallEvent(
           phase: CallPhase.ended,
           endedAt: now,
         ),
+        // A repeat of the end keeps what the screen is showing.
+        CallPhase.ended || CallPhase.failed => snapshot,
         // Rang and was never answered: nothing to show.
         _ => const CallSnapshot(),
       };

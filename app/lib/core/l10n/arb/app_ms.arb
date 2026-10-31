@@ -79,7 +79,6 @@
   "onboardingPermCallingAccountWhy": "Membolehkan panggilan berdering dalam Jaga.",
   "onboardingPermAutostart": "Mula secara automatik",
   "onboardingPermAutostartWhy": "Memastikan Jaga terus berjalan pada telefon Xiaomi.",
-  "onboardingAfterCallSetup": "Disediakan kemudian bersama panggilan",
   "onboardingForwardTitle": "Majukan panggilan ke Jaga",
   "onboardingForwardBody": "Dail kod ini sekali. Panggilan ke telefon ini kemudian akan berdering dalam Jaga.",
   "onboardingDialNow": "Dail sekarang",

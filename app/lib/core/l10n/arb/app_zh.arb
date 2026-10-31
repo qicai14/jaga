@@ -79,7 +79,6 @@
   "onboardingPermCallingAccountWhy": "让电话在 Jaga 里响铃。",
   "onboardingPermAutostart": "自动启动",
   "onboardingPermAutostartWhy": "让 Jaga 在小米手机上保持运行。",
-  "onboardingAfterCallSetup": "稍后随通话功能设置",
   "onboardingForwardTitle": "将来电转接到 Jaga",
   "onboardingForwardBody": "拨一次这个代码。之后打给这部手机的电话会在 Jaga 里响铃。",
   "onboardingDialNow": "立即拨号",

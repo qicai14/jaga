@@ -24,6 +24,7 @@ class CallRepository {
   final _snapshot = ValueNotifier(const CallSnapshot());
   StreamSubscription<CallSnapshot>? _sub;
   Timer? _refresh;
+  bool _stopped = false;
 
   ValueListenable<CallSnapshot> get snapshot => _snapshot;
 
@@ -35,6 +36,7 @@ class CallRepository {
 
   /// Follows the call without registering (the debug gallery and tests).
   Future<void> watch() async {
+    _stopped = false;
     _sub = _service.snapshots.listen((s) => _snapshot.value = s);
     _snapshot.value = await _service.current();
   }
@@ -49,7 +51,8 @@ class CallRepository {
     } on Object catch (e) {
       debugPrint('Jaga line registration failed, retrying: ${e.runtimeType}');
     }
-    _refresh = Timer(wait, _register);
+    // stop() may have run while the fetch was in flight.
+    if (!_stopped) _refresh = Timer(wait, _register);
   }
 
   Future<void> hangUp() => _service.hangUp();
@@ -58,6 +61,7 @@ class CallRepository {
 
   /// Stops listening and refreshing; [start] can run again.
   void stop() {
+    _stopped = true;
     _refresh?.cancel();
     _sub?.cancel();
   }

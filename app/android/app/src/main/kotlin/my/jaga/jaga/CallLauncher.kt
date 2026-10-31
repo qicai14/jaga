@@ -23,13 +23,19 @@ object CallLauncher {
     private const val TAG = "JagaCallLauncher"
 
     /** Set by [MainActivity]; read only to log whether Android let the direct start through. */
+    // TODO: remove after the real-call trial (evidence for the bring-to-front log).
     @Volatile
     var activityResumed = false
+
+    /** True from answer to the end of the call; [MainActivity] drops its lock-screen access when it is false. */
+    @Volatile
+    var callLive = false
 
     fun bringForward(context: Context) {
         val open = Intent(context, MainActivity::class.java)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             .putExtra(ROUTE_EXTRA, ROUTE_CALL)
+        callLive = true
         // Android allows a background start while the app has an overlay window on screen.
         val overlay = showOverlay(context)
         try {
@@ -40,7 +46,13 @@ object CallLauncher {
         postFullScreen(context, open)
         // startActivity never throws when Android blocks a background start, so look again shortly.
         Handler(Looper.getMainLooper()).postDelayed({
-            overlay?.let { context.getSystemService(WindowManager::class.java).removeView(it) }
+            overlay?.let {
+                try {
+                    context.getSystemService(WindowManager::class.java).removeView(it)
+                } catch (e: RuntimeException) {
+                    Log.w(TAG, "overlay window already gone: $e")
+                }
+            }
             Log.i(
                 TAG,
                 (if (activityResumed) "BAL direct start ALLOWED: activity is in front"
@@ -89,6 +101,12 @@ object CallLauncher {
                 .setFullScreenIntent(pending, true)
                 .build(),
         )
+    }
+
+    /** The call is over: the notification must not outlive it. */
+    fun callEnded(context: Context) {
+        callLive = false
+        cancelNotification(context)
     }
 
     fun cancelNotification(context: Context) =

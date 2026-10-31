@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The server: voice token, stage stream, setup. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- Family alerts (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- The Warning fills the screen over the lock screen (Android 14 asks the user). -->

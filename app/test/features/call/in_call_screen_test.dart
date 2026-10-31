@@ -79,6 +79,13 @@ void main() {
     final hang = tester.getRect(find.byType(BigButton));
     expect(hang.bottom, lessThanOrEqualTo(phoneSize.height));
     expect(hang.top, greaterThan(0));
+    expect(hang.height, greaterThanOrEqualTo(56));
+    for (final label in ['Mute', 'Speaker']) {
+      expect(
+        tester.getSize(find.widgetWithText(CallToggle, label)).height,
+        greaterThanOrEqualTo(56),
+      );
+    }
     for (final label in ['Mute', 'Speaker']) {
       final r = tester.getRect(find.widgetWithText(CallToggle, label));
       expect(r.bottom, lessThanOrEqualTo(hang.top), reason: label);
@@ -132,6 +139,7 @@ void main() {
     // The button and the strip under the masthead.
     expect(find.text('Muted: the caller can\'t hear you'), findsNWidgets(2));
     final strip = find.byType(InkWell).first;
+    expect(tester.getSize(strip).height, greaterThanOrEqualTo(56));
     expect(
       tester.getTopLeft(strip).dy,
       lessThan(tester.getTopLeft(find.text(caller)).dy),

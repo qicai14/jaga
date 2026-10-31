@@ -100,6 +100,22 @@ void main() {
     expect(seen.last.speakerOn, isFalse);
   });
 
+  test('a late ring while the call is live changes nothing', () {
+    play([CallEvent.answer, CallEvent.connected]);
+    final before = seen.length;
+    play([CallEvent.ringing]);
+    expect(seen.length, before);
+    expect(seen.last.phase, CallPhase.active);
+  });
+
+  test('a repeated call end keeps ended', () {
+    play([CallEvent.answer, CallEvent.connected, CallEvent.callEnded]);
+    final before = seen.length;
+    play([CallEvent.callEnded]);
+    expect(seen.length, before);
+    expect(seen.last.phase, CallPhase.ended);
+  });
+
   test('events that mean nothing here change nothing', () {
     final before = seen.length;
     play([CallEvent.log, CallEvent.permission, CallEvent.hold]);

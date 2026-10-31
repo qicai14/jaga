@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.twilio.twilio_voice.receivers.TVBroadcastReceiver
 import com.twilio.twilio_voice.types.TVNativeCallActions
 
 /**
@@ -16,11 +17,18 @@ import com.twilio.twilio_voice.types.TVNativeCallActions
 class JagaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        LocalBroadcastManager.getInstance(this).registerReceiver(
+        val broadcasts = LocalBroadcastManager.getInstance(this)
+        broadcasts.registerReceiver(
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) = CallLauncher.bringForward(context)
             },
             IntentFilter(TVNativeCallActions.ACTION_ANSWERED),
+        )
+        broadcasts.registerReceiver(
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) = CallLauncher.callEnded(context)
+            },
+            IntentFilter(TVBroadcastReceiver.ACTION_CALL_ENDED),
         )
     }
 }

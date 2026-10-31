@@ -64,6 +64,20 @@ void main() {
     repo.dispose();
   });
 
+  testWidgets(
+    'a register in flight when stop() runs does not re-arm the timer',
+    (tester) async {
+      final tokens = _Tokens(DateTime.now);
+      final repo = CallRepository(service: FakeCallService(), tokens: tokens);
+      final starting = repo.start();
+      repo.stop(); // before the fetch completes
+      await starting;
+      await tester.pump(const Duration(hours: 2));
+      expect(tokens.fetches, 1);
+      repo.dispose();
+    },
+  );
+
   testWidgets('a failed fetch is retried', (tester) async {
     final tokens = _Tokens(DateTime.now)..failing = true;
     final service = FakeCallService();

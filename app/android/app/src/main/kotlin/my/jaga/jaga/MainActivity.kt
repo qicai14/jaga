@@ -35,6 +35,12 @@ class MainActivity : FlutterActivity() {
         CallLauncher.cancelNotification(this)
     }
 
+    override fun onStop() {
+        // Opened for a call that never reached the in-call screen: don't keep lighting the lock screen.
+        if (!CallLauncher.callLive) setLockScreenAccess(false)
+        super.onStop()
+    }
+
     override fun onPause() {
         CallLauncher.activityResumed = false
         super.onPause()
