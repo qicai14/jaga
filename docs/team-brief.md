@@ -7,7 +7,7 @@ Team: Qi Cai (lead), Preston, Foon, Joshua
 
 ## TL;DR
 Jaga is an Android app that protects people, especially our parents and grandparents, from **phone scams**. Calls ring
-inside Jaga, so Jaga can listen to **what the caller is saying** in Malay, English, Mandarin or Tamil. When the call follows
+inside Jaga, so Jaga can listen to **what the caller is saying** in Malay, English or Mandarin. When the call follows
 the Macau-scam script, Jaga tells the user **"Letak telefon. Hang up."**, coaches them what to say, alerts a family member,
 and can make the bank **hold the transfer**. Our goal: **no money leaves the account.**
 
@@ -32,7 +32,7 @@ and can make the bank **hold the transfer**. Our goal: **no money leaves the acc
 1. **Calls ring inside Jaga.** The user's SIM forwards calls to a "Jaga line" (a Twilio number), which rings our app.
    Android and iOS don't let apps hear normal phone calls, so this is how Hiya does it too.
 2. **Jaga listens.** Meta's **Muse Voice Transcribe** turns both sides of the call into text live, even with mixed
-   Malay, English, Mandarin and Tamil.
+   Malay, English and Mandarin.
 3. **Jaga tracks the script (free, no AI).** Simple rules spot which stage the caller has reached: pretext, authority,
    fear, isolation ("tell no one"), handoff, money or credentials.
 4. **Jaga thinks only when needed.** When the rules fire, Meta's **Muse Spark** checks the situation and can use tools:
@@ -77,8 +77,8 @@ through with no false alarm. We finish on our evidence table.
 ## 4. How we prove it works (judged by data, not by us)
 - **Malaysian test set:** real scam recordings (PDRM and CCID clips, news, victim uploads), court judgments quoting
   scripts, and genuine bank and courier calls. Labelled by stage, with a second person checking.
-- **Public benchmark:** TeleAntiFraud (28k Mandarin scam calls, free to use). Published systems score only 0.65 to 0.68 on
-  its hardest set.
+- **Public benchmark:** the TeleAntiFraud-28k binary test (Mandarin scam calls, Apache 2.0). In the paper
+  (arXiv:2503.24115, Table 4) published systems score 51 to 85 weighted F1 on fraud detection.
 - **Targets, fixed before we build:**
 
 | Target | MVP |
@@ -86,7 +86,7 @@ through with no false alarm. We finish on our evidence table.
 | Scams caught before the money stage | at least 90% |
 | False alarms on genuine calls | at most 1 per 10 hours |
 | Warning after the trigger line | within 2 s |
-| TeleAntiFraud hard-set score (Macro-F1) | at least 0.75 |
+| TeleAntiFraud-28k binary test (Macro-F1) | at least 0.75 |
 | Completed transfers in our role-play trial | 0 |
 
 Judging criteria: impact 30%, use of Meta AI tools 25%, demo 25%, technical depth 20%.
@@ -105,14 +105,26 @@ jaga/
 ├─ server/                   # Python FastAPI: telephony, listening, rules, AI   → Lane A (Qi Cai), tools + pause Lane D
 ├─ eval/                     # test sets, replay harness, metrics               → Lane C
 ├─ .claude/                  # agents, skills, safety hooks (shared by Copilot too)
-└─ .github/                  # CI, APK build, server deploy, PR template, code owners
+└─ .github/                  # CI, APK build, PR template, code owners
 ```
 **Same versions on every machine:** Flutter **3.47.7** (via FVM), Python **3.13** and uv **0.12.24**, with lock files for
 every package (`pubspec.lock`, `uv.lock`, `skills-lock.json`). The server runs in the **same Docker image** locally and in
 production. Line endings are forced to LF so Windows and Mac don't fight.
 
-**Stack:** Flutter (Android) · FastAPI on Fly.io · Firebase (push notifications, auth) · Twilio (calls) · Meta Model API
+**Stack:** Flutter (Android) · FastAPI on Render · Firebase (push notifications, auth) · Twilio (calls) · Meta Model API
 (Muse Voice Transcribe, Muse Spark, SAM 3.1).
+
+**Deploy and wake step:** the server runs on Render Free (`render.yaml`, auto-deploys from `main` once CI passes; no repo
+secret). It spins down after 15 minutes without inbound traffic and takes about a minute to wake, but Twilio's voice
+webhook gives up after 15 seconds, so a sleeping server fails the first call. Before a call or demo, hit `/health` and
+wait for the JSON 200 (there is no keep-awake pinger, on purpose):
+```powershell
+$u = 'https://jaga-server.onrender.com'; $t = Get-Date
+do { try { $ok = (Invoke-RestMethod "$u/health").status -eq 'ok' } catch { $ok = $false }; if (-not $ok) { Start-Sleep 3 } } until ($ok)
+"awake after $([int]((Get-Date) - $t).TotalSeconds) s"
+```
+Calls, stage timelines and Jaga Pause state live in memory, so a spin-down or restart (including setting an
+environment variable) loses them. This is accepted for the hackathon.
 
 **AI-assisted workflow (works with Claude Code or GitHub Copilot):**
 - Shared skills: **Matt Pocock's skills** (spec, tickets, implement, TDD, code review, PR, handoff), **Ponytail** (smallest
@@ -129,9 +141,9 @@ Lanes C and D are interchangeable between Foon and Joshua. Tell me your pick.
 | Lane | Who | Folder | Your job |
 |---|---|---|---|
 | **A. Core pipeline + lead** | **Qi Cai** | `server/` core, `contracts/` | Twilio audio in, live transcription, the script tracker, Muse Spark escalation, sending stage updates to the app, merging and unblocking everyone |
-| **B. The app** | **Preston** | `app/` | Receiving calls in the app (`twilio_voice`), the warning screen (big command, counter-move), family mode with push alerts, onboarding, 4 languages, elderly-friendly design |
+| **B. The app** | **Preston** | `app/` | Receiving calls in the app (`twilio_voice`), the warning screen (big command, counter-move), family mode with push alerts, onboarding, 3 languages, elderly-friendly design |
 | **C. The evidence** | **Foon / Joshua** | `eval/` | Build the test sets, labelling, the replay harness, run the TeleAntiFraud benchmark, produce the numbers for the demo |
-| **D. Product edges + shipping** | **Joshua / Foon** | `server/jaga/tools`, `server/jaga/pause`, Demo Bank, CI | Scam-phrase library in 4 languages, official-hotline table, mule-account mock, Jaga Pause and the Demo Bank, golden-hour report, CI and deployment, the demo video |
+| **D. Product edges + shipping** | **Joshua / Foon** | `server/jaga/tools`, `server/jaga/pause`, Demo Bank, CI | Scam-phrase library in 3 languages, official-hotline table, mule-account mock, Jaga Pause and the Demo Bank, golden-hour report, CI and deployment, the demo video |
 
 **Tickets are ready:** 26 of them in GitHub Issues (#1 to #26), each one lane, with "blocked by" links.
 Day-1 starters with no blockers: A `001` contracts, `002` telephony test; C `003` transcription test, `005` corpus; D `004`
@@ -153,7 +165,7 @@ structured output, prompt-injection defences.
 - `twilio_voice` on pub.dev: incoming calls on Android (ConnectionService, Firebase setup, Android 14/15 permissions such as
   full-screen intent and foreground-service types).
 - FCM data messages, and a WebSocket client in Flutter.
-- `flutter_localizations` (Malay, English, Mandarin, Tamil).
+- `flutter_localizations` (Malay, English, Mandarin).
 - Accessibility for elderly users: large text and high contrast.
 
 **Lane C:**
@@ -166,10 +178,10 @@ structured output, prompt-injection defences.
 - Look up WER (`jiwer`), Cohen's kappa and bootstrap confidence intervals.
 
 **Lane D:**
-- Draft the **scam-phrase list** in Malay, English, Mandarin and Tamil (from PDRM, NSRC and Semak Mule advisories).
+- Draft the **scam-phrase list** in Malay, English and Mandarin (from PDRM, NSRC and Semak Mule advisories).
 - Draft the **official hotlines table** (PDRM, LHDN, Bank Negara, major banks, NSRC 997).
 - Check whether PDRM **Semak Mule** has any public API.
-- Create the **Firebase** and **Fly.io** accounts (free tiers).
+- Create the **Firebase** and **Render** accounts (free tiers).
 - Storyboard the demo video.
 - Plan the Truecaller head-to-head (a phone with Truecaller receiving our "PDRM" call).
 

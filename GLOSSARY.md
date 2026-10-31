@@ -7,6 +7,7 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **Protected user** | The person Jaga guards, usually an elderly parent. Their calls ring in the Jaga app |
 | **Family co-pilot** | A trusted contact who gets alerts about one protected user, can phone them from the alert, and is the only one who can clear Jaga Pause early. Same app, `family` role |
 | **Jaga line** | The telephony number the protected user's SIM forwards calls to. It rings the app and forks the audio to the server |
+| **Voice access token** | What lets the protected user's app register to ring on the Jaga line's calls. Short-lived, and it can receive calls but never place them |
 | **Leg** | One side of a call's audio: `caller` or `user` |
 | **Stage** | Where the caller is in the scam script: `pretext`, `authority`, `fear`, `isolation`, `handoff`, `money`, `credentials`. A call's stage is the most severe one seen so far and never goes down; `money` and `credentials` tie as most severe. `none` means no signs yet |
 | **Region pack** | Everything country-specific: script packs, official contacts, scam hotline, languages, keywords and default command language. The MVP ships Malaysia only |
@@ -27,6 +28,9 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **App language** | The language of everything else on screen. On the protected user's phone it is the command language; a family co-pilot picks their own |
 | **Dismiss** | The protected user hiding a Caution or Warning on their own screen. Never stops family alerts or clears Jaga Pause, and lasts only until the stage or risk gets worse |
 | **Co-pilot lock** | The PIN a family co-pilot sets at setup that guards settings on the protected user's phone, so a caller can't coach them into switching Jaga off |
+| **Phrase ID** | The stable ID of one library entry, e.g. `my.fear.command` or `my.fear.counter.1`. Muse Spark picks a counter-move by phrase ID, never by free text |
+| **Official contact** | A region pack's source-noted number for an agency (997, PDRM, LHDN, Bank Negara, the main banks), read with `official_contact(region, agency)`. Never invented |
+| **Family alert** | A push to a protected user's family co-pilots about one call: an alert when the call reaches `isolation`, then `money` or `credentials`, or a "may be genuine" follow-up when Muse Spark lowers a Warning. A summary, never the transcript |
 | **Link code** | The code shown at setup that a family co-pilot enters to follow a protected user |
 | **Stage timeline** | What's kept after a call: stages, times, risk changes and masked evidence quotes. Never the transcript or audio |
 | **Jaga Pause** | Bank-facing signal: "is this customer mid-scam?". The Demo Bank uses it to hold a transfer |

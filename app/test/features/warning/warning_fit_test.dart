@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/big_button.dart';
 import 'package:jaga/data/models/stage_update.dart';
-import 'package:jaga/debug/fixtures/stage_update_extended_fixtures.dart';
+import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
 
 import 'warning_overlay_test.dart' show emit, pump;
 
@@ -22,27 +22,25 @@ void main() {
 
   final cases = {
     'high': (
-      extHigh,
-      'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri.',
-      '+60 3-2266 2222',
+      stageHigh,
+      'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri di 03-2266 2222.',
     ),
     'credentials': (
-      extHighCredentials,
-      'Bank tidak akan minta kod TAC anda. Letak telefon dan hubungi bank anda sendiri.',
-      '+60 3-2174 1717',
+      stageHighCredentials,
+      'Bank tidak akan minta kod TAC anda. Letak telefon dan hubungi bank anda sendiri di 03-2174 1717.',
     ),
   };
-  for (final MapEntry(key: name, value: (fixture, counter, number))
+  for (final MapEntry(key: name, value: (fixture, counter))
       in cases.entries) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-        '$name at 393x852, text x$scale: command, counter-move and number sit above Hang up',
+        '$name at 393x852, text x$scale: command and counter-move sit above Hang up',
         (tester) async {
           final rig = await pump(tester, scale);
           await emit(tester, rig, fixture);
           final hang = tester.getRect(find.byType(BigButton)).top;
           final command = StageUpdate.parse(fixture).command!;
-          for (final t in [command, counter, number]) {
+          for (final t in [command, counter]) {
             final r = tester.getRect(find.text(t));
             expect(r.top, greaterThanOrEqualTo(0), reason: t);
             expect(r.bottom, lessThanOrEqualTo(hang), reason: t);
