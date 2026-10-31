@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Jaga",
+  "@appTitle": { "description": "App name. Window title and the placeholder home screen." },
+
+  "statusProtected": "Jaga is protecting you",
+  "@statusProtected": { "description": "Status hero on the protected user's home screen, and the 'protected' badge." },
+
+  "statusPauseActive": "Jaga Pause active",
+  "@statusPauseActive": { "description": "Badge shown while Jaga Pause is on." },
+
+  "callReconnecting": "Reconnecting",
+  "@callReconnecting": { "description": "Semantics label only, never shown as text. The reconnecting dot on the call and Warning screens." },
+
+  "commonHoldHint": "Hold for 2 seconds",
+  "@commonHoldHint": { "description": "TalkBack hint on every hold-to-confirm button." },
+
+  "commonTapAgainHint": "Tap again to confirm",
+  "@commonTapAgainHint": { "description": "Announced when a hold-to-confirm button is armed in TalkBack two-tap mode." },
+
+  "stageLabelPretext": "Gave a reason to call",
+  "@stageLabelPretext": { "description": "Stage bar label, step 1: the caller opened with a pretext." },
+  "stageLabelAuthority": "Claimed to be an official",
+  "@stageLabelAuthority": { "description": "Stage bar label, step 2." },
+  "stageLabelFear": "Made you afraid",
+  "@stageLabelFear": { "description": "Stage bar label, step 3." },
+  "stageLabelIsolation": "Told to keep it secret",
+  "@stageLabelIsolation": { "description": "Stage bar label, step 4." },
+  "stageLabelHandoff": "Passed to another person",
+  "@stageLabelHandoff": { "description": "Stage bar label, step 5." },
+  "stageLabelMoney": "Asked to move money",
+  "@stageLabelMoney": { "description": "Stage bar label, step 6." },
+  "stageLabelCredentials": "Asked for codes or passwords",
+  "@stageLabelCredentials": { "description": "Stage bar label, step 6 (ties with money)." },
+
+  "stageStepSemantics": "Step {step} of {total}: {label}",
+  "@stageStepSemantics": {
+    "description": "TalkBack label of the stage progress bar.",
+    "placeholders": {
+      "step": { "type": "int" },
+      "total": { "type": "int" },
+      "label": { "type": "String" }
+    }
+  },
+  "cautionBannerText": "This call has signs of a scam",
+  "@cautionBannerText": { "description": "Caution banner text (medium risk), glossary wording." },
+
+  "warningSemanticsLabel": "Scam warning",
+  "@warningSemanticsLabel": { "description": "Visible label in the Warning masthead, next to the Jaga wordmark." },
+
+  "warningFromJaga": "Scam warning from Jaga",
+  "@warningFromJaga": { "description": "Route name of the full-screen Warning, read by TalkBack once. Jaga is never translated." },
+
+  "warningOfficialNumberLabel": "{agency}'s official number",
+  "@warningOfficialNumberLabel": {
+    "description": "Label above the official number on the Warning. agency is the agency the caller claimed.",
+    "placeholders": { "agency": { "type": "String" } }
+  },
+
+  "warningOfficialNumberLabelNoAgency": "Official number",
+  "@warningOfficialNumberLabelNoAgency": { "description": "Label above the official number when no agency was claimed." },
+
+  "warningEvidenceLabel": "The caller said",
+  "@warningEvidenceLabel": { "description": "Label above the masked quote on the Warning." },
+
+  "warningHangUp": "Hang up",
+  "@warningHangUp": { "description": "The big hang-up button on the Warning. She presses it; Jaga never hangs up itself." },
+
+  "warningDismissLabel": "This call is fine",
+  "@warningDismissLabel": { "description": "Hold-to-dismiss button on the Caution banner and the Warning." },
+
+  "warningDismissHint": "Hold for 2 seconds",
+  "@warningDismissHint": { "description": "TalkBack hint on the dismiss button." },
+
+  "warningDismissConfirmHint": "Tap again to confirm this call is fine",
+  "@warningDismissConfirmHint": { "description": "Announced when the dismiss button is armed in TalkBack two-tap mode." },
+
+  "warningCommandFallback": "Letak telefon. Hang up.",
+  "@warningCommandFallback": { "description": "Safety-net command, same in every language. Only when the server sends no command at high risk. Wording to be approved by Lane D (Q35)." }
+}
