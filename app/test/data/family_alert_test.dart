@@ -10,7 +10,7 @@ FamilyAlert alert(String raw) => FamilyAlert.parse(raw);
 
 void main() {
   group('FamilyAlert', () {
-    test('parses a v0 payload; kind defaults to alert', () {
+    test('parses a payload', () {
       final a = alert(familyIsolation);
       expect(a.callId, 'call-1');
       expect(a.stage, Stage.isolation);
