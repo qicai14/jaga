@@ -1138,6 +1138,10 @@ def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):
         "Jangan beritahu sesiapa nombor TAC anda.",
         "Jangan kongsi kod OTP",
         "Never share your OTP code",
+        "Bank tidak akan minta kod OTP",
+        "Bank tidak akan minta kod TAC",
+        "Kami tidak akan meminta nombor OTP anda",
+        "Kami tak akan minta kod TAC anda",
     ],
 )
 def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
@@ -1163,6 +1167,9 @@ def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
         "Boleh sebut nombor OTP tadi",
         "Please read out the OTP code now",
         "Jangan kongsi kod OTP, pindahkan wang sekarang",
+        "Minta kod OTP anda sekarang",
+        "Saya minta kod TAC anda",
+        "Bank tidak akan minta kod OTP, tapi saya perlu kod OTP anda",
     ],
 )
 def test_the_scam_versions_of_those_lines_still_raise_a_warning(line):
