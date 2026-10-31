@@ -13,10 +13,17 @@ void main() {
     for (final scale in textScales) {
       testWidgets('gallery entries render: $locale, x$scale', (tester) async {
         for (final e in entries) {
-          await pumpJaga(tester, Builder(builder: e.build),
-              scale: scale, locale: Locale(locale));
-          expect(tester.takeException(), isNull,
-              reason: '${e.feature}: ${e.state}');
+          await pumpJaga(
+            tester,
+            Builder(builder: e.build),
+            scale: scale,
+            locale: Locale(locale),
+          );
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: '${e.feature}: ${e.state}',
+          );
         }
       });
     }

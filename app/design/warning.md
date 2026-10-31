@@ -164,3 +164,21 @@ Until #1 lands, missing fields are nullable in the model and their elements are 
 - Redesign (Preston, 28 Oct): the Warning becomes the Jaga notice (§4). Q38: body text on the Warning is capped at 1.4
   (buttons 1.5). Q39: "This call is fine" moves to the end of the scroll area, still hold-to-confirm. Q40: the counter-move
   length budget (about 90 characters per language) is raised with Lane D separately; no code.
+
+## Live stage stream (#19)
+- `WebSocketStageStreamService` (`dart:io`, no package) connects to `JAGA_SERVER_URL` with https->wss, http->ws, path
+  `/calls/{callId}/stages`. `CallRepository` connects when the snapshot is live with a non-null `callId` and closes
+  when the call ends. Null `callId` (Fake path) means no stream; without `JAGA_APP_TOKEN` the Fake service is used.
+- Reconnect: a drop retries after 1, 2, 4, then every 8 s; `connected` is false meanwhile (the reconnecting dot).
+  The server replays all updates on connect, so already-delivered messages are skipped by position. Close 1000 (call
+  ended), close 1008 or a refused handshake (unknown call, HTTP 403) stop without retry. Malformed messages are ignored.
+- Depends on Lane A: `/twilio/voice` must send the CallSid as the `callId` Client parameter
+  (`<Client><Identity>{identity}</Identity><Parameter name="callId" value="{CallSid}"/></Client>`). Until then the
+  app gets no `callId` and stays on the Fake.
+- Local demo: `JAGA_SERVER_URL=http://10.0.2.2:8000` (debug builds allow cleartext to 10.0.2.2 and localhost only,
+  `android/app/src/debug/res/xml/network_security_config.xml`). On origin/main `server/jaga/fakes/twilio.py` builds
+  a scripted Media Stream and `server/tests/test_fake_call.py` plays one in-process, but no runnable driver script
+  plays a fake call against a running server. Lane A would need a small script that sends
+  `media_stream(call_sid, script)` to `/twilio/media` of the docker server (Twilio-signed); the app then needs that CallSid
+  (adb-broadcast or a debug-only fixed `callId`) to subscribe.
+- No auth on the stream yet (server shortcut).

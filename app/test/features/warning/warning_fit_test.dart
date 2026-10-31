@@ -30,8 +30,7 @@ void main() {
       'Bank tidak akan minta kod TAC anda. Letak telefon dan hubungi bank anda sendiri di 03-2174 1717.',
     ),
   };
-  for (final MapEntry(key: name, value: (fixture, counter))
-      in cases.entries) {
+  for (final MapEntry(key: name, value: (fixture, counter)) in cases.entries) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
         '$name at 393x852, text x$scale: command and counter-move sit above Hang up',

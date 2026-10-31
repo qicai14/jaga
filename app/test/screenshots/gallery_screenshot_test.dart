@@ -67,7 +67,9 @@ void main() {
         ('ms', 1.0),
         ('en', 1.0),
         ('en', 2.0),
-        if (state == 'alert-isolation' || state == 'home-pause-active') ...[('zh', 1.0)],
+        if (state == 'alert-isolation' || state == 'home-pause-active') ...[
+          ('zh', 1.0),
+        ],
         if (state == 'alert-long-text') ('ms', 2.0),
       ];
     }
@@ -75,8 +77,13 @@ void main() {
       return [
         ('ms', 1.0),
         ('en', 1.0),
-        if (const {'link-code', 'perms-mixed', 'join-full', 'pin-confirm', 'settings'}
-            .contains(state))
+        if (const {
+          'link-code',
+          'perms-mixed',
+          'join-full',
+          'pin-confirm',
+          'settings',
+        }.contains(state))
           ('en', 2.0),
         if (state == 'perms-mixed' || state == 'link-code') ...[('zh', 1.0)],
       ];

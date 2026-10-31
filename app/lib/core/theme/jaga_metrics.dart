@@ -43,21 +43,20 @@ class JagaMetrics extends ThemeExtension<JagaMetrics> {
     double? radiusPill,
     double? minTarget,
     double? primaryButtonHeight,
-  }) =>
-      JagaMetrics(
-        xs: xs ?? this.xs,
-        s: s ?? this.s,
-        m: m ?? this.m,
-        l: l ?? this.l,
-        xl: xl ?? this.xl,
-        xxl: xxl ?? this.xxl,
-        radiusSmall: radiusSmall ?? this.radiusSmall,
-        radiusMedium: radiusMedium ?? this.radiusMedium,
-        radiusLarge: radiusLarge ?? this.radiusLarge,
-        radiusPill: radiusPill ?? this.radiusPill,
-        minTarget: minTarget ?? this.minTarget,
-        primaryButtonHeight: primaryButtonHeight ?? this.primaryButtonHeight,
-      );
+  }) => JagaMetrics(
+    xs: xs ?? this.xs,
+    s: s ?? this.s,
+    m: m ?? this.m,
+    l: l ?? this.l,
+    xl: xl ?? this.xl,
+    xxl: xxl ?? this.xxl,
+    radiusSmall: radiusSmall ?? this.radiusSmall,
+    radiusMedium: radiusMedium ?? this.radiusMedium,
+    radiusLarge: radiusLarge ?? this.radiusLarge,
+    radiusPill: radiusPill ?? this.radiusPill,
+    minTarget: minTarget ?? this.minTarget,
+    primaryButtonHeight: primaryButtonHeight ?? this.primaryButtonHeight,
+  );
 
   @override
   JagaMetrics lerp(ThemeExtension<JagaMetrics>? other, double t) {

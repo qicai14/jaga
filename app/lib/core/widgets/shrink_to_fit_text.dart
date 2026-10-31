@@ -27,28 +27,39 @@ class ShrinkToFitText extends StatelessWidget {
     final base = DefaultTextStyle.of(context).style.merge(style);
     final startSize = base.fontSize ?? 14;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      bool fits(double size) {
-        final painter = TextPainter(
-          text: TextSpan(text: text, style: base.copyWith(fontSize: size)),
-          textDirection: direction,
-          textScaler: scaler,
-          maxLines: maxLines,
-        )..layout(maxWidth: constraints.maxWidth);
-        final ok = !painter.didExceedMaxLines &&
-            (!constraints.hasBoundedHeight || painter.height <= constraints.maxHeight);
-        painter.dispose();
-        return ok;
-      }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool fits(double size) {
+          final painter = TextPainter(
+            text: TextSpan(
+              text: text,
+              style: base.copyWith(fontSize: size),
+            ),
+            textDirection: direction,
+            textScaler: scaler,
+            maxLines: maxLines,
+          )..layout(maxWidth: constraints.maxWidth);
+          final ok =
+              !painter.didExceedMaxLines &&
+              (!constraints.hasBoundedHeight ||
+                  painter.height <= constraints.maxHeight);
+          painter.dispose();
+          return ok;
+        }
 
-      var size = startSize;
-      while (size > minFontSize && !fits(size)) {
-        size = (size - 2).clamp(minFontSize, startSize);
-      }
-      if (onOverflow != null && !fits(size)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => onOverflow!());
-      }
-      return Text(text, style: style.copyWith(fontSize: size), maxLines: maxLines);
-    });
+        var size = startSize;
+        while (size > minFontSize && !fits(size)) {
+          size = (size - 2).clamp(minFontSize, startSize);
+        }
+        if (onOverflow != null && !fits(size)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => onOverflow!());
+        }
+        return Text(
+          text,
+          style: style.copyWith(fontSize: size),
+          maxLines: maxLines,
+        );
+      },
+    );
   }
 }

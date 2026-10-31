@@ -4,11 +4,7 @@ import '../../../../core/theme/theme_context.dart';
 import 'choice_card.dart';
 
 /// Each language is named in its own script, so anyone can find theirs.
-const _languages = [
-  ('ms', 'Bahasa Melayu'),
-  ('en', 'English'),
-  ('zh', '中文'),
-];
+const _languages = [('ms', 'Bahasa Melayu'), ('en', 'English'), ('zh', '中文')];
 
 class LanguageList extends StatelessWidget {
   const LanguageList({

@@ -89,7 +89,11 @@ Future<AppDependencies> createDependencies() async {
       'Jaga line calls are off: set JAGA_SERVER_URL and JAGA_APP_TOKEN with --dart-define.',
     );
   }
+  final stageStream = realCalls
+      ? WebSocketStageStreamService(Uri.parse(_serverUrl))
+      : FakeStageStreamService();
   final call = CallRepository(
+    stageStream: stageStream,
     service: realCalls
         ? TwilioCallService(fcmToken: fcmService.token)
         : FakeCallService(),
@@ -113,8 +117,7 @@ Future<AppDependencies> createDependencies() async {
     timeline: FakeTimelineService(),
     call: call,
     callUi: const AndroidCallUiService(),
-    // TODO(#19): the real stage stream replaces this Fake.
-    stageStream: FakeStageStreamService(),
+    stageStream: stageStream,
     attention: ProximityAttentionService(),
     initAlerts: notifier.init,
   );

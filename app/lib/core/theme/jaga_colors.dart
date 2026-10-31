@@ -72,24 +72,23 @@ class JagaColors extends ThemeExtension<JagaColors> {
     Color? genuine,
     Color? onGenuine,
     Color? muted,
-  }) =>
-      JagaColors(
-        guarded: guarded ?? this.guarded,
-        onGuarded: onGuarded ?? this.onGuarded,
-        guardedContainer: guardedContainer ?? this.guardedContainer,
-        onGuardedContainer: onGuardedContainer ?? this.onGuardedContainer,
-        caution: caution ?? this.caution,
-        onCaution: onCaution ?? this.onCaution,
-        cautionEdge: cautionEdge ?? this.cautionEdge,
-        warning: warning ?? this.warning,
-        onWarning: onWarning ?? this.onWarning,
-        warningNumber: warningNumber ?? this.warningNumber,
-        genuineContainer: genuineContainer ?? this.genuineContainer,
-        onGenuineContainer: onGenuineContainer ?? this.onGenuineContainer,
-        genuine: genuine ?? this.genuine,
-        onGenuine: onGenuine ?? this.onGenuine,
-        muted: muted ?? this.muted,
-      );
+  }) => JagaColors(
+    guarded: guarded ?? this.guarded,
+    onGuarded: onGuarded ?? this.onGuarded,
+    guardedContainer: guardedContainer ?? this.guardedContainer,
+    onGuardedContainer: onGuardedContainer ?? this.onGuardedContainer,
+    caution: caution ?? this.caution,
+    onCaution: onCaution ?? this.onCaution,
+    cautionEdge: cautionEdge ?? this.cautionEdge,
+    warning: warning ?? this.warning,
+    onWarning: onWarning ?? this.onWarning,
+    warningNumber: warningNumber ?? this.warningNumber,
+    genuineContainer: genuineContainer ?? this.genuineContainer,
+    onGenuineContainer: onGenuineContainer ?? this.onGenuineContainer,
+    genuine: genuine ?? this.genuine,
+    onGenuine: onGenuine ?? this.onGenuine,
+    muted: muted ?? this.muted,
+  );
 
   @override
   JagaColors lerp(ThemeExtension<JagaColors>? other, double t) {
