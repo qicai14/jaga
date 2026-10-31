@@ -46,5 +46,15 @@ services:
         sync: false
       - key: JAGA_COPILOT_TOKEN
         sync: false
+      - key: JAGA_APP_TOKEN
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_API_KEY_SID
+        sync: false
+      - key: TWILIO_API_KEY_SECRET
+        sync: false
+      - key: TWILIO_PUSH_CREDENTIAL_SID
+        sync: false
       - key: DEMO_BANK_ORIGINS
         sync: false
