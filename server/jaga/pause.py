@@ -28,10 +28,11 @@ def pause(ask: Ask) -> dict:
     now = telephony.now()
     # shortcut: all calls are the one protected user's and never evicted; upgrade with #12/#19.
     # A call is current while live (no end time) and for 30 minutes after it ends.
-    current = [
-        c.tracker.stage for c in telephony.calls.values() if c.ended_at is None or now - c.ended_at <= WINDOW
-    ]
-    stage = max(current, key=RANK.get, default="none")
+    # list(): this route runs in a threadpool while the loop thread adds calls.
+    current = [c for c in list(telephony.calls.values()) if c.ended_at is None or now - c.ended_at <= WINDOW]
+    top = max(current, key=lambda c: RANK[c.tracker.stage], default=None)
+    stage = top.tracker.stage if top else "none"
+    agency = telephony.claimed_agency(top.updates) if top else None  # left out when nobody claimed one
     in_scam = RANK[stage] >= RANK["isolation"]
     hold = 0 if not in_scam else 30 if RANK[stage] >= RANK["money"] else 15
     return {
@@ -39,4 +40,4 @@ def pause(ask: Ask) -> dict:
         "stage": stage,
         "recommendedHoldMinutes": hold,
         "checkedAt": now.isoformat(),
-    }
+    } | ({"claimedAgency": agency} if agency else {})
