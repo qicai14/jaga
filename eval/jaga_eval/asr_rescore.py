@@ -152,12 +152,12 @@ def occurrences(terms, hyp: str) -> dict:
 
 
 def stages_fired(text: str) -> set[str]:
-    """Stages whose phrases or hard triggers are anywhere in the text (lowercase substring, as the tracker
-    matches). Both speakers are in one mono text, same on reference and Muse. shortcut: no leg or order logic
+    """Stages whose phrases or hard triggers are anywhere in the text, matched in the tracker's `norm` form.
+    Both speakers are in one mono text, same on reference and Muse. shortcut: no leg or order logic
     and no user-disclosure rules, so it can differ from a live call; fine for recall."""
-    pack, text = stages.load_pack("my"), text.lower()
-    found = {s for s, ps in pack["phrases"].items() if any(p in text for p in ps)}
-    return found | {s for p, s in pack["hardTriggers"].items() if p in text}
+    t, text = stages.StageTracker(stages.load_pack("my")), stages.norm(text)
+    found = {s for s, ps in t.phrases.items() if any(p in text for p in ps)}
+    return found | {s for p, s in t.hard_triggers.items() if p in text}
 
 
 def stage_scores(ref: dict, muse: dict, resamples=1000, seed=0) -> dict:
