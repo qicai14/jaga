@@ -29,6 +29,10 @@ dependencies:
   proximity_sensor: ^2.0.0
   share_plus: ^13.3.1
   shared_preferences: ^2.5.6
+  twilio_voice:
+    git:
+      url: https://github.com/cybex-dev/twilio_voice
+      ref: f0522381d2de2dad9b6329ea9a4af8fee279924d
   url_launcher: ^6.3.3
   vibration: ^3.2.1
 
