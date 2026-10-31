@@ -76,6 +76,16 @@ void main() {
         if (state == 'alert-long-text') ('ms', 2.0),
       ];
     }
+    if (feature == 'onboarding') {
+      return [
+        ('ms', 1.0),
+        ('en', 1.0),
+        if (const {'link-code', 'perms-mixed', 'join-full', 'pin-confirm', 'settings'}
+            .contains(state))
+          ('en', 2.0),
+        if (state == 'perms-mixed' || state == 'link-code') ...[('ta', 1.0), ('zh', 1.0)],
+      ];
+    }
     if (feature != 'warning') return [('ms', 1.0), ('en', 1.0)];
     return [
       ('ms', 1.0),
@@ -119,7 +129,14 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        if (e.state == 'about-loading') {
+          // A spinner never settles: give the setup a few frames instead.
+          for (var i = 0; i < 3; i++) {
+            await tester.pump(const Duration(milliseconds: 300));
+          }
+        } else {
+          await tester.pumpAndSettle();
+        }
         await tester.runAsync(() async {
           final boundary =
               key.currentContext!.findRenderObject()! as RenderRepaintBoundary;

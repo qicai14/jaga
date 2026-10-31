@@ -6,13 +6,17 @@ abstract class DialerService {
   Future<bool> dial(String? number);
 }
 
+/// A `#` left unencoded would start a URI fragment and the dialer would drop
+/// the rest, so a code like `*21*+60123#` must end in `%23`. [Uri] does that.
+Uri telUri(String? number) => Uri(scheme: 'tel', path: number ?? '');
+
 class UrlDialerService implements DialerService {
   const UrlDialerService();
 
   @override
   Future<bool> dial(String? number) async {
     try {
-      return await launchUrl(Uri(scheme: 'tel', path: number ?? ''));
+      return await launchUrl(telUri(number));
     } on Exception {
       return false;
     }

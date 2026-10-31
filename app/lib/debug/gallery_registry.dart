@@ -1,5 +1,6 @@
 import 'entries/core_entries.dart';
 import 'entries/family_entries.dart';
+import 'entries/onboarding_entries.dart';
 import 'entries/warning_entries.dart';
 import 'gallery_entry.dart';
 
@@ -7,5 +8,6 @@ import 'gallery_entry.dart';
 List<GalleryEntry> galleryEntries() => [
       ...coreEntries(),
       ...familyEntries(),
+      ...onboardingEntries(),
       ...warningEntries(),
     ];

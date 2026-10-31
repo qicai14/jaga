@@ -1,7 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Family alerts (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- The Warning fills the screen over the lock screen (Android 14 asks the user). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+    <!-- Jaga hears the caller during a Jaga line call. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <application
+        android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:label="jaga"
         android:name="${applicationName}"

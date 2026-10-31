@@ -341,6 +341,468 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t open the phone app.'**
   String get familyAlertDialFailed;
+
+  /// Copy button next to a token or code.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get commonCopy;
+
+  /// SnackBar after Copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get commonCopied;
+
+  /// Share button next to a token or code.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get commonShare;
+
+  /// Cancel button, e.g. on the co-pilot lock sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// Debug builds only: skips the call forwarding step.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get commonSkip;
+
+  /// Semantics label only: the PIN pad's delete-a-digit key.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// Semantics label only: how many PIN digits are typed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} digits entered'**
+  String commonPinEntered(int count, int total);
+
+  /// Setup app bar title.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total}'**
+  String onboardingStepOf(int step, int total);
+
+  /// Primary button on every setup step.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get onboardingContinue;
+
+  /// Setup step 2 title, both roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is this phone for?'**
+  String get onboardingRoleTitle;
+
+  /// Step 2 choice: the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'The person Jaga protects'**
+  String get onboardingRoleProtected;
+
+  /// Step 2 choice body.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls to this phone will ring in Jaga.'**
+  String get onboardingRoleProtectedBody;
+
+  /// Step 2 choice: the family co-pilot. Also quoted in the link code share text.
+  ///
+  /// In en, this message translates to:
+  /// **'A family co-pilot'**
+  String get onboardingRoleCopilot;
+
+  /// Step 2 choice body.
+  ///
+  /// In en, this message translates to:
+  /// **'Get alerts about someone you look after.'**
+  String get onboardingRoleCopilotBody;
+
+  /// Protected user settings: title of the command language list.
+  ///
+  /// In en, this message translates to:
+  /// **'Which language should warnings use?'**
+  String get onboardingLanguageTitle;
+
+  /// Setup step 1 title, both roles: the app language, which on a protected phone is also the command language.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get onboardingAppLanguageTitle;
+
+  /// Protected setup step 3 title.
+  ///
+  /// In en, this message translates to:
+  /// **'About her'**
+  String get onboardingAboutTitle;
+
+  /// Step 3 name field label.
+  ///
+  /// In en, this message translates to:
+  /// **'Her name'**
+  String get onboardingNameLabel;
+
+  /// Helper text under the field whose short label is Her name.
+  ///
+  /// In en, this message translates to:
+  /// **'What does the family call her?'**
+  String get onboardingNameHelper;
+
+  /// Step 3 read-only region row.
+  ///
+  /// In en, this message translates to:
+  /// **'Region: Malaysia. Jaga uses Malaysia\'s official numbers.'**
+  String get onboardingRegionInfo;
+
+  /// Step 3 button while registering.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up…'**
+  String get onboardingSettingUp;
+
+  /// Inline error when the server can't be reached.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t reach Jaga. Check the internet and try again.'**
+  String get onboardingNetworkError;
+
+  /// Protected setup step 4 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone permissions'**
+  String get onboardingPermissionsTitle;
+
+  /// Button on a permission row that is not granted yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get onboardingFix;
+
+  /// Manual tick for a permission Android can't report.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve done this'**
+  String get onboardingFixedIt;
+
+  /// Permission row title.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get onboardingPermNotifications;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows alerts.'**
+  String get onboardingPermNotificationsWhy;
+
+  /// Permission row title.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get onboardingPermMicrophone;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you talk on calls through Jaga.'**
+  String get onboardingPermMicrophoneWhy;
+
+  /// Permission row title.
+  ///
+  /// In en, this message translates to:
+  /// **'Full-screen alerts'**
+  String get onboardingPermFullScreen;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets the warning fill the screen.'**
+  String get onboardingPermFullScreenWhy;
+
+  /// Permission row title.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling account'**
+  String get onboardingPermCallingAccount;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets calls ring in Jaga.'**
+  String get onboardingPermCallingAccountWhy;
+
+  /// Permission row title, Xiaomi phones only.
+  ///
+  /// In en, this message translates to:
+  /// **'Start automatically'**
+  String get onboardingPermAutostart;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps Jaga running on Xiaomi phones.'**
+  String get onboardingPermAutostartWhy;
+
+  /// Calling account row, until calls are built.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up later with calls'**
+  String get onboardingAfterCallSetup;
+
+  /// Protected setup step 5 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward calls to Jaga'**
+  String get onboardingForwardTitle;
+
+  /// Step 5 body, above the code to dial.
+  ///
+  /// In en, this message translates to:
+  /// **'Dial this code once. Calls to this phone will then ring in Jaga.'**
+  String get onboardingForwardBody;
+
+  /// Step 5 button: opens the dialer with the code.
+  ///
+  /// In en, this message translates to:
+  /// **'Dial now'**
+  String get onboardingDialNow;
+
+  /// Step 5 secondary button: dials the forwarding check code.
+  ///
+  /// In en, this message translates to:
+  /// **'Check forwarding'**
+  String get onboardingCheckForwarding;
+
+  /// Step 5 Continue label.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve dialled it'**
+  String get onboardingForwardDone;
+
+  /// Protected setup step 6 title: the co-pilot lock.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the co-pilot lock'**
+  String get onboardingPinTitle;
+
+  /// Step 6 body.
+  ///
+  /// In en, this message translates to:
+  /// **'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk her into switching it off.'**
+  String get onboardingPinBody;
+
+  /// Step 6 prompt for the second entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the PIN again'**
+  String get onboardingPinConfirm;
+
+  /// Step 6 error when the two entries differ.
+  ///
+  /// In en, this message translates to:
+  /// **'The PINs don\'t match. Set it again.'**
+  String get onboardingPinMismatch;
+
+  /// Protected setup step 7 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause token'**
+  String get onboardingPauseTitle;
+
+  /// Step 7 body.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she\'s on a scam call.'**
+  String get onboardingPauseBody;
+
+  /// Protected setup step 8 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Link code'**
+  String get onboardingLinkTitle;
+
+  /// Step 8 body.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 3 family members can enter this code in their own Jaga app.'**
+  String get onboardingLinkBody;
+
+  /// Text shared with the link code. The quoted label matches onboardingRoleCopilot.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Jaga, choose \"A family co-pilot\" and enter {code} to get alerts about {name}.'**
+  String onboardingLinkShareText(String code, String name);
+
+  /// Step 8 heading above the list of co-pilots who joined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined so far'**
+  String get onboardingJoined;
+
+  /// Step 8 when nobody has joined.
+  ///
+  /// In en, this message translates to:
+  /// **'No one yet'**
+  String get onboardingJoinedNone;
+
+  /// Protected setup step 9 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel the buzz'**
+  String get onboardingBuzzTitle;
+
+  /// Step 9 body.
+  ///
+  /// In en, this message translates to:
+  /// **'When the phone buzzes like this during a call, look at the screen.'**
+  String get onboardingBuzzBody;
+
+  /// Step 9 button: plays the Warning buzz once.
+  ///
+  /// In en, this message translates to:
+  /// **'Feel the buzz'**
+  String get onboardingBuzzButton;
+
+  /// Protected setup step 10 headline.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaga is set up.'**
+  String get onboardingDoneProtected;
+
+  /// Last step button, both roles.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get onboardingFinish;
+
+  /// Co-pilot setup step 3 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get onboardingJoinCode;
+
+  /// Co-pilot step 3 title once the code is accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'A few details'**
+  String get onboardingNamesTitle;
+
+  /// Co-pilot name field: shown to the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get onboardingYourName;
+
+  /// Co-pilot field: the nickname used in alerts, kept on this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Her nickname'**
+  String get onboardingCallHer;
+
+  /// Helper text under the field whose short label is Her nickname.
+  ///
+  /// In en, this message translates to:
+  /// **'What do you call her?'**
+  String get onboardingCallHerHelper;
+
+  /// Link code error.
+  ///
+  /// In en, this message translates to:
+  /// **'That code doesn\'t match. Check the 6 digits.'**
+  String get onboardingCodeWrong;
+
+  /// Link code error.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has expired. Ask for a new one.'**
+  String get onboardingCodeExpired;
+
+  /// Link code error: three co-pilots already joined.
+  ///
+  /// In en, this message translates to:
+  /// **'3 family co-pilots are already linked. One must unlink before you can join.'**
+  String get onboardingCopilotsFull;
+
+  /// Co-pilot setup step 4 title.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow alerts'**
+  String get onboardingNotifTitle;
+
+  /// Co-pilot step 4 body.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaga sends an alert here when someone you look after may be on a scam call.'**
+  String get onboardingNotifBody;
+
+  /// Co-pilot step 4: skip allowing notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get onboardingNotNow;
+
+  /// Co-pilot setup last step, and the placeholder home.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll get alerts about {name}.'**
+  String onboardingDoneCopilot(String name);
+
+  /// Status screen label above the co-pilots' names.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family'**
+  String get statusFamilyLabel;
+
+  /// Status screen when no co-pilot has joined.
+  ///
+  /// In en, this message translates to:
+  /// **'No family linked yet'**
+  String get statusFamilyNone;
+
+  /// Status screen headline when a permission was switched off.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your family to check Jaga'**
+  String get statusNeedsFamily;
+
+  /// Settings screen title.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// Sheet title when the status screen is long-pressed.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the co-pilot lock'**
+  String get settingsPinTitle;
+
+  /// Co-pilot lock sheet: wrong PIN.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong PIN'**
+  String get settingsPinWrong;
+
+  /// Co-pilot lock sheet after five wrong tries.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many tries. Wait 5 minutes.'**
+  String get settingsPinLocked;
+
+  /// Settings: hold-to-confirm button that resets Jaga.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to reset Jaga'**
+  String get settingsReset;
 }
 
 class _AppLocalizationsDelegate

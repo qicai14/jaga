@@ -29,6 +29,7 @@ class BigButton extends StatelessWidget {
     this.tone = BigButtonTone.guarded,
     this.maxTextScale,
     this.semanticsLabel,
+    this.busy = false,
   });
 
   final String label;
@@ -38,6 +39,10 @@ class BigButton extends StatelessWidget {
 
   /// Caps the label and icon scale (the Warning passes 1.5); null follows the system.
   final double? maxTextScale;
+
+  /// Shows a spinner in place of the icon. The caller also passes a null [onPressed].
+  final bool busy;
+
   /// Spoken instead of [label] when the label is shortened for the eye.
   final String? semanticsLabel;
 
@@ -60,7 +65,14 @@ class BigButton extends StatelessWidget {
     );
     // The icon grows with the text, capped at 2x (a 24dp icon in a 64dp button).
     final scale = MediaQuery.textScalerOf(context).scale(24).clamp(24.0, 48.0);
-    final iconWidget = icon == null ? null : Icon(icon, size: scale);
+    final iconWidget = busy
+        ? SizedBox.square(
+            dimension: scale,
+            child: const CircularProgressIndicator(strokeWidth: 3),
+          )
+        : icon == null
+        ? null
+        : Icon(icon, size: scale);
 
     if (tone == BigButtonTone.quiet) {
       return iconWidget == null

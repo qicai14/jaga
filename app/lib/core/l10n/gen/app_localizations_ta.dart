@@ -152,4 +152,265 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get familyAlertDialFailed => 'தொலைபேசி செயலியைத் திறக்க முடியவில்லை.';
+
+  @override
+  String get commonCopy => 'நகலெடு';
+
+  @override
+  String get commonCopied => 'நகலெடுக்கப்பட்டது';
+
+  @override
+  String get commonShare => 'பகிர்';
+
+  @override
+  String get commonCancel => 'ரத்து செய்';
+
+  @override
+  String get commonSkip => 'தவிர்';
+
+  @override
+  String get commonDelete => 'அழி';
+
+  @override
+  String commonPinEntered(int count, int total) {
+    return '$total இலக்கங்களில் $count உள்ளிடப்பட்டன';
+  }
+
+  @override
+  String onboardingStepOf(int step, int total) {
+    return 'படி $step / $total';
+  }
+
+  @override
+  String get onboardingContinue => 'தொடரவும்';
+
+  @override
+  String get onboardingRoleTitle => 'இந்த தொலைபேசி யாருக்கானது?';
+
+  @override
+  String get onboardingRoleProtected => 'Jaga பாதுகாக்கும் நபர்';
+
+  @override
+  String get onboardingRoleProtectedBody =>
+      'இந்த தொலைபேசிக்கான அழைப்புகள் Jaga-வில் ஒலிக்கும்.';
+
+  @override
+  String get onboardingRoleCopilot => 'குடும்ப உதவியாளர்';
+
+  @override
+  String get onboardingRoleCopilotBody =>
+      'நீங்கள் கவனித்துக்கொள்ளும் ஒருவரைப் பற்றிய எச்சரிக்கைகளைப் பெறுங்கள்.';
+
+  @override
+  String get onboardingLanguageTitle =>
+      'எச்சரிக்கைகள் எந்த மொழியில் இருக்க வேண்டும்?';
+
+  @override
+  String get onboardingAppLanguageTitle => 'உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்';
+
+  @override
+  String get onboardingAboutTitle => 'அவரைப் பற்றி';
+
+  @override
+  String get onboardingNameLabel => 'அவர் பெயர்';
+
+  @override
+  String get onboardingNameHelper => 'குடும்பத்தினர் அவரை என்ன அழைப்பார்கள்?';
+
+  @override
+  String get onboardingRegionInfo =>
+      'பிராந்தியம்: மலேசியா. Jaga மலேசியாவின் அதிகாரப்பூர்வ எண்களைப் பயன்படுத்துகிறது.';
+
+  @override
+  String get onboardingSettingUp => 'அமைக்கிறது…';
+
+  @override
+  String get onboardingNetworkError =>
+      'Jaga-வை அடைய முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get onboardingPermissionsTitle => 'தொலைபேசி அனுமதிகள்';
+
+  @override
+  String get onboardingFix => 'சரிசெய்';
+
+  @override
+  String get onboardingFixedIt => 'செய்துவிட்டேன்';
+
+  @override
+  String get onboardingPermNotifications => 'அறிவிப்புகள்';
+
+  @override
+  String get onboardingPermNotificationsWhy => 'எச்சரிக்கைகளைக் காட்டும்.';
+
+  @override
+  String get onboardingPermMicrophone => 'ஒலிவாங்கி';
+
+  @override
+  String get onboardingPermMicrophoneWhy =>
+      'Jaga மூலம் அழைப்புகளில் பேச உதவும்.';
+
+  @override
+  String get onboardingPermFullScreen => 'முழுத்திரை எச்சரிக்கைகள்';
+
+  @override
+  String get onboardingPermFullScreenWhy =>
+      'எச்சரிக்கை திரை முழுவதும் தோன்ற உதவும்.';
+
+  @override
+  String get onboardingPermCallingAccount => 'அழைப்புக் கணக்கு';
+
+  @override
+  String get onboardingPermCallingAccountWhy =>
+      'அழைப்புகள் Jaga-வில் ஒலிக்க உதவும்.';
+
+  @override
+  String get onboardingPermAutostart => 'தானாகத் தொடங்கு';
+
+  @override
+  String get onboardingPermAutostartWhy =>
+      'Xiaomi தொலைபேசிகளில் Jaga தொடர்ந்து இயங்க உதவும்.';
+
+  @override
+  String get onboardingAfterCallSetup => 'அழைப்புகளுடன் பின்னர் அமைக்கப்படும்';
+
+  @override
+  String get onboardingForwardTitle =>
+      'அழைப்புகளை Jaga-விற்கு திருப்பிவிடுங்கள்';
+
+  @override
+  String get onboardingForwardBody =>
+      'இந்த குறியீட்டை ஒருமுறை டயல் செய்யுங்கள். பிறகு இந்த தொலைபேசிக்கான அழைப்புகள் Jaga-வில் ஒலிக்கும்.';
+
+  @override
+  String get onboardingDialNow => 'இப்போது டயல் செய்';
+
+  @override
+  String get onboardingCheckForwarding => 'திருப்புதலைச் சரிபார்';
+
+  @override
+  String get onboardingForwardDone => 'டயல் செய்துவிட்டேன்';
+
+  @override
+  String get onboardingPinTitle => 'துணை பூட்டை அமைக்கவும்';
+
+  @override
+  String get onboardingPinBody =>
+      'இந்த PIN மூலம் குடும்பத்தினர் மட்டுமே Jaga அமைப்புகளை மாற்ற முடியும்; அதனால் அழைப்பவர் அவரை அதை அணைக்கச் சொல்லி ஏமாற்ற முடியாது.';
+
+  @override
+  String get onboardingPinConfirm => 'PIN-ஐ மீண்டும் உள்ளிடவும்';
+
+  @override
+  String get onboardingPinMismatch =>
+      'PIN-கள் பொருந்தவில்லை. மீண்டும் அமைக்கவும்.';
+
+  @override
+  String get onboardingPauseTitle => 'Pause டோக்கன்';
+
+  @override
+  String get onboardingPauseBody =>
+      'இந்தக் குறியீட்டை அவரது வங்கியிடம் ஒருமுறை கொடுங்கள். அவர் பரிமாற்றம் செய்யும்போது, வங்கி Jaga-விடம் சரிபார்க்கும்; அவர் மோசடி அழைப்பில் இருந்தால் அதை நிறுத்தி வைக்கலாம்.';
+
+  @override
+  String get onboardingLinkTitle => 'இணைப்புக் குறியீடு';
+
+  @override
+  String get onboardingLinkBody =>
+      '3 குடும்ப உறுப்பினர்கள் வரை தங்கள் Jaga செயலியில் இந்தக் குறியீட்டை உள்ளிடலாம்.';
+
+  @override
+  String onboardingLinkShareText(String code, String name) {
+    return 'Jaga-வைத் திறந்து, \"குடும்ப உதவியாளர்\" என்பதைத் தேர்ந்தெடுத்து, $name பற்றிய எச்சரிக்கைகளைப் பெற $code ஐ உள்ளிடவும்.';
+  }
+
+  @override
+  String get onboardingJoined => 'இதுவரை சேர்ந்தவர்கள்';
+
+  @override
+  String get onboardingJoinedNone => 'இன்னும் யாரும் இல்லை';
+
+  @override
+  String get onboardingBuzzTitle => 'அதிர்வை உணருங்கள்';
+
+  @override
+  String get onboardingBuzzBody =>
+      'அழைப்பின் போது தொலைபேசி இப்படி அதிர்ந்தால், திரையைப் பாருங்கள்.';
+
+  @override
+  String get onboardingBuzzButton => 'அதிர்வை உணருங்கள்';
+
+  @override
+  String get onboardingDoneProtected => 'Jaga அமைக்கப்பட்டது.';
+
+  @override
+  String get onboardingFinish => 'முடி';
+
+  @override
+  String get onboardingJoinCode => '6 இலக்கக் குறியீட்டை உள்ளிடவும்';
+
+  @override
+  String get onboardingNamesTitle => 'சில விவரங்கள்';
+
+  @override
+  String get onboardingYourName => 'உங்கள் பெயர்';
+
+  @override
+  String get onboardingCallHer => 'அவரை அழைக்கும் பெயர்';
+
+  @override
+  String get onboardingCallHerHelper => 'நீங்கள் அவரை என்ன அழைப்பீர்கள்?';
+
+  @override
+  String get onboardingCodeWrong =>
+      'அந்தக் குறியீடு பொருந்தவில்லை. 6 இலக்கங்களையும் சரிபார்க்கவும்.';
+
+  @override
+  String get onboardingCodeExpired =>
+      'இந்தக் குறியீடு காலாவதியாகிவிட்டது. புதியதைக் கேளுங்கள்.';
+
+  @override
+  String get onboardingCopilotsFull =>
+      '3 குடும்ப உதவியாளர்கள் ஏற்கெனவே இணைக்கப்பட்டுள்ளனர். நீங்கள் சேர ஒருவர் இணைப்பை நீக்க வேண்டும்.';
+
+  @override
+  String get onboardingNotifTitle => 'எச்சரிக்கைகளை அனுமதிக்கவும்';
+
+  @override
+  String get onboardingNotifBody =>
+      'நீங்கள் கவனித்துக்கொள்ளும் ஒருவர் மோசடி அழைப்பில் இருக்கலாம் என்றால், Jaga இங்கே எச்சரிக்கை அனுப்பும்.';
+
+  @override
+  String get onboardingNotNow => 'இப்போது வேண்டாம்';
+
+  @override
+  String onboardingDoneCopilot(String name) {
+    return '$name பற்றிய எச்சரிக்கைகளைப் பெறுவீர்கள்.';
+  }
+
+  @override
+  String get statusFamilyLabel => 'உங்கள் குடும்பம்';
+
+  @override
+  String get statusFamilyNone => 'இன்னும் குடும்பத்தினர் இணைக்கப்படவில்லை';
+
+  @override
+  String get statusNeedsFamily =>
+      'உங்கள் குடும்பத்தினரிடம் Jaga-வைச் சரிபார்க்கச் சொல்லுங்கள்';
+
+  @override
+  String get settingsTitle => 'அமைப்புகள்';
+
+  @override
+  String get settingsPinTitle => 'துணை பூட்டை உள்ளிடவும்';
+
+  @override
+  String get settingsPinWrong => 'தவறான PIN';
+
+  @override
+  String get settingsPinLocked =>
+      'அதிக முறை முயற்சித்துவிட்டீர்கள். 5 நிமிடங்கள் காத்திருக்கவும்.';
+
+  @override
+  String get settingsReset => 'Jaga-வை மீட்டமைக்க அழுத்திப் பிடிக்கவும்';
 }

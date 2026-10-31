@@ -50,9 +50,11 @@ ThemeData buildJagaTheme(Locale locale) {
       filled: true,
       fillColor: scheme.surfaceContainer,
       contentPadding: const EdgeInsets.all(20),
+      // A visible resting border: with none, the floated label straddled the
+      // top edge of the filled box with nothing for it to sit on.
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(m.radiusSmall),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: scheme.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(m.radiusSmall),
