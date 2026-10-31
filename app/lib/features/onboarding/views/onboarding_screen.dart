@@ -12,7 +12,7 @@ import 'steps/buzz_step.dart';
 import 'steps/done_step.dart';
 import 'steps/join_code_step.dart';
 import 'steps/notifications_step.dart';
-import 'steps/permissions_step.dart';
+import 'widgets/permission_checklist.dart';
 import 'steps/pin_step.dart';
 import 'steps/role_step.dart';
 import 'widgets/forwarding_body.dart';
@@ -46,7 +46,14 @@ class OnboardingScreen extends StatelessWidget {
           OnboardingStep.about => (l.onboardingAboutTitle, AboutStep(vm: vm)),
           OnboardingStep.permissions => (
             l.onboardingPermissionsTitle,
-            PermissionsStep(vm: vm),
+            PermissionChecklist(
+              setup: vm.setup,
+              tried: vm.tried,
+              onFix: vm.fix,
+              xiaomi: vm.xiaomi,
+              autostartConfirmed: vm.autostartConfirmed,
+              onConfirmAutostart: vm.confirmAutostart,
+            ),
           ),
           OnboardingStep.forwarding => (
             l.onboardingForwardTitle,

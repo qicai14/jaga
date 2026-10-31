@@ -9,16 +9,15 @@ TextStyle _style(
   double height, {
   double? letterSpacing,
   List<FontFeature>? features,
-}) =>
-    TextStyle(
-      fontFamily: 'NotoSans',
-      fontFamilyFallback: _fallback,
-      fontSize: size,
-      fontWeight: weight,
-      height: height,
-      letterSpacing: letterSpacing,
-      fontFeatures: features,
-    );
+}) => TextStyle(
+  fontFamily: 'NotoSans',
+  fontFamilyFallback: _fallback,
+  fontSize: size,
+  fontWeight: weight,
+  height: height,
+  letterSpacing: letterSpacing,
+  fontFeatures: features,
+);
 
 /// The Warning-specific styles (design-system.md section 3).
 @immutable
@@ -33,10 +32,20 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
     const tabular = [FontFeature.tabularFigures()];
     return JagaTextStyles(
       command: _style(52, FontWeight.w800, 1.08),
-      officialNumber: _style(40, FontWeight.w800, 1.1,
-          letterSpacing: 1.0, features: tabular),
-      linkCode: _style(48, FontWeight.w800, 1.0,
-          letterSpacing: 6.0, features: tabular),
+      officialNumber: _style(
+        40,
+        FontWeight.w800,
+        1.1,
+        letterSpacing: 1.0,
+        features: tabular,
+      ),
+      linkCode: _style(
+        48,
+        FontWeight.w800,
+        1.0,
+        letterSpacing: 6.0,
+        features: tabular,
+      ),
     );
   }
 
@@ -49,12 +58,11 @@ class JagaTextStyles extends ThemeExtension<JagaTextStyles> {
     TextStyle? command,
     TextStyle? officialNumber,
     TextStyle? linkCode,
-  }) =>
-      JagaTextStyles(
-        command: command ?? this.command,
-        officialNumber: officialNumber ?? this.officialNumber,
-        linkCode: linkCode ?? this.linkCode,
-      );
+  }) => JagaTextStyles(
+    command: command ?? this.command,
+    officialNumber: officialNumber ?? this.officialNumber,
+    linkCode: linkCode ?? this.linkCode,
+  );
 
   @override
   JagaTextStyles lerp(ThemeExtension<JagaTextStyles>? other, double t) {

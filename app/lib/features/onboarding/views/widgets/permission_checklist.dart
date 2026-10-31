@@ -2,22 +2,37 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/gen/app_localizations.dart';
 import '../../../../data/services/device_setup_service.dart';
-import '../../view_models/onboarding_view_model.dart';
-import '../widgets/permission_row.dart';
+import 'permission_row.dart';
 
-/// Step 4: a live checklist. The view model looks again whenever the app resumes.
-class PermissionsStep extends StatelessWidget {
-  const PermissionsStep({super.key, required this.vm});
+/// The live permissions checklist: onboarding step 4 and the PIN-locked Settings.
+/// The owning view model looks again whenever the app resumes.
+class PermissionChecklist extends StatelessWidget {
+  const PermissionChecklist({
+    super.key,
+    required this.setup,
+    required this.tried,
+    required this.onFix,
+    this.xiaomi = false,
+    this.autostartConfirmed = false,
+    this.onConfirmAutostart,
+  });
 
-  final OnboardingViewModel vm;
+  final Map<SetupItem, bool> setup;
+  final Set<SetupItem> tried;
+  final void Function(SetupItem) onFix;
+
+  /// Xiaomi phones also list autostart, ticked by hand.
+  final bool xiaomi;
+  final bool autostartConfirmed;
+  final VoidCallback? onConfirmAutostart;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    bool granted(SetupItem i) => vm.setup[i] == true;
+    bool granted(SetupItem i) => setup[i] == true;
     // A refused permission says what to do next once Fix was tried.
     String why(SetupItem i, String title, String normal) =>
-        vm.tried.contains(i) && !granted(i)
+        tried.contains(i) && !granted(i)
         ? l.onboardingPermOpenSettingsHelp(title)
         : normal;
     final phoneOk = granted(SetupItem.phoneCalls);
@@ -31,7 +46,7 @@ class PermissionsStep extends StatelessWidget {
             l.onboardingPermPhoneWhy,
           ),
           granted: phoneOk,
-          onFix: () => vm.fix(SetupItem.phoneCalls),
+          onFix: () => onFix(SetupItem.phoneCalls),
         ),
         PermissionRow(
           title: l.onboardingPermMicrophone,
@@ -41,45 +56,45 @@ class PermissionsStep extends StatelessWidget {
             l.onboardingPermMicrophoneWhy,
           ),
           granted: granted(SetupItem.microphone),
-          onFix: () => vm.fix(SetupItem.microphone),
+          onFix: () => onFix(SetupItem.microphone),
         ),
         PermissionRow(
           title: l.onboardingPermCallingAccount,
           why: !phoneOk
               ? l.onboardingPermCallingAccountFirst
-              : vm.tried.contains(SetupItem.callingAccount) &&
+              : tried.contains(SetupItem.callingAccount) &&
                     !granted(SetupItem.callingAccount)
               ? l.onboardingPermCallingAccountHelp
               : l.onboardingPermCallingAccountWhy,
           granted: granted(SetupItem.callingAccount),
           // Disabled until Phone calls is allowed.
-          onFix: phoneOk ? () => vm.fix(SetupItem.callingAccount) : null,
+          onFix: phoneOk ? () => onFix(SetupItem.callingAccount) : null,
         ),
         PermissionRow(
           title: l.onboardingPermOverlay,
           why: l.onboardingPermOverlayWhy,
           granted: granted(SetupItem.displayOverApps),
-          onFix: () => vm.fix(SetupItem.displayOverApps),
+          onFix: () => onFix(SetupItem.displayOverApps),
         ),
         PermissionRow(
           title: l.onboardingPermNotifications,
           why: l.onboardingPermNotificationsWhy,
           granted: granted(SetupItem.notifications),
-          onFix: () => vm.fix(SetupItem.notifications),
+          onFix: () => onFix(SetupItem.notifications),
         ),
         PermissionRow(
           title: l.onboardingPermFullScreen,
           why: l.onboardingPermFullScreenWhy,
           granted: granted(SetupItem.fullScreenAlerts),
-          onFix: () => vm.fix(SetupItem.fullScreenAlerts),
+          onFix: () => onFix(SetupItem.fullScreenAlerts),
         ),
-        if (vm.xiaomi)
+        if (xiaomi)
           PermissionRow(
             title: l.onboardingPermAutostart,
             why: l.onboardingPermAutostartWhy,
-            granted: vm.autostartConfirmed,
-            onFix: () => vm.fix(SetupItem.autostart),
-            onConfirm: vm.confirmAutostart,
+            granted: autostartConfirmed,
+            onFix: () => onFix(SetupItem.autostart),
+            onConfirm: onConfirmAutostart,
           ),
       ],
     );

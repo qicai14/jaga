@@ -31,9 +31,17 @@ class ProtectedHomeViewModel extends ChangeNotifier
   bool _disposed = false;
   bool _needsAttention = false;
   List<String> _family = const [];
+  Map<SetupItem, bool> _setup = {};
+  final _tried = <SetupItem>{};
 
   /// A step-4 permission is no longer granted: the family must look at the phone.
   bool get needsAttention => _needsAttention;
+
+  /// Per-permission state for the Settings checklist.
+  Map<SetupItem, bool> get setup => _setup;
+
+  /// Items whose Fix was pressed: if still red, the row says what to do next.
+  Set<SetupItem> get tried => _tried;
 
   /// Names of the family co-pilots who have joined.
   List<String> get family => _family;
@@ -44,7 +52,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
 
   /// Checks the permissions and the family list. Runs at start and on resume.
   Future<void> refresh() async {
-    final attention = !platformItemsOk(await _deviceSetup.check());
+    final setup = await _deviceSetup.check();
     List<String> family;
     try {
       family = await _repository.copilots();
@@ -52,7 +60,8 @@ class ProtectedHomeViewModel extends ChangeNotifier
       family = _family;
     }
     if (_disposed) return;
-    _needsAttention = attention;
+    _setup = setup;
+    _needsAttention = !platformItemsOk(setup);
     _family = family;
     notifyListeners();
   }
@@ -60,6 +69,12 @@ class ProtectedHomeViewModel extends ChangeNotifier
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) refresh();
+  }
+
+  Future<void> fix(SetupItem item) async {
+    _tried.add(item);
+    await _deviceSetup.fix(item);
+    await refresh();
   }
 
   Future<PinResult> verifyPin(String pin) => _pin.verify(pin);

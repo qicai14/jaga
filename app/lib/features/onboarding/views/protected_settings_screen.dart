@@ -9,8 +9,9 @@ import 'widgets/forwarding_body.dart';
 import 'widgets/language_list.dart';
 import 'widgets/link_code_body.dart';
 import 'widgets/pause_token_body.dart';
+import 'widgets/permission_checklist.dart';
 
-/// Behind the co-pilot lock: language, forwarding, pause token, link code, reset.
+/// Behind the co-pilot lock: permissions, language, forwarding, pause token, link code, reset.
 class ProtectedSettingsScreen extends StatelessWidget {
   const ProtectedSettingsScreen({super.key, required this.vm});
 
@@ -45,6 +46,15 @@ class ProtectedSettingsScreen extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _section(
+              context,
+              l.onboardingPermissionsTitle,
+              PermissionChecklist(
+                setup: vm.setup,
+                tried: vm.tried,
+                onFix: vm.fix,
+              ),
+            ),
             _section(
               context,
               l.onboardingLanguageTitle,

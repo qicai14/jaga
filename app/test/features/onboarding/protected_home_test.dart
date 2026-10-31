@@ -123,6 +123,37 @@ void main() {
     },
   );
 
+  forEachScale(
+    'the amber status opens Settings behind the PIN, where Fix works',
+    (tester, scale) async {
+      final rig = await pumpHome(
+        tester,
+        scale: scale,
+        device: FakeDeviceSetupService(
+          state: {for (final i in platformItems) i: true}
+            ..[SetupItem.microphone] = false,
+        ),
+      );
+      await tester.tap(find.text('Ask your family to check Jaga'));
+      await tester.pumpAndSettle();
+      expect(find.text('Enter the co-pilot lock'), findsOneWidget);
+      await unlockWith(tester, '1234');
+      expect(inSettings('Phone permissions'), findsOneWidget);
+      final fix = find.descendant(
+        of: find.byType(ProtectedSettingsScreen),
+        matching: find.widgetWithText(OutlinedButton, 'Fix'),
+      );
+      expect(fix, findsOneWidget);
+      expect(tester.getSize(fix).height, greaterThanOrEqualTo(56));
+
+      // Fixing it in system settings: the row turns green, the status goes back.
+      rig.device.state[SetupItem.microphone] = true;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(fix, findsNothing);
+    },
+  );
+
   forEachScale('a long press asks for the co-pilot lock', (
     tester,
     scale,
