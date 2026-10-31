@@ -39,7 +39,7 @@ forwarding, pause token, reset) sit behind a long-press plus the co-pilot lock P
 ### Call screen (#12)
 **Own incoming-call screen: not available** (Preston, 28 Oct). `twilio_voice` uses a system-managed ConnectionService,
 so the phone's own dialer draws the ring and answer screen (system ringtone, OEM look). **Ours:** the in-call screen after
-answer (guarded masthead, caller number, timer, speaker, hang up; no mute, no hold), the Caution and Warning layered on
+answer (guarded masthead, caller number, timer, mute (obvious red when on), speaker, hang up; no hold), the Caution and Warning layered on
 it, and our notifications (bring the in-call screen forward at answer, Warning fallback). Detail in `call.md`.
 
 ### Caution and Warning (#9, live in #19)

@@ -28,19 +28,25 @@ PopScope(canPop: false, onPopInvoked: back rule) > WarningOverlay(vm: warningVm,
       FittedBox(scaleDown) > Text(callerLabel, headlineMedium, onSurface, tabular)   // one line, never wraps
       gap s8; Semantics(liveRegion) > Text(status line, bodyLarge, onSurfaceVariant)  // timer or state text
   3 Spacer
-  4 Padding(l24, v16) > Column: SpeakerToggle; gap m16; BigButton(hangUp tone, call_end, callHangUp, maxTextScale 1.5))
+  4 Padding(l24, v16) > Column: MuteToggle; gap m12; SpeakerToggle; gap m16; BigButton(hangUp tone, call_end, callHangUp, maxTextScale 1.5))
 ```
 - **Speaker toggle (kept, justified):** on speaker she is looking at the screen, so a Warning is seen at once; many elderly
   users already call on speaker. Full width, 64dp, `OutlinedButton` shape: icon `volume_up`, label `callSpeaker`, trailing
   `callSpeakerOn/Off`; on = `primaryContainer` fill + 3dp `primary` border. Semantics: toggle button with checked state.
-- **Mute: dropped** (ui-plan listed it). An accidental mute makes her think the call broke, and it adds nothing to safety.
+- **Mute: kept (Preston, 1 Nov), and its state must be impossible to miss.** Same 64dp full-width shape as Speaker, above it.
+  - Off: outlined, icon `mic`, label `callMute`, trailing `callMuteOff`.
+  - On: the whole button turns the hang-up red fill with white text, icon `mic_off`, label `callMuted` ("Muted: the caller
+    can't hear you"). A same-red strip also appears under the masthead with the same words, so it shows even when she
+    only glances at the top. Tapping the strip or the button unmutes.
+  - Semantics: toggle button with checked state; announces `callMuted` / `callUnmuted` in a live region on change.
+  - Mute is never changed by Jaga: a Warning or Caution keeps it as is, and it resets to off at the next call.
 - **Timer: kept**, `mm:ss` from the `connected` event, so she sees the call is live. Semantics `callTimerSemantics`.
 - **Ear:** while speaker is off and the screen is ours, hold a proximity screen-off wake lock (dialers do this; once our
   activity is in front the dialer's lock is gone). Released on speaker on, end, or background. Pending trial on a phone.
 
 | Phase | Status line | Controls |
 |---|---|---|
-| connecting (answered, not connected) | `callConnecting` | speaker disabled, Hang up enabled |
+| connecting (answered, not connected) | `callConnecting` | mute and speaker disabled, Hang up enabled |
 | active | timer | both |
 | reconnecting (call audio dropped) | `callReconnectingAudio` (text: her audio is affected, she must know) | both |
 | ended | `callEnded` + final `mm:ss` | both replaced by `BigButton(callDone, guarded)`; auto-return after 3 s |
@@ -91,16 +97,16 @@ Recovery: rows re-check on resume as today. **Status screen:** any red row → t
 ## 6. Architecture
 ```
 lib/data/models/call_snapshot.dart      CallPhase {idle, ringing, connecting, active, reconnecting, ended, failed},
-                                        CallSnapshot {phase, callerLabel?, callId?, connectedAt?, speakerOn}  (app-internal)
+                                        CallSnapshot {phase, callerLabel?, callId?, connectedAt?, muted, speakerOn}  (app-internal)
 lib/data/services/call_service.dart     abstract CallService { Stream<CallSnapshot> snapshots; Future<CallSnapshot> current();
-                                        hangUp(); setSpeaker(bool); register(accessToken) }  + FakeCallService (scripted)
+                                        hangUp(); setMuted(bool); setSpeaker(bool); register(accessToken) }  + FakeCallService (scripted)
 lib/data/services/twilio_call_service.dart  the only file importing twilio_voice; maps CallEvent -> CallSnapshot
 lib/data/services/call_ui_service.dart  `jaga/call_ui` channel: setProximityLock, setShowWhenLocked, moveToBack,
                                         launchedForCall stream  + FakeCallUiService
 lib/data/repositories/call_repository.dart  ValueListenable<CallSnapshot>; restores on launch (isOnCall/activeCall);
                                         feeds callId to CallRiskRepository
-lib/features/call/view_models/in_call_view_model.dart   ChangeNotifier: phase, timer (1 s Ticker only while active), speaker
-lib/features/call/views/in_call_screen.dart, views/widgets/speaker_toggle.dart
+lib/features/call/view_models/in_call_view_model.dart   ChangeNotifier: phase, timer (1 s Ticker only while active), mute, speaker
+lib/features/call/views/in_call_screen.dart, views/widgets/mute_toggle.dart, views/widgets/speaker_toggle.dart
 lib/core/widgets/guarded_masthead.dart  shared with warning_screen
 lib/debug/entries/call_entries.dart     replaces placeholder_call_screen.dart (warning entries host on InCallScreen)
 android: JagaMessagingService.kt (priority 100, spike §5), JagaApplication.kt (§4), MainActivity (`jaga/call_ui`)
@@ -108,7 +114,7 @@ DeviceSetupService: + SetupItem.phoneCalls; callingAccount becomes real (both in
 ```
 **Event mapping** (`TwilioCallService`): `incoming`/`ringing` → ringing (no screen); `answer` → connecting (+ route to call);
 `connected` → active, `connectedAt = now`; `reconnecting` → reconnecting; `reconnected` → active; `callEnded` → ended, or
-failed if never connected; `declined`/`missedCall` → idle; `speakerOn/Off` → `speakerOn`; `permission` → re-check step 4;
+failed if never connected; `declined`/`missedCall` → idle; `mute/unmute` → `muted`; `speakerOn/Off` → `speakerOn`; `permission` → re-check step 4;
 the rest ignored. `callId` from `activeCall.customParams['callId']` (§9). Only the protected role starts `CallService`.
 **Push routing:** `JagaMessagingService extends FlutterFirebaseMessagingService`, priority 100: `TwilioVoiceFcm.handleMessage`
 takes Twilio invites/cancels natively (works with the app killed); everything else (`data.familyAlert`) falls through to
@@ -126,6 +132,9 @@ covers the plugin's 26.
 | `callFailed` | The call didn't connect | Panggilan tidak bersambung | 电话没有接通 |
 | `callFailedBody` | If it matters, they will call again. | Jika penting, mereka akan telefon semula. | 如果有要紧事，对方会再打来。 |
 | `callHangUp` | Hang up | Letak telefon | 挂断 |
+| `callMute` / `callMuteOff` | Mute / Off | Senyap / Mati | 静音 / 关 |
+| `callMuted` | Muted: the caller can't hear you | Disenyapkan: pemanggil tidak dapat dengar anda | 已静音：对方听不到你 |
+| `callUnmuted` | Unmuted | Bunyi dihidupkan | 已取消静音 |
 | `callSpeaker` / `callSpeakerOn` / `callSpeakerOff` | Speaker / On / Off | Pembesar suara / Hidup / Mati | 扬声器 / 开 / 关 |
 | `callTimerSemantics` | Call time {time} | Masa panggilan {time} | 通话时间 {time} |
 | `callUnknownCaller` | Unknown number | Nombor tidak dikenali | 未知号码 |
@@ -148,14 +157,15 @@ endpoint). Until then `CallRiskRepository(callId: null)` accepts any call and `F
 access-token endpoint; what the caller hears if the app rejects the invite (missing permissions) or doesn't answer.
 
 ## 10. Widget tests (`test/features/call/`), each at 393×852 and at text scale 2.0
-1. active: masthead, caller label on one line, timer, speaker, Hang up visible; no overflow; Hang up above the gesture bar.
-2. connecting: `callConnecting`, speaker disabled. reconnecting: `callReconnectingAudio` in a live region.
+1. active: masthead, caller label on one line, timer, mute, speaker, Hang up visible; no overflow; Hang up above the gesture bar.
+2. connecting: `callConnecting`, mute and speaker disabled. reconnecting: `callReconnectingAudio` in a live region.
 3. Timer: `connectedAt` 2:14 ago shows "02:14"; semantics `callTimerSemantics`.
-4. Speaker tap: `FakeCallService.setSpeaker(true)`; toggle checked; `FakeCallUiService` proximity lock released.
+4. Mute tap: `FakeCallService.setMuted(true)`; button turns red with `callMuted`, the strip under the masthead shows, live
+   region announces; tapping the strip unmutes. At text scale 2.0 both still fit. Speaker tap: `FakeCallService.setSpeaker(true)`; toggle checked; `FakeCallUiService` proximity lock released.
 5. Hang up (call screen and Warning): `hangUp` called once each.
 6. ended: `callEnded` + duration and Done; after 3 s, status screen. failed: `callFailed`, body, Done.
 7. Back: active → `moveToBack` called, route stays; Warning up → nothing; ended → status screen.
-8. medium update: banner over the masthead, call controls still tappable; high: Warning, buzz started, speaker state kept.
+8. medium update: banner over the masthead, call controls still tappable; high: Warning, buzz started, mute and speaker state kept.
 9. Event mapping (unit): each `CallEvent` sequence → expected phases; `answer`+`callEnded` without `connected` → failed.
 10. Step 4: Phone calls red → calling-account Fix disabled with the hint; both green → Continue enabled; settings shows rows.
 
