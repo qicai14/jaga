@@ -1,0 +1,13 @@
+{
+  "kind": "alert",
+  "callId": "call_01HZX7K2M4",
+  "protectedUserName": "Mak Siti",
+  "stage": "money",
+  "summary": "Caller claims to be PDRM and is pushing a transfer to a 'safe account'.",
+  "quotes": [
+    "akaun ****1234",
+    "jangan beritahu sesiapa",
+    "waran tangkap"
+  ],
+  "at": "2026-10-27T09:17:12+08:00"
+}

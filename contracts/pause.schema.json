@@ -1,16 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "jaga/pause",
-  "title": "Jaga Pause (bank -> Jaga: 'is this customer mid-scam?'). Response body. Draft v0.",
-  "type": "object",
-  "required": ["inScam", "checkedAt"],
-  "additionalProperties": false,
-  "properties": {
-    "inScam": { "type": "boolean" },
-    "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
-    "claimedAgency": { "type": ["string", "null"] },
-    "callActiveForSeconds": { "type": ["integer", "null"] },
-    "recommendedHoldMinutes": { "type": "integer", "minimum": 0 },
-    "checkedAt": { "type": "string", "format": "date-time" }
+  "title": "Jaga Pause (bank -> Jaga: 'is this customer mid-scam?'). The root validates a response; the request body is #/$defs/request.",
+  "$comment": "The family co-pilot's GET /copilot/pause and POST /copilot/pause/clear take no body and answer #/$defs/response (ADR 0010).",
+  "$ref": "#/$defs/response",
+  "$defs": {
+    "request": {
+      "title": "Jaga Pause request body (bank -> Jaga)",
+      "type": "object",
+      "required": ["pauseToken"],
+      "additionalProperties": false,
+      "properties": {
+        "pauseToken": { "type": "string", "minLength": 1, "description": "The protected user's pause token, given to the bank at onboarding" }
+      }
+    },
+    "response": {
+      "title": "Jaga Pause response body (Jaga -> bank or family co-pilot)",
+      "type": "object",
+      "required": ["inScam", "checkedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "inScam": { "type": "boolean", "description": "True while a call is live at isolation or higher, and for 30 minutes after it ends, unless a family co-pilot cleared it, until that call's stage changes (ADR 0010)" },
+        "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
+        "claimedAgency": { "type": ["string", "null"] },
+        "callActiveForSeconds": { "type": ["integer", "null"] },
+        "recommendedHoldMinutes": { "type": "integer", "minimum": 0, "description": "30 at money/credentials, 15 at isolation/handoff, 0 otherwise" },
+        "checkedAt": { "type": "string", "format": "date-time" }
+      }
+    }
   }
 }
