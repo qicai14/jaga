@@ -73,8 +73,8 @@ void main() {
       () async {
         await start(const OnboardingProgress());
         expect(vm.progress.language, 'ms');
-        vm.selectLanguage('ta');
-        expect(rig.onboarding.progress.value.language, 'ta');
+        vm.selectLanguage('zh');
+        expect(rig.onboarding.progress.value.language, 'zh');
       },
     );
 
@@ -145,12 +145,12 @@ void main() {
 
     test('back from Role returns to the language, kept', () async {
       await start(const OnboardingProgress());
-      vm.selectLanguage('ta');
+      vm.selectLanguage('zh');
       await vm.next();
       expect(vm.step, OnboardingStep.role);
       expect(vm.back(), isTrue);
       expect(vm.step, OnboardingStep.language);
-      expect(vm.progress.language, 'ta');
+      expect(vm.progress.language, 'zh');
     });
 
     test('the last step has no back', () async {
@@ -349,11 +349,11 @@ void main() {
   group('co-pilot flow', () {
     test('has five steps and keeps the language chosen first', () async {
       await start(const OnboardingProgress());
-      vm.selectLanguage('ta');
+      vm.selectLanguage('zh');
       await vm.next();
       vm.selectRole(OnboardingRole.copilot);
       expect(vm.stepCount, 5);
-      expect(vm.progress.language, 'ta');
+      expect(vm.progress.language, 'zh');
     });
 
     test(

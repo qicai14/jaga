@@ -5,7 +5,7 @@ Usage, from a folder outside the repo (so the repo's uv version pin doesn't appl
         python -I <repo>/app/tool/subset_fonts.py <dir with the original Noto files>
 Re-run whenever the zh ARB gains new characters.
 
-Sources: notofonts/notofonts.github.io (NotoSans, NotoSansTamil, unhinted static TTF) and
+Sources: notofonts/notofonts.github.io (NotoSans, unhinted static TTF) and
 notofonts/noto-cjk Sans/SubsetOTF/SC (NotoSansSC Regular and Bold). All OFL 1.1.
 """
 
@@ -19,7 +19,6 @@ APP = Path(__file__).resolve().parents[1]
 OUT = APP / "assets" / "fonts"
 
 LATIN = "U+0000-007F,U+00A0-00FF,U+0100-017F,U+2000-206F,U+20AC,U+2122"
-TAMIL = "U+0B80-0BFF,U+200C,U+200D,U+25CC," + LATIN
 
 
 def gb2312_level1() -> set[str]:
@@ -54,7 +53,6 @@ def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     for w in ("Regular", "SemiBold", "ExtraBold"):
         run(src, f"NotoSans-{w}.ttf", f"NotoSans-{w}.ttf", unicodes=LATIN)
-        run(src, f"NotoSansTamil-{w}.ttf", f"NotoSansTamil-{w}.ttf", unicodes=TAMIL)
     han = "".join(sorted(gb2312_level1() | arb_han()))
     for w in ("Regular", "Bold"):
         run(src, f"NotoSansSC-{w}.otf", f"NotoSansSC-{w}.otf", unicodes=LATIN, text=han)

@@ -4,7 +4,7 @@ import '../core/l10n/gen/app_localizations.dart';
 import '../core/theme/jaga_theme.dart';
 import 'gallery_entry.dart';
 
-const _locales = [Locale('ms'), Locale('en'), Locale('zh'), Locale('ta')];
+const _locales = [Locale('ms'), Locale('en'), Locale('zh')];
 const _scales = [1.0, 1.5, 2.0];
 
 /// Debug-only catalogue of screen states. Chrome is English on purpose (not user-facing).

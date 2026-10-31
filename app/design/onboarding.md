@@ -39,7 +39,7 @@ offline): the protection is the lockout and the Keystore.
 ## 3. Protected flow (10 steps)
 | # | Step | Content and states |
 |---|---|---|
-| 1 | Language | `onboardingAppLanguageTitle` ("Choose your language"), the same screen before a role is chosen. Radio list, each option in its own script ("Bahasa Melayu", "English", "中文", "தமிழ்"); the phone's language is preselected if Jaga speaks it, otherwise Malay. The app switches language live on selection. No back arrow (nothing to go back to), and no "Step n of m" until a role is chosen (the total is not known yet). Here the choice is also the command language |
+| 1 | Language | `onboardingAppLanguageTitle` ("Choose your language"), the same screen before a role is chosen. Radio list, each option in its own script ("Bahasa Melayu", "English", "中文"); the phone's language is preselected if Jaga speaks it, otherwise Malay. The app switches language live on selection. No back arrow (nothing to go back to), and no "Step n of m" until a role is chosen (the total is not known yet). Here the choice is also the command language |
 | 2 | Role | `onboardingRoleTitle`; two large choice cards (min 96dp, `surfaceContainer`, radius 28, selected = 3dp `primary` border + check): `onboardingRoleProtected` / `onboardingRoleCopilot`, each with a one-line body. Same step in both flows. Back returns to Language, value kept |
 | 3 | About her | Text field `onboardingNameLabel` (her name, as the family calls her, max 30), then region row "Malaysia" with `onboardingRegionInfo` (read-only). Continue = **register**: button shows a spinner and "Setting up…"; error → inline `onboardingNetworkError` + retry |
 | 4 | Phone permissions | Checklist (§5). Continue enabled when every required item is green |
@@ -103,7 +103,7 @@ If a step-4 check fails on resume, the screen shows the `needsAttention` state (
 `482913`; join code `000000` = full, `111111` = expired, others wrong). Fixtures are Dart, not JSON, until a schema
 exists (no schema test).
 
-## 8. Copy (`app_en.arb`; ms/zh/ta by flutter-dev)
+## 8. Copy (`app_en.arb`; ms/zh by flutter-dev)
 | Key | English |
 |---|---|
 | `onboardingStepOf` / `onboardingContinue` | Step {step} of {total} / Continue |

@@ -8,7 +8,6 @@ const _languages = [
   ('ms', 'Bahasa Melayu'),
   ('en', 'English'),
   ('zh', '中文'),
-  ('ta', 'தமிழ்'),
 ];
 
 class LanguageList extends StatelessWidget {

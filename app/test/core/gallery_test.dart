@@ -9,7 +9,7 @@ void main() {
   final entries = galleryEntries();
 
   // Every registered state must render in every language at 393x852 and text x2.
-  for (final locale in const ['ms', 'en', 'zh', 'ta']) {
+  for (final locale in const ['ms', 'en', 'zh']) {
     for (final scale in textScales) {
       testWidgets('gallery entries render: $locale, x$scale', (tester) async {
         for (final e in entries) {

@@ -67,7 +67,7 @@ void main() {
     expect(find.text('Remove Mum from this phone'), findsOneWidget);
   });
 
-  for (final locale in const ['ms', 'ta']) {
+  for (final locale in const ['ms', 'zh']) {
     testWidgets('settings in $locale at text x2.0 has no overflow', (
       tester,
     ) async {
