@@ -1136,6 +1136,12 @@ def test_cjk_phrases_match_despite_spacing_punctuation_and_line_splits(lines):
         "Jangan beritahu sesiapa kod TAC anda, bank tidak akan meminta.",
         "Never share your TAC code with anyone, even bank staff.",
         "Jangan beritahu sesiapa nombor TAC anda.",
+        "Jangan kongsi kod OTP",
+        "Never share your OTP code",
+        "Bank tidak akan minta kod OTP",
+        "Bank tidak akan minta kod TAC",
+        "Kami tidak akan meminta nombor OTP anda",
+        "Kami tak akan minta kod TAC anda",
     ],
 )
 def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
@@ -1157,6 +1163,13 @@ def test_a_genuine_bank_warning_that_names_a_hard_trigger_stays_at_none(line):
         "Don't tell anyone the OTP we sent",
         "Don’t tell anyone about this call.",
         "Never share your TAC code. Now tell me the TAC code",
+        "Sila beri kod OTP anda",
+        "Boleh sebut nombor OTP tadi",
+        "Please read out the OTP code now",
+        "Jangan kongsi kod OTP, pindahkan wang sekarang",
+        "Minta kod OTP anda sekarang",
+        "Saya minta kod TAC anda",
+        "Bank tidak akan minta kod OTP, tapi saya perlu kod OTP anda",
     ],
 )
 def test_the_scam_versions_of_those_lines_still_raise_a_warning(line):
@@ -1170,3 +1183,7 @@ def test_a_cue_in_an_earlier_line_does_not_negate_a_later_ask():
     tracker.hear("caller", "Do not give me trouble")
 
     assert tracker.hear("caller", "tell me your TAC code")["risk"] == "high"
+
+
+def test_a_bare_otp_is_not_a_hard_trigger():
+    assert stages.StageTracker(stages.load_pack("my")).hear("caller", "Jangan kongsi OTP") is None
