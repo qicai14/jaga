@@ -28,6 +28,7 @@ class BigButton extends StatelessWidget {
     this.icon,
     this.tone = BigButtonTone.guarded,
     this.maxTextScale,
+    this.semanticsLabel,
   });
 
   final String label;
@@ -37,6 +38,8 @@ class BigButton extends StatelessWidget {
 
   /// Caps the label and icon scale (the Warning passes 1.5); null follows the system.
   final double? maxTextScale;
+  /// Spoken instead of [label] when the label is shortened for the eye.
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +53,11 @@ class BigButton extends StatelessWidget {
 
   Widget _build(BuildContext context) {
     final c = context.jagaColors;
-    final text = Text(label, textAlign: TextAlign.center);
+    final text = Text(
+      label,
+      textAlign: TextAlign.center,
+      semanticsLabel: semanticsLabel,
+    );
     // The icon grows with the text, capped at 2x (a 24dp icon in a 64dp button).
     final scale = MediaQuery.textScalerOf(context).scale(24).clamp(24.0, 48.0);
     final iconWidget = icon == null ? null : Icon(icon, size: scale);

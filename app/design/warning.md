@@ -99,8 +99,6 @@ Route name for TalkBack ("Jaga" is never translated). The rest:
 |---|---|---|
 | `cautionBannerText` | This call has signs of a scam | glossary wording |
 | `warningSemanticsLabel` | Scam warning | the masthead's visible label |
-| `warningOfficialNumberLabel` | {agency}'s official number | `agency` = `claimedAgency` |
-| `warningOfficialNumberLabelNoAgency` | Official number | |
 | `warningEvidenceLabel` | The caller said | |
 | `warningHangUp` | Hang up | |
 | `warningDismissLabel` | This call is fine | ms: "Panggilan ini selamat" |

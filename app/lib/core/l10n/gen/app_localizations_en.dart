@@ -63,14 +63,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningFromJaga => 'Scam warning from Jaga';
 
   @override
-  String warningOfficialNumberLabel(String agency) {
-    return '$agency\'s official number';
-  }
-
-  @override
-  String get warningOfficialNumberLabelNoAgency => 'Official number';
-
-  @override
   String get warningEvidenceLabel => 'The caller said';
 
   @override
@@ -88,4 +80,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warningCommandFallback => 'Letak telefon. Hang up.';
+
+  @override
+  String get familyNotifChannelAlerts => 'Scam alerts';
+
+  @override
+  String get familyNotifChannelUpdates => 'Call updates';
+
+  @override
+  String familyNotifTitle(String name) {
+    return '$name may be on a scam call';
+  }
+
+  @override
+  String familyNotifBody(String stage) {
+    return '$stage.';
+  }
+
+  @override
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage. Says they are from $agency.';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return '$name\'s call may be genuine';
+  }
+
+  @override
+  String familyNotifCallAction(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String familyAlertHeadline(String name) {
+    return '$name may be on a scam call';
+  }
+
+  @override
+  String familyAlertTime(String time) {
+    return 'Alert at $time';
+  }
+
+  @override
+  String get familyAlertAgencyLabel => 'The caller says they are from';
+
+  @override
+  String get familyAlertQuotesLabel => 'The caller said';
+
+  @override
+  String familyAlertCall(String name) {
+    return 'Call $name';
+  }
+
+  @override
+  String get familyAlertOpenDialer => 'Open the phone app';
+
+  @override
+  String familyGenuineHeadline(String name) {
+    return '$name\'s call may be genuine';
+  }
+
+  @override
+  String familyGenuineBody(String name) {
+    return 'Jaga now thinks this call is less likely to be a scam. You can still call $name to check.';
+  }
+
+  @override
+  String get familyAlertCallShort => 'Call';
+
+  @override
+  String get familyAlertDialFailed => 'Couldn\'t open the phone app.';
 }

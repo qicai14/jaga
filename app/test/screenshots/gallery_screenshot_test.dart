@@ -67,6 +67,15 @@ void main() {
 
   // (locale, scale) combinations per entry state.
   List<(String, double)> variants(String feature, String state) {
+    if (feature == 'family') {
+      return [
+        ('ms', 1.0),
+        ('en', 1.0),
+        ('en', 2.0),
+        if (state == 'alert-isolation') ...[('ta', 1.0), ('zh', 1.0)],
+        if (state == 'alert-long-text') ('ms', 2.0),
+      ];
+    }
     if (feature != 'warning') return [('ms', 1.0), ('en', 1.0)];
     return [
       ('ms', 1.0),

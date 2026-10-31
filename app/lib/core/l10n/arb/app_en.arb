@@ -52,14 +52,7 @@
   "warningFromJaga": "Scam warning from Jaga",
   "@warningFromJaga": { "description": "Route name of the full-screen Warning, read by TalkBack once. Jaga is never translated." },
 
-  "warningOfficialNumberLabel": "{agency}'s official number",
-  "@warningOfficialNumberLabel": {
-    "description": "Label above the official number on the Warning. agency is the agency the caller claimed.",
-    "placeholders": { "agency": { "type": "String" } }
-  },
 
-  "warningOfficialNumberLabelNoAgency": "Official number",
-  "@warningOfficialNumberLabelNoAgency": { "description": "Label above the official number when no agency was claimed." },
 
   "warningEvidenceLabel": "The caller said",
   "@warningEvidenceLabel": { "description": "Label above the masked quote on the Warning." },
@@ -77,5 +70,40 @@
   "@warningDismissConfirmHint": { "description": "Announced when the dismiss button is armed in TalkBack two-tap mode." },
 
   "warningCommandFallback": "Letak telefon. Hang up.",
-  "@warningCommandFallback": { "description": "Safety-net command, same in every language. Only when the server sends no command at high risk. Wording to be approved by Lane D (Q35)." }
+  "@warningCommandFallback": { "description": "Safety-net command, same in every language. Only when the server sends no command at high risk. Wording to be approved by Lane D (Q35)." },
+
+  "familyNotifChannelAlerts": "Scam alerts",
+  "@familyNotifChannelAlerts": { "description": "Android notification channel name for urgent family alerts." },
+  "familyNotifChannelUpdates": "Call updates",
+  "@familyNotifChannelUpdates": { "description": "Android notification channel name for quiet follow-ups ('may be genuine')." },
+  "familyNotifTitle": "{name} may be on a scam call",
+  "@familyNotifTitle": { "description": "Notification title (lock screen). name is the protected user's name.", "placeholders": { "name": { "type": "String" } } },
+  "familyNotifBody": "{stage}.",
+  "@familyNotifBody": { "description": "Notification body without an agency. stage is the plain-word stage label. Never quotes or summary.", "placeholders": { "stage": { "type": "String" } } },
+  "familyNotifBodyAgency": "{stage}. Says they are from {agency}.",
+  "@familyNotifBodyAgency": { "description": "Notification body with an agency. stage is the stage label, agency the one the caller claimed.", "placeholders": { "stage": { "type": "String" }, "agency": { "type": "String" } } },
+  "familyNotifGenuineTitle": "{name}'s call may be genuine",
+  "@familyNotifGenuineTitle": { "description": "Notification title of the 'may be genuine' follow-up.", "placeholders": { "name": { "type": "String" } } },
+  "familyNotifCallAction": "Call {name}",
+  "@familyNotifCallAction": { "description": "Notification action button that calls the protected user.", "placeholders": { "name": { "type": "String" } } },
+  "familyAlertHeadline": "{name} may be on a scam call",
+  "@familyAlertHeadline": { "description": "Family alert headline in the amber band.", "placeholders": { "name": { "type": "String" } } },
+  "familyAlertTime": "Alert at {time}",
+  "@familyAlertTime": { "description": "Time line under the family alert headline. time is already formatted.", "placeholders": { "time": { "type": "String" } } },
+  "familyAlertAgencyLabel": "The caller says they are from",
+  "@familyAlertAgencyLabel": { "description": "Label above the agency the caller claimed, on the family alert." },
+  "familyAlertQuotesLabel": "The caller said",
+  "@familyAlertQuotesLabel": { "description": "Label above the masked quotes on the family alert." },
+  "familyAlertCall": "Call {name}",
+  "@familyAlertCall": { "description": "The family alert's one button. name is the protected user.", "placeholders": { "name": { "type": "String" } } },
+  "familyAlertOpenDialer": "Open the phone app",
+  "@familyAlertOpenDialer": { "description": "Button label when no number is known for the protected user." },
+  "familyGenuineHeadline": "{name}'s call may be genuine",
+  "@familyGenuineHeadline": { "description": "Headline of the 'may be genuine' follow-up (blue band).", "placeholders": { "name": { "type": "String" } } },
+  "familyGenuineBody": "Jaga now thinks this call is less likely to be a scam. You can still call {name} to check.",
+  "@familyGenuineBody": { "description": "Calm text of the follow-up. Also the follow-up notification body.", "placeholders": { "name": { "type": "String" } } },
+  "familyAlertCallShort": "Call",
+  "@familyAlertCallShort": { "description": "The family alert button when the protected user's name is long: the name stays in the TalkBack label." },
+  "familyAlertDialFailed": "Couldn't open the phone app.",
+  "@familyAlertDialFailed": { "description": "Shown above the Call button when the phone app would not open. The number, if known, is shown under it so the co-pilot can dial it themselves." }
 }
