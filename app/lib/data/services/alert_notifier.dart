@@ -103,7 +103,7 @@ AlertOpen? alertOpenFrom(NotificationResponse r) {
       autoDial: r.actionId == callActionId,
     );
   } catch (e) {
-    debugPrint('Ignoring a notification with a bad payload: $e');
+    debugPrint('Ignoring a notification with a bad payload: ${e.runtimeType}');
     return null;
   }
 }
@@ -124,8 +124,9 @@ class LocalAlertNotifier implements AlertNotifier {
   @override
   Stream<AlertOpen> get opens => _opens.stream;
 
-  /// Creates the channels and asks for the notification permission.
-  Future<void> init() async {
+  /// Creates the channels and, unless [askPermission] is false (a background
+  /// isolate has no activity to ask from), the notification permission.
+  Future<void> init({bool askPermission = true}) async {
     await _plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@drawable/ic_stat_jaga'),
@@ -154,7 +155,7 @@ class LocalAlertNotifier implements AlertNotifier {
         importance: Importance.low,
       ),
     );
-    await android.requestNotificationsPermission();
+    if (askPermission) await android.requestNotificationsPermission();
   }
 
   @override
