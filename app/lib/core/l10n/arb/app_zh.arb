@@ -167,5 +167,7 @@
   "onboardingPermPhoneWhy": "让 Jaga 接听和挂断电话。",
   "onboardingPermCallingAccountFirst": "请先允许电话权限。",
   "onboardingPermCallingAccountHelp": "在列表中打开 Jaga，然后返回。",
-  "onboardingPermOpenSettingsHelp": "打开“权限”，允许{item}，然后返回。"
+  "onboardingPermOpenSettingsHelp": "打开“权限”，允许{item}，然后返回。",
+  "onboardingPermOverlay": "显示在其他应用上层",
+  "onboardingPermOverlayWhy": "接听电话时，让 Jaga 显示在最前面。"
 }

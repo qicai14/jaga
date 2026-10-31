@@ -56,6 +56,12 @@ class PermissionsStep extends StatelessWidget {
           onFix: phoneOk ? () => vm.fix(SetupItem.callingAccount) : null,
         ),
         PermissionRow(
+          title: l.onboardingPermOverlay,
+          why: l.onboardingPermOverlayWhy,
+          granted: granted(SetupItem.displayOverApps),
+          onFix: () => vm.fix(SetupItem.displayOverApps),
+        ),
+        PermissionRow(
           title: l.onboardingPermNotifications,
           why: l.onboardingPermNotificationsWhy,
           granted: granted(SetupItem.notifications),

@@ -196,6 +196,7 @@ void main() {
         await vm.fix(SetupItem.microphone);
         expect(vm.canContinue, isFalse);
         await vm.fix(SetupItem.fullScreenAlerts);
+        await vm.fix(SetupItem.displayOverApps);
         await vm.fix(SetupItem.phoneCalls);
         expect(vm.canContinue, isFalse);
         await vm.fix(SetupItem.callingAccount);
@@ -203,6 +204,7 @@ void main() {
         expect(rig.device.fixed, [
           SetupItem.microphone,
           SetupItem.fullScreenAlerts,
+          SetupItem.displayOverApps,
           SetupItem.phoneCalls,
           SetupItem.callingAccount,
         ]);

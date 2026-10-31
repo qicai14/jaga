@@ -351,5 +351,9 @@
   "onboardingPermCallingAccountHelp": "Switch on Jaga in the list, then come back.",
   "@onboardingPermCallingAccountHelp": {"description": "Calling account row hint after the settings page opened."},
   "onboardingPermOpenSettingsHelp": "Open Permissions, allow {item}, then come back.",
-  "@onboardingPermOpenSettingsHelp": {"description": "Hint when a permission was refused for good. item is the permission name.", "placeholders": {"item": {"type": "String"}}}
+  "@onboardingPermOpenSettingsHelp": {"description": "Hint when a permission was refused for good. item is the permission name.", "placeholders": {"item": {"type": "String"}}},
+  "onboardingPermOverlay": "Display over other apps",
+  "@onboardingPermOverlay": {"description": "Permission row title. Android's own name for the setting."},
+  "onboardingPermOverlayWhy": "Lets Jaga come to the front when you answer a call.",
+  "@onboardingPermOverlayWhy": {"description": "Permission row reason."}
 }

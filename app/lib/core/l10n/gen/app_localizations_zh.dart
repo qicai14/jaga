@@ -541,4 +541,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String onboardingPermOpenSettingsHelp(String item) {
     return '打开“权限”，允许$item，然后返回。';
   }
+
+  @override
+  String get onboardingPermOverlay => '显示在其他应用上层';
+
+  @override
+  String get onboardingPermOverlayWhy => '接听电话时，让 Jaga 显示在最前面。';
 }

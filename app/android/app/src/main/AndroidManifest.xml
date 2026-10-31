@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
     <!-- Jaga hears the caller during a Jaga line call. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Lets Jaga come to the front when a call is answered from the phone's own call screen. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <application
         android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"

@@ -238,17 +238,17 @@ void main() {
         tester,
         _protected.copyWith(step: OnboardingStep.permissions),
       );
-      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(4));
+      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(5));
       expect(continueButton(tester).onPressed, isNull);
       // The calling account's Fix appears once Phone calls is green.
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < 6; i++) {
         final fix = find.widgetWithText(OutlinedButton, 'Fix').first;
         await tester.ensureVisible(fix);
         await tester.tap(fix);
         await tester.pumpAndSettle();
       }
       expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNothing);
-      expect(s.rig.device.fixed, hasLength(5));
+      expect(s.rig.device.fixed, hasLength(6));
       expect(continueButton(tester).onPressed, isNotNull);
     });
 
@@ -259,8 +259,8 @@ void main() {
       );
       expect(find.text('Phone calls'), findsOneWidget);
       expect(find.text('Allow phone calls first.'), findsOneWidget);
-      // Phone calls, Microphone, Notifications, Full-screen: no Fix for the account yet.
-      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(4));
+      // Phone calls, Microphone, Display over apps, Notifications, Full-screen: none for the account yet.
+      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(5));
       await tester.tap(find.widgetWithText(OutlinedButton, 'Fix').first);
       await tester.pumpAndSettle();
       expect(find.text('Allow phone calls first.'), findsNothing);

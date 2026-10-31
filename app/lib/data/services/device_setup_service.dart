@@ -10,6 +10,7 @@ enum SetupItem {
   notifications,
   microphone,
   fullScreenAlerts,
+  displayOverApps,
   callingAccount,
   autostart,
 }
@@ -20,6 +21,7 @@ const platformItems = [
   SetupItem.phoneCalls,
   SetupItem.microphone,
   SetupItem.callingAccount,
+  SetupItem.displayOverApps,
   SetupItem.notifications,
   SetupItem.fullScreenAlerts,
 ];
@@ -60,6 +62,7 @@ class AndroidDeviceSetupService implements DeviceSetupService {
     SetupItem.fullScreenAlerts:
         // Below Android 14 the platform side reports true.
         await _channel.invokeMethod<bool>('canUseFullScreenIntent') == true,
+    SetupItem.displayOverApps: await Permission.systemAlertWindow.isGranted,
     SetupItem.callingAccount: await _voice.isPhoneAccountEnabled(),
     SetupItem.autostart: false,
   };
@@ -96,6 +99,9 @@ class AndroidDeviceSetupService implements DeviceSetupService {
             data: 'package:${await _package()}',
           ),
         );
+      case SetupItem.displayOverApps:
+        // Opens the "Display over other apps" page for Jaga.
+        await Permission.systemAlertWindow.request();
       case SetupItem.autostart:
         await _open(
           const AndroidIntent(

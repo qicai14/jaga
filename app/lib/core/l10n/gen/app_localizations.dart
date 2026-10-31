@@ -1071,6 +1071,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Permissions, allow {item}, then come back.'**
   String onboardingPermOpenSettingsHelp(String item);
+
+  /// Permission row title. Android's own name for the setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Display over other apps'**
+  String get onboardingPermOverlay;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets Jaga come to the front when you answer a call.'**
+  String get onboardingPermOverlayWhy;
 }
 
 class _AppLocalizationsDelegate

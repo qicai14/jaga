@@ -567,4 +567,11 @@ class AppLocalizationsMs extends AppLocalizations {
   String onboardingPermOpenSettingsHelp(String item) {
     return 'Buka Kebenaran, benarkan $item, kemudian kembali.';
   }
+
+  @override
+  String get onboardingPermOverlay => 'Paparan di atas apl lain';
+
+  @override
+  String get onboardingPermOverlayWhy =>
+      'Membolehkan Jaga muncul di hadapan apabila anda menjawab panggilan.';
 }

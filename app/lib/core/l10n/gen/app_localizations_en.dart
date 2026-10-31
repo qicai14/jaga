@@ -561,4 +561,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String onboardingPermOpenSettingsHelp(String item) {
     return 'Open Permissions, allow $item, then come back.';
   }
+
+  @override
+  String get onboardingPermOverlay => 'Display over other apps';
+
+  @override
+  String get onboardingPermOverlayWhy =>
+      'Lets Jaga come to the front when you answer a call.';
 }
