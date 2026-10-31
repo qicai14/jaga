@@ -12,8 +12,7 @@ class ViewModelHost<T extends ChangeNotifier> extends StatefulWidget {
   State<ViewModelHost<T>> createState() => _ViewModelHostState<T>();
 }
 
-class _ViewModelHostState<T extends ChangeNotifier>
-    extends State<ViewModelHost<T>> {
+class _ViewModelHostState<T extends ChangeNotifier> extends State<ViewModelHost<T>> {
   late final T _vm = widget.create();
 
   @override

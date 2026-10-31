@@ -80,30 +80,30 @@ void main() {
     );
   });
 
-  forEachScale('3 high: command, counter-move, evidence in order', (
-    tester,
-    scale,
-  ) async {
-    final handle = tester.ensureSemantics();
-    final rig = await pump(tester, scale);
-    await emit(tester, rig, stageHigh);
-    expect(rig.buzzer.startCount, 1);
+  forEachScale(
+    '3 high: command, counter-move, evidence in order',
+    (tester, scale) async {
+      final handle = tester.ensureSemantics();
+      final rig = await pump(tester, scale);
+      await emit(tester, rig, stageHigh);
+      expect(rig.buzzer.startCount, 1);
 
-    final texts = [
-      command,
-      'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri di 03-2266 2222.',
-      'The caller said',
-      '“Akaun anda dikaitkan dengan satu kes jenayah”',
-    ];
-    // The scroll region may clip lower items at 2.0 but they are still in the tree.
-    final paint = [for (final t in texts) top(tester, t)];
-    expect(paint, orderedEquals([...paint]..sort()));
-    final semantic = [
-      for (final t in texts) tester.getSemantics(find.text(t)).rect.top,
-    ];
-    expect(semantic, orderedEquals([...semantic]..sort()));
-    handle.dispose();
-  });
+      final texts = [
+        command,
+        'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri di 03-2266 2222.',
+        'The caller said',
+        '“Akaun anda dikaitkan dengan satu kes jenayah”',
+      ];
+      // The scroll region may clip lower items at 2.0 but they are still in the tree.
+      final paint = [for (final t in texts) top(tester, t)];
+      expect(paint, orderedEquals([...paint]..sort()));
+      final semantic = [
+        for (final t in texts) tester.getSemantics(find.text(t)).rect.top,
+      ];
+      expect(semantic, orderedEquals([...semantic]..sort()));
+      handle.dispose();
+    },
+  );
 
   forEachScale('3e high: one icon, a masthead, dismiss in the scroll area', (
     tester,

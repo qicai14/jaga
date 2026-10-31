@@ -6,12 +6,7 @@ enum BadgeTone { guarded, caution, genuine, neutral }
 
 /// A pill that states a status. Not tappable. Never red (red means Warning).
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({
-    super.key,
-    required this.label,
-    this.tone = BadgeTone.guarded,
-    this.icon,
-  });
+  const StatusBadge({super.key, required this.label, this.tone = BadgeTone.guarded, this.icon});
 
   final String label;
   final BadgeTone tone;
@@ -45,8 +40,7 @@ class StatusBadge extends StatelessWidget {
           Flexible(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelMedium
-                  ?.copyWith(color: fg),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: fg),
             ),
           ),
         ],

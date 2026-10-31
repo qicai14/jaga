@@ -21,11 +21,18 @@ class _Server {
   final sockets = <WebSocket>[];
   final paths = <String>[];
   int? rejectWith;
+  int rejectTimes = 0; // reject this many requests, then upgrade
 
   Future<void> start() async {
     http = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     http.listen((req) async {
       paths.add(req.uri.path);
+      if (rejectTimes > 0) {
+        rejectTimes--;
+        req.response.statusCode = HttpStatus.serviceUnavailable;
+        await req.response.close();
+        return;
+      }
       if (rejectWith != null) {
         req.response.statusCode = rejectWith!;
         await req.response.close();
@@ -96,11 +103,39 @@ void main() {
     expect(service.connected.value, isTrue);
   });
 
-  test('a refused handshake (unknown call) does not retry', () async {
+  test('a refused handshake (unknown call) gives up', () async {
     server.rejectWith = HttpStatus.forbidden;
     service.connect('nope');
-    await Future<void>.delayed(const Duration(milliseconds: 150));
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(server.paths, hasLength(WebSocketStageStreamService.maxRefusals));
+  });
+
+  test('a 503 during a deploy retries and then connects', () async {
+    server.rejectTimes = 1;
+    service.connect('CA1');
+    final ws = await server.nextSocket(1);
+    ws.add(stageMedium);
+    await _until(() => got.length == 1);
+    expect(server.paths, hasLength(2));
+  });
+
+  test('close() cancels a pending backoff', () async {
+    final slow = WebSocketStageStreamService(
+      server.url,
+      backoff: const [Duration(seconds: 30)],
+    );
+    server.rejectTimes = 1;
+    slow.connect('CA1');
+    await _until(() => server.paths.length == 1);
+    slow.close();
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(server.paths, hasLength(1));
+  });
+
+  test('a call id is encoded in the path', () async {
+    service.connect('a/b');
+    await server.nextSocket(1);
+    expect(server.paths.single, '/calls/a%2Fb/stages');
   });
 
   test('close code 1008 stops without retry', () async {

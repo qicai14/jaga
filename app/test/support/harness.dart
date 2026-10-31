@@ -22,15 +22,13 @@ Future<void> pumpJaga(
     tester.view.resetDevicePixelRatio();
     tester.platformDispatcher.clearTextScaleFactorTestValue();
   });
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: buildJagaTheme(locale),
-      locale: locale,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: child,
-    ),
-  );
+  await tester.pumpWidget(MaterialApp(
+    theme: buildJagaTheme(locale),
+    locale: locale,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: child,
+  ));
   await tester.pumpAndSettle();
 }
 
