@@ -1,17 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "jaga/family-alert",
-  "title": "FamilyAlert (server -> family co-pilot via FCM). Summary only, never the transcript. Draft v0.",
+  "title": "FamilyAlert (server -> family co-pilot via FCM). Summary only, never the transcript. Sent JSON-encoded in one FCM data field.",
   "type": "object",
-  "required": ["callId", "protectedUserName", "stage", "summary", "at"],
+  "required": ["kind", "callId", "protectedUserName", "stage", "summary", "at"],
   "additionalProperties": false,
   "properties": {
+    "kind": {
+      "enum": ["alert", "mayBeGenuine"],
+      "description": "alert: the call reached isolation, or money/credentials (at most 2 per call). mayBeGenuine: follow-up after an alert when Muse Spark lowers a Warning"
+    },
     "callId": { "type": "string" },
     "protectedUserName": { "type": "string" },
     "stage": { "enum": ["isolation", "handoff", "money", "credentials"] },
     "claimedAgency": { "type": ["string", "null"] },
-    "summary": { "type": "string", "maxLength": 200 },
-    "quotes": { "type": "array", "items": { "type": "string" }, "maxItems": 2 },
+    "summary": { "type": "string", "maxLength": 200, "description": "Muse Spark's free text (ADR 0006)" },
+    "quotes": { "type": "array", "items": { "type": "string" }, "maxItems": 2, "description": "Short masked quotes" },
     "at": { "type": "string", "format": "date-time" }
   }
 }
