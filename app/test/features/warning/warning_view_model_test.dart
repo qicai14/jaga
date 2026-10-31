@@ -4,7 +4,6 @@ import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/data/repositories/call_risk_repository.dart';
 import 'package:jaga/data/services/attention_service.dart';
 import 'package:jaga/data/services/stage_stream_service.dart';
-import 'package:jaga/debug/fixtures/stage_update_extended_fixtures.dart';
 import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
 import 'package:jaga/features/warning/view_models/warning_view_model.dart';
 
@@ -47,14 +46,14 @@ void main() {
   });
 
   test('high is a Warning and starts the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     expect(layer(), WarningLayer.warning);
     expect(buzzer.startCount, 1);
     expect(vm.state.content.isCredentials, isFalse);
   });
 
   test('stage credentials at high is the credentials variant', () {
-    stream.emit(u(extHighCredentials));
+    stream.emit(u(stageHighCredentials));
     expect(vm.state.content.isCredentials, isTrue);
   });
 
@@ -68,7 +67,7 @@ void main() {
   );
 
   test('high to medium steps down and stops the buzz; medium to low hides', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     stream.emit(u(stageMedium));
     expect(layer(), WarningLayer.caution);
     expect(buzzer.buzzing, isFalse);
@@ -77,11 +76,11 @@ void main() {
   });
 
   test('dismiss hides locally; a different stage brings it back', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     vm.dismiss();
     expect(layer(), WarningLayer.none);
     expect(buzzer.buzzing, isFalse);
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     stream.emit(
       u(stageMedium),
     ); // authority is a different stage: re-shows (below)
@@ -97,11 +96,11 @@ void main() {
   });
 
   test('dismissed: a new stage or a higher risk brings it back and buzzes', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     vm.dismiss();
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     expect(layer(), WarningLayer.none);
-    stream.emit(u(extHighCredentials));
+    stream.emit(u(stageHighCredentials));
     expect(layer(), WarningLayer.warning);
     expect(buzzer.startCount, 2);
   });
@@ -109,35 +108,35 @@ void main() {
   test(
     'risk rise is measured against the previous update, not the dismissal',
     () {
-      stream.emit(u(extHigh)); // fear
+      stream.emit(u(stageHigh)); // fear
       stream.emit(u(stageMedium.replaceAll('authority', 'fear')));
       vm.dismiss();
-      stream.emit(u(extHigh)); // medium -> high at the same stage
+      stream.emit(u(stageHigh)); // medium -> high at the same stage
       expect(layer(), WarningLayer.warning);
     },
   );
 
   test('command change while up swaps content and restarts the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     stream.emit(
-      u(extHigh.replaceAll('Letak telefon sekarang.', 'Jangan percaya.')),
+      u(stageHigh.replaceAll('Letak telefon sekarang.', 'Jangan percaya.')),
     );
     expect(vm.state.content.command, 'Jangan percaya.');
     expect(buzzer.startCount, 2);
   });
 
   test('same command again does not restart the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     vm.stopBuzz();
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     expect(buzzer.startCount, 1);
   });
 
   test('looked and touch stop the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     attention.lookNow();
     expect(buzzer.buzzing, isFalse);
-    stream.emit(u(extHigh.replaceAll('sekarang', 'segera')));
+    stream.emit(u(stageHigh.replaceAll('sekarang', 'segera')));
     expect(buzzer.buzzing, isTrue);
     vm.stopBuzz();
     expect(buzzer.buzzing, isFalse);
@@ -146,7 +145,7 @@ void main() {
   test(
     'disconnect freezes layer and content, reconnect applies the latest',
     () {
-      stream.emit(u(extHigh));
+      stream.emit(u(stageHigh));
       stream.setConnected(false);
       expect(vm.state.reconnecting, isTrue);
       stream.emit(u(stageLow));
@@ -159,15 +158,15 @@ void main() {
   );
 
   test('a new callId resets all state and stops the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     vm.dismiss();
-    stream.emit(u(extHigh.replaceAll('call-1', 'call-2')));
+    stream.emit(u(stageHigh.replaceAll('call-1', 'call-2')));
     expect(layer(), WarningLayer.warning); // dismissal did not carry over
     expect(buzzer.startCount, 2);
   });
 
   test('reset (call ended) clears the layer and stops the buzz', () {
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     vm.reset();
     expect(layer(), WarningLayer.none);
     expect(buzzer.buzzing, isFalse);
@@ -179,7 +178,7 @@ void main() {
       buzzer: FakeBuzzer(),
       attention: attention,
     );
-    stream.emit(u(extHigh));
+    stream.emit(u(stageHigh));
     expect(other.state.layer, WarningLayer.none);
     other.dispose();
   });

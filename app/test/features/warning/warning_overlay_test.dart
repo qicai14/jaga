@@ -9,7 +9,6 @@ import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/data/repositories/call_risk_repository.dart';
 import 'package:jaga/data/services/attention_service.dart';
 import 'package:jaga/data/services/stage_stream_service.dart';
-import 'package:jaga/debug/fixtures/stage_update_extended_fixtures.dart';
 import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
 import 'package:jaga/debug/placeholder_call_screen.dart';
 import 'package:jaga/features/warning/view_models/warning_view_model.dart';
@@ -82,19 +81,16 @@ void main() {
   });
 
   forEachScale(
-    '3 high: command, English, counter-move, number, evidence in order',
+    '3 high: command, counter-move, evidence in order',
     (tester, scale) async {
       final handle = tester.ensureSemantics();
       final rig = await pump(tester, scale);
-      await emit(tester, rig, extHigh);
+      await emit(tester, rig, stageHigh);
       expect(rig.buzzer.startCount, 1);
 
       final texts = [
         command,
-        'Hang up now.',
-        'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri.',
-        "PDRM's official number",
-        '+60 3-2266 2222',
+        'Polis tidak akan minta wang atau kata laluan melalui telefon. Hubungi PDRM sendiri di 03-2266 2222.',
         'The caller said',
         '“Akaun anda dikaitkan dengan satu kes jenayah”',
       ];
@@ -115,7 +111,7 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     expect(
       find.descendant(
         of: find.byType(WarningScreen),
@@ -154,7 +150,7 @@ void main() {
     tester,
   ) async {
     final rig = await pump(tester, 2.0);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     final found = tester
         .widgetList<Text>(find.textContaining('Hubungi PDRM sendiri'))
         .toList();
@@ -167,13 +163,13 @@ void main() {
 
   // Note: flutter_test lays text out in Ahem (every glyph 1em wide), roughly 1.6x
   // wider than Noto Sans, so these are worst-case sizes.
-  forEachScale('4 high, 73-character command and English: never below 32sp as seen', (
+  forEachScale('4 high, 73-character command: never below 32sp as seen', (
     tester,
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHighLongText);
-    final cmd = (u(extHighLongText).command)!;
+    await emit(tester, rig, stageHighLongText);
+    final cmd = (u(stageHighLongText).command)!;
     final style = tester.widget<Text>(find.text(cmd)).style!;
     expect(style.fontSize! * scale, greaterThanOrEqualTo(32));
     // Hang up stays pinned on screen.
@@ -192,9 +188,7 @@ void main() {
     await emit(
       tester,
       rig,
-      extHigh
-          .replaceAll('Letak telefon sekarang.', long)
-          .replaceAll('"commandEnglish": "Hang up now.",', ''),
+      stageHigh.replaceAll('Letak telefon sekarang.', long),
     );
     final style = tester.widget<Text>(find.text(long)).style!;
     expect(style.fontSize! * scale, greaterThanOrEqualTo(32));
@@ -212,7 +206,7 @@ void main() {
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHighCredentials);
+    await emit(tester, rig, stageHighCredentials);
     expect(find.text('Jangan beritahu kod atau kata laluan.'), findsOneWidget);
     expect(find.byIcon(Icons.pan_tool), findsNothing);
     expect(find.text('The caller said'), findsNothing);
@@ -229,32 +223,12 @@ void main() {
     expect(find.text('Hang up'), findsOneWidget); // the button
   });
 
-  forEachScale('5c no official number: its label and number are hidden', (
-    tester,
-    scale,
-  ) async {
-    final rig = await pump(tester, scale);
-    await emit(tester, rig, extHighNoNumber);
-    expect(find.textContaining('official number'), findsNothing);
-    expect(find.text('Official number'), findsNothing);
-    expect(find.text(command), findsOneWidget);
-  });
-
-  forEachScale('6 English-only phrase: command shown once', (
-    tester,
-    scale,
-  ) async {
-    final rig = await pump(tester, scale);
-    await emit(tester, rig, extHighEnglishOnly);
-    expect(find.text('Hang up now.'), findsOneWidget);
-  });
-
   forEachScale('7 hold 1 s keeps it; hold 2 s dismisses locally', (
     tester,
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     final button = find.byType(HoldToConfirmButton);
     await tester.ensureVisible(button);
     await tester.pumpAndSettle();
@@ -282,12 +256,12 @@ void main() {
     '8 dismissed: same update stays hidden, a new stage brings it back',
     (tester, scale) async {
       final rig = await pump(tester, scale);
-      await emit(tester, rig, extHigh);
+      await emit(tester, rig, stageHigh);
       rig.vm.dismiss();
       await tester.pumpAndSettle();
-      await emit(tester, rig, extHigh);
+      await emit(tester, rig, stageHigh);
       expect(find.byType(WarningScreen), findsNothing);
-      await emit(tester, rig, extHighCredentials);
+      await emit(tester, rig, stageHighCredentials);
       expect(find.byType(WarningScreen), findsOneWidget);
       expect(rig.buzzer.startCount, 2);
     },
@@ -295,7 +269,7 @@ void main() {
 
   forEachScale('9 high to medium to low', (tester, scale) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     await emit(tester, rig, stageMedium);
     expect(find.byType(CautionBanner), findsOneWidget);
     expect(find.byType(WarningScreen), findsNothing);
@@ -310,11 +284,11 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     expect(find.bySemanticsLabel('Reconnecting'), findsNothing);
     rig.stream.setConnected(false);
     await tester.pumpAndSettle();
-    await emit(tester, rig, extHigh.replaceAll(command, 'Jangan percaya.'));
+    await emit(tester, rig, stageHigh.replaceAll(command, 'Jangan percaya.'));
     expect(find.text(command), findsOneWidget);
     expect(find.text('Jangan percaya.'), findsNothing);
     expect(find.bySemanticsLabel('Reconnecting'), findsOneWidget);
@@ -342,7 +316,7 @@ void main() {
     navigator.push(MaterialPageRoute<void>(builder: (_) => rig.host));
     await tester.pumpAndSettle();
 
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
     expect(find.byType(WarningScreen), findsOneWidget);
@@ -363,7 +337,7 @@ void main() {
         const FakeAccessibilityFeatures(disableAnimations: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     final rig = await pump(tester, scale);
-    rig.stream.emit(u(extHigh));
+    rig.stream.emit(u(stageHigh));
     await tester.pump();
     expect(find.text(command), findsOneWidget);
     final opacity = tester.widget<Opacity>(
@@ -377,7 +351,7 @@ void main() {
 
   forEachScale('13 hang up tapped: onHangUp once', (tester, scale) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     await tester.tap(find.byType(BigButton));
     await tester.pump();
     expect(rig.hangUps, 1);
@@ -385,7 +359,7 @@ void main() {
 
   forEachScale('touching the Warning stops the buzz', (tester, scale) async {
     final rig = await pump(tester, scale);
-    await emit(tester, rig, extHigh);
+    await emit(tester, rig, stageHigh);
     expect(rig.buzzer.buzzing, isTrue);
     await tester.tapAt(const Offset(200, 300));
     await tester.pump();
@@ -397,7 +371,7 @@ void main() {
     (tester) async {
       final handle = tester.ensureSemantics();
       final rig = await pump(tester, 1.0);
-      await emit(tester, rig, extHigh);
+      await emit(tester, rig, stageHigh);
       expect(find.bySemanticsLabel('Scam warning from Jaga'), findsOneWidget);
       expect(
         tester.getSemantics(find.bySemanticsLabel('Scam warning from Jaga')),

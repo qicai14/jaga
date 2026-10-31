@@ -48,7 +48,7 @@ class _WarningOverlayState extends State<WarningOverlay> {
     super.dispose();
   }
 
-  /// "command. English" as a live announcement when the Warning appears or its command changes.
+  /// The command as a live announcement when the Warning appears or its command changes.
   void _announce() {
     final s = widget.vm.state;
     if (s.layer != WarningLayer.warning) {
@@ -57,11 +57,7 @@ class _WarningOverlayState extends State<WarningOverlay> {
     }
     final fallback = AppLocalizations.of(context).warningCommandFallback;
     final command = s.content.command ?? fallback;
-    final english = s.content.commandEnglish;
-    final spoken =
-        english == null || english == command || s.content.command == null
-        ? command
-        : '$command. $english';
+    final spoken = command;
     if (spoken == _announced) return;
     _announced = spoken;
     SemanticsService.sendAnnouncement(

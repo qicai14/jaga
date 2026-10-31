@@ -1,4 +1,4 @@
-// Valid against contracts/stage-update.schema.json (draft v0); the schema test
+// Valid against contracts/stage-update.schema.json (v1); the schema test
 // validates every string in [timelineV0Fixtures]. The timeline's own shape is
 // provisional (#1): events are stage updates, calls are family alerts.
 // call-1's steps are the stage-update fixtures in stage_update_fixtures.dart.
@@ -20,7 +20,7 @@ const timelineCall2Authority = r'''{
 
 const timelineCall2Credentials = r'''{
   "callId": "call-2", "stage": "credentials", "risk": "high",
-  "claimedAgency": "Bank Negara", "command": null, "counterMove": null,
+  "claimedAgency": "Bank Negara", "command": "Letak telefon sekarang", "counterMove": "Hubungi nombor rasmi sendiri",
   "evidence": ["Sila beritahu kod yang kami hantar"],
   "source": "spark", "at": "2026-10-27T10:01:10Z"
 }''';
@@ -34,7 +34,7 @@ const timelineLongPretext = r'''{
 const timelineLongFear = r'''{
   "callId": "call-5", "stage": "fear", "risk": "high",
   "claimedAgency": "Suruhanjaya Pencegahan Rasuah Malaysia",
-  "command": null, "counterMove": null,
+  "command": "Letak telefon sekarang", "counterMove": "Hubungi nombor rasmi sendiri",
   "evidence": ["Akaun anda telah digunakan untuk kegiatan pengubahan wang haram dan anda perlu memindahkan semua wang anda ke akaun selamat kami hari ini juga, jika tidak anda akan ditahan oleh polis serta-merta."],
   "source": "spark", "at": "2026-10-27T10:03:00Z"
 }''';
@@ -42,7 +42,7 @@ const timelineLongFear = r'''{
 const timelineLongIsolation = r'''{
   "callId": "call-5", "stage": "isolation", "risk": "high",
   "claimedAgency": "Suruhanjaya Pencegahan Rasuah Malaysia",
-  "command": null, "counterMove": null,
+  "command": "Letak telefon sekarang", "counterMove": "Hubungi nombor rasmi sendiri",
   "evidence": ["Jangan beritahu keluarga atau pegawai bank anda tentang perbualan ini kerana siasatan ini adalah sulit dan boleh menjejaskan kes anda jika anda berbuat demikian.", "Jangan letak telefon sehingga kami benarkan"],
   "source": "spark", "at": "2026-10-27T10:04:00Z"
 }''';

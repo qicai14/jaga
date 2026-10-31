@@ -1,7 +1,7 @@
 # Warning and Caution (#9; live stream in #19)
 
 From `ui-plan.md` §2 and `design-system.md`. Protected user's phone only. Contract: `contracts/stage-update.schema.json`
-(draft v0; #1 not landed). Phrase-library text only (ADR 0006): the app shows `command` and `counterMove` as given.
+(v1, ADR 0007). Phrase-library text only (ADR 0006): the app shows `command` and `counterMove` as given.
 
 ## 1. Architecture
 ```
@@ -20,7 +20,7 @@ lib/debug/placeholder_call_screen.dart   the #9 host (§7)
 its real call screen in it; the fallback (full-screen notification) can push `WarningScreen` alone as a route.
 
 **View model state** (immutable snapshot `WarningState`, rebuilt with `ListenableBuilder`):
-`layer` (`none` | `caution` | `warning`), `content` (`command`, `commandEnglish`, `counterMove`, `officialNumber`,
+`layer` (`none` | `caution` | `warning`), `content` (`command`, `counterMove`,
 `agency`, `evidence`, `isCredentials`), `reconnecting`, plus private `dismissed`, `lastStage`, `lastRisk`.
 
 ## 2. Rules (all in the view model, unit-tested)
@@ -69,12 +69,8 @@ AnnotatedRegion(SystemUiOverlayStyle.light) > PopScope(canPop: false)
       ReconnectingDot(onGuarded) at the end
   2 Command band: ColoredBox(warning), full bleed, padding l24/v24
       ShrinkToFitText(command, command style, onWarning)   // max height 30% of body, floor 32sp
-      gap s8; Text(commandEnglish, onWarning)               // only if it differs
   3 Expanded > Scrollbar(thumbVisibility) > SingleChildScrollView > Padding(l24, top l24) > Column   // body text capped at 1.4
       Text(counterMove, bodyLarge, onSurface)
-      gap l24; Text(number label, bodyMedium, onSurfaceVariant)
-      FittedBox(scaleDown) > Text(officialNumber, officialNumber style, onSurface)      // one line, never wraps
-      gap m16; Text(counterMoveEnglish, bodyMedium, onSurfaceVariant)
       Divider(outlineVariant); Text(evidence label) + Text("“evidence”", bodyLarge, maxLines 3)  // not on credentials (Q36)
       gap xl; DismissButton(calm)                           // end of the scroll area, still hold-to-confirm
   4 Footer (pinned): Padding(l24, v16) > BigButton(hangUp, call_end, warningHangUp, maxTextScale 1.5)
@@ -103,8 +99,6 @@ Route name for TalkBack ("Jaga" is never translated). The rest:
 |---|---|---|
 | `cautionBannerText` | This call has signs of a scam | glossary wording |
 | `warningSemanticsLabel` | Scam warning | the masthead's visible label |
-| `warningOfficialNumberLabel` | {agency}'s official number | `agency` = `claimedAgency` |
-| `warningOfficialNumberLabelNoAgency` | Official number | |
 | `warningEvidenceLabel` | The caller said | |
 | `warningHangUp` | Hang up | |
 | `warningDismissLabel` | This call is fine | ms: "Panggilan ini selamat" |
@@ -138,8 +132,6 @@ fake attention service. Gallery entries: `low`, `medium`, `high`, `high-credenti
 | counter-move | `counterMove` | in v0 |
 | agency in number label | `claimedAgency` | in v0 |
 | evidence line | `evidence[0]` | in v0 (masked caller quote) |
-| English command / counter-move | none | **missing**: needs `commandEnglish`, `counterMoveEnglish` (or phrase IDs + local table) |
-| official number as big text | none | **missing**: needs `officialNumber` from `official_contact` |
 | reconnecting dot | none (connection state of the service) | not a contract field |
 | `source`, `at` | not shown | |
 Until #1 lands, missing fields are nullable in the model and their elements are hidden (no parsing numbers out of text).
@@ -164,7 +156,7 @@ Until #1 lands, missing fields are nullable in the model and their elements are 
 
 ## 10. Decisions (Preston, 27 Oct)
 - Q33: the big **Hang up** button on the Warning is approved. She presses it; Jaga never hangs up by itself.
-- Q34: `commandEnglish`, `counterMoveEnglish` and `officialNumber` are requested from #1. Until then they are nullable and hidden.
+- Q34 (aligned to contracts v1): `commandEnglish`, `counterMoveEnglish` and `officialNumber` do not exist. `command` is one string (command language, then English) and the official number is inside `counterMove`; both render as given, with no separate English or number line.
 - Q35: one built-in safety-net command, "Letak telefon. Hang up.", only when `command` is null at high risk. Lane D approves the wording.
 - Q36: the evidence line is a labelled masked quote ("The caller said"); the credentials Warning shows no evidence.
 - Q37: a Caution never buzzes. The buzz always means "look now, it's serious".

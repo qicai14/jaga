@@ -1,0 +1,63 @@
+{
+  "callId": "call_01HZX7K2M4",
+  "startedAt": "2026-10-27T09:13:56+08:00",
+  "endedAt": "2026-10-27T09:18:02+08:00",
+  "claimedAgency": "PDRM",
+  "events": [
+    {
+      "at": "2026-10-27T09:14:05+08:00",
+      "stage": "pretext",
+      "risk": "low",
+      "source": "rules",
+      "evidence": [
+        "ini panggilan dari Pos Laju, bungkusan puan ditahan"
+      ]
+    },
+    {
+      "at": "2026-10-27T09:14:32+08:00",
+      "stage": "authority",
+      "risk": "medium",
+      "source": "rules",
+      "evidence": [
+        "Saya Inspektor Razak dari IPD Bukit Aman"
+      ]
+    },
+    {
+      "at": "2026-10-27T09:15:10+08:00",
+      "stage": "fear",
+      "risk": "medium",
+      "source": "spark",
+      "evidence": [
+        "ada waran tangkap atas nama puan",
+        "IC ******-**-5678 terlibat kes dadah"
+      ]
+    },
+    {
+      "at": "2026-10-27T09:15:48+08:00",
+      "stage": "isolation",
+      "risk": "high",
+      "source": "rules",
+      "evidence": [
+        "jangan beritahu sesiapa, ini siasatan sulit"
+      ]
+    },
+    {
+      "at": "2026-10-27T09:16:48+08:00",
+      "stage": "handoff",
+      "risk": "high",
+      "source": "spark",
+      "evidence": [
+        "pindahkan duit ke akaun selamat ****1234"
+      ]
+    },
+    {
+      "at": "2026-10-27T09:17:10+08:00",
+      "stage": "money",
+      "risk": "high",
+      "source": "spark",
+      "evidence": [
+        "transfer RM 48,000 sekarang ke akaun ****1234"
+      ]
+    }
+  ]
+}

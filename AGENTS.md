@@ -7,7 +7,9 @@ when the rules fire.
 ## Tooling
 Pinned toolchain (ADR 0004). Never use global tools.
 - App: `fvm flutter ...` (never `flutter`)
-- Python (server + eval): `uv sync --locked`, `uv run pytest`, `uv run ruff check`
+- Python (server + eval), CI's commands, from the repo root after updating from `origin/main`:
+  `uv sync --locked --all-packages`, `uv run --all-packages pytest -q server/tests eval/tests`, `uv run ruff check`,
+  `uv run ruff format --check`
 - Server locally: `docker compose up server`, health at `http://localhost:8000/health`
 
 ## Layout

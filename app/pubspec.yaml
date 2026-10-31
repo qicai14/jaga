@@ -23,6 +23,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_secure_storage: ^11.2.0
+  http: ^1.6.0
   intl: ^0.20.3
   permission_handler: ^13.0.2
   proximity_sensor: ^2.0.0

@@ -1,4 +1,4 @@
-# Same image locally (docker compose) and on Fly.io. Build context is the repo root (uv workspace + lock).
+# Same image locally (docker compose) and on Render. Build context is the repo root (uv workspace + lock).
 FROM ghcr.io/astral-sh/uv:0.12.24 AS uv
 FROM python:3.13-slim
 

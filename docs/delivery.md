@@ -3,7 +3,7 @@
 Read this before you commit, open a PR or change dependencies.
 
 - One ticket, one branch (`<name>/<ticket-id>-<slug>`), one PR. Rebase on `main` before opening. CI must be green.
-- Before a PR: `fvm flutter analyze` and `fvm flutter test` for `app/`; `uv run ruff check` and `uv run pytest` for Python.
+- Before a PR, update from `origin/main`, then run CI's commands from the repo root. `app/`: `fvm flutter analyze` and `fvm flutter test`. Python: `uv run --all-packages pytest -q server/tests eval/tests`, `uv run ruff check`, `uv run ruff format --check`.
 - Dependency changes (`pubspec.yaml`, `pyproject.toml`, locks) go in their own PR.
 - Contract changes go in their own PR, with an ADR, never mixed with feature code.
 - Folder owners are in `.github/CODEOWNERS`. Stay inside your ticket's folder; ask before editing another lane's.

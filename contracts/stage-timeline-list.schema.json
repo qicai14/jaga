@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/stage-timeline-list",
+  "title": "StageTimelineList (server -> family co-pilot's app, GET /timelines). Every kept stage timeline for the co-pilot's protected user, newest first by startedAt (not enforceable in JSON Schema; the server sorts). Empty when none are kept.",
+  "type": "array",
+  "items": { "$ref": "stage-timeline" }
+}

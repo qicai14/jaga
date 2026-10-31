@@ -1,0 +1,25 @@
+call_id,line_no,leg,text,label,call_expect_warning,expect_final_stage,expect_family_pushes,caught_before_line,description,source,label_status,usage
+SEQ1,1,caller,Waran tangkap akan dikeluarkan hari ini.,fear,yes,money,2,5,"scam, stages out of order (fear before authority)",synthetic,author_draft,test_only
+SEQ1,2,caller,Saya Inspektor Hafiz dari Bukit Aman.,authority,yes,money,2,5,"scam, stages out of order (fear before authority)",synthetic,author_draft,test_only
+SEQ1,3,caller,Nama anda dikaitkan dengan satu kes penipuan.,pretext,yes,money,2,5,"scam, stages out of order (fear before authority)",synthetic,author_draft,test_only
+SEQ1,4,caller,"Jangan beritahu sesiapa, ini rahsia siasatan.",isolation,yes,money,2,5,"scam, stages out of order (fear before authority)",synthetic,author_draft,test_only
+SEQ1,5,caller,Sila pindahkan wang anda ke akaun yang kami berikan.,money,yes,money,2,5,"scam, stages out of order (fear before authority)",synthetic,author_draft,test_only
+SEQ2,1,caller,"Selamat petang, saya Aina dari bahagian pencegahan penipuan Bank X.",none,no,n/a (must not Warn),0,,genuine bank call that follows the scam shape,synthetic,author_draft,test_only
+SEQ2,2,caller,Kami nampak transaksi luar biasa di kad kredit anda sebanyak RM800.,none,no,n/a (must not Warn),0,,genuine bank call that follows the scam shape,synthetic,author_draft,test_only
+SEQ2,3,caller,Anda tidak perlu beritahu butiran kad. Boleh anda sahkan sama ada transaksi itu anda buat?,none,no,n/a (must not Warn),0,,genuine bank call that follows the scam shape,synthetic,author_draft,test_only
+SEQ2,4,caller,"Jika bukan, kami akan sekat kad anda. Untuk keselamatan, sila tamatkan panggilan dan hubungi nombor di belakang kad anda.",none,no,n/a (must not Warn),0,,genuine bank call that follows the scam shape,synthetic,author_draft,test_only
+SEQ3,1,caller,"Hello, selamat pagi, apa khabar?",none,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,2,caller,"Saya dari Pos Malaysia, ada bungkusan atas nama anda.",authority,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,3,caller,Cuaca hari ini panas kan?,none,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,4,caller,Bungkusan itu mengandungi dadah dan sudah dirampas kastam.,pretext,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,5,caller,Saya sambungkan anda kepada pegawai polis sekarang.,handoff,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,6,caller,Berikan nombor akaun bank anda untuk disemak.,credentials,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ3,7,caller,Selepas itu pindahkan baki ke akaun selamat.,money,yes,money,2,6,"slow-burn scam, stages spread across chatter",synthetic,author_draft,test_only
+SEQ4,1,caller,"Hello, ini Pos Laju.",none,no,n/a (must not Warn),0,,genuine courier call with an address check,synthetic,author_draft,test_only
+SEQ4,2,caller,Bungkusan anda sampai esok antara pukul 2 hingga 5 petang.,none,no,n/a (must not Warn),0,,genuine courier call with an address check,synthetic,author_draft,test_only
+SEQ4,3,caller,"Boleh sahkan alamat penghantaran: No 12, Jalan Bunga?",none,no,n/a (must not Warn),0,,genuine courier call with an address check,synthetic,author_draft,test_only
+SEQ4,4,caller,"Terima kasih, selamat petang.",none,no,n/a (must not Warn),0,,genuine courier call with an address check,synthetic,author_draft,test_only
+SEQ5,1,caller,Saya Inspektor Lim dari PDRM.,authority,yes,credentials,2,,scam where the protected user discloses a TAC (user leg),synthetic,author_draft,test_only
+SEQ5,2,caller,Akaun anda dikaitkan dengan satu kes pengubahan wang haram.,pretext,yes,credentials,2,,scam where the protected user discloses a TAC (user leg),synthetic,author_draft,test_only
+SEQ5,3,caller,Jangan beritahu sesiapa tentang panggilan ini.,isolation,yes,credentials,2,,scam where the protected user discloses a TAC (user leg),synthetic,author_draft,test_only
+SEQ5,4,user,"Baiklah, TAC yang saya terima ialah 4 8 2 9 1 3.",credentials,yes,credentials,2,,scam where the protected user discloses a TAC (user leg),synthetic,author_draft,test_only

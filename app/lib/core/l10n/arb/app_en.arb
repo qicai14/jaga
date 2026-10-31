@@ -52,14 +52,7 @@
   "warningFromJaga": "Scam warning from Jaga",
   "@warningFromJaga": { "description": "Route name of the full-screen Warning, read by TalkBack once. Jaga is never translated." },
 
-  "warningOfficialNumberLabel": "{agency}'s official number",
-  "@warningOfficialNumberLabel": {
-    "description": "Label above the official number on the Warning. agency is the agency the caller claimed.",
-    "placeholders": { "agency": { "type": "String" } }
-  },
 
-  "warningOfficialNumberLabelNoAgency": "Official number",
-  "@warningOfficialNumberLabelNoAgency": { "description": "Label above the official number when no agency was claimed." },
 
   "warningEvidenceLabel": "The caller said",
   "@warningEvidenceLabel": { "description": "Label above the masked quote on the Warning." },

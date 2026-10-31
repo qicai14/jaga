@@ -95,6 +95,7 @@ void main() {
         stage: Stage.money,
         summary: '',
         at: DateTime.utc(2026, 10, 27),
+        kind: FamilyAlertKind.alert,
       );
       final open = alertOpenFrom(tap(payload: jsonEncode(a.toJson())))!;
       expect(open.alert.claimedAgency, isNull);

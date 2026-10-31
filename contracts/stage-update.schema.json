@@ -1,19 +1,39 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "jaga/stage-update",
-  "title": "StageUpdate (server -> protected user's app, during a call). Draft v0: finalise on 26 Oct by ADR.",
+  "title": "StageUpdate (server -> protected user's app, during a call). One message per stage or risk change.",
   "type": "object",
-  "required": ["callId", "stage", "risk", "at"],
+  "required": ["callId", "stage", "risk", "source", "at"],
   "additionalProperties": false,
   "properties": {
     "callId": { "type": "string" },
     "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
-    "risk": { "enum": ["low", "medium", "high"] },
+    "risk": { "enum": ["low", "medium", "high"], "description": "medium = Caution, high = Warning" },
     "claimedAgency": { "type": ["string", "null"], "description": "e.g. PDRM, LHDN, Bank Negara" },
-    "command": { "type": ["string", "null"], "description": "The single instruction shown first, in the user's language" },
-    "counterMove": { "type": ["string", "null"] },
+    "command": {
+      "type": ["string", "null"],
+      "description": "Resolved phrase-library text, command language then English, e.g. 'Letak telefon. Hang up.' Non-empty when risk=high, otherwise null or absent"
+    },
+    "counterMove": {
+      "type": ["string", "null"],
+      "description": "Resolved phrase-library text, not a phrase ID. Non-empty when risk=high, otherwise null or absent"
+    },
     "evidence": { "type": "array", "items": { "type": "string" }, "maxItems": 3, "description": "Short masked quotes" },
     "source": { "enum": ["rules", "spark"] },
     "at": { "type": "string", "format": "date-time" }
+  },
+  "if": { "properties": { "risk": { "const": "high" } }, "required": ["risk"] },
+  "then": {
+    "required": ["command", "counterMove"],
+    "properties": {
+      "command": { "type": "string", "minLength": 1 },
+      "counterMove": { "type": "string", "minLength": 1 }
+    }
+  },
+  "else": {
+    "properties": {
+      "command": { "type": "null" },
+      "counterMove": { "type": "null" }
+    }
   }
 }

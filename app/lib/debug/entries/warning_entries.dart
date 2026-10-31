@@ -6,7 +6,6 @@ import '../../data/repositories/call_risk_repository.dart';
 import '../../data/services/attention_service.dart';
 import '../../data/services/stage_stream_service.dart';
 import '../../features/warning/view_models/warning_view_model.dart';
-import '../fixtures/stage_update_extended_fixtures.dart';
 import '../fixtures/stage_update_fixtures.dart';
 import '../gallery_entry.dart';
 import '../placeholder_call_screen.dart';
@@ -59,21 +58,19 @@ List<GalleryEntry> warningEntries() {
   return [
     _entry('low', (s, _) => s.emit(u(stageLow))),
     _entry('medium', (s, _) => s.emit(u(stageMedium))),
-    _entry('high', (s, _) => s.emit(u(extHigh))),
-    _entry('high-credentials', (s, _) => s.emit(u(extHighCredentials))),
-    _entry('high-english-only', (s, _) => s.emit(u(extHighEnglishOnly))),
-    _entry('high-long-text', (s, _) => s.emit(u(extHighLongText))),
-    _entry('high-no-number', (s, _) => s.emit(u(extHighNoNumber))),
+    _entry('high', (s, _) => s.emit(u(stageHigh))),
+    _entry('high-credentials', (s, _) => s.emit(u(stageHighCredentials))),
+    _entry('high-long-text', (s, _) => s.emit(u(stageHighLongText))),
     _entry('dismissed', (s, vm) {
-      s.emit(u(extHigh));
+      s.emit(u(stageHigh));
       vm.dismiss();
     }),
     _entry('stepped-down', (s, _) {
-      s.emit(u(extHigh));
+      s.emit(u(stageHigh));
       s.emit(u(stageMedium));
     }),
     _entry('reconnecting-high', (s, _) {
-      s.emit(u(extHigh));
+      s.emit(u(stageHigh));
       s.setConnected(false);
     }),
     _entry('reconnecting-medium', (s, _) {

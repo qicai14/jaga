@@ -15,10 +15,7 @@ enum WarningLayer { none, caution, warning }
 class WarningContent {
   const WarningContent({
     this.command,
-    this.commandEnglish,
     this.counterMove,
-    this.counterMoveEnglish,
-    this.officialNumber,
     this.agency,
     this.evidence = const [],
     this.isCredentials = false,
@@ -26,10 +23,7 @@ class WarningContent {
 
   factory WarningContent.from(StageUpdate u) => WarningContent(
     command: u.command,
-    commandEnglish: u.commandEnglish,
     counterMove: u.counterMove,
-    counterMoveEnglish: u.counterMoveEnglish,
-    officialNumber: u.officialNumber,
     agency: u.claimedAgency,
     evidence: u.evidence,
     isCredentials: u.stage == Stage.credentials,
@@ -37,10 +31,7 @@ class WarningContent {
 
   /// Null at high means the view shows the built-in safety-net command.
   final String? command;
-  final String? commandEnglish;
   final String? counterMove;
-  final String? counterMoveEnglish;
-  final String? officialNumber;
   final String? agency;
   final List<String> evidence;
   final bool isCredentials;

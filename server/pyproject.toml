@@ -7,10 +7,14 @@ dependencies = [
   "fastapi",
   "uvicorn[standard]",
   "pydantic-settings",
+  "websockets",  # client for the Muse Voice Transcribe realtime socket (#20)
+  "httpx",  # HTTP client for the Muse Spark chat API (#21)
+  "firebase-admin",  # FCM client for family alert pushes (#54)
+  "pyjwt",  # signs Voice access tokens for the app (#12)
 ]
 
 [dependency-groups]
-dev = ["pytest", "httpx", "ruff"]
+dev = ["pytest", "httpx", "ruff", "jsonschema", "rfc3339-validator"]
 
 [build-system]
 requires = ["hatchling"]

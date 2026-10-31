@@ -158,8 +158,6 @@ class _WarningScreenState extends State<WarningScreen> {
     final styles = context.jagaText;
     final content = widget.content;
     final command = content.command ?? l.warningCommandFallback;
-    // Shown once: when her language is missing the server sends English.
-    final english = content.command == null ? null : content.commandEnglish;
     final scale = MediaQuery.textScalerOf(context).scale(1);
 
     final band = Column(
@@ -185,17 +183,6 @@ class _WarningScreenState extends State<WarningScreen> {
                   },
                 ),
               ),
-        if (english != null && english != command) ...[
-          SizedBox(height: m.s),
-          // Secondary line: unscaled (30sp) so it never outsizes a shrunk command.
-          MediaQuery.withClampedTextScaling(
-            maxScaleFactor: 1.0,
-            child: Text(
-              english,
-              style: styles.commandEnglish.copyWith(color: c.onWarning),
-            ),
-          ),
-        ],
       ],
     );
 
@@ -224,10 +211,7 @@ class _WarningScreenState extends State<WarningScreen> {
     final scheme = Theme.of(context).colorScheme;
     final m = context.metrics;
     final text = Theme.of(context).textTheme;
-    final styles = context.jagaText;
     final content = widget.content;
-    final counterEnglish = content.counterMoveEnglish;
-    final number = content.officialNumber;
     // Never on the credentials Warning (Q36).
     final evidence = content.isCredentials || content.evidence.isEmpty
         ? null
@@ -246,47 +230,6 @@ class _WarningScreenState extends State<WarningScreen> {
                 content.counterMove!,
                 style: text.bodyLarge?.copyWith(color: scheme.onSurface),
               ),
-            if (number != null) ...[
-              SizedBox(height: m.l),
-              Text(
-                content.agency == null
-                    ? l.warningOfficialNumberLabelNoAgency
-                    : l.warningOfficialNumberLabel(content.agency!),
-                style: text.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-              // One line, never wraps; it shrinks instead. Read one numeral at a time.
-              MediaQuery.withClampedTextScaling(
-                maxScaleFactor: 1.2,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text(
-                    number,
-                    maxLines: 1,
-                    softWrap: false,
-                    semanticsLabel: number.replaceAllMapped(
-                      RegExp(r'\d'),
-                      (d) => '${d[0]} ',
-                    ),
-                    style: styles.officialNumber.copyWith(
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            if (counterEnglish != null &&
-                counterEnglish != content.counterMove) ...[
-              SizedBox(height: m.m),
-              Text(
-                counterEnglish,
-                style: text.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ],
             if (evidence != null) ...[
               Divider(height: m.xl, color: scheme.outlineVariant),
               Text(

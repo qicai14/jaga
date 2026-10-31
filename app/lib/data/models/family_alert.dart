@@ -14,7 +14,7 @@ enum FamilyAlertKind {
       FamilyAlertKind.values.firstWhere((k) => k.name == value);
 }
 
-/// Server to family co-pilot: `contracts/family-alert.schema.json` (draft v0).
+/// Server to family co-pilot: `contracts/family-alert.schema.json` (v1).
 /// Summary and masked quotes only, never the transcript. Unknown enum values throw.
 class FamilyAlert {
   const FamilyAlert({
@@ -23,9 +23,9 @@ class FamilyAlert {
     required this.stage,
     required this.summary,
     required this.at,
+    required this.kind,
     this.claimedAgency,
     this.quotes = const [],
-    this.kind = FamilyAlertKind.alert,
   });
 
   factory FamilyAlert.fromJson(Map<String, dynamic> json) => FamilyAlert(
@@ -36,10 +36,7 @@ class FamilyAlert {
     at: DateTime.parse(json['at'] as String),
     claimedAgency: json['claimedAgency'] as String?,
     quotes: [...?(json['quotes'] as List?)?.cast<String>()],
-    // Not in contract v0 yet (requested from contracts #1): absent means alert.
-    kind: json['kind'] == null
-        ? FamilyAlertKind.alert
-        : FamilyAlertKind.fromJson(json['kind'] as String),
+    kind: FamilyAlertKind.fromJson(json['kind'] as String),
   );
 
   /// The contract's stage enum starts at isolation: `none` is never sent.

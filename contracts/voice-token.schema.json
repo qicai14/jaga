@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/voice-token",
+  "title": "VoiceToken (server -> protected user's app). The body of a POST /voice-token 200. A credential: never logged.",
+  "type": "object",
+  "required": ["token", "expiresAt"],
+  "additionalProperties": false,
+  "properties": {
+    "token": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$",
+      "description": "The Voice access token, a signed JWT. The app passes it to twilio_voice as is and never reads inside it"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The token's exp claim, 1 hour after it was issued. The app fetches a new token before this time"
+    }
+  }
+}

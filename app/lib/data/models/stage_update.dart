@@ -19,7 +19,7 @@ enum Source {
       Source.values.firstWhere((s) => s.name == value);
 }
 
-/// Server to app, during a call: `contracts/stage-update.schema.json` (draft v0).
+/// Server to app, during a call: `contracts/stage-update.schema.json` (v1, ADR 0007).
 /// Unknown enum values throw (contract drift).
 class StageUpdate {
   const StageUpdate({
@@ -31,10 +31,7 @@ class StageUpdate {
     this.command,
     this.counterMove,
     this.evidence = const [],
-    this.source,
-    this.commandEnglish,
-    this.counterMoveEnglish,
-    this.officialNumber,
+    required this.source,
   });
 
   factory StageUpdate.fromJson(Map<String, dynamic> json) => StageUpdate(
@@ -46,12 +43,7 @@ class StageUpdate {
     command: json['command'] as String?,
     counterMove: json['counterMove'] as String?,
     evidence: [...?(json['evidence'] as List?)?.cast<String>()],
-    source: json['source'] == null
-        ? null
-        : Source.fromJson(json['source'] as String),
-    commandEnglish: json['commandEnglish'] as String?,
-    counterMoveEnglish: json['counterMoveEnglish'] as String?,
-    officialNumber: json['officialNumber'] as String?,
+    source: Source.fromJson(json['source'] as String),
   );
 
   factory StageUpdate.parse(String raw) =>
@@ -63,15 +55,10 @@ class StageUpdate {
   final DateTime at;
   final String? claimedAgency;
 
-  /// Non-null only at high risk, in the user's language (phrase library, ADR 0006).
+  /// Non-null only at high risk: command language, then English. The official
+  /// number is inside [counterMove].
   final String? command;
   final String? counterMove;
   final List<String> evidence;
-  final Source? source;
-
-  // Not in contract v0 yet (requested from contracts #1). Null until it lands;
-  // the elements that show them are hidden when null.
-  final String? commandEnglish;
-  final String? counterMoveEnglish;
-  final String? officialNumber;
+  final Source source;
 }

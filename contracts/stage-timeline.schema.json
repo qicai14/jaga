@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "jaga/stage-timeline",
+  "title": "StageTimeline (server -> family co-pilot's app). What is kept after a call, for 30 days (family can delete sooner). Never the transcript or audio.",
+  "type": "object",
+  "required": ["callId", "startedAt", "endedAt", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "callId": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "endedAt": { "type": ["string", "null"], "format": "date-time", "description": "null while the call is live" },
+    "claimedAgency": { "type": ["string", "null"] },
+    "events": {
+      "type": "array",
+      "description": "One event per stage or risk change, oldest first",
+      "items": {
+        "type": "object",
+        "required": ["at", "stage", "risk", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "at": { "type": "string", "format": "date-time" },
+          "stage": { "enum": ["none", "pretext", "authority", "fear", "isolation", "handoff", "money", "credentials"] },
+          "risk": { "enum": ["low", "medium", "high"] },
+          "source": { "enum": ["rules", "spark"] },
+          "evidence": { "type": "array", "items": { "type": "string" }, "maxItems": 3, "description": "Short masked quotes" }
+        }
+      }
+    }
+  }
+}

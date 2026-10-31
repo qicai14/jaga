@@ -63,14 +63,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningFromJaga => 'Scam warning from Jaga';
 
   @override
-  String warningOfficialNumberLabel(String agency) {
-    return '$agency\'s official number';
-  }
-
-  @override
-  String get warningOfficialNumberLabelNoAgency => 'Official number';
-
-  @override
   String get warningEvidenceLabel => 'The caller said';
 
   @override

@@ -202,18 +202,6 @@ abstract class AppLocalizations {
   /// **'Scam warning from Jaga'**
   String get warningFromJaga;
 
-  /// Label above the official number on the Warning. agency is the agency the caller claimed.
-  ///
-  /// In en, this message translates to:
-  /// **'{agency}\'s official number'**
-  String warningOfficialNumberLabel(String agency);
-
-  /// Label above the official number when no agency was claimed.
-  ///
-  /// In en, this message translates to:
-  /// **'Official number'**
-  String get warningOfficialNumberLabelNoAgency;
-
   /// Label above the masked quote on the Warning.
   ///
   /// In en, this message translates to:

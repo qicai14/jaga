@@ -19,8 +19,6 @@
   "cautionBannerText": "Panggilan ini ada tanda penipuan",
   "warningSemanticsLabel": "Amaran penipuan",
   "warningFromJaga": "Amaran penipuan daripada Jaga",
-  "warningOfficialNumberLabel": "Nombor rasmi {agency}",
-  "warningOfficialNumberLabelNoAgency": "Nombor rasmi",
   "warningEvidenceLabel": "Pemanggil berkata",
   "warningHangUp": "Letak telefon",
   "warningDismissLabel": "Panggilan ini selamat",

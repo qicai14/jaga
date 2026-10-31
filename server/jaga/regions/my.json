@@ -1,0 +1,90 @@
+{
+  "defaultLanguage": "ms",
+  "library": {
+    "pretext": {
+      "command": {"id": "my.pretext.command", "text": {"ms": "Jangan beri sebarang butiran. Letak telefon. Do not give any details. Hang up.", "en": "Do not give any details. Hang up.", "zh": "不要透露任何资料。请挂断电话。 Do not give any details. Hang up."}},
+      "counterMoves": [{"id": "my.pretext.counter.1", "text": {"ms": "Katakan anda akan telefon semula, kemudian hubungi organisasi itu sendiri melalui nombor rasminya.", "en": "Say you will call back, then phone the organisation yourself using its official number.", "zh": "说你会回电，然后用官方号码自己联系该机构。"}}]
+    },
+    "authority": {
+      "command": {"id": "my.authority.command", "text": {"ms": "Letak telefon. Semak sendiri siapa yang menelefon. Hang up. Check who this is yourself.", "en": "Hang up. Check who this is yourself.", "zh": "请挂断电话，自己核实对方身份。 Hang up. Check who this is yourself."}},
+      "counterMoves": [{"id": "my.authority.counter.1", "text": {"ms": "Polis, LHDN dan Bank Negara tidak meminta wang atau kod melalui telefon. Hubungi 997 untuk menyemak.", "en": "Real police, LHDN and Bank Negara do not ask for money or codes by phone. Call 997 to check.", "zh": "警方、内陆税收局（LHDN）和国家银行不会通过电话索要钱或验证码。请致电 997 核实。"}}]
+    },
+    "fear": {
+      "command": {"id": "my.fear.command", "text": {"ms": "Jangan tergesa-gesa. Letak telefon. Do not be rushed. Hang up.", "en": "Do not be rushed. Hang up.", "zh": "不要慌张，请挂断电话。 Do not be rushed. Hang up."}},
+      "counterMoves": [{"id": "my.fear.counter.1", "text": {"ms": "Waran tangkap sebenar tidak diselesaikan melalui telefon. Hubungi 997 atau bank anda sendiri.", "en": "A real arrest warrant is never settled by phone. Call 997 or your bank yourself.", "zh": "真正的拘捕令不会通过电话处理。请自己致电 997 或你的银行。"}}]
+    },
+    "isolation": {
+      "command": {"id": "my.isolation.command", "text": {"ms": "Letak telefon sekarang. Bercakap dengan orang yang anda percayai. Hang up now. Talk to someone you trust.", "en": "Hang up now. Talk to someone you trust.", "zh": "请马上挂断电话，和你信任的人谈谈。 Hang up now. Talk to someone you trust."}},
+      "counterMoves": [{"id": "my.isolation.counter.1", "text": {"ms": "Beritahu ahli keluarga sekarang. Pegawai sebenar tidak pernah suruh anda rahsiakan.", "en": "Tell a family member now. A real officer never asks you to keep it secret.", "zh": "现在就告诉家人。真正的官员不会要求你保密。"}}]
+    },
+    "handoff": {
+      "command": {"id": "my.handoff.command", "text": {"ms": "Jangan terima panggilan yang dipindahkan itu. Letak telefon. Do not accept the transferred call. Hang up.", "en": "Do not accept the transferred call. Hang up.", "zh": "不要接听被转接的电话，请挂断电话。 Do not accept the transferred call. Hang up."}},
+      "counterMoves": [{"id": "my.handoff.counter.1", "text": {"ms": "Jangan sertai panggilan video atau buat pindahan wang. Hubungi 997 sendiri.", "en": "Do not join the video call or make a transfer. Call 997 yourself.", "zh": "不要加入视频通话或转账。请自己致电 997。"}}]
+    },
+    "money": {
+      "command": {"id": "my.money.command", "text": {"ms": "Jangan pindahkan wang. Letak telefon. Do not transfer any money. Hang up.", "en": "Do not transfer any money. Hang up.", "zh": "不要转账，请挂断电话。 Do not transfer any money. Hang up."}},
+      "counterMoves": [{"id": "my.money.counter.1", "text": {"ms": "Jangan alihkan sebarang wang. Hubungi 997 atau talian penipuan bank anda sendiri.", "en": "Do not move any money. Call 997 or your bank's fraud line yourself.", "zh": "不要转移任何钱。请自己致电 997 或银行的防诈热线。"}}]
+    },
+    "credentials": {
+      "command": {"id": "my.credentials.command", "text": {"ms": "Jangan sebut sebarang kod atau nombor. Letak telefon. Do not read out any code or number. Hang up.", "en": "Do not read out any code or number. Hang up.", "zh": "不要说出任何验证码或号码，请挂断电话。 Do not read out any code or number. Hang up."}},
+      "counterMoves": [{"id": "my.credentials.counter.1", "text": {"ms": "Jangan kongsi TAC, OTP atau kata laluan anda. Hubungi talian penipuan bank anda sendiri.", "en": "Never share your TAC, OTP or password. Call your bank's fraud line yourself.", "zh": "切勿透露验证码（TAC、OTP）或密码。请自己致电银行的防诈热线。"}}]
+    }
+  },
+  "libraryReview": {"ms": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-30.", "zh": "Reviewed by a native speaker, Qi Cai (qicai14), 2026-10-28."},
+  "contacts": {
+    "nsrc": {"name": "National Scam Response Centre (NSRC)", "number": "997", "purpose": "Real-time help for online financial scams; call within 24 hours so the money can be blocked", "hours": "Daily, 24 hours (some bank and government pages still list 8am-8pm; treat those as stale)", "source": "https://www.malaysia.gov.my/en/categories/safety-and-community/cybersecurity/nsrc-997-hotline", "checked": "2026-10-28"},
+    "pdrm": {"name": "PDRM (MERS 999)", "number": "999", "purpose": "Emergencies only, shared with Bomba, hospitals, APM and Maritim", "hours": "Not stated", "source": "https://999.gov.my/mers-999/apa-itu-mers-999/", "checked": "2026-10-28"},
+    "pdrm_hq": {"name": "PDRM Bukit Aman HQ", "number": "+603-2266 2222", "purpose": "General line", "hours": "Not stated", "source": "https://www.rmp.gov.my/news-detail/2026/04/27/besmartstayalert-letsfightscammertogether-postings-pilihan-nsrc-997-perangi-jenayah-dan-penipuan", "checked": "2026-10-28"},
+    "lhdn": {"name": "LHDN (HASiL Contact Centre)", "number": "603-8911 1000", "purpose": "Tax enquiries", "hours": "Mon-Fri 9:00 am to 5:00 pm, except public holidays", "source": "https://www.hasil.gov.my/en/hubungi-kami/meja-bantuan-hasil/", "checked": "2026-10-28"},
+    "bnm": {"name": "Bank Negara Malaysia (BNMTELELINK)", "number": "1-300-88-5465", "purpose": "Report fraud, scams and illegal financial schemes", "hours": "Mon-Fri 9:00 am to 5:00 pm (contact-us page)", "source": "https://www.bnm.gov.my/web/financial-fraud-alert/report-a-fraud", "checked": "2026-10-28"},
+    "maybank": {"name": "Maybank Fraud Hotline", "number": "+603 5891 4744", "purpose": "Report fraud on your Maybank account", "hours": "24 hours", "source": "https://www.maybank2u.com.my/maybank2u/malaysia/en/personal/about_us/contact-us.page", "checked": "2026-10-28"},
+    "cimb": {"name": "CIMB 24-hour Contact Centre", "number": "+603 6204 7788", "purpose": "The line CIMB names to call if you have been scammed", "hours": "24 hours", "source": "https://www.cimb.com.my/en/personal/help-support/security-and-fraud/security-and-fraud-awareness/reporting-instructions-personal.html", "checked": "2026-10-28"},
+    "public_bank": {"name": "Public Bank Report Fraud", "number": "03-21773555", "purpose": "Dedicated fraud line (Case Management)", "hours": "24 hours", "source": "https://www.pbebank.com/en/contact-us/", "checked": "2026-10-28"},
+    "rhb": {"name": "RHB Customer Contact Centre", "number": "603-9206 8118", "purpose": "Customer contact centre; no separate fraud line listed", "hours": "24 hours", "source": "https://www.rhbgroup.com/others/contact-us/index.html", "checked": "2026-10-28"},
+    "hong_leong": {"name": "Hong Leong Bank Contact Centre", "number": "03-7626 8899", "purpose": "Report a scam or fraud", "hours": "24 hours daily", "source": "https://www.hlb.com.my/en/personal-banking/help-support/general-faq/report-a-scam-fraud.html", "checked": "2026-10-28"},
+    "ambank": {"name": "AmBank Contact Centre", "number": "03-2178 8888", "purpose": "Contact centre; no separate fraud line listed", "hours": "General 9:00 am to 9:00 pm daily; fraud and scam reporting stays 24 hours", "source": "https://www.ambank.com.my/home/contact-centre", "checked": "2026-10-28"},
+    "bank_islam": {"name": "Bank Islam Contact Centre", "number": "+603-26 900 900", "purpose": "Contact centre, also the Fraud Hotline", "hours": "24 hours, 7 days a week", "source": "https://www.bankislam.com/need-assistance/contact-us/", "checked": "2026-10-28"},
+    "bsn": {"name": "BSN Contact Centre", "number": "03-2613 1900", "purpose": "Report fraud and scam", "hours": "Not stated", "source": "https://www.bsn.com.my/page/new-bsn-official-telephone-numbers", "checked": "2026-10-28"}
+  },
+  "languageBias": ["Malay", "English", "Mandarin Chinese"],
+  "keywords": ["LHDN", "PDRM", "Bank Negara", "akaun selamat", "waran tangkap", "TAC", "OTP"],
+  "phrases": {
+    "pretext": ["bungkusan haram", "illegal parcel", "nama anda terlibat", "your name is linked", "非法包裹", "涉嫌包裹", "你的名字涉及", "您的姓名涉及", "syarikat kurier", "parcel atas nama", "pihak kastam", "tunggakan cukai", "dari bank negara", "from bank negara", "whatsapp investment", "investment group", "parcel under", "unpaid tax", "atas nama you"],
+    "authority": ["pegawai pdrm", "pegawai lhdn", "pegawai bank negara", "polis diraja", "inspektor", "mahkamah", "我是警察", "警官", "国家银行官员", "國家銀行官員", "检察官", "檢察官", "unit jenayah", "jenayah komersial", "commercial crime", "pegawai penyiasat", "investigating officer", "bukit aman", "dari pdrm", "from pdrm", "from the court", "pendakwa raya", "police officer"],
+    "fear": ["waran tangkap", "arrest warrant", "akan ditangkap", "dibekukan", "money laundering", "wang haram", "逮捕令", "拘捕令", "通缉令", "通緝令", "涉嫌洗钱", "涉嫌洗錢", "涉案账户将被冻结", "涉案帳戶將被凍結", "datang tangkap", "kena tangkap", "be arrested", "akan ditahan", "go to jail", "keluarkan waran", "akan difailkan", "bekukan akaun", "freeze your account", "account will be frozen", "polis akan datang", "police will come", "tangkap you", "tangkap awak", "kena sita", "kalau tak settle hari ini", "kalau tak settle sekarang", "kalau tak settle cepat"],
+    "isolation": ["jangan letak telefon", "do not hang up", "rahsia siasatan", "keep this confidential", "不要挂电话", "不要掛電話", "保密调查", "保密調查", "不要告诉任何人", "不要告訴任何人", "kes ini sulit", "ini kes sulit", "kes ini rahsia", "jangan beritahu keluarga", "bocor siasatan", "termasuk keluarga", "even your family", "jangan letak phone", "jangan putuskan talian", "jangan tutup talian", "jangan tutup telefon"],
+    "handoff": ["sambungkan anda kepada polis", "transfer you to the police", "video call", "skype", "转接给警方", "轉接給警方", "视频通话调查", "視頻通話調查", "kepada pegawai polis", "kepada pegawai penyiasat", "kepada pegawai atasan", "kepada pegawai bank negara", "kepada sarjan", "kepada tuan inspektor", "sambungkan tuan kepada", "sambungkan encik kepada", "sambungkan you kepada", "handoff you", "saya handoff", "handoff kes", "handing over your case", "connect you direct", "pass kes you", "transfer your case"],
+    "money": ["pindahkan wang", "transfer the money", "bayar jaminan", "wang jaminan", "把钱转", "把錢轉", "安全账户", "安全賬戶", "安全帳戶", "交保证金", "交保證金", "pindahkan semua", "pindah semua", "pindahkan baki", "semua wang ke", "semua duit ke", "bank in to our", "ke akaun yang saya bagi", "move all your", "move your money", "transfer all your", "transfer all money", "transfer semua", "bank negara untuk audit"],
+    "credentials": ["beritahu kata laluan", "tell me your password", "give me your password", "告诉我验证码", "告訴我驗證碼", "告诉我密码", "告訴我密碼", "報出驗證碼", "bagi saya kod", "beri saya kod", "baca kod", "baca pada saya", "give me the tac", "online banking username", "bagi kod itu pada saya"]
+  },
+  "hardTriggers": {
+    "akaun selamat": "money",
+    "safe account": "money",
+    "nombor tac": "credentials",
+    "kod tac": "credentials",
+    "tac code": "credentials",
+    "kod otp": "credentials",
+    "nombor otp": "credentials",
+    "otp code": "credentials",
+    "jangan beritahu sesiapa": "isolation",
+    "don't tell anyone": "isolation"
+  },
+  "negation": {
+    "before": "(?:never|do not|don't|jangan|tidak akan|tak akan)\\s+(?:ever\\s+)?(?:share|give|tell|disclose|reveal|kongsi|beri|berikan|beritahu|dedah|minta|meminta)\\b[^.,;!?]{0,12}$",
+    "after": "\\s*(?:(?:kod|nombor)\\s+)?(?:tac|otp)\\b",
+    "money": "transfer|pindah|akaun selamat|safe account|wang|money"
+  },
+  "digitWords": {
+    "kosong": 0, "sifar": 0, "zero": 0, "oh": 0,
+    "satu": 1, "one": 1, "dua": 2, "two": 2, "tiga": 3, "three": 3, "empat": 4, "four": 4,
+    "lima": 5, "five": 5, "enam": 6, "six": 6, "tujuh": 7, "seven": 7, "lapan": 8, "eight": 8,
+    "sembilan": 9, "nine": 9
+  },
+  "codeAsk": "\\b(?:otp|tac)\\b|\\bkod\\s+(?:pengesahan|keselamatan)\\b",
+  "bareTac": "(?<!\\d)\\d{6}(?!\\d)",
+  "userDisclosure": {
+    "TAC read out": "(?:tac|otp|code)\\D{0,20}(?<!\\d)\\d{6}(?!\\d)",
+    "account number read out": "(?:akaun|account)\\D{0,20}(?<!\\d)\\d(?:[ -]?\\d){9,15}(?!\\d)",
+    "IC read out": "(?<!\\d)\\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\\d|3[01])-?\\d{2}-?\\d{4}(?!\\d)"
+  }
+}
