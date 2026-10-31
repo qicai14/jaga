@@ -6,13 +6,7 @@ void main() {
   test('no text style below 20sp', () {
     final en = buildJagaTheme(const Locale('en'));
     final t = en.textTheme;
-    for (final s in [
-      t.bodySmall,
-      t.bodyMedium,
-      t.labelSmall,
-      t.labelMedium,
-      t.titleSmall,
-    ]) {
+    for (final s in [t.bodySmall, t.bodyMedium, t.labelSmall, t.labelMedium, t.titleSmall]) {
       expect(s!.fontSize, greaterThanOrEqualTo(20));
     }
   });

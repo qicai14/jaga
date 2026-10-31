@@ -34,12 +34,16 @@ class WebSocketStageStreamService implements StageStreamService {
     ],
   });
 
+  static const maxRefusals = 5;
+
   final Uri _serverUrl;
   final List<Duration> backoff;
   final _controller = StreamController<StageUpdate>.broadcast();
   final _connected = ValueNotifier<bool>(true);
   WebSocket? _socket;
   int _generation = 0;
+  Timer? _retry;
+  Completer<void>? _retryDone;
 
   @override
   Stream<StageUpdate> get updates => _controller.stream;
@@ -56,6 +60,11 @@ class WebSocketStageStreamService implements StageStreamService {
   @override
   void close() {
     _generation++;
+    _retry?.cancel();
+    // Wakes _run, which sees the new generation and ends.
+    if (_retryDone case final done? when !done.isCompleted) done.complete();
+    _retry = null;
+    _retryDone = null;
     _socket?.close();
     _socket = null;
     _connected.value = true;
@@ -63,23 +72,27 @@ class WebSocketStageStreamService implements StageStreamService {
 
   Uri _url(String callId) => _serverUrl.replace(
     scheme: _serverUrl.scheme == 'https' ? 'wss' : 'ws',
-    path: '/calls/$callId/stages',
+    path: '/calls/${Uri.encodeComponent(callId)}/stages',
   );
 
   Future<void> _run(String callId, int generation) async {
     var delivered = 0; // messages already shown, replayed again after a drop
     var failures = 0;
+    var refusals = 0;
     while (generation == _generation) {
       WebSocket? socket;
       try {
-        socket = await WebSocket.connect(_url(callId).toString());
+        socket = await WebSocket.connect(_url(callId).toString())
+            .timeout(const Duration(seconds: 10));
         if (generation != _generation) {
           unawaited(socket.close());
           return;
         }
+        socket.pingInterval = const Duration(seconds: 20);
         _socket = socket;
         _connected.value = true;
         failures = 0;
+        refusals = 0;
         var index = 0;
         await for (final message in socket) {
           if (index++ < delivered) continue;
@@ -87,10 +100,13 @@ class WebSocketStageStreamService implements StageStreamService {
           _deliver(message);
         }
       } on WebSocketException catch (e) {
-        // shortcut: dart:io hides the handshake status; any refused upgrade
-        // (403 for an unknown call) is treated as "stop", revisit with auth.
-        if (socket == null) {
-          debugPrint('Stage stream refused: ${e.runtimeType}');
+        // The server answers 403 for an unknown call, 502/503 mid-deploy. Some
+        // SDKs leave the status out of the message, so a refusal also gives up
+        // after [maxRefusals] in a row.
+        if (socket == null &&
+            (e.message.contains('status code: 403') ||
+                ++refusals >= maxRefusals)) {
+          debugPrint('Stage stream refused: unknown call');
           return;
         }
       } on Object catch (e) {
@@ -106,7 +122,9 @@ class WebSocketStageStreamService implements StageStreamService {
       final wait =
           backoff[failures < backoff.length ? failures : backoff.length - 1];
       failures++;
-      await Future<void>.delayed(wait);
+      final done = _retryDone = Completer<void>();
+      _retry = Timer(wait, done.complete);
+      await done.future;
     }
   }
 
