@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
+import '../../../core/l10n/date_text.dart';
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/big_button.dart';
@@ -67,7 +67,7 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
                           headline: genuine
                               ? l.familyGenuineHeadline(s.personName)
                               : l.familyAlertHeadline(s.personName),
-                          time: l.familyAlertTime(_when(context, s.at)),
+                          time: l.familyAlertTime(s.at.formatWhen(context)),
                         ),
                         Padding(
                           padding: EdgeInsets.all(m.l),
@@ -156,17 +156,4 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
       ),
     );
   }
-}
-
-/// Time only for today, date and time before that.
-String _when(BuildContext context, DateTime at) {
-  final locale = Localizations.localeOf(context).toString();
-  final local = at.toLocal();
-  final now = DateTime.now();
-  final today =
-      local.year == now.year &&
-      local.month == now.month &&
-      local.day == now.day;
-  return (today ? DateFormat.jm(locale) : DateFormat.yMMMd(locale).add_jm())
-      .format(local);
 }

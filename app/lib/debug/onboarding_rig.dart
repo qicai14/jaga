@@ -5,11 +5,13 @@ import '../data/repositories/onboarding_repository.dart';
 import '../data/repositories/pin_repository.dart';
 import '../data/services/alert_notifier.dart';
 import '../data/services/alert_push_service.dart';
+import '../data/services/copilot_pause_service.dart';
 import '../data/services/device_setup_service.dart';
 import '../data/services/dialer_service.dart';
 import '../data/services/key_value_store.dart';
 import '../data/services/onboarding_api_service.dart';
 import '../data/services/share_service.dart';
+import '../data/services/timeline_service.dart';
 import '../features/onboarding/view_models/onboarding_view_model.dart';
 import '../features/onboarding/view_models/protected_home_view_model.dart';
 
@@ -56,6 +58,8 @@ class OnboardingRig {
   final buzzer = FakeBuzzer();
   final share = FakeShareService();
   final push = FakeAlertPushService();
+  final pause = FakeCopilotPauseService();
+  final timeline = FakeTimelineService();
   final FakeAlertNotifier notifier;
 
   AppDependencies get deps => AppDependencies(
@@ -67,6 +71,8 @@ class OnboardingRig {
     share: share,
     alertPush: push,
     alertNotifier: notifier,
+    pause: pause,
+    timeline: timeline,
     initAlerts: () async {},
   );
 

@@ -405,4 +405,92 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsReset => 'Hold to reset Jaga';
+
+  @override
+  String get familyHomeProtected => 'Protected';
+
+  @override
+  String get familyClearPause => 'Clear Jaga Pause';
+
+  @override
+  String familyClearPauseStatement(String name) {
+    return 'I\'ve spoken to $name and checked this transfer is genuine.';
+  }
+
+  @override
+  String get familyClearPauseHold => 'Hold to clear Jaga Pause';
+
+  @override
+  String get familyPauseCleared => 'Jaga Pause cleared';
+
+  @override
+  String get familyClearPauseError =>
+      'Couldn\'t clear Jaga Pause. Check your internet and try again.';
+
+  @override
+  String get familyCallsTitle => 'Alerted calls';
+
+  @override
+  String get familyCallsEmpty => 'No alerted calls in the last 30 days.';
+
+  @override
+  String get familyCallsError => 'Couldn\'t load calls. Check your internet.';
+
+  @override
+  String get commonTryAgain => 'Try again';
+
+  @override
+  String familyTimelineTitle(String date) {
+    return 'Call on $date';
+  }
+
+  @override
+  String get familyTimelineError =>
+      'Couldn\'t load this timeline. Check your internet.';
+
+  @override
+  String get familyTimelineRiskMedium => 'Caution shown';
+
+  @override
+  String get familyTimelineRiskHigh => 'Warning shown';
+
+  @override
+  String get familyTimelineRiskLow => 'Risk fell back to low';
+
+  @override
+  String familyCallHotline(String hotline) {
+    return 'Call $hotline to report';
+  }
+
+  @override
+  String get familyTimelineDelete => 'Delete';
+
+  @override
+  String get familyTimelineDeleteConfirm =>
+      'Delete this timeline? It can\'t be brought back.';
+
+  @override
+  String get familyTimelineDeleted => 'Timeline deleted';
+
+  @override
+  String get familyTimelineDeleteError =>
+      'Couldn\'t delete the timeline. Check your internet and try again.';
+
+  @override
+  String familyUnlink(String name) {
+    return 'Remove $name from this phone';
+  }
+
+  @override
+  String familyUnlinkConfirm(String name) {
+    return 'Remove $name from this phone? You can link again with a new code.';
+  }
+
+  @override
+  String get familyUnlinkAction => 'Remove';
+
+  @override
+  String familyUnlinkError(String name) {
+    return 'Couldn\'t remove $name. Try again.';
+  }
 }

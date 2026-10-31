@@ -413,4 +413,94 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get settingsReset => 'Jaga-வை மீட்டமைக்க அழுத்திப் பிடிக்கவும்';
+
+  @override
+  String get familyHomeProtected => 'பாதுகாக்கப்படுகிறார்';
+
+  @override
+  String get familyClearPause => 'Jaga Pause-ஐ நீக்கு';
+
+  @override
+  String familyClearPauseStatement(String name) {
+    return 'நான் $name-உடன் பேசி, இந்தப் பரிமாற்றம் உண்மையானது என்று உறுதிசெய்தேன்.';
+  }
+
+  @override
+  String get familyClearPauseHold => 'Jaga Pause-ஐ நீக்க அழுத்திப் பிடிக்கவும்';
+
+  @override
+  String get familyPauseCleared => 'Jaga Pause நீக்கப்பட்டது';
+
+  @override
+  String get familyClearPauseError =>
+      'Jaga Pause-ஐ நீக்க முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String get familyCallsTitle => 'எச்சரிக்கை விடுக்கப்பட்ட அழைப்புகள்';
+
+  @override
+  String get familyCallsEmpty =>
+      'கடந்த 30 நாட்களில் எச்சரிக்கை விடுக்கப்பட்ட அழைப்புகள் இல்லை.';
+
+  @override
+  String get familyCallsError =>
+      'அழைப்புகளை ஏற்ற முடியவில்லை. இணையத்தைச் சரிபார்க்கவும்.';
+
+  @override
+  String get commonTryAgain => 'மீண்டும் முயற்சிக்கவும்';
+
+  @override
+  String familyTimelineTitle(String date) {
+    return '$date அன்றைய அழைப்பு';
+  }
+
+  @override
+  String get familyTimelineError =>
+      'இந்த காலவரிசையை ஏற்ற முடியவில்லை. இணையத்தைச் சரிபார்க்கவும்.';
+
+  @override
+  String get familyTimelineRiskMedium => 'எச்சரிக்கை காட்டப்பட்டது';
+
+  @override
+  String get familyTimelineRiskHigh => 'எச்சரிக்கை திரை காட்டப்பட்டது';
+
+  @override
+  String get familyTimelineRiskLow => 'ஆபத்து மீண்டும் குறைந்தது';
+
+  @override
+  String familyCallHotline(String hotline) {
+    return 'புகாரளிக்க $hotline-ஐ அழைக்கவும்';
+  }
+
+  @override
+  String get familyTimelineDelete => 'அழி';
+
+  @override
+  String get familyTimelineDeleteConfirm =>
+      'இந்த காலவரிசையை அழிக்கவா? இதை மீட்டெடுக்க முடியாது.';
+
+  @override
+  String get familyTimelineDeleted => 'காலவரிசை அழிக்கப்பட்டது';
+
+  @override
+  String get familyTimelineDeleteError =>
+      'காலவரிசையை அழிக்க முடியவில்லை. இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.';
+
+  @override
+  String familyUnlink(String name) {
+    return '$name-ஐ இந்த தொலைபேசியிலிருந்து நீக்கு';
+  }
+
+  @override
+  String familyUnlinkConfirm(String name) {
+    return '$name-ஐ இந்த தொலைபேசியிலிருந்து நீக்கவா? புதிய குறியீட்டுடன் மீண்டும் இணைக்கலாம்.';
+  }
+
+  @override
+  String get familyUnlinkAction => 'நீக்கு';
+
+  @override
+  String familyUnlinkError(String name) {
+    return '$name-ஐ நீக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.';
+  }
 }

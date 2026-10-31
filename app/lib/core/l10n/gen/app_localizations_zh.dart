@@ -390,4 +390,88 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsReset => '按住以重置 Jaga';
+
+  @override
+  String get familyHomeProtected => '受保护';
+
+  @override
+  String get familyClearPause => '解除 Jaga 暂停';
+
+  @override
+  String familyClearPauseStatement(String name) {
+    return '我已和$name通过话，确认这笔转账是真实的。';
+  }
+
+  @override
+  String get familyClearPauseHold => '按住以解除 Jaga 暂停';
+
+  @override
+  String get familyPauseCleared => '已解除 Jaga 暂停';
+
+  @override
+  String get familyClearPauseError => '无法解除 Jaga 暂停。请检查网络后重试。';
+
+  @override
+  String get familyCallsTitle => '已发出警报的来电';
+
+  @override
+  String get familyCallsEmpty => '过去 30 天没有发出警报的来电。';
+
+  @override
+  String get familyCallsError => '无法加载来电。请检查网络。';
+
+  @override
+  String get commonTryAgain => '重试';
+
+  @override
+  String familyTimelineTitle(String date) {
+    return '$date的来电';
+  }
+
+  @override
+  String get familyTimelineError => '无法加载此时间线。请检查网络。';
+
+  @override
+  String get familyTimelineRiskMedium => '已显示提醒';
+
+  @override
+  String get familyTimelineRiskHigh => '已显示警告';
+
+  @override
+  String get familyTimelineRiskLow => '风险已降回较低';
+
+  @override
+  String familyCallHotline(String hotline) {
+    return '拨打 $hotline 举报';
+  }
+
+  @override
+  String get familyTimelineDelete => '删除';
+
+  @override
+  String get familyTimelineDeleteConfirm => '删除此时间线？删除后无法恢复。';
+
+  @override
+  String get familyTimelineDeleted => '时间线已删除';
+
+  @override
+  String get familyTimelineDeleteError => '无法删除时间线。请检查网络后重试。';
+
+  @override
+  String familyUnlink(String name) {
+    return '从此手机移除$name';
+  }
+
+  @override
+  String familyUnlinkConfirm(String name) {
+    return '从此手机移除$name？可用新代码重新关联。';
+  }
+
+  @override
+  String get familyUnlinkAction => '移除';
+
+  @override
+  String familyUnlinkError(String name) {
+    return '无法移除$name。请重试。';
+  }
 }

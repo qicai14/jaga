@@ -13,14 +13,20 @@ import 'data/repositories/onboarding_repository.dart';
 import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
+import 'data/services/copilot_pause_service.dart';
 import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
 import 'data/services/share_service.dart';
+import 'data/services/timeline_service.dart';
+import 'features/family/view_models/clear_pause_view_model.dart';
+import 'features/family/view_models/copilot_home_view_model.dart';
+import 'features/family/view_models/copilot_settings_view_model.dart';
 import 'features/family/view_models/family_alert_view_model.dart';
+import 'features/family/view_models/stage_timeline_view_model.dart';
+import 'features/family/views/copilot_home_screen.dart';
 import 'features/family/views/family_alert_screen.dart';
 import 'features/onboarding/view_models/onboarding_view_model.dart';
 import 'features/onboarding/view_models/protected_home_view_model.dart';
-import 'features/onboarding/views/copilot_home_screen.dart';
 import 'features/onboarding/views/onboarding_screen.dart';
 import 'features/onboarding/views/protected_home_screen.dart';
 
@@ -36,6 +42,8 @@ class AppDependencies {
     required this.share,
     required this.alertPush,
     required this.alertNotifier,
+    required this.pause,
+    required this.timeline,
     required this.initAlerts,
   });
 
@@ -47,6 +55,8 @@ class AppDependencies {
   final ShareService share;
   final AlertPushService alertPush;
   final AlertNotifier alertNotifier;
+  final CopilotPauseService pause;
+  final TimelineService timeline;
 
   /// Creates the notification channels. Only a co-pilot needs it.
   final Future<void> Function() initAlerts;
@@ -120,8 +130,8 @@ class _JagaAppState extends State<JagaApp> {
   }
 }
 
-/// The co-pilot side until #23: a placeholder home that opens the family alert
-/// when a notification is tapped, including the tap that launched the app.
+/// The co-pilot side: the home, which opens the family alert when a
+/// notification is tapped, including the tap that launched the app.
 class CopilotShell extends StatefulWidget {
   const CopilotShell({super.key, required this.deps, required this.person});
 
@@ -137,6 +147,11 @@ class _CopilotShellState extends State<CopilotShell> {
     push: widget.deps.alertPush,
     notifier: widget.deps.alertNotifier,
     person: widget.person,
+  );
+  late final _home = CopilotHomeViewModel(
+    person: widget.person,
+    pause: widget.deps.pause,
+    timeline: widget.deps.timeline,
   );
   StreamSubscription<AlertOpen>? _opens;
 
@@ -156,29 +171,49 @@ class _CopilotShellState extends State<CopilotShell> {
   }
 
   void _open(AlertOpen open) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ViewModelHost(
-          create: () => FamilyAlertViewModel(
-            repository: _alerts,
-            dialer: widget.deps.dialer,
-            initial: open.alert,
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => ViewModelHost(
+              create: () => FamilyAlertViewModel(
+                repository: _alerts,
+                dialer: widget.deps.dialer,
+                initial: open.alert,
+              ),
+              builder: (_, vm) =>
+                  FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
+            ),
           ),
-          builder: (_, vm) =>
-              FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
-        ),
-      ),
-    );
+        )
+        // The call may have changed while the alert was open.
+        .then((_) {
+          if (mounted) _home.load();
+        });
   }
 
   @override
   void dispose() {
     _opens?.cancel();
     _alerts.dispose();
+    _home.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) =>
-      CopilotHomeScreen(personName: widget.person.name);
+  Widget build(BuildContext context) => CopilotHomeScreen(
+    vm: _home,
+    createClearPause: () => ClearPauseViewModel(
+      personName: widget.person.name,
+      pause: widget.deps.pause,
+    ),
+    timelineFor: (call) => StageTimelineViewModel(
+      call: call,
+      timeline: widget.deps.timeline,
+      dialer: widget.deps.dialer,
+    ),
+    createSettings: () => CopilotSettingsViewModel(
+      repository: widget.deps.onboarding,
+      person: widget.person,
+    ),
+  );
 }

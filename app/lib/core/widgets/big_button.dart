@@ -75,10 +75,17 @@ class BigButton extends StatelessWidget {
         : Icon(icon, size: scale);
 
     if (tone == BigButtonTone.quiet) {
+      final m = context.metrics;
+      // A minimum, not a fixed height: a label on two lines grows the button.
+      final style = OutlinedButton.styleFrom(
+        minimumSize: Size.fromHeight(m.primaryButtonHeight),
+        padding: EdgeInsets.symmetric(horizontal: m.l, vertical: m.s),
+      );
       return iconWidget == null
-          ? OutlinedButton(onPressed: onPressed, child: text)
+          ? OutlinedButton(onPressed: onPressed, style: style, child: text)
           : OutlinedButton.icon(
               onPressed: onPressed,
+              style: style,
               icon: iconWidget,
               label: text,
             );

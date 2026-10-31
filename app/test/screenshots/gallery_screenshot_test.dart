@@ -72,7 +72,7 @@ void main() {
         ('ms', 1.0),
         ('en', 1.0),
         ('en', 2.0),
-        if (state == 'alert-isolation') ...[('ta', 1.0), ('zh', 1.0)],
+        if (state == 'alert-isolation' || state == 'home-pause-active') ...[('ta', 1.0), ('zh', 1.0)],
         if (state == 'alert-long-text') ('ms', 2.0),
       ];
     }
@@ -129,7 +129,7 @@ void main() {
             ),
           ),
         );
-        if (e.state == 'about-loading') {
+        if (e.state == 'about-loading' || e.state == 'clear-pause-busy') {
           // A spinner never settles: give the setup a few frames instead.
           for (var i = 0; i < 3; i++) {
             await tester.pump(const Duration(milliseconds: 300));

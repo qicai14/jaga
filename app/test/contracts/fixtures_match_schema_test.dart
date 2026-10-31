@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
+import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
 import 'package:json_schema/json_schema.dart';
 
 List<File> _json(String dir) => Directory(dir)
@@ -28,6 +29,14 @@ void main() {
       final result = schema.validate(jsonDecode(raw), validateFormats: true);
       expect(result.isValid, isTrue, reason: '${f.path} ${result.errors}');
       StageUpdate.parse(raw); // through the real model
+    }
+  });
+
+  test('the debug-gallery timeline fixtures are valid stage updates', () {
+    for (final raw in timelineV0Fixtures) {
+      final result = schema.validate(jsonDecode(raw), validateFormats: true);
+      expect(result.isValid, isTrue, reason: '${result.errors} $raw');
+      StageUpdate.parse(raw);
     }
   });
 

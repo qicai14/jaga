@@ -803,6 +803,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold to reset Jaga'**
   String get settingsReset;
+
+  /// Co-pilot home: badge saying Jaga is guarding the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected'**
+  String get familyHomeProtected;
+
+  /// Co-pilot home: button that opens the Clear Jaga Pause sheet. Also the busy button's label.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Jaga Pause'**
+  String get familyClearPause;
+
+  /// Clear Jaga Pause sheet: what the family co-pilot confirms by holding. name is the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve spoken to {name} and checked this transfer is genuine.'**
+  String familyClearPauseStatement(String name);
+
+  /// Clear Jaga Pause sheet: the hold-to-confirm button.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to clear Jaga Pause'**
+  String get familyClearPauseHold;
+
+  /// SnackBar after Jaga Pause was cleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaga Pause cleared'**
+  String get familyPauseCleared;
+
+  /// Clear Jaga Pause sheet: the request failed; the sheet stays open.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t clear Jaga Pause. Check your internet and try again.'**
+  String get familyClearPauseError;
+
+  /// Co-pilot home: heading above the alerted calls.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerted calls'**
+  String get familyCallsTitle;
+
+  /// Co-pilot home: no alerted calls.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerted calls in the last 30 days.'**
+  String get familyCallsEmpty;
+
+  /// Co-pilot home: the calls could not be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load calls. Check your internet.'**
+  String get familyCallsError;
+
+  /// Button that retries a failed load.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get commonTryAgain;
+
+  /// Stage timeline screen title. date is already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Call on {date}'**
+  String familyTimelineTitle(String date);
+
+  /// Stage timeline screen: the timeline could not be loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this timeline. Check your internet.'**
+  String get familyTimelineError;
+
+  /// Stage timeline: badge on the step where risk rose to medium (Caution shown).
+  ///
+  /// In en, this message translates to:
+  /// **'Caution shown'**
+  String get familyTimelineRiskMedium;
+
+  /// Stage timeline: badge on the step where risk rose to high (Warning shown).
+  ///
+  /// In en, this message translates to:
+  /// **'Warning shown'**
+  String get familyTimelineRiskHigh;
+
+  /// Stage timeline: badge on the step where risk fell back to low.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk fell back to low'**
+  String get familyTimelineRiskLow;
+
+  /// Stage timeline: bottom button that calls the scam hotline. hotline is the number.
+  ///
+  /// In en, this message translates to:
+  /// **'Call {hotline} to report'**
+  String familyCallHotline(String hotline);
+
+  /// Stage timeline: delete button tooltip and confirm button.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get familyTimelineDelete;
+
+  /// Stage timeline: delete confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this timeline? It can\'t be brought back.'**
+  String get familyTimelineDeleteConfirm;
+
+  /// SnackBar after a timeline was deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline deleted'**
+  String get familyTimelineDeleted;
+
+  /// SnackBar when a timeline could not be deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t delete the timeline. Check your internet and try again.'**
+  String get familyTimelineDeleteError;
+
+  /// Co-pilot settings: button that forgets the protected user on this phone. name is theirs.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this phone'**
+  String familyUnlink(String name);
+
+  /// Co-pilot settings: confirmation dialog. This only removes the link from this phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this phone? You can link again with a new code.'**
+  String familyUnlinkConfirm(String name);
+
+  /// Co-pilot settings: confirm button in the remove dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get familyUnlinkAction;
+
+  /// Co-pilot settings: SnackBar when the link could not be removed from this phone. name is the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t remove {name}. Try again.'**
+  String familyUnlinkError(String name);
 }
 
 class _AppLocalizationsDelegate
