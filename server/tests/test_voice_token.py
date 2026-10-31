@@ -1,4 +1,4 @@
-"""Seam: the protected user's app fetches a Voice access token over HTTP (ADR 0009). Tokens are minted at runtime."""
+"""Seam: the protected user's app fetches a Voice access token over HTTP (ADR 0009). Minted at runtime."""
 
 import json
 import logging

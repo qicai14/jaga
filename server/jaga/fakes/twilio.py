@@ -19,7 +19,7 @@ def media_stream(call_sid: str, script: list[tuple[str, str]], region: str | Non
     return [json.dumps(m) for m in [{"event": "connected"}, start, *media, {"event": "stop"}]]
 
 
-# Public placeholders for the Voice access token in fake mode (ADR 0009): Twilio rejects a token signed with these.
+# Public placeholders for the fake-mode Voice access token (ADR 0009); Twilio rejects it.
 FAKE_API_KEY_SECRET = "jaga-fake-api-key-secret-not-a-real-secret"
 FAKE_CREDENTIALS = {
     "TWILIO_ACCOUNT_SID": "ACfake",
