@@ -6,3 +6,5 @@ open-weight models. Telephony, push, storage, CI and hosting can use any tool.
 Official Rules on 26 Oct.
 **Privacy:** Standard mode only (never `-contributor` models), request zero data retention, mask IC, account and OTP numbers
 before Muse Spark, store no audio.
+**Zero data retention:** our Muse Spark calls send `store: false` on the Responses API, so we request no storage per call.
+Account-level ZDR needs an enterprise account, which our personal dev.meta.ai account is not.
