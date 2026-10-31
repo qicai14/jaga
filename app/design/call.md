@@ -68,7 +68,11 @@ reopen the in-call screen while a call is active (the router checks `CallReposit
 Warning are reachable, Hang up works without unlocking. Cleared at end, so leaving the call lands behind the keyguard.
 
 ## 4. Answered from the native screen while Jaga is in the background
-Pending trial result (needs one real call; spend needs Preston's OK).
+**Trial result (31 Oct, 5 real calls, emulator Android 17; spike doc §8):** answered while Jaga is in the background, the
+mic is silenced at once (`App op 27 missing, silencing record`): no error, the caller hears nothing, reproducible. Once our
+activity comes to the front the mic is unsilenced within 20 ms, and it stays live if she leaves the app afterwards. So
+**bringing our activity forward at answer is required, not optional.** The plugin also turns speaker on at ring: set the
+speaker state explicitly at answer.
 - The plugin does not bring our activity forward. `JagaApplication` (Kotlin) registers a process-wide local receiver for
   `TVNativeCallActions.ACTION_ANSWERED` (the ConnectionService keeps the process alive even with Flutter not running).
 - On answer it posts a **full-screen-intent** notification (channel `jaga_call`, category CALL, ongoing, `callNotification*`
@@ -76,8 +80,12 @@ Pending trial result (needs one real call; spend needs Preston's OK).
   route: on the lock screen it opens the activity; unlocked it shows a heads-up she can tap. Cancelled once we are in front.
 - **#316 mitigation:** at ref `f0522381` the plugin re-issues `startForeground` with the microphone type when our activity
   resumes during a call (`ACTION_REFRESH_FOREGROUND_SERVICE_TYPES`). Bringing the activity forward at answer is therefore
-  the likely fix for the mic being blocked from background on Android 14+. Trial: answer with the app killed, screen locked,
-  on Android 14+, and check the caller hears her.
+  the fix (confirmed by the trial).
+- **Open risk, unlocked phone:** the trial brought the activity forward from adb, which is always allowed. From the app,
+  Android 10+ blocks background activity starts, and an FSI on an unlocked phone only shows a heads-up she must tap, so the
+  mic stays dead until she taps it. Build order in #12: (1) try `startActivity` straight from the answer receiver and check
+  logcat for a BAL allow/deny line; (2) if denied, ask for "Display over other apps" (`SYSTEM_ALERT_WINDOW`), which permits
+  background activity starts, as one more row in step 4; (3) keep the FSI for the lock screen. Re-test with a real call.
 - If FSI is denied (step 4 row c red), the dialer's own in-call screen stays; the Warning then uses the warning.md fallback.
 - The plugin's own foreground notification ("Voice Calls", English, tap target broken) can't change without a fork: noted.
 
@@ -171,5 +179,5 @@ access-token endpoint; what the caller hears if the app rejects the invite (miss
 
 ## 11. Acceptance (emulator, then one real call when approved)
 Gallery shows every phase in ms/en/zh at 1.0/1.5/2.0. With the fake: answer → in-call screen, Warning over it, Hang up ends.
-Real call (pending trial): rings natively over the lock screen; answer with the app killed opens our screen; caller hears
-her (#316) on Android 14+; screen off at the ear; a `familyAlert` push still reaches the co-pilot path.
+Real call: rings natively over the lock screen; answer with the app killed or in the background opens our screen and
+the caller hears her (#316; the trial showed the mic is dead until our screen is in front); screen off at the ear; a `familyAlert` push still reaches the co-pilot path.
