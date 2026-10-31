@@ -79,7 +79,7 @@ def test_cli_templates_never_overwrite(tmp_path):
     assert (tmp_path / "call_01.ref.txt").read_text() == "mine"
     assert (tmp_path / "call_02.ref.txt").exists()
     rows = list(csv.reader((tmp_path / "keywords.csv").open(encoding="utf-8")))
-    assert rows[0][0] == "clip" and len(rows[0]) == 14
+    assert rows[0][0] == "clip" and len(rows[0]) == 17
     assert [x[0] for x in rows[1:]] == ["call_01", "call_02"]
     before = (tmp_path / "keywords.csv").read_text()
     r.main([str(tmp_path), "--templates", "call_01"])

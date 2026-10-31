@@ -63,6 +63,9 @@
     "nombor tac": "credentials",
     "kod tac": "credentials",
     "tac code": "credentials",
+    "kod otp": "credentials",
+    "nombor otp": "credentials",
+    "otp code": "credentials",
     "jangan beritahu sesiapa": "isolation",
     "don't tell anyone": "isolation"
   },
