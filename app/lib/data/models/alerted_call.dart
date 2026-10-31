@@ -1,10 +1,8 @@
 import 'stage.dart';
 import 'stage_update.dart' show Risk;
 
-// PROVISIONAL (#1): the stage-timeline list and event shapes are not in
-// contracts v0. Both models reuse the v0 fields they will most likely carry:
-// an alert's (callId, at, stage, claimedAgency) and a stage update's
-// (at, stage, risk, evidence).
+// Parsed from `contracts/stage-timeline.schema.json` (ADR 0008). The timeline's
+// `endedAt` and an event's `source` are not shown, so they are not kept.
 
 /// One call the family was alerted about, as a row of the co-pilot home.
 class AlertedCall {
@@ -14,6 +12,19 @@ class AlertedCall {
     required this.stage,
     this.claimedAgency,
   });
+
+  /// A row from `GET /timelines`: [at] is `startedAt`, [stage] the latest event's.
+  factory AlertedCall.fromJson(Map<String, dynamic> json) {
+    final events = json['events'] as List;
+    return AlertedCall(
+      callId: json['callId'] as String,
+      at: DateTime.parse(json['startedAt'] as String),
+      stage: events.isEmpty
+          ? Stage.none
+          : Stage.fromJson((events.last as Map)['stage'] as String),
+      claimedAgency: json['claimedAgency'] as String?,
+    );
+  }
 
   final String callId;
   final DateTime at;
@@ -30,6 +41,13 @@ class TimelineEvent {
     required this.risk,
     this.quotes = const [],
   });
+
+  factory TimelineEvent.fromJson(Map<String, dynamic> json) => TimelineEvent(
+    at: DateTime.parse(json['at'] as String),
+    stage: Stage.fromJson(json['stage'] as String),
+    risk: Risk.fromJson(json['risk'] as String),
+    quotes: [...?(json['evidence'] as List?)?.cast<String>()],
+  );
 
   final DateTime at;
   final Stage stage;

@@ -32,6 +32,7 @@ import 'firebase_options.dart';
 // Build-time config (--dart-define). Empty means fake mode: no network, no Twilio registration.
 const _serverUrl = String.fromEnvironment('JAGA_SERVER_URL');
 const _appToken = String.fromEnvironment('JAGA_APP_TOKEN');
+const _copilotToken = String.fromEnvironment('JAGA_COPILOT_TOKEN');
 
 /// Starts Firebase. False (logged) when it is unreachable, so the app falls
 /// back to Fakes instead of crashing. [init] is a seam for tests.
@@ -48,13 +49,16 @@ Future<bool> initFirebase([Future<void> Function()? init]) async {
   }
 }
 
-/// The real services, except the server APIs (onboarding, pause, timeline),
-/// which are still Fakes. Push and auth are real when Firebase starts.
+/// The real services, except the onboarding API, which is still a Fake. Pause
+/// and timeline are real with JAGA_SERVER_URL and JAGA_COPILOT_TOKEN. Push and auth are real when Firebase starts.
 Future<AppDependencies> createDependencies() async {
-  // TODO(#1): the real onboarding API, pause and timeline services replace these Fakes once
-  // contracts v1 land.
+  // TODO(#1): the real onboarding API replaces this Fake once its contract lands.
+  final realCopilot = _serverUrl.isNotEmpty && _copilotToken.isNotEmpty;
   debugPrint(
-    'Jaga is running on Fake onboarding API, pause and timeline services.',
+    realCopilot
+        ? 'Jaga is running on a Fake onboarding API.'
+        : 'Jaga is running on Fake onboarding API, pause and timeline services: '
+              'set JAGA_SERVER_URL and JAGA_COPILOT_TOKEN with --dart-define.',
   );
   final firebaseReady = await initFirebase();
   final AuthService auth;
@@ -113,8 +117,18 @@ Future<AppDependencies> createDependencies() async {
     share: const SharePlusService(),
     alertPush: push,
     alertNotifier: notifier,
-    pause: FakeCopilotPauseService(),
-    timeline: FakeTimelineService(),
+    pause: realCopilot
+        ? HttpCopilotPauseService(
+            baseUrl: Uri.parse(_serverUrl),
+            token: _copilotToken,
+          )
+        : FakeCopilotPauseService(),
+    timeline: realCopilot
+        ? HttpTimelineService(
+            baseUrl: Uri.parse(_serverUrl),
+            token: _copilotToken,
+          )
+        : FakeTimelineService(),
     call: call,
     callUi: const AndroidCallUiService(),
     stageStream: stageStream,

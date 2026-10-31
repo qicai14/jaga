@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/data/models/voice_token.dart';
@@ -130,6 +131,89 @@ void main() {
       for (final f in files) {
         expect(
           voiceSchema
+              .validate(jsonDecode(f.readAsStringSync()), validateFormats: true)
+              .isValid,
+          isFalse,
+          reason: f.path,
+        );
+      }
+    });
+  });
+
+  group('stage-timeline, list and pause', () {
+    Map<String, dynamic> load(String name) =>
+        jsonDecode(File('../contracts/$name.schema.json').readAsStringSync());
+    final timelineSchema = JsonSchema.create(load('stage-timeline'));
+    final listSchema = JsonSchema.create(
+      load('stage-timeline-list'),
+      refProvider: RefProvider.sync(
+        (ref) => ref.endsWith('stage-timeline') ? load('stage-timeline') : null,
+      ),
+    );
+    final pauseSchema = JsonSchema.create(
+      load('pause'),
+    ); // the root is the response
+
+    void validAndInvalid(
+      String dir,
+      JsonSchema schema,
+      void Function(dynamic) parse,
+    ) {
+      test('every valid $dir fixture validates and parses', () {
+        final files = _json('../contracts/fixtures/$dir');
+        expect(files, isNotEmpty);
+        for (final f in files) {
+          final json = jsonDecode(f.readAsStringSync());
+          final result = schema.validate(json, validateFormats: true);
+          expect(result.isValid, isTrue, reason: '${f.path} ${result.errors}');
+          parse(json);
+        }
+      });
+      test('every invalid $dir fixture fails the schema', () {
+        final files = _json('../contracts/fixtures/invalid/$dir');
+        expect(files, isNotEmpty);
+        for (final f in files) {
+          expect(
+            schema
+                .validate(
+                  jsonDecode(f.readAsStringSync()),
+                  validateFormats: true,
+                )
+                .isValid,
+            isFalse,
+            reason: f.path,
+          );
+        }
+      });
+    }
+
+    void parseTimeline(dynamic j) {
+      AlertedCall.fromJson(j);
+      for (final e in j['events']) {
+        TimelineEvent.fromJson(e);
+      }
+    }
+
+    validAndInvalid('stage-timeline', timelineSchema, parseTimeline);
+    validAndInvalid(
+      'stage-timeline-list',
+      listSchema,
+      (j) => (j as List).forEach(parseTimeline),
+    );
+    // The pause fixtures also hold the request body, which is not a response.
+    test('every pause response fixture validates; invalid ones fail', () {
+      for (final f in _json('../contracts/fixtures/pause')) {
+        if (f.path.contains('request')) continue;
+        final r = pauseSchema.validate(
+          jsonDecode(f.readAsStringSync()),
+          validateFormats: true,
+        );
+        expect(r.isValid, isTrue, reason: '${f.path} ${r.errors}');
+      }
+      for (final f in _json('../contracts/fixtures/invalid/pause')) {
+        if (f.path.contains('request')) continue;
+        expect(
+          pauseSchema
               .validate(jsonDecode(f.readAsStringSync()), validateFormats: true)
               .isValid,
           isFalse,
