@@ -30,6 +30,25 @@ def now() -> datetime:
     return datetime.now(UTC)
 
 
+# Known limit: only phrases that moved the stage are seen, and these are Malaysia's names held in code while
+# the region pack is being changed elsewhere.
+AGENCIES = (
+    ("PDRM", ("pdrm", "polis", "police", "inspektor", "bukit aman", "警察", "警官")),
+    ("LHDN", ("lhdn",)),
+    ("Bank Negara", ("bank negara", "国家银行", "國家銀行")),
+)
+
+
+def claimed_agency(updates: list[dict]) -> str | None:
+    """A fixed agency name if the earliest evidence that names one does, else None; never transcript text."""
+    for u in updates:
+        for phrase in u["evidence"]:
+            for name, aliases in AGENCIES:
+                if any(a in phrase.casefold() for a in aliases):
+                    return name
+    return None
+
+
 @dataclass
 class Call:
     call_id: str
@@ -73,7 +92,10 @@ class Call:
         else:
             return
         await alerts.send_all(
-            self.push, alerts.build(kind, self.call_id, update["stage"], self.tracker.snippet())
+            self.push,
+            alerts.build(
+                kind, self.call_id, update["stage"], self.tracker.snippet(), claimed_agency(self.updates)
+            ),
         )
 
     async def end(self) -> None:

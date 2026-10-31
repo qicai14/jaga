@@ -43,7 +43,7 @@ def tier(stage: str) -> int:
     return 0 if RANK[stage] < RANK["isolation"] else 1 if RANK[stage] < RANK["money"] else 2
 
 
-def build(kind: str, call_id: str, stage: str, snippet: str) -> dict:
+def build(kind: str, call_id: str, stage: str, snippet: str, claimed_agency: str | None = None) -> dict:
     """snippet is the tracker's masked one; its latest lines are the quotes."""
     # shortcut: one protected user, upgrade with #12/#19
     name = os.environ.get("JAGA_PROTECTED_USER_NAME") or "Your family member"
@@ -58,7 +58,7 @@ def build(kind: str, call_id: str, stage: str, snippet: str) -> dict:
         "callId": call_id,
         "protectedUserName": name,
         "stage": stage,
-        "claimedAgency": None,
+        "claimedAgency": claimed_agency,
         "summary": summary[:200],
         "quotes": quotes,
         "at": datetime.now(UTC).isoformat(),
