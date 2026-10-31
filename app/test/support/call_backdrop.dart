@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../core/l10n/gen/app_localizations.dart';
-import '../core/theme/theme_context.dart';
-import '../core/widgets/screen_frame.dart';
-import '../features/warning/view_models/warning_view_model.dart';
-import '../features/warning/views/warning_overlay.dart';
+import 'package:jaga/core/l10n/gen/app_localizations.dart';
+import 'package:jaga/core/theme/theme_context.dart';
+import 'package:jaga/core/widgets/screen_frame.dart';
+import 'package:jaga/features/warning/view_models/warning_view_model.dart';
+import 'package:jaga/features/warning/views/warning_overlay.dart';
 
-/// Stand-in for the real call screen (#12), so the Caution and Warning can be
-/// seen over something. Debug only.
-class PlaceholderCallScreen extends StatelessWidget {
-  const PlaceholderCallScreen({super.key, required this.vm, this.onHangUp});
+/// A bare call screen for the Warning tests, so they test the overlay alone.
+/// The real one is InCallScreen.
+class CallBackdrop extends StatelessWidget {
+  const CallBackdrop({super.key, required this.vm, this.onHangUp});
 
   final WarningViewModel vm;
   final VoidCallback? onHangUp;

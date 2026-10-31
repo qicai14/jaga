@@ -10,17 +10,17 @@ import 'package:jaga/data/repositories/call_risk_repository.dart';
 import 'package:jaga/data/services/attention_service.dart';
 import 'package:jaga/data/services/stage_stream_service.dart';
 import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
-import 'package:jaga/debug/placeholder_call_screen.dart';
 import 'package:jaga/features/warning/view_models/warning_view_model.dart';
 import 'package:jaga/features/warning/views/widgets/caution_banner.dart';
 import 'package:jaga/features/warning/views/widgets/warning_screen.dart';
 
+import '../../support/call_backdrop.dart';
 import '../../support/harness.dart';
 
 StageUpdate u(String raw) => StageUpdate.parse(raw);
 
 const command = 'Letak telefon sekarang.';
-const caller = PlaceholderCallScreen.callerNumber;
+const caller = CallBackdrop.callerNumber;
 
 class Rig {
   final stream = FakeStageStreamService();
@@ -32,7 +32,7 @@ class Rig {
   );
   int hangUps = 0;
 
-  Widget get host => PlaceholderCallScreen(vm: vm, onHangUp: () => hangUps++);
+  Widget get host => CallBackdrop(vm: vm, onHangUp: () => hangUps++);
 }
 
 Future<Rig> pump(WidgetTester tester, double scale) async {

@@ -7,8 +7,7 @@ import '../../../../core/l10n/gen/app_localizations.dart';
 import '../../../../core/theme/theme_context.dart';
 import '../../../../core/widgets/big_button.dart';
 import '../../../../core/widgets/hold_to_confirm_button.dart';
-import '../../../../core/widgets/jaga_wordmark.dart';
-import '../../../../core/widgets/reconnecting_dot.dart';
+import '../../../../core/widgets/guarded_masthead.dart';
 import '../../../../core/widgets/shrink_to_fit_text.dart';
 import '../../view_models/warning_view_model.dart';
 import 'dismiss_button.dart';
@@ -84,65 +83,16 @@ class _WarningScreenState extends State<WarningScreen> {
                   final body = box.maxHeight - pad.top - pad.bottom;
                   return Column(
                     children: [
-                      _masthead(context),
+                      GuardedMasthead(
+                        title: l.warningSemanticsLabel,
+                        reconnecting: widget.reconnecting,
+                      ),
                       _commandBand(context, body * 0.30),
                       Expanded(child: _detail(context)),
                       _footer(context),
                     ],
                   );
                 },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _masthead(BuildContext context) {
-    final c = context.jagaColors;
-    final m = context.metrics;
-    final l = AppLocalizations.of(context);
-    return Semantics(
-      header: true,
-      child: ColoredBox(
-        color: c.guarded,
-        child: SafeArea(
-          bottom: false,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 56),
-            child: Padding(
-              padding: EdgeInsets.only(left: m.l, right: m.s),
-              child: Row(
-                children: [
-                  // The route name already says "Scam warning from Jaga".
-                  Expanded(
-                    child: ExcludeSemantics(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          JagaWordmark(color: c.onGuarded),
-                          SizedBox(width: m.m),
-                          Expanded(
-                            child: MediaQuery.withClampedTextScaling(
-                              maxScaleFactor: 1.5,
-                              child: Text(
-                                l.warningSemanticsLabel,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(color: c.onGuarded),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ReconnectingDot(
-                    visible: widget.reconnecting,
-                    color: c.onGuarded,
-                  ),
-                ],
               ),
             ),
           ),

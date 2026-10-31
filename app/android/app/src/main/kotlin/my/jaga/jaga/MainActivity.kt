@@ -1,15 +1,62 @@
 package my.jaga.jaga
 
 import android.app.NotificationManager
+import android.content.Intent
 import android.os.Build
+import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        showForCall(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        showForCall(intent)
+    }
+
+    /** Opened for a call: show over the lock screen and wake the screen. Dart clears it when the call ends. */
+    private fun showForCall(intent: Intent?) {
+        if (intent?.getStringExtra(CallLauncher.ROUTE_EXTRA) == CallLauncher.ROUTE_CALL) setLockScreenAccess(true)
+    }
+
+    private fun setLockScreenAccess(on: Boolean) {
+        setShowWhenLocked(on)
+        setTurnScreenOn(on)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        CallLauncher.activityResumed = true
+        CallLauncher.cancelNotification(this)
+    }
+
+    override fun onPause() {
+        CallLauncher.activityResumed = false
+        super.onPause()
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "jaga/device_setup")
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
+        MethodChannel(messenger, "jaga/call_ui").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "setShowWhenLocked" -> {
+                    setLockScreenAccess(call.arguments == true)
+                    result.success(null)
+                }
+                "moveToBack" -> {
+                    moveTaskToBack(true)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
+        MethodChannel(messenger, "jaga/device_setup")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "canUseFullScreenIntent" -> {

@@ -7,11 +7,15 @@ import 'package:flutter/widgets.dart';
 import 'app.dart';
 import 'core/haptics/vibration_buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
+import 'data/repositories/call_repository.dart';
 import 'data/repositories/onboarding_repository.dart';
 import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
+import 'data/services/attention_service.dart';
 import 'data/services/auth_service.dart';
+import 'data/services/call_service.dart';
+import 'data/services/call_ui_service.dart';
 import 'data/services/copilot_pause_service.dart';
 import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
@@ -19,8 +23,15 @@ import 'data/services/fcm_alert_push_service.dart';
 import 'data/services/key_value_store.dart';
 import 'data/services/onboarding_api_service.dart';
 import 'data/services/share_service.dart';
+import 'data/services/stage_stream_service.dart';
 import 'data/services/timeline_service.dart';
+import 'data/services/twilio_call_service.dart';
+import 'data/services/voice_token_service.dart';
 import 'firebase_options.dart';
+
+// Build-time config (--dart-define). Empty means fake mode: no network, no Twilio registration.
+const _serverUrl = String.fromEnvironment('JAGA_SERVER_URL');
+const _appToken = String.fromEnvironment('JAGA_APP_TOKEN');
 
 /// Starts Firebase. False (logged) when it is unreachable, so the app falls
 /// back to Fakes instead of crashing. [init] is a seam for tests.
@@ -48,11 +59,13 @@ Future<AppDependencies> createDependencies() async {
   final firebaseReady = await initFirebase();
   final AuthService auth;
   final AlertPushService push;
+  FcmAlertPushService? fcmService;
   if (firebaseReady) {
     registerFcmBackgroundHandler();
     final fcm = FcmAlertPushService();
     auth = FirebaseAuthService();
     push = fcm;
+    fcmService = fcm;
     unawaited(_signIn(auth, fcm));
   } else {
     auth = const FakeAuthService();
@@ -68,6 +81,25 @@ Future<AppDependencies> createDependencies() async {
   final notifier = LocalAlertNotifier(
     locale: () => Locale(onboarding.progress.value.language),
   );
+  // The real Jaga line needs Firebase (its push token), the server and the app secret.
+  final realCalls =
+      fcmService != null && _serverUrl.isNotEmpty && _appToken.isNotEmpty;
+  if (!realCalls) {
+    debugPrint(
+      'Jaga line calls are off: set JAGA_SERVER_URL and JAGA_APP_TOKEN with --dart-define.',
+    );
+  }
+  final call = CallRepository(
+    service: realCalls
+        ? TwilioCallService(fcmToken: fcmService.token)
+        : FakeCallService(),
+    tokens: realCalls
+        ? HttpVoiceTokenService(
+            baseUrl: Uri.parse(_serverUrl),
+            appToken: _appToken,
+          )
+        : FakeVoiceTokenService(),
+  );
   return AppDependencies(
     onboarding: onboarding,
     pin: pin,
@@ -79,6 +111,11 @@ Future<AppDependencies> createDependencies() async {
     alertNotifier: notifier,
     pause: FakeCopilotPauseService(),
     timeline: FakeTimelineService(),
+    call: call,
+    callUi: const AndroidCallUiService(),
+    // TODO(#19): the real stage stream replaces this Fake.
+    stageStream: FakeStageStreamService(),
+    attention: ProximityAttentionService(),
     initAlerts: notifier.init,
   );
 }

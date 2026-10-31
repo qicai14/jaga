@@ -268,9 +268,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Keeps Jaga running on Xiaomi phones.';
 
   @override
-  String get onboardingAfterCallSetup => 'Set up later with calls';
-
-  @override
   String get onboardingForwardTitle => 'Forward calls to Jaga';
 
   @override
@@ -492,5 +489,76 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String familyUnlinkError(String name) {
     return 'Couldn\'t remove $name. Try again.';
+  }
+
+  @override
+  String get callProtecting => 'Protecting this call';
+
+  @override
+  String get callConnecting => 'Connecting…';
+
+  @override
+  String get callReconnectingAudio => 'Reconnecting the call…';
+
+  @override
+  String get callEnded => 'Call ended';
+
+  @override
+  String get callDone => 'Done';
+
+  @override
+  String get callFailed => 'The call didn\'t connect';
+
+  @override
+  String get callFailedBody => 'If it matters, they will call again.';
+
+  @override
+  String get callHangUp => 'Hang up';
+
+  @override
+  String get callMute => 'Mute';
+
+  @override
+  String get callMuteOff => 'Off';
+
+  @override
+  String get callMuted => 'Muted: the caller can\'t hear you';
+
+  @override
+  String get callUnmuted => 'Unmuted';
+
+  @override
+  String get callSpeaker => 'Speaker';
+
+  @override
+  String get callSpeakerOn => 'On';
+
+  @override
+  String get callSpeakerOff => 'Off';
+
+  @override
+  String callTimerSemantics(String time) {
+    return 'Call time $time';
+  }
+
+  @override
+  String get callUnknownCaller => 'Unknown number';
+
+  @override
+  String get onboardingPermPhone => 'Phone calls';
+
+  @override
+  String get onboardingPermPhoneWhy => 'Lets Jaga answer and end calls.';
+
+  @override
+  String get onboardingPermCallingAccountFirst => 'Allow phone calls first.';
+
+  @override
+  String get onboardingPermCallingAccountHelp =>
+      'Switch on Jaga in the list, then come back.';
+
+  @override
+  String onboardingPermOpenSettingsHelp(String item) {
+    return 'Open Permissions, allow $item, then come back.';
   }
 }

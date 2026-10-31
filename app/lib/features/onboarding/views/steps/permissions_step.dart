@@ -15,8 +15,46 @@ class PermissionsStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     bool granted(SetupItem i) => vm.setup[i] == true;
+    // A refused permission says what to do next once Fix was tried.
+    String why(SetupItem i, String title, String normal) =>
+        vm.tried.contains(i) && !granted(i)
+        ? l.onboardingPermOpenSettingsHelp(title)
+        : normal;
+    final phoneOk = granted(SetupItem.phoneCalls);
     return Column(
       children: [
+        PermissionRow(
+          title: l.onboardingPermPhone,
+          why: why(
+            SetupItem.phoneCalls,
+            l.onboardingPermPhone,
+            l.onboardingPermPhoneWhy,
+          ),
+          granted: phoneOk,
+          onFix: () => vm.fix(SetupItem.phoneCalls),
+        ),
+        PermissionRow(
+          title: l.onboardingPermMicrophone,
+          why: why(
+            SetupItem.microphone,
+            l.onboardingPermMicrophone,
+            l.onboardingPermMicrophoneWhy,
+          ),
+          granted: granted(SetupItem.microphone),
+          onFix: () => vm.fix(SetupItem.microphone),
+        ),
+        PermissionRow(
+          title: l.onboardingPermCallingAccount,
+          why: !phoneOk
+              ? l.onboardingPermCallingAccountFirst
+              : vm.tried.contains(SetupItem.callingAccount) &&
+                    !granted(SetupItem.callingAccount)
+              ? l.onboardingPermCallingAccountHelp
+              : l.onboardingPermCallingAccountWhy,
+          granted: granted(SetupItem.callingAccount),
+          // Disabled until Phone calls is allowed.
+          onFix: phoneOk ? () => vm.fix(SetupItem.callingAccount) : null,
+        ),
         PermissionRow(
           title: l.onboardingPermNotifications,
           why: l.onboardingPermNotificationsWhy,
@@ -24,23 +62,10 @@ class PermissionsStep extends StatelessWidget {
           onFix: () => vm.fix(SetupItem.notifications),
         ),
         PermissionRow(
-          title: l.onboardingPermMicrophone,
-          why: l.onboardingPermMicrophoneWhy,
-          granted: granted(SetupItem.microphone),
-          onFix: () => vm.fix(SetupItem.microphone),
-        ),
-        PermissionRow(
           title: l.onboardingPermFullScreen,
           why: l.onboardingPermFullScreenWhy,
           granted: granted(SetupItem.fullScreenAlerts),
           onFix: () => vm.fix(SetupItem.fullScreenAlerts),
-        ),
-        // Waits for #12 (calls): neither ticked nor a problem until then.
-        PermissionRow(
-          title: l.onboardingPermCallingAccount,
-          why: l.onboardingAfterCallSetup,
-          granted: false,
-          pending: true,
         ),
         if (vm.xiaomi)
           PermissionRow(

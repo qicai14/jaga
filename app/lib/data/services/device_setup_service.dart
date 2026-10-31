@@ -2,9 +2,11 @@ import 'package:android_intent_plus/android_intent.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:twilio_voice/twilio_voice.dart';
 
 /// What the phone must allow for Jaga to work (onboarding.md section 5).
 enum SetupItem {
+  phoneCalls,
   notifications,
   microphone,
   fullScreenAlerts,
@@ -12,11 +14,13 @@ enum SetupItem {
   autostart,
 }
 
-/// The items Android can report. A protected phone needs them all; the calling
-/// account waits for #12 and Xiaomi autostart can't be read.
+/// The items Android can report, in the order step 4 lists them. A protected
+/// phone needs them all; Xiaomi autostart can't be read.
 const platformItems = [
-  SetupItem.notifications,
+  SetupItem.phoneCalls,
   SetupItem.microphone,
+  SetupItem.callingAccount,
+  SetupItem.notifications,
   SetupItem.fullScreenAlerts,
 ];
 
@@ -43,21 +47,32 @@ class AndroidDeviceSetupService implements DeviceSetupService {
   Future<String> _package() async =>
       (await _channel.invokeMethod<String>('packageName'))!;
 
+  static TwilioVoicePlatform get _voice => TwilioVoicePlatform.instance;
+
   @override
   Future<Map<SetupItem, bool>> check() async => {
+    SetupItem.phoneCalls:
+        await _voice.hasReadPhoneStatePermission() &&
+        await _voice.hasReadPhoneNumbersPermission() &&
+        await _voice.hasCallPhonePermission(),
     SetupItem.notifications: await Permission.notification.isGranted,
     SetupItem.microphone: await Permission.microphone.isGranted,
     SetupItem.fullScreenAlerts:
         // Below Android 14 the platform side reports true.
         await _channel.invokeMethod<bool>('canUseFullScreenIntent') == true,
-    // Waits for #12 (twilio_voice); counted as done until then.
-    SetupItem.callingAccount: false,
+    SetupItem.callingAccount: await _voice.isPhoneAccountEnabled(),
     SetupItem.autostart: false,
   };
 
   @override
   Future<void> fix(SetupItem item) async {
     switch (item) {
+      case SetupItem.phoneCalls:
+        final granted =
+            await _voice.requestReadPhoneStatePermission() == true &&
+            await _voice.requestReadPhoneNumbersPermission() == true &&
+            await _voice.requestCallPhonePermission() == true;
+        if (!granted) await openAppSettings();
       case SetupItem.notifications:
         final status = await Permission.notification.request();
         if (status.isPermanentlyDenied) {
@@ -90,7 +105,16 @@ class AndroidDeviceSetupService implements DeviceSetupService {
           ),
         );
       case SetupItem.callingAccount:
-        break; // Waits for #12.
+        try {
+          await _voice.registerPhoneAccount();
+        } on PlatformException {
+          // Samsung hides the calling-accounts page: try the settings page, then the app's own.
+          try {
+            await _voice.openPhoneAccountSettings();
+          } on PlatformException {
+            await openAppSettings();
+          }
+        }
     }
   }
 

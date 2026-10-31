@@ -261,9 +261,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingPermAutostartWhy => '让 Jaga 在小米手机上保持运行。';
 
   @override
-  String get onboardingAfterCallSetup => '稍后随通话功能设置';
-
-  @override
   String get onboardingForwardTitle => '将来电转接到 Jaga';
 
   @override
@@ -473,5 +470,75 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String familyUnlinkError(String name) {
     return '无法移除$name。请重试。';
+  }
+
+  @override
+  String get callProtecting => '正在保护这通电话';
+
+  @override
+  String get callConnecting => '正在接通…';
+
+  @override
+  String get callReconnectingAudio => '正在重新连接通话…';
+
+  @override
+  String get callEnded => '通话已结束';
+
+  @override
+  String get callDone => '完成';
+
+  @override
+  String get callFailed => '电话没有接通';
+
+  @override
+  String get callFailedBody => '如果有要紧事，对方会再打来。';
+
+  @override
+  String get callHangUp => '挂断';
+
+  @override
+  String get callMute => '静音';
+
+  @override
+  String get callMuteOff => '关';
+
+  @override
+  String get callMuted => '已静音：对方听不到你';
+
+  @override
+  String get callUnmuted => '已取消静音';
+
+  @override
+  String get callSpeaker => '扬声器';
+
+  @override
+  String get callSpeakerOn => '开';
+
+  @override
+  String get callSpeakerOff => '关';
+
+  @override
+  String callTimerSemantics(String time) {
+    return '通话时间 $time';
+  }
+
+  @override
+  String get callUnknownCaller => '未知号码';
+
+  @override
+  String get onboardingPermPhone => '电话';
+
+  @override
+  String get onboardingPermPhoneWhy => '让 Jaga 接听和挂断电话。';
+
+  @override
+  String get onboardingPermCallingAccountFirst => '请先允许电话权限。';
+
+  @override
+  String get onboardingPermCallingAccountHelp => '在列表中打开 Jaga，然后返回。';
+
+  @override
+  String onboardingPermOpenSettingsHelp(String item) {
+    return '打开“权限”，允许$item，然后返回。';
   }
 }

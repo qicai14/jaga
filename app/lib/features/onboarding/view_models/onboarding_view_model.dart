@@ -147,7 +147,13 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
+  final _tried = <SetupItem>{};
+
+  /// Items whose Fix was pressed: if still red, the row says what to do next.
+  Set<SetupItem> get tried => _tried;
+
   Future<void> fix(SetupItem item) async {
+    _tried.add(item);
     await _deviceSetup.fix(item);
     await refreshSetup();
   }

@@ -8,16 +8,23 @@ import 'core/theme/jaga_theme.dart';
 import 'core/widgets/view_model_host.dart';
 import 'data/models/linked_person.dart';
 import 'data/models/onboarding_progress.dart';
+import 'data/repositories/call_repository.dart';
+import 'data/repositories/call_risk_repository.dart';
 import 'data/repositories/family_alert_repository.dart';
 import 'data/repositories/onboarding_repository.dart';
 import 'data/repositories/pin_repository.dart';
 import 'data/services/alert_notifier.dart';
 import 'data/services/alert_push_service.dart';
+import 'data/services/attention_service.dart';
+import 'data/services/call_ui_service.dart';
 import 'data/services/copilot_pause_service.dart';
 import 'data/services/device_setup_service.dart';
 import 'data/services/dialer_service.dart';
 import 'data/services/share_service.dart';
+import 'data/services/stage_stream_service.dart';
 import 'data/services/timeline_service.dart';
+import 'features/call/view_models/in_call_view_model.dart';
+import 'features/call/views/in_call_screen.dart';
 import 'features/family/view_models/clear_pause_view_model.dart';
 import 'features/family/view_models/copilot_home_view_model.dart';
 import 'features/family/view_models/copilot_settings_view_model.dart';
@@ -29,6 +36,7 @@ import 'features/onboarding/view_models/onboarding_view_model.dart';
 import 'features/onboarding/view_models/protected_home_view_model.dart';
 import 'features/onboarding/views/onboarding_screen.dart';
 import 'features/onboarding/views/protected_home_screen.dart';
+import 'features/warning/view_models/warning_view_model.dart';
 
 /// Everything the screens need from outside, built once in `bootstrap.dart`
 /// (real) or by a test (fakes).
@@ -44,6 +52,10 @@ class AppDependencies {
     required this.alertNotifier,
     required this.pause,
     required this.timeline,
+    required this.call,
+    required this.callUi,
+    required this.stageStream,
+    required this.attention,
     required this.initAlerts,
   });
 
@@ -57,6 +69,10 @@ class AppDependencies {
   final AlertNotifier alertNotifier;
   final CopilotPauseService pause;
   final TimelineService timeline;
+  final CallRepository call;
+  final CallUiService callUi;
+  final StageStreamService stageStream;
+  final AttentionService attention;
 
   /// Creates the notification channels. Only a co-pilot needs it.
   final Future<void> Function() initAlerts;
@@ -117,17 +133,86 @@ class _JagaAppState extends State<JagaApp> {
     if (progress.role == OnboardingRole.copilot) {
       return CopilotShell(deps: deps, person: progress.link!);
     }
-    return ViewModelHost(
-      create: () => ProtectedHomeViewModel(
-        repository: deps.onboarding,
-        pin: deps.pin,
-        deviceSetup: deps.deviceSetup,
-        dialer: deps.dialer,
-        share: deps.share,
+    return ProtectedShell(
+      deps: deps,
+      child: ViewModelHost(
+        create: () => ProtectedHomeViewModel(
+          repository: deps.onboarding,
+          pin: deps.pin,
+          deviceSetup: deps.deviceSetup,
+          dialer: deps.dialer,
+          share: deps.share,
+        ),
+        builder: (_, vm) => ProtectedHomeScreen(vm: vm),
       ),
-      builder: (_, vm) => ProtectedHomeScreen(vm: vm),
     );
   }
+}
+
+/// The protected side: registers the Jaga line and puts the in-call screen in
+/// front whenever a call is on, including one that was answered while the app was closed.
+class ProtectedShell extends StatefulWidget {
+  const ProtectedShell({super.key, required this.deps, required this.child});
+
+  final AppDependencies deps;
+  final Widget child;
+
+  @override
+  State<ProtectedShell> createState() => _ProtectedShellState();
+}
+
+class _ProtectedShellState extends State<ProtectedShell> {
+  bool _open = false;
+
+  CallRepository get _call => widget.deps.call;
+
+  @override
+  void initState() {
+    super.initState();
+    _call.snapshot.addListener(_sync);
+    unawaited(_call.start().then((_) => _sync()));
+  }
+
+  @override
+  void dispose() {
+    _call.snapshot.removeListener(_sync);
+    _call.stop();
+    super.dispose();
+  }
+
+  void _sync() {
+    if (!mounted || _open || !_call.snapshot.value.live) return;
+    _open = true;
+    final deps = widget.deps;
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => ViewModelHost(
+              create: () => WarningViewModel(
+                repository: CallRiskRepository(
+                  deps.stageStream,
+                  callId: _call.snapshot.value.callId,
+                ),
+                buzzer: deps.buzzer,
+                attention: deps.attention,
+              ),
+              builder: (_, warning) => ViewModelHost(
+                create: () =>
+                    InCallViewModel(repository: _call, callUi: deps.callUi),
+                builder: (_, vm) => InCallScreen(vm: vm, warningVm: warning),
+              ),
+            ),
+          ),
+        )
+        .then((_) {
+          _open = false;
+          // A new call may have come in while the old one was leaving.
+          _sync();
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// The co-pilot side: the home, which opens the family alert when a

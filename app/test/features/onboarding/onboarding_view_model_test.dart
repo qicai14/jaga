@@ -196,10 +196,15 @@ void main() {
         await vm.fix(SetupItem.microphone);
         expect(vm.canContinue, isFalse);
         await vm.fix(SetupItem.fullScreenAlerts);
+        await vm.fix(SetupItem.phoneCalls);
+        expect(vm.canContinue, isFalse);
+        await vm.fix(SetupItem.callingAccount);
         expect(vm.canContinue, isTrue);
         expect(rig.device.fixed, [
           SetupItem.microphone,
           SetupItem.fullScreenAlerts,
+          SetupItem.phoneCalls,
+          SetupItem.callingAccount,
         ]);
       },
     );
@@ -232,15 +237,18 @@ void main() {
       expect(vm.canContinue, isTrue);
     });
 
-    test('the calling account never blocks Continue', () async {
+    test('the calling account blocks Continue until it is on', () async {
       await start(
         _protectedAt.copyWith(step: OnboardingStep.permissions),
         device: FakeDeviceSetupService(
-          state: {for (final i in platformItems) i: true},
+          state: {
+            for (final i in platformItems) i: i != SetupItem.callingAccount,
+          },
         ),
       );
       await pump();
-      expect(vm.setup[SetupItem.callingAccount], isFalse);
+      expect(vm.canContinue, isFalse);
+      await vm.fix(SetupItem.callingAccount);
       expect(vm.canContinue, isTrue);
     });
   });

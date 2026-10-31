@@ -271,10 +271,6 @@ class AppLocalizationsMs extends AppLocalizations {
       'Memastikan Jaga terus berjalan pada telefon Xiaomi.';
 
   @override
-  String get onboardingAfterCallSetup =>
-      'Disediakan kemudian bersama panggilan';
-
-  @override
   String get onboardingForwardTitle => 'Majukan panggilan ke Jaga';
 
   @override
@@ -497,5 +493,78 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String familyUnlinkError(String name) {
     return 'Tidak dapat mengalih keluar $name. Cuba lagi.';
+  }
+
+  @override
+  String get callProtecting => 'Melindungi panggilan ini';
+
+  @override
+  String get callConnecting => 'Menyambung…';
+
+  @override
+  String get callReconnectingAudio => 'Menyambung semula panggilan…';
+
+  @override
+  String get callEnded => 'Panggilan tamat';
+
+  @override
+  String get callDone => 'Selesai';
+
+  @override
+  String get callFailed => 'Panggilan tidak bersambung';
+
+  @override
+  String get callFailedBody => 'Jika penting, mereka akan telefon semula.';
+
+  @override
+  String get callHangUp => 'Letak telefon';
+
+  @override
+  String get callMute => 'Senyap';
+
+  @override
+  String get callMuteOff => 'Mati';
+
+  @override
+  String get callMuted => 'Disenyapkan: pemanggil tidak dapat dengar anda';
+
+  @override
+  String get callUnmuted => 'Bunyi dihidupkan';
+
+  @override
+  String get callSpeaker => 'Pembesar suara';
+
+  @override
+  String get callSpeakerOn => 'Hidup';
+
+  @override
+  String get callSpeakerOff => 'Mati';
+
+  @override
+  String callTimerSemantics(String time) {
+    return 'Masa panggilan $time';
+  }
+
+  @override
+  String get callUnknownCaller => 'Nombor tidak dikenali';
+
+  @override
+  String get onboardingPermPhone => 'Panggilan telefon';
+
+  @override
+  String get onboardingPermPhoneWhy =>
+      'Membolehkan Jaga menjawab dan menamatkan panggilan.';
+
+  @override
+  String get onboardingPermCallingAccountFirst =>
+      'Benarkan panggilan telefon dahulu.';
+
+  @override
+  String get onboardingPermCallingAccountHelp =>
+      'Hidupkan Jaga dalam senarai, kemudian kembali.';
+
+  @override
+  String onboardingPermOpenSettingsHelp(String item) {
+    return 'Buka Kebenaran, benarkan $item, kemudian kembali.';
   }
 }

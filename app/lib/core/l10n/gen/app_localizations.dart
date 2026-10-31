@@ -550,12 +550,6 @@ abstract class AppLocalizations {
   /// **'Keeps Jaga running on Xiaomi phones.'**
   String get onboardingPermAutostartWhy;
 
-  /// Calling account row, until calls are built.
-  ///
-  /// In en, this message translates to:
-  /// **'Set up later with calls'**
-  String get onboardingAfterCallSetup;
-
   /// Protected setup step 5 title.
   ///
   /// In en, this message translates to:
@@ -945,6 +939,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t remove {name}. Try again.'**
   String familyUnlinkError(String name);
+
+  /// Masthead text on the in-call screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Protecting this call'**
+  String get callProtecting;
+
+  /// Status line while the answered call connects.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get callConnecting;
+
+  /// Status line when the call audio dropped.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting the call…'**
+  String get callReconnectingAudio;
+
+  /// Status line after the call.
+  ///
+  /// In en, this message translates to:
+  /// **'Call ended'**
+  String get callEnded;
+
+  /// Button that leaves the ended or failed call screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get callDone;
+
+  /// Title when the answered call ended before connecting.
+  ///
+  /// In en, this message translates to:
+  /// **'The call didn\'t connect'**
+  String get callFailed;
+
+  /// Body under callFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'If it matters, they will call again.'**
+  String get callFailedBody;
+
+  /// Hang up button on the in-call screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Hang up'**
+  String get callHangUp;
+
+  /// Mute button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get callMute;
+
+  /// Mute button trailing text when not muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get callMuteOff;
+
+  /// Mute button and strip text while muted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted: the caller can\'t hear you'**
+  String get callMuted;
+
+  /// Spoken when mute is switched off.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmuted'**
+  String get callUnmuted;
+
+  /// Speaker button label.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get callSpeaker;
+
+  /// Speaker trailing text when on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get callSpeakerOn;
+
+  /// Speaker trailing text when off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get callSpeakerOff;
+
+  /// Spoken for the call timer. time is mm:ss.
+  ///
+  /// In en, this message translates to:
+  /// **'Call time {time}'**
+  String callTimerSemantics(String time);
+
+  /// Caller label when the number is not known.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown number'**
+  String get callUnknownCaller;
+
+  /// Permission row title.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone calls'**
+  String get onboardingPermPhone;
+
+  /// Permission row reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets Jaga answer and end calls.'**
+  String get onboardingPermPhoneWhy;
+
+  /// Calling account row hint while Phone calls is not allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow phone calls first.'**
+  String get onboardingPermCallingAccountFirst;
+
+  /// Calling account row hint after the settings page opened.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch on Jaga in the list, then come back.'**
+  String get onboardingPermCallingAccountHelp;
+
+  /// Hint when a permission was refused for good. item is the permission name.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Permissions, allow {item}, then come back.'**
+  String onboardingPermOpenSettingsHelp(String item);
 }
 
 class _AppLocalizationsDelegate

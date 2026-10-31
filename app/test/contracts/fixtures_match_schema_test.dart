@@ -4,15 +4,17 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage_update.dart';
+import 'package:jaga/data/models/voice_token.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
 import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
 import 'package:json_schema/json_schema.dart';
 
-List<File> _json(String dir) => Directory(dir)
-    .listSync()
-    .whereType<File>()
-    .where((f) => f.path.endsWith('.json'))
-    .toList();
+List<File> _json(String dir) =>
+    Directory(dir)
+        .listSync()
+        .whereType<File>()
+        .where((f) => f.path.endsWith('.json'))
+        .toList();
 
 void main() {
   final schema = JsonSchema.create(
@@ -97,6 +99,42 @@ void main() {
         );
         expect(result.isValid, isTrue, reason: '${result.errors} $raw');
         FamilyAlert.parse(raw);
+      }
+    });
+  });
+
+  group('voice-token', () {
+    final voiceSchema = JsonSchema.create(
+      jsonDecode(
+        File('../contracts/voice-token.schema.json').readAsStringSync(),
+      ),
+    );
+
+    test('every v1 voice-token fixture validates and parses', () {
+      final files = _json('../contracts/fixtures/voice-token');
+      expect(files, isNotEmpty);
+      for (final f in files) {
+        final raw = f.readAsStringSync();
+        final result = voiceSchema.validate(
+          jsonDecode(raw),
+          validateFormats: true,
+        );
+        expect(result.isValid, isTrue, reason: '${f.path} ${result.errors}');
+        VoiceToken.parse(raw);
+      }
+    });
+
+    test('every invalid voice-token fixture fails the schema', () {
+      final files = _json('../contracts/fixtures/invalid/voice-token');
+      expect(files, isNotEmpty);
+      for (final f in files) {
+        expect(
+          voiceSchema
+              .validate(jsonDecode(f.readAsStringSync()), validateFormats: true)
+              .isValid,
+          isFalse,
+          reason: f.path,
+        );
       }
     });
   });

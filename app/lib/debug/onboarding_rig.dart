@@ -1,17 +1,23 @@
 import '../app.dart';
 import '../core/haptics/fake_buzzer.dart';
 import '../data/models/onboarding_progress.dart';
+import '../data/repositories/call_repository.dart';
 import '../data/repositories/onboarding_repository.dart';
 import '../data/repositories/pin_repository.dart';
 import '../data/services/alert_notifier.dart';
 import '../data/services/alert_push_service.dart';
+import '../data/services/attention_service.dart';
+import '../data/services/call_service.dart';
+import '../data/services/call_ui_service.dart';
 import '../data/services/copilot_pause_service.dart';
 import '../data/services/device_setup_service.dart';
 import '../data/services/dialer_service.dart';
 import '../data/services/key_value_store.dart';
 import '../data/services/onboarding_api_service.dart';
 import '../data/services/share_service.dart';
+import '../data/services/stage_stream_service.dart';
 import '../data/services/timeline_service.dart';
+import '../data/services/voice_token_service.dart';
 import '../features/onboarding/view_models/onboarding_view_model.dart';
 import '../features/onboarding/view_models/protected_home_view_model.dart';
 
@@ -73,6 +79,13 @@ class OnboardingRig {
     alertNotifier: notifier,
     pause: pause,
     timeline: timeline,
+    call: CallRepository(
+      service: FakeCallService(),
+      tokens: FakeVoiceTokenService(),
+    ),
+    callUi: FakeCallUiService(),
+    stageStream: FakeStageStreamService(),
+    attention: FakeAttentionService(),
     initAlerts: () async {},
   );
 

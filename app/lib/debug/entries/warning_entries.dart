@@ -4,11 +4,12 @@ import '../../core/haptics/fake_buzzer.dart';
 import '../../data/models/stage_update.dart';
 import '../../data/repositories/call_risk_repository.dart';
 import '../../data/services/attention_service.dart';
+import '../../data/services/call_service.dart';
 import '../../data/services/stage_stream_service.dart';
 import '../../features/warning/view_models/warning_view_model.dart';
 import '../fixtures/stage_update_fixtures.dart';
 import '../gallery_entry.dart';
-import '../placeholder_call_screen.dart';
+import '../demo_call_screen.dart';
 
 typedef _Script = void Function(FakeStageStreamService s, WarningViewModel vm);
 
@@ -24,6 +25,7 @@ class _WarningDemo extends StatefulWidget {
 
 class _WarningDemoState extends State<_WarningDemo> {
   final _stream = FakeStageStreamService();
+  final _service = FakeCallService(DemoCallScreen.active());
   late final WarningViewModel _vm = WarningViewModel(
     repository: CallRiskRepository(_stream),
     buzzer: FakeBuzzer(),
@@ -40,11 +42,13 @@ class _WarningDemoState extends State<_WarningDemo> {
   void dispose() {
     _vm.dispose();
     _stream.dispose();
+    _service.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => PlaceholderCallScreen(vm: _vm);
+  Widget build(BuildContext context) =>
+      DemoCallScreen(warningVm: _vm, service: _service);
 }
 
 GalleryEntry _entry(String state, _Script script) => GalleryEntry(

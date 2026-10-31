@@ -238,15 +238,34 @@ void main() {
         tester,
         _protected.copyWith(step: OnboardingStep.permissions),
       );
-      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(3));
+      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(4));
       expect(continueButton(tester).onPressed, isNull);
-      for (var i = 0; i < 3; i++) {
-        await tester.tap(find.widgetWithText(OutlinedButton, 'Fix').first);
+      // The calling account's Fix appears once Phone calls is green.
+      for (var i = 0; i < 5; i++) {
+        final fix = find.widgetWithText(OutlinedButton, 'Fix').first;
+        await tester.ensureVisible(fix);
+        await tester.tap(fix);
         await tester.pumpAndSettle();
       }
       expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNothing);
-      expect(s.rig.device.fixed, hasLength(3));
+      expect(s.rig.device.fixed, hasLength(5));
       expect(continueButton(tester).onPressed, isNotNull);
+    });
+
+    testWidgets('the calling account waits for Phone calls', (tester) async {
+      await pumpSetup(
+        tester,
+        _protected.copyWith(step: OnboardingStep.permissions),
+      );
+      expect(find.text('Phone calls'), findsOneWidget);
+      expect(find.text('Allow phone calls first.'), findsOneWidget);
+      // Phone calls, Microphone, Notifications, Full-screen: no Fix for the account yet.
+      expect(find.widgetWithText(OutlinedButton, 'Fix'), findsNWidgets(4));
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Fix').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Allow phone calls first.'), findsNothing);
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Fix').first);
+      await tester.pumpAndSettle();
     });
 
     testWidgets('a resume ticks what was switched on in Settings', (
