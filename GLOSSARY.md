@@ -7,6 +7,7 @@ Seed list. `/grill-with-docs` extends it. Use these words in code, tickets and P
 | **Protected user** | The person Jaga guards, usually an elderly parent. Their calls ring in the Jaga app |
 | **Family co-pilot** | A trusted contact who gets alerts about one protected user, can phone them from the alert, and is the only one who can clear Jaga Pause early. Same app, `family` role |
 | **Jaga line** | The telephony number the protected user's SIM forwards calls to. It rings the app and forks the audio to the server |
+| **Voice access token** | What lets the protected user's app register to ring on the Jaga line's calls. Short-lived, and it can receive calls but never place them |
 | **Leg** | One side of a call's audio: `caller` or `user` |
 | **Stage** | Where the caller is in the scam script: `pretext`, `authority`, `fear`, `isolation`, `handoff`, `money`, `credentials`. A call's stage is the most severe one seen so far and never goes down; `money` and `credentials` tie as most severe. `none` means no signs yet |
 | **Region pack** | Everything country-specific: script packs, official contacts, scam hotline, languages, keywords and default command language. The MVP ships Malaysia only |
