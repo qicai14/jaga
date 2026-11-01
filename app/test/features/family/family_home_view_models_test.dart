@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/scam_hotline.dart';
+import 'package:jaga/data/models/stage.dart';
+import 'package:jaga/data/models/stage_update.dart' show Risk;
 import 'package:jaga/data/services/copilot_pause_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/timeline_service.dart';
@@ -150,6 +153,27 @@ void main() {
     });
     tearDown(() => vm.dispose());
 
+    test('the call-start none/low event is left out', () async {
+      final start = TimelineEvent(
+        at: DateTime.utc(2026, 11, 1, 18, 43),
+        stage: Stage.none,
+        risk: Risk.low,
+      );
+      final caution = TimelineEvent(
+        at: DateTime.utc(2026, 11, 1, 18, 44),
+        stage: Stage.authority,
+        risk: Risk.medium,
+      );
+      final rig = StageTimelineViewModel(
+        call: fixtureCalls().last,
+        timeline: _EventsOnly([start, caution]),
+        dialer: dialer,
+      );
+      addTearDown(rig.dispose);
+      await pumpEventQueue();
+      expect(rig.events, [caution]);
+    });
+
     test('loads the call events in order', () async {
       await pumpEventQueue();
       expect(vm.status, LoadStatus.loaded);
@@ -201,4 +225,20 @@ void main() {
       expect(dialer.dialed, [scamHotline]);
     });
   });
+}
+
+/// Serves fixed events for any call.
+class _EventsOnly implements TimelineService {
+  _EventsOnly(this._events);
+
+  final List<TimelineEvent> _events;
+
+  @override
+  Future<List<AlertedCall>> calls() async => const [];
+
+  @override
+  Future<List<TimelineEvent>> events(String callId) async => _events;
+
+  @override
+  Future<void> delete(String callId) async {}
 }

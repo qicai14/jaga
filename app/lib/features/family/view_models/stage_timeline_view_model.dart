@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import '../../../data/models/alerted_call.dart';
 import '../../../data/models/scam_hotline.dart';
+import '../../../data/models/stage.dart';
+import '../../../data/models/stage_update.dart' show Risk;
 import '../../../data/services/dialer_service.dart';
 import '../../../data/services/network_exception.dart';
 import '../../../data/services/timeline_service.dart';
@@ -37,7 +39,11 @@ class StageTimelineViewModel extends ChangeNotifier {
     try {
       final events = await _timeline.events(call.callId);
       if (_disposed) return;
-      _events = events;
+      // The server opens every call with a none/low event; it has nothing to show.
+      _events = [
+        for (final e in events)
+          if (e.stage != Stage.none || e.risk != Risk.low) e,
+      ];
       _status = LoadStatus.loaded;
     } on NetworkException {
       if (_disposed) return;
