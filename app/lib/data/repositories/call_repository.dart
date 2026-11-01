@@ -23,6 +23,9 @@ class CallRepository {
   static const retryAfter = Duration(minutes: 1);
 
   final CallService _service;
+
+  /// True on the scripted Fake: Jaga line calls will not ring this phone.
+  bool get usesFakeService => _service is FakeCallService;
   final VoiceTokenService _tokens;
   final StageStreamService? _stageStream;
   final DateTime Function() _now;

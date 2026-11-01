@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 
 import 'core/config/build_config.dart';
@@ -148,6 +149,7 @@ class _JagaAppState extends State<JagaApp> {
           deviceSetup: deps.deviceSetup,
           dialer: deps.dialer,
           share: deps.share,
+          callsAreFake: kReleaseMode && deps.call.usesFakeService,
         ),
         builder: (_, vm) => ProtectedHomeScreen(vm: vm),
       ),

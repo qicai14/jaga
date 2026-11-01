@@ -25,6 +25,15 @@ class _Tokens implements VoiceTokenService {
 }
 
 void main() {
+  test('usesFakeService is true only for the Fake call service', () {
+    final repo = CallRepository(
+      service: FakeCallService(),
+      tokens: FakeVoiceTokenService(),
+    );
+    expect(repo.usesFakeService, isTrue);
+    repo.dispose();
+  });
+
   test('start registers the first token and follows the call', () async {
     final service = FakeCallService();
     final repo = CallRepository(

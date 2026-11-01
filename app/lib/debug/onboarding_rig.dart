@@ -104,13 +104,15 @@ class OnboardingRig {
     pollEvery: pollEvery,
   );
 
-  ProtectedHomeViewModel protectedHomeViewModel() => ProtectedHomeViewModel(
-    repository: onboarding,
-    pin: pin,
-    deviceSetup: device,
-    dialer: dialer,
-    share: share,
-  );
+  ProtectedHomeViewModel protectedHomeViewModel({bool callsAreFake = false}) =>
+      ProtectedHomeViewModel(
+        repository: onboarding,
+        pin: pin,
+        deviceSetup: device,
+        dialer: dialer,
+        share: share,
+        callsAreFake: callsAreFake,
+      );
 
   void dispose() {
     onboarding.dispose();

@@ -17,6 +17,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
     required this._deviceSetup,
     required this._dialer,
     required this._share,
+    this.callsAreFake = false,
   }) {
     WidgetsBinding.instance.addObserver(this);
     refresh();
@@ -28,6 +29,9 @@ class ProtectedHomeViewModel extends ChangeNotifier
   final DialerService _dialer;
   final ShareService _share;
 
+  /// A release build without the Jaga line settings: it is not really protecting.
+  final bool callsAreFake;
+
   bool _disposed = false;
   bool _needsAttention = false;
   List<String> _family = const [];
@@ -35,7 +39,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
   final _tried = <SetupItem>{};
 
   /// A step-4 permission is no longer granted: the family must look at the phone.
-  bool get needsAttention => _needsAttention;
+  bool get needsAttention => _needsAttention || callsAreFake;
 
   /// Per-permission state for the Settings checklist.
   Map<SetupItem, bool> get setup => _setup;

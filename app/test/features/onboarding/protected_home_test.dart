@@ -27,6 +27,7 @@ Future<OnboardingRig> pumpHome(
   double scale = 1.0,
   FakeDeviceSetupService? device,
   List<String> family = const [],
+  bool callsAreFake = false,
 }) async {
   final rig = await OnboardingRig.create(
     start: _done,
@@ -38,7 +39,7 @@ Future<OnboardingRig> pumpHome(
   await pumpJaga(
     tester,
     ViewModelHost<ProtectedHomeViewModel>(
-      create: rig.protectedHomeViewModel,
+      create: () => rig.protectedHomeViewModel(callsAreFake: callsAreFake),
       builder: (_, vm) => ProtectedHomeScreen(vm: vm),
     ),
     scale: scale,
@@ -104,6 +105,15 @@ void main() {
       expect(find.byIcon(Icons.check_circle), findsNothing);
     },
   );
+
+  forEachScale('a release build on the fake call service is amber', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale, callsAreFake: true);
+    expect(find.text('Ask your family to check Jaga'), findsOneWidget);
+    expect(find.text('Jaga is protecting you'), findsNothing);
+  });
 
   testWidgets(
     'the status goes amber when a permission is revoked, and back when fixed',
