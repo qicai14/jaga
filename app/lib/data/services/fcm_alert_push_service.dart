@@ -4,6 +4,7 @@ import 'dart:ui' show Locale;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../core/config/build_config.dart';
 import '../models/family_alert.dart';
 import '../models/onboarding_progress.dart';
 import '../repositories/onboarding_repository.dart';
@@ -100,6 +101,11 @@ Future<void> showBackgroundAlert(
   await notifier.show(alert, person);
 }
 
-/// Registered once in `createDependencies`.
+/// Protected users never receive family alerts, and FlutterFire starts a
+/// background engine for the handler that re-registers twilio_voice and steals
+/// its call events from the visible app.
+bool registersFcmBackgroundHandler(BuildRole role) => role.offersCopilot;
+
+/// Registered once in `createDependencies`, when [registersFcmBackgroundHandler].
 void registerFcmBackgroundHandler() =>
     FirebaseMessaging.onBackgroundMessage(familyAlertBackgroundHandler);

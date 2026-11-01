@@ -72,7 +72,10 @@ Future<AppDependencies> createDependencies() async {
   final AlertPushService push;
   FcmAlertPushService? fcmService;
   if (firebaseReady) {
-    registerFcmBackgroundHandler();
+    // Not in the protected build: the handler's background engine steals twilio_voice's events.
+    if (registersFcmBackgroundHandler(buildRole)) {
+      registerFcmBackgroundHandler();
+    }
     final fcm = FcmAlertPushService();
     auth = FirebaseAuthService();
     push = fcm;
