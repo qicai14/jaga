@@ -79,7 +79,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
     OnboardingStep.role => progress.role != null,
     OnboardingStep.about => aboutLocked || _name.trim().isNotEmpty,
     OnboardingStep.permissions =>
-      platformItemsOk(_setup) && (!_xiaomi || _autostartConfirmed),
+      platformItemsOk(_setup) && (!_xiaomi || autostartConfirmed),
     OnboardingStep.pin => _pinDigits.length == pinLength,
     OnboardingStep.buzz => _buzzed,
     OnboardingStep.joinCode =>
@@ -133,13 +133,12 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   Map<SetupItem, bool> _setup = {};
   bool _xiaomi = false;
-  bool _autostartConfirmed = false;
 
   Map<SetupItem, bool> get setup => _setup;
 
   /// Xiaomi phones also list autostart, ticked by hand.
   bool get xiaomi => _xiaomi;
-  bool get autostartConfirmed => _autostartConfirmed;
+  bool get autostartConfirmed => progress.autostartConfirmed;
 
   Future<void> refreshSetup() async {
     final state = await _deviceSetup.check();
@@ -162,7 +161,7 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   void confirmAutostart() {
-    _autostartConfirmed = true;
+    _repository.update(progress.copyWith(autostartConfirmed: true));
     notifyListeners();
   }
 

@@ -51,6 +51,7 @@ class OnboardingProgress {
     this.registration,
     this.link,
     this.complete = false,
+    this.autostartConfirmed = false,
   });
 
   factory OnboardingProgress.parse(String raw) {
@@ -73,6 +74,7 @@ class OnboardingProgress {
               phoneNumber: link['phoneNumber'] as String?,
             ),
       complete: json['complete'] as bool,
+      autostartConfirmed: json['autostartConfirmed'] as bool? ?? false,
     );
   }
 
@@ -93,6 +95,9 @@ class OnboardingProgress {
   final LinkedPerson? link;
   final bool complete;
 
+  /// Xiaomi only: the family ticked autostart by hand (Android can't say).
+  final bool autostartConfirmed;
+
   List<OnboardingStep> get steps => OnboardingStep.of(role);
 
   OnboardingProgress copyWith({
@@ -104,6 +109,7 @@ class OnboardingProgress {
     Registration? registration,
     LinkedPerson? link,
     bool? complete,
+    bool? autostartConfirmed,
   }) => OnboardingProgress(
     role: role ?? this.role,
     step: step ?? this.step,
@@ -113,6 +119,7 @@ class OnboardingProgress {
     registration: registration ?? this.registration,
     link: link ?? this.link,
     complete: complete ?? this.complete,
+    autostartConfirmed: autostartConfirmed ?? this.autostartConfirmed,
   );
 
   String toJson() => jsonEncode({
@@ -126,5 +133,6 @@ class OnboardingProgress {
         ? null
         : {'name': link!.name, 'phoneNumber': link!.phoneNumber},
     'complete': complete,
+    'autostartConfirmed': autostartConfirmed,
   });
 }

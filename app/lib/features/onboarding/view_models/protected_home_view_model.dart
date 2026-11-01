@@ -36,6 +36,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
   bool _needsAttention = false;
   List<String> _family = const [];
   Map<SetupItem, bool> _setup = {};
+  bool _xiaomi = false;
   final _tried = <SetupItem>{};
 
   /// A step-4 permission is no longer granted: the family must look at the phone.
@@ -43,6 +44,10 @@ class ProtectedHomeViewModel extends ChangeNotifier
 
   /// Per-permission state for the Settings checklist.
   Map<SetupItem, bool> get setup => _setup;
+
+  /// Xiaomi phones also list autostart, ticked by hand and saved.
+  bool get xiaomi => _xiaomi;
+  bool get autostartConfirmed => _repository.progress.value.autostartConfirmed;
 
   /// Items whose Fix was pressed: if still red, the row says what to do next.
   Set<SetupItem> get tried => _tried;
@@ -57,6 +62,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
   /// Checks the permissions and the family list. Runs at start and on resume.
   Future<void> refresh() async {
     final setup = await _deviceSetup.check();
+    final xiaomi = await _deviceSetup.isXiaomi();
     List<String> family;
     try {
       family = await _repository.copilots();
@@ -65,6 +71,7 @@ class ProtectedHomeViewModel extends ChangeNotifier
     }
     if (_disposed) return;
     _setup = setup;
+    _xiaomi = xiaomi;
     _needsAttention = !platformItemsOk(setup);
     _family = family;
     notifyListeners();
@@ -79,6 +86,13 @@ class ProtectedHomeViewModel extends ChangeNotifier
     _tried.add(item);
     await _deviceSetup.fix(item);
     await refresh();
+  }
+
+  void confirmAutostart() {
+    _repository.update(
+      _repository.progress.value.copyWith(autostartConfirmed: true),
+    );
+    notifyListeners();
   }
 
   Future<PinResult> verifyPin(String pin) => _pin.verify(pin);

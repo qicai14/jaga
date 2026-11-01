@@ -28,9 +28,10 @@ Future<OnboardingRig> pumpHome(
   FakeDeviceSetupService? device,
   List<String> family = const [],
   bool callsAreFake = false,
+  OnboardingProgress start = _done,
 }) async {
   final rig = await OnboardingRig.create(
-    start: _done,
+    start: start,
     device: device ?? _granted(),
   );
   rig.api.joined = family;
@@ -94,6 +95,62 @@ void main() {
   forEachScale('status with no family says so', (tester, scale) async {
     await pumpHome(tester, scale: scale);
     expect(find.text('No family linked yet'), findsOneWidget);
+  });
+
+  FakeDeviceSetupService xiaomiPhone() => FakeDeviceSetupService(
+    xiaomi: true,
+    state: {for (final i in platformItems) i: true},
+  );
+
+  Future<void> openSettings(WidgetTester tester) async {
+    await openGate(tester);
+    await unlockWith(tester, '1234');
+  }
+
+  forEachScale('Settings on Xiaomi shows autostart unconfirmed, then ticked', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pumpHome(tester, scale: scale, device: xiaomiPhone());
+    await openSettings(tester);
+    await scrollSettingsTo(tester, inSettings('Start automatically'));
+    final tick = inSettings("I've done this");
+    expect(tick, findsOneWidget);
+    await tester.ensureVisible(tick);
+    await tester.pumpAndSettle();
+    await tester.tap(tick);
+    await tester.pumpAndSettle();
+    expect(tick, findsNothing);
+    expect(rig.onboarding.progress.value.autostartConfirmed, isTrue);
+    // Not readable from Android, so it never turns the status amber.
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Jaga is protecting you'), findsOneWidget);
+  });
+
+  forEachScale('Settings on Xiaomi shows a saved autostart confirmation', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(
+      tester,
+      scale: scale,
+      device: xiaomiPhone(),
+      start: _done.copyWith(autostartConfirmed: true),
+    );
+    await openSettings(tester);
+    await scrollSettingsTo(tester, inSettings('Start automatically'));
+    expect(inSettings("I've done this"), findsNothing);
+  });
+
+  forEachScale('Settings on a non-Xiaomi phone has no autostart row', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale);
+    await openSettings(tester);
+    expect(inSettings('Phone permissions'), findsOneWidget);
+    expect(inSettings('Start automatically'), findsNothing);
   });
 
   forEachScale(

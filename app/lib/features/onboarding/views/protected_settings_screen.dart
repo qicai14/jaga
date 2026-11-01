@@ -53,6 +53,9 @@ class ProtectedSettingsScreen extends StatelessWidget {
                 setup: vm.setup,
                 tried: vm.tried,
                 onFix: vm.fix,
+                xiaomi: vm.xiaomi,
+                autostartConfirmed: vm.autostartConfirmed,
+                onConfirmAutostart: vm.confirmAutostart,
               ),
             ),
             _section(

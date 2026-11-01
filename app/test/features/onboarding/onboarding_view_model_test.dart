@@ -237,6 +237,11 @@ void main() {
       expect(vm.canContinue, isFalse);
       vm.confirmAutostart();
       expect(vm.canContinue, isTrue);
+      // Saved, so Settings can show it after a restart.
+      final saved = OnboardingProgress.parse(
+        rig.onboarding.progress.value.toJson(),
+      );
+      expect(saved.autostartConfirmed, isTrue);
     });
 
     test('the calling account blocks Continue until it is on', () async {
