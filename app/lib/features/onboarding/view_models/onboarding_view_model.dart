@@ -142,7 +142,12 @@ class OnboardingViewModel extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> refreshSetup() async {
     final state = await _deviceSetup.check();
-    final xiaomi = await _deviceSetup.isXiaomi();
+    var xiaomi = false;
+    try {
+      xiaomi = await _deviceSetup.isXiaomi();
+    } catch (_) {
+      // Not knowing the maker must not stop the permission check.
+    }
     if (_disposed) return;
     _setup = state;
     _xiaomi = xiaomi;

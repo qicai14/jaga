@@ -95,6 +95,7 @@ class PermissionChecklist extends StatelessWidget {
             granted: autostartConfirmed,
             onFix: () => onFix(SetupItem.autostart),
             onConfirm: onConfirmAutostart,
+            fixWhenGranted: true,
           ),
       ],
     );

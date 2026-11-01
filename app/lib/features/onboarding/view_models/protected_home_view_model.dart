@@ -62,7 +62,12 @@ class ProtectedHomeViewModel extends ChangeNotifier
   /// Checks the permissions and the family list. Runs at start and on resume.
   Future<void> refresh() async {
     final setup = await _deviceSetup.check();
-    final xiaomi = await _deviceSetup.isXiaomi();
+    var xiaomi = false;
+    try {
+      xiaomi = await _deviceSetup.isXiaomi();
+    } catch (_) {
+      // Not knowing the maker must not stop the permission check.
+    }
     List<String> family;
     try {
       family = await _repository.copilots();

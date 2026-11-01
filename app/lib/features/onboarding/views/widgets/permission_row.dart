@@ -13,6 +13,7 @@ class PermissionRow extends StatelessWidget {
     required this.granted,
     this.onFix,
     this.onConfirm,
+    this.fixWhenGranted = false,
   });
 
   final String title;
@@ -22,6 +23,9 @@ class PermissionRow extends StatelessWidget {
 
   /// For a permission Android can't report: the family ticks it by hand.
   final VoidCallback? onConfirm;
+
+  /// Keep Fix after the tick: a phone update can reset what Android can't report.
+  final bool fixWhenGranted;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +51,8 @@ class PermissionRow extends StatelessWidget {
                 children: [
                   Text(title, style: text.titleLarge),
                   Text(why, style: text.bodyMedium),
-                  if (!granted && (onFix != null || onConfirm != null))
+                  if (onFix != null && (!granted || fixWhenGranted) ||
+                      !granted && onConfirm != null)
                     Padding(
                       padding: EdgeInsets.only(top: m.s),
                       child: Wrap(
@@ -59,7 +64,7 @@ class PermissionRow extends StatelessWidget {
                               onPressed: onFix,
                               child: Text(l.onboardingFix),
                             ),
-                          if (onConfirm != null)
+                          if (!granted && onConfirm != null)
                             OutlinedButton(
                               onPressed: onConfirm,
                               child: Text(l.onboardingFixedIt),

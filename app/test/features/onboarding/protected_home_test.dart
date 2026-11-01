@@ -132,7 +132,7 @@ void main() {
     tester,
     scale,
   ) async {
-    await pumpHome(
+    final rig = await pumpHome(
       tester,
       scale: scale,
       device: xiaomiPhone(),
@@ -141,6 +141,15 @@ void main() {
     await openSettings(tester);
     await scrollSettingsTo(tester, inSettings('Start automatically'));
     expect(inSettings("I've done this"), findsNothing);
+    // Fix stays so the co-pilot can reopen the page after a phone update.
+    final fix = find.descendant(
+      of: find.byType(ProtectedSettingsScreen),
+      matching: find.widgetWithText(OutlinedButton, 'Fix'),
+    );
+    await tester.ensureVisible(fix);
+    await tester.pumpAndSettle();
+    await tester.tap(fix);
+    expect(rig.device.fixed, contains(SetupItem.autostart));
   });
 
   forEachScale('Settings on a non-Xiaomi phone has no autostart row', (

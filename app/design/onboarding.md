@@ -73,7 +73,7 @@ Row: icon (`check_circle` guarded / `error_outline` `error`), title `titleLarge`
 | b Microphone | `Permission.microphone` | request; else `ACTION_APPLICATION_DETAILS_SETTINGS` (`package:` uri) |
 | c Full-screen alerts (14+) | `NotificationManager.canUseFullScreenIntent()` (API 34+; below = green) | `Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT` (`package:` uri) |
 | d Calling account | `twilio_voice` phone account registered and enabled | register, then `TelecomManager.ACTION_CHANGE_PHONE_ACCOUNTS` |
-| e Xiaomi autostart | only if manufacturer is xiaomi/redmi/poco; can't be read | component `com.miui.securitycenter/com.miui.permcenter.autostart.AutoStartManagementActivity`, fallback app details; then a manual `onboardingFixedIt` tick |
+| e Xiaomi autostart | only if manufacturer is xiaomi/redmi/poco; can't be read | component `com.miui.securitycenter/com.miui.permcenter.autostart.AutoStartManagementActivity`, fallback app details; then a manual `onboardingFixedIt` tick, saved (`autostartConfirmed`). Left out of `needsAttention` on purpose: unreadable, and already-set-up phones would all turn amber. In Settings Fix stays after the tick |
 Item d is a fake (always red with Fix → "Available after #12", `onboardingAfterCallSetup`, counted as done) until #12
 adds `twilio_voice`. Samsung and some OEMs hide the calling-account toggle: if the intent fails, open app details.
 

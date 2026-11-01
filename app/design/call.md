@@ -113,6 +113,7 @@ Recovery: rows re-check on resume as today. **Status screen:** any red row → t
 `statusNeedsFamily`); no new row on the home screen (she can't fix it). **Settings** (behind the PIN) gains a first section
 `onboardingPermissionsTitle` with the same rows, so the co-pilot fixes it there. Keep `rejectCallOnNoPermissions` default
 (reject): a call that rings but can't be answered is worse. What the caller then hears is Lane A's (§9).
+Xiaomi autostart is left out of `needsAttention` on purpose: Android can't read it, and every phone already set up would turn amber. It is saved (`autostartConfirmed`) and shown in Settings, where Fix stays visible after the tick so the co-pilot can reopen the page.
 
 ## 6. Architecture
 ```
