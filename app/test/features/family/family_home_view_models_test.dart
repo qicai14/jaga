@@ -39,6 +39,15 @@ void main() {
       expect(vm.calls, hasLength(5));
     });
 
+    test('a failing pause status still shows the timelines', () async {
+      pause.offline = true;
+      build();
+      await pumpEventQueue();
+      expect(vm.status, LoadStatus.loaded);
+      expect(vm.pauseActive, isFalse);
+      expect(vm.calls, hasLength(5));
+    });
+
     test('a failed load shows an error, and Try again recovers', () async {
       timeline.offline = true;
       build();

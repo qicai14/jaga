@@ -48,9 +48,23 @@ void main() {
       ).calls();
       expect(sent.single.url.path, '/timelines');
       expect(sent.single.headers['Authorization'], 'Bearer tok');
-      expect(calls, hasLength(2));
-      expect(calls.first.callId, 'call_01HZXB2R8T');
-      expect(calls.first.stage, Stage.authority);
+      // The newest call never got past authority, so it is not listed.
+      expect(calls, hasLength(1));
+      expect(calls.single.stage, Stage.money);
+    });
+
+    test('keeps only calls whose events reached isolation', () async {
+      String call(String id, List<String> stages) =>
+          '{"callId":"$id","startedAt":"2026-10-27T09:00:00Z","events":['
+          '${stages.map((s) => '{"at":"2026-10-27T09:01:00Z","stage":"$s","risk":"low","source":"rules"}').join(',')}]}';
+      final body = [
+        call('none', []),
+        call('early', ['pretext', 'fear']),
+        call('late', ['fear', 'isolation']),
+        call('peak', ['money', 'fear']),
+      ].join(',');
+      final calls = await timeline(200, '[$body]').calls();
+      expect(calls.map((c) => c.callId), ['late', 'peak']);
     });
 
     test('reads one timeline', () async {
@@ -62,8 +76,11 @@ void main() {
       expect(events, isNotEmpty);
     });
 
-    test('a gone timeline has no events', () async {
-      expect(await timeline(404, _notFound).events('x'), isEmpty);
+    test('a 404 on events is an error: a wrong token looks the same', () {
+      expect(
+        timeline(404, _notFound).events('x'),
+        throwsA(isA<NetworkException>()),
+      );
     });
 
     test('delete sends DELETE; 204 succeeds, 404 is an error', () async {

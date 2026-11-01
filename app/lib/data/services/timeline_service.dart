@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/alerted_call.dart';
+import '../models/stage.dart';
 import 'copilot_http.dart';
 import 'network_exception.dart';
 
@@ -34,21 +35,30 @@ class HttpTimelineService implements TimelineService {
     try {
       return [
         for (final j in jsonDecode(res.body) as List)
-          AlertedCall.fromJson(j as Map<String, dynamic>),
+          if (_reachedIsolation(j as Map<String, dynamic>))
+            AlertedCall.fromJson(j),
       ];
     } on Object {
       throw const NetworkException();
     }
   }
 
-  /// A timeline the server no longer has (deleted, or past 30 days) has no events.
+  /// A call that never got past pretext, authority or fear was not alerted
+  /// (the family-alert stages start at isolation), so it is not listed.
+  static bool _reachedIsolation(Map<String, dynamic> timeline) =>
+      (timeline['events'] as List).any(
+        (e) =>
+            Stage.fromJson((e as Map)['stage'] as String).index >=
+            Stage.isolation.index,
+      );
+
+  /// A 404 is an error: a wrong token gets the same bare 404 (ADR 0008).
   @override
   Future<List<TimelineEvent>> events(String callId) async {
     final res = await _api.send(
       'GET',
       '/timelines/${Uri.encodeComponent(callId)}',
     );
-    if (res.statusCode == 404) return const [];
     if (res.statusCode != 200) throw _api.refused(res);
     try {
       final json = jsonDecode(res.body) as Map<String, dynamic>;
