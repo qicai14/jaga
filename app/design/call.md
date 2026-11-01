@@ -92,6 +92,12 @@ speaker state explicitly at answer.
   line is removed. Registration with the server's incoming-only token works (ADR 0009, first unverified point).
   **Still open:** with the emulator asleep (screen off, light doze) the call push never arrived and nothing rang. Not yet
   known whether that is the emulator's push delivery or ours; to check on a real phone.
+- **On hold (2 Nov), not fixable in the app today:**
+  - The asleep ring above. Next step: one locked-phone call on a physical Android 10+ phone; on the emulator, a screen-off
+    call with `dumpsys deviceidle disable` separates doze from the app freezer.
+  - ADR 0009's second point (does it still ring more than 1 h after the last token fetch) needs an idle hour and a call.
+  - `twilio_voice` logs the FCM token in its own native debug line (`Successfully registered FCM <token>`); ours doesn't.
+    Fix needs a plugin change upstream.
 - If FSI is denied (step 4 row c red), the dialer's own in-call screen stays; the Warning then uses the warning.md fallback.
 - The plugin's own foreground notification ("Voice Calls", English, tap target broken) can't change without a fork: noted.
 
