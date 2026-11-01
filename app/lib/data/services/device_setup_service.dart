@@ -113,13 +113,16 @@ class AndroidDeviceSetupService implements DeviceSetupService {
       case SetupItem.callingAccount:
         try {
           await _voice.registerPhoneAccount();
+          // Registering leaves the account switched off on Android: the user flips it in Settings.
+          if (await _voice.isPhoneAccountEnabled()) return;
         } on PlatformException {
-          // Samsung hides the calling-accounts page: try the settings page, then the app's own.
-          try {
-            await _voice.openPhoneAccountSettings();
-          } on PlatformException {
-            await openAppSettings();
-          }
+          // Fall through to the settings page.
+        }
+        // Samsung hides the calling-accounts page: try the settings page, then the app's own.
+        try {
+          await _voice.openPhoneAccountSettings();
+        } on PlatformException {
+          await openAppSettings();
         }
     }
   }
