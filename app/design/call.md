@@ -181,6 +181,3 @@ access-token endpoint; what the caller hears if the app rejects the invite (miss
 Gallery shows every phase in ms/en/zh at 1.0/1.5/2.0. With the fake: answer → in-call screen, Warning over it, Hang up ends.
 Real call: rings natively over the lock screen; answer with the app killed or in the background opens our screen and
 the caller hears her (#316; the trial showed the mic is dead until our screen is in front); screen off at the ear; a `familyAlert` push still reaches the co-pilot path.
-
-Known pitfall: the protected-user build must not register the FCM background handler. FlutterFire then starts a background
-engine that re-registers twilio_voice and takes its call events, so the in-call screen never opens (real call, emulator).

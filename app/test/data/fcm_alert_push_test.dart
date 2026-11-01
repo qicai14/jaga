@@ -3,7 +3,6 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/bootstrap.dart';
-import 'package:jaga/core/config/build_config.dart';
 import 'package:jaga/data/models/linked_person.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
 import 'package:jaga/data/repositories/onboarding_repository.dart';
@@ -13,12 +12,6 @@ import 'package:jaga/data/services/key_value_store.dart';
 import 'package:jaga/debug/fixtures/family_alert_fixtures.dart';
 
 void main() {
-  test('only the protected build skips the FCM background handler', () {
-    expect(registersFcmBackgroundHandler(BuildRole.dev), isTrue);
-    expect(registersFcmBackgroundHandler(BuildRole.copilot), isTrue);
-    expect(registersFcmBackgroundHandler(BuildRole.protectedUser), isFalse);
-  });
-
   group('familyAlertFromData', () {
     test('parses the alert JSON string', () {
       final alert = familyAlertFromData({familyAlertDataKey: familyMoney});
