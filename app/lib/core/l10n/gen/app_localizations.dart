@@ -439,19 +439,19 @@ abstract class AppLocalizations {
   /// Protected setup step 3 title.
   ///
   /// In en, this message translates to:
-  /// **'About her'**
+  /// **'About the person you\'re protecting'**
   String get onboardingAboutTitle;
 
   /// Step 3 name field label.
   ///
   /// In en, this message translates to:
-  /// **'Her name'**
+  /// **'Their name'**
   String get onboardingNameLabel;
 
   /// Helper text under the field whose short label is Her name.
   ///
   /// In en, this message translates to:
-  /// **'What does the family call her?'**
+  /// **'What does the family call them?'**
   String get onboardingNameHelper;
 
   /// Step 3 read-only region row.
@@ -589,7 +589,7 @@ abstract class AppLocalizations {
   /// Step 6 body.
   ///
   /// In en, this message translates to:
-  /// **'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk her into switching it off.'**
+  /// **'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk them into switching it off.'**
   String get onboardingPinBody;
 
   /// Step 6 prompt for the second entry.
@@ -613,7 +613,7 @@ abstract class AppLocalizations {
   /// Step 7 body.
   ///
   /// In en, this message translates to:
-  /// **'Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she\'s on a scam call.'**
+  /// **'Give this code to their bank once. When they make a transfer, the bank checks with Jaga and can hold it if they\'re on a scam call.'**
   String get onboardingPauseBody;
 
   /// Protected setup step 8 title.
@@ -697,13 +697,13 @@ abstract class AppLocalizations {
   /// Co-pilot field: the nickname used in alerts, kept on this phone.
   ///
   /// In en, this message translates to:
-  /// **'Her nickname'**
+  /// **'Their nickname'**
   String get onboardingCallHer;
 
   /// Helper text under the field whose short label is Her nickname.
   ///
   /// In en, this message translates to:
-  /// **'What do you call her?'**
+  /// **'What do you call them?'**
   String get onboardingCallHerHelper;
 
   /// Link code error.

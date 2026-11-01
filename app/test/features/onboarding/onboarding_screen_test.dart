@@ -75,7 +75,7 @@ void main() {
   final protectedSteps = {
     OnboardingStep.language: 'Choose your language',
     OnboardingStep.role: 'Who is this phone for?',
-    OnboardingStep.about: 'About her',
+    OnboardingStep.about: "About the person you're protecting",
     OnboardingStep.permissions: 'Phone permissions',
     OnboardingStep.forwarding: 'Forward calls to Jaga',
     OnboardingStep.pin: 'Set the co-pilot lock',

@@ -207,13 +207,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingAppLanguageTitle => 'Choose your language';
 
   @override
-  String get onboardingAboutTitle => 'About her';
+  String get onboardingAboutTitle => 'About the person you\'re protecting';
 
   @override
-  String get onboardingNameLabel => 'Her name';
+  String get onboardingNameLabel => 'Their name';
 
   @override
-  String get onboardingNameHelper => 'What does the family call her?';
+  String get onboardingNameHelper => 'What does the family call them?';
 
   @override
   String get onboardingRegionInfo =>
@@ -288,7 +288,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPinBody =>
-      'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk her into switching it off.';
+      'Only family can change Jaga\'s settings with this PIN, so a caller can\'t talk them into switching it off.';
 
   @override
   String get onboardingPinConfirm => 'Enter the PIN again';
@@ -301,7 +301,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingPauseBody =>
-      'Give this code to her bank once. When she makes a transfer, the bank checks with Jaga and can hold it if she\'s on a scam call.';
+      'Give this code to their bank once. When they make a transfer, the bank checks with Jaga and can hold it if they\'re on a scam call.';
 
   @override
   String get onboardingLinkTitle => 'Link code';
@@ -347,10 +347,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingYourName => 'Your name';
 
   @override
-  String get onboardingCallHer => 'Her nickname';
+  String get onboardingCallHer => 'Their nickname';
 
   @override
-  String get onboardingCallHerHelper => 'What do you call her?';
+  String get onboardingCallHerHelper => 'What do you call them?';
 
   @override
   String get onboardingCodeWrong =>
