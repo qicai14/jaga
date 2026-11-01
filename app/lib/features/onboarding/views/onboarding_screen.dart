@@ -12,12 +12,12 @@ import 'steps/buzz_step.dart';
 import 'steps/done_step.dart';
 import 'steps/join_code_step.dart';
 import 'steps/notifications_step.dart';
-import 'widgets/permission_checklist.dart';
 import 'steps/pin_step.dart';
 import 'steps/role_step.dart';
 import 'widgets/forwarding_body.dart';
 import 'widgets/language_list.dart';
 import 'widgets/link_code_body.dart';
+import 'widgets/permission_checklist.dart';
 import 'widgets/pause_token_body.dart';
 
 /// Both setup flows: one page per step, one big button at the bottom.

@@ -66,15 +66,19 @@ class ProtectedHomeScreen extends StatelessWidget {
               SizedBox(height: m.l),
               Semantics(
                 liveRegion: true,
-                button: vm.needsAttention,
                 // The family's way in to fix a permission: still behind the PIN.
                 child: InkWell(
                   onTap: vm.needsAttention
                       ? () => _openSettings(context)
                       : null,
-                  child: Text(
-                    vm.needsAttention ? l.statusNeedsFamily : l.statusProtected,
-                    style: text.displaySmall,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: m.minTarget),
+                    child: Text(
+                      vm.needsAttention
+                          ? l.statusNeedsFamily
+                          : l.statusProtected,
+                      style: text.displaySmall,
+                    ),
                   ),
                 ),
               ),

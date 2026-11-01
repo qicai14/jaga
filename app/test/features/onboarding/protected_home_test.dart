@@ -134,7 +134,14 @@ void main() {
             ..[SetupItem.microphone] = false,
         ),
       );
-      await tester.tap(find.text('Ask your family to check Jaga'));
+      final amber = find.text('Ask your family to check Jaga');
+      expect(
+        tester
+            .getSize(find.ancestor(of: amber, matching: find.byType(InkWell)))
+            .height,
+        greaterThanOrEqualTo(56),
+      );
+      await tester.tap(amber);
       await tester.pumpAndSettle();
       expect(find.text('Enter the co-pilot lock'), findsOneWidget);
       await unlockWith(tester, '1234');
@@ -151,8 +158,22 @@ void main() {
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
       expect(fix, findsNothing);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.text('Jaga is protecting you'), findsOneWidget);
     },
   );
+
+  forEachScale('the amber status with a wrong PIN stays out of Settings', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale, device: FakeDeviceSetupService());
+    await tester.tap(find.text('Ask your family to check Jaga'));
+    await tester.pumpAndSettle();
+    await unlockWith(tester, '1111');
+    expect(find.byType(ProtectedSettingsScreen), findsNothing);
+  });
 
   forEachScale('a long press asks for the co-pilot lock', (
     tester,
