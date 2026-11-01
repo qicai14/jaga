@@ -51,8 +51,9 @@ Future<Rig> pump(
   FakeTimelineService? timeline,
   bool offline = false,
 }) async {
-  final rig = Rig(pauseActive: pauseActive, timeline: timeline);
-  rig.timeline.offline = offline;
+  // Offline before the Rig: the view model starts loading in its constructor.
+  final svc = (timeline ?? fixtureTimelineService())..offline = offline;
+  final rig = Rig(pauseActive: pauseActive, timeline: svc);
   addTearDown(rig.vm.dispose);
   await pumpJaga(tester, rig.screen, scale: scale);
   return rig;

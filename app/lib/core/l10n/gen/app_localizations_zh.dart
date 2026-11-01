@@ -207,10 +207,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingAboutTitle => '关于受保护的人';
 
   @override
-  String get onboardingNameLabel => '对方的名字';
+  String get onboardingNameLabel => '受保护者的名字';
 
   @override
-  String get onboardingNameHelper => '家人怎么称呼对方？';
+  String get onboardingNameHelper => '家人怎么称呼 TA？';
 
   @override
   String get onboardingRegionInfo => '地区：马来西亚。Jaga 使用马来西亚的官方电话号码。';
@@ -279,7 +279,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingPinTitle => '设置家庭协助人锁';
 
   @override
-  String get onboardingPinBody => '只有家人能用这个 PIN 更改 Jaga 的设置，这样来电者就无法哄对方把它关掉。';
+  String get onboardingPinBody => '只有家人能用这个 PIN 更改 Jaga 的设置，这样来电者就无法哄 TA 把它关掉。';
 
   @override
   String get onboardingPinConfirm => '请再输入一次 PIN';
@@ -292,7 +292,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingPauseBody =>
-      '把这个代码交给对方的银行，只需一次。对方转账时，银行会向 Jaga 核实，如果对方正在接听诈骗电话，银行可以暂缓这笔转账。';
+      '把这个代码交给受保护者的银行，只需一次。TA 转账时，银行会向 Jaga 核实，如果 TA 正在接听诈骗电话，银行可以暂缓这笔转账。';
 
   @override
   String get onboardingLinkTitle => '关联码';
@@ -336,10 +336,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingYourName => '您的姓名';
 
   @override
-  String get onboardingCallHer => '您对对方的称呼';
+  String get onboardingCallHer => '您对 TA 的称呼';
 
   @override
-  String get onboardingCallHerHelper => '您怎么称呼对方？';
+  String get onboardingCallHerHelper => '您怎么称呼 TA？';
 
   @override
   String get onboardingCodeWrong => '代码不匹配。请检查这 6 位数字。';

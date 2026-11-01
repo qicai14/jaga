@@ -58,7 +58,7 @@
   "@warningEvidenceLabel": { "description": "Label above the masked quote on the Warning." },
 
   "warningHangUp": "Hang up",
-  "@warningHangUp": { "description": "The big hang-up button on the Warning. She presses it; Jaga never hangs up itself." },
+  "@warningHangUp": { "description": "The big hang-up button on the Warning. The protected user presses it; Jaga never hangs up itself." },
 
   "warningDismissLabel": "This call is fine",
   "@warningDismissLabel": { "description": "Hold-to-dismiss button on the Caution banner and the Warning." },
@@ -144,7 +144,7 @@
   "onboardingNameLabel": "Their name",
   "@onboardingNameLabel": {"description": "Step 3 name field label."},
   "onboardingNameHelper": "What does the family call them?",
-  "@onboardingNameHelper": {"description": "Helper text under the field whose short label is Her name."},
+  "@onboardingNameHelper": {"description": "Helper text under the field whose short label is Their name."},
   "onboardingRegionInfo": "Region: Malaysia. Jaga uses Malaysia's official numbers.",
   "@onboardingRegionInfo": {"description": "Step 3 read-only region row."},
   "onboardingSettingUp": "Setting up…",
@@ -228,7 +228,7 @@
   "onboardingCallHer": "Their nickname",
   "@onboardingCallHer": {"description": "Co-pilot field: the nickname used in alerts, kept on this phone."},
   "onboardingCallHerHelper": "What do you call them?",
-  "@onboardingCallHerHelper": {"description": "Helper text under the field whose short label is Her nickname."},
+  "@onboardingCallHerHelper": {"description": "Helper text under the field whose short label is Their nickname."},
   "onboardingCodeWrong": "That code doesn't match. Check the 6 digits.",
   "@onboardingCodeWrong": {"description": "Link code error."},
   "onboardingCodeExpired": "This code has expired. Ask for a new one.",

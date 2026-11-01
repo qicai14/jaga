@@ -13,7 +13,7 @@ import '../../warning/views/warning_overlay.dart';
 import '../view_models/in_call_view_model.dart';
 import 'widgets/call_toggle.dart';
 
-/// The Jaga line call, after she answered on the phone's own call screen (call.md).
+/// The Jaga line call, after the protected user answered on the phone's own call screen (call.md).
 /// Leaves by itself when the call is gone: at once if there is none, 3 s after it ended.
 class InCallScreen extends StatefulWidget {
   const InCallScreen({super.key, required this.vm, required this.warningVm});

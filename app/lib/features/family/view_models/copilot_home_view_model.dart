@@ -46,14 +46,13 @@ class CopilotHomeViewModel extends ChangeNotifier {
     }
     // The pause status loads on its own: if it fails the pause row stays
     // hidden and the timelines still show.
-    bool? active;
-    try {
-      active = await _pause.isActive();
-    } on NetworkException {
-      active = null;
-    }
+    final pause = _pause.isActive().then<bool?>(
+      (v) => v,
+      onError: (Object _) => null,
+    );
     try {
       final calls = await _timeline.calls();
+      final active = await pause;
       if (_disposed) return;
       _pauseActive = active ?? _pauseActive;
       _calls = calls;

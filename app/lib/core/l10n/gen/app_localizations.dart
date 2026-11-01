@@ -208,7 +208,7 @@ abstract class AppLocalizations {
   /// **'The caller said'**
   String get warningEvidenceLabel;
 
-  /// The big hang-up button on the Warning. She presses it; Jaga never hangs up itself.
+  /// The big hang-up button on the Warning. The protected user presses it; Jaga never hangs up itself.
   ///
   /// In en, this message translates to:
   /// **'Hang up'**
@@ -448,7 +448,7 @@ abstract class AppLocalizations {
   /// **'Their name'**
   String get onboardingNameLabel;
 
-  /// Helper text under the field whose short label is Her name.
+  /// Helper text under the field whose short label is Their name.
   ///
   /// In en, this message translates to:
   /// **'What does the family call them?'**
@@ -700,7 +700,7 @@ abstract class AppLocalizations {
   /// **'Their nickname'**
   String get onboardingCallHer;
 
-  /// Helper text under the field whose short label is Her nickname.
+  /// Helper text under the field whose short label is Their nickname.
   ///
   /// In en, this message translates to:
   /// **'What do you call them?'**
