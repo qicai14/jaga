@@ -39,10 +39,12 @@ class FamilyAlert {
     kind: FamilyAlertKind.fromJson(json['kind'] as String),
   );
 
-  /// The contract's stage enum starts at isolation: `none` is never sent.
+  /// The contract's stage enum starts at isolation: earlier stages are never sent.
   static Stage _stageFrom(String value) {
     final stage = Stage.fromJson(value);
-    if (stage == Stage.none) throw const FormatException('stage none');
+    if (stage.index < Stage.isolation.index) {
+      throw FormatException('stage ${stage.name} is below isolation');
+    }
     return stage;
   }
 

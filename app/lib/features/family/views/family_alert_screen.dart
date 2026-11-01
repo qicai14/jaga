@@ -98,7 +98,8 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
                                   l.familyAlertQuotesLabel,
                                   style: text.bodyMedium,
                                 ),
-                                for (final quote in s.quotes) ...[
+                                // The contract allows two quotes at most.
+                                for (final quote in s.quotes.take(2)) ...[
                                   SizedBox(height: m.s),
                                   QuoteBlock(quote: quote),
                                 ],

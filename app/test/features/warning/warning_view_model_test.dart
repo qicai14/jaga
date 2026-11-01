@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/haptics/fake_buzzer.dart';
+import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/data/repositories/call_risk_repository.dart';
 import 'package:jaga/data/services/attention_service.dart';
@@ -8,6 +9,15 @@ import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
 import 'package:jaga/features/warning/view_models/warning_view_model.dart';
 
 StageUpdate u(String raw) => StageUpdate.parse(raw);
+
+// The model rejects this from the wire, so the view's safety net is fed directly.
+final _highNoCommand = StageUpdate(
+  callId: 'call-1',
+  stage: Stage.money,
+  risk: Risk.high,
+  at: DateTime.utc(2026, 10, 27, 10, 1, 30),
+  source: Source.rules,
+);
 
 void main() {
   late FakeStageStreamService stream;
@@ -60,7 +70,7 @@ void main() {
   test(
     'high with no command is still a Warning (the view shows the fallback)',
     () {
-      stream.emit(u(stageHighNoCommand));
+      stream.emit(_highNoCommand);
       expect(layer(), WarningLayer.warning);
       expect(vm.state.content.command, isNull);
     },

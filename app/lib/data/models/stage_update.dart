@@ -34,17 +34,34 @@ class StageUpdate {
     required this.source,
   });
 
-  factory StageUpdate.fromJson(Map<String, dynamic> json) => StageUpdate(
-    callId: json['callId'] as String,
-    stage: Stage.fromJson(json['stage'] as String),
-    risk: Risk.fromJson(json['risk'] as String),
-    at: DateTime.parse(json['at'] as String),
-    claimedAgency: json['claimedAgency'] as String?,
-    command: json['command'] as String?,
-    counterMove: json['counterMove'] as String?,
-    evidence: [...?(json['evidence'] as List?)?.cast<String>()],
-    source: Source.fromJson(json['source'] as String),
-  );
+  /// Enforces the contract's if/then/else: high needs a command and counter-move,
+  /// anything else must carry neither.
+  factory StageUpdate.fromJson(Map<String, dynamic> json) {
+    final risk = Risk.fromJson(json['risk'] as String);
+    final command = json['command'] as String?;
+    final counterMove = json['counterMove'] as String?;
+    if (risk == Risk.high) {
+      if (command == null ||
+          command.isEmpty ||
+          counterMove == null ||
+          counterMove.isEmpty) {
+        throw const FormatException('high risk needs command and counterMove');
+      }
+    } else if (command != null || counterMove != null) {
+      throw const FormatException('command and counterMove only at high risk');
+    }
+    return StageUpdate(
+      callId: json['callId'] as String,
+      stage: Stage.fromJson(json['stage'] as String),
+      risk: risk,
+      at: DateTime.parse(json['at'] as String),
+      claimedAgency: json['claimedAgency'] as String?,
+      command: command,
+      counterMove: counterMove,
+      evidence: [...?(json['evidence'] as List?)?.cast<String>()],
+      source: Source.fromJson(json['source'] as String),
+    );
+  }
 
   factory StageUpdate.parse(String raw) =>
       StageUpdate.fromJson(jsonDecode(raw) as Map<String, dynamic>);

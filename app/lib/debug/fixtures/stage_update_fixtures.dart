@@ -33,13 +33,6 @@ const stageHighCredentials = r'''{
   "source": "spark", "at": "2026-10-27T10:01:10Z"
 }''';
 
-// Malformed at high in v1 (command required): kept to test the safety net.
-const stageHighNoCommand = r'''{
-  "callId": "call-1", "stage": "money", "risk": "high",
-  "claimedAgency": null, "command": null, "counterMove": null,
-  "evidence": [], "source": "rules", "at": "2026-10-27T10:01:30Z"
-}''';
-
 const stageHighLongText = r'''{
   "callId": "call-1", "stage": "money", "risk": "high",
   "claimedAgency": "Bank Negara",

@@ -44,6 +44,16 @@ void main() {
       );
     });
 
+    test('stages below isolation are rejected', () {
+      for (final s in ['pretext', 'authority', 'fear']) {
+        expect(
+          () => alert(familyIsolation.replaceAll('isolation', s)),
+          throwsFormatException,
+          reason: s,
+        );
+      }
+    });
+
     test('toJson round-trips through parse', () {
       final a = alert(familyMayBeGenuine);
       expect(FamilyAlert.fromJson(a.toJson()), a);

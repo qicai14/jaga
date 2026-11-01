@@ -29,4 +29,46 @@ void main() {
       throwsStateError,
     );
   });
+
+  group('contract if/then/else', () {
+    String update(String risk, String extra) =>
+        '{"callId":"c","stage":"fear","risk":"$risk","source":"rules",'
+        '"at":"2026-10-27T10:00:00Z"$extra}';
+    const both = ',"command":"Letak telefon.","counterMove":"Call 997."';
+
+    test('high needs a non-empty command and counterMove', () {
+      expect(StageUpdate.parse(update('high', both)).command, isNotNull);
+      for (final extra in [
+        '',
+        ',"counterMove":"Call 997."',
+        ',"command":"Letak telefon."',
+        ',"command":"Letak telefon.","counterMove":""',
+        ',"command":null,"counterMove":null',
+      ]) {
+        expect(
+          () => StageUpdate.parse(update('high', extra)),
+          throwsFormatException,
+          reason: extra,
+        );
+      }
+    });
+
+    test('low and medium carry no command or counterMove', () {
+      for (final risk in ['low', 'medium']) {
+        expect(
+          () => StageUpdate.parse(update(risk, ',"command":"x"')),
+          throwsFormatException,
+        );
+        expect(
+          () => StageUpdate.parse(update(risk, both)),
+          throwsFormatException,
+        );
+        expect(
+          StageUpdate.parse(update(risk, ',"command":null,"counterMove":null'))
+              .command,
+          isNull,
+        );
+      }
+    });
+  });
 }

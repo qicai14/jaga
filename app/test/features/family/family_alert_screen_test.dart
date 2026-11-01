@@ -121,6 +121,19 @@ void main() {
     expect(rig.dialer.dialed, [null]);
   });
 
+  forEachScale('shows at most two quotes (contract maxItems)', (
+    tester,
+    scale,
+  ) async {
+    final raw = familyMoney.replaceFirst(
+      RegExp(r'"quotes":\s*\[[^\]]*\]'),
+      '"quotes":["a","b","c"]',
+    );
+    expect(raw, contains('"c"'));
+    await pump(tester, scale, raw);
+    expect(find.byType(QuoteBlock), findsNWidgets(2));
+  });
+
   forEachScale('4 no agency, no quotes: those blocks are gone', (
     tester,
     scale,
@@ -290,11 +303,7 @@ void main() {
       await pumpJaga(tester, Builder(builder: band), scale: scale);
       expect(
         tester.getSemantics(find.text('Head')),
-        matchesSemantics(
-          label: 'Head',
-          isHeader: true,
-          isLiveRegion: true,
-        ),
+        matchesSemantics(label: 'Head', isHeader: true, isLiveRegion: true),
       );
       handle.dispose();
     });

@@ -147,7 +147,7 @@ Future<AppDependencies> createDependencies() async {
 
 /// Signs in anonymously without holding up startup; a failure is logged and
 /// retried by the next `ensureSignedIn`. Debug builds also log the uid and
-/// FCM token, for checking Firebase on a device.
+/// whether an FCM token exists, for checking Firebase on a device.
 Future<void> _signIn(AuthService auth, FcmAlertPushService fcm) async {
   try {
     final uid = await auth.ensureSignedIn();
@@ -157,9 +157,12 @@ Future<void> _signIn(AuthService auth, FcmAlertPushService fcm) async {
   }
   if (!kDebugMode) return;
   try {
-    debugPrint('Jaga FCM token: ${await fcm.token()}');
+    // Never print the token itself.
+    debugPrint(
+      'Jaga FCM token ${await fcm.token() == null ? 'missing' : 'ready'}',
+    );
   } on Object catch (e) {
-    debugPrint('Jaga FCM token failed: $e');
+    debugPrint('Jaga FCM token failed: ${e.runtimeType}');
   }
 }
 

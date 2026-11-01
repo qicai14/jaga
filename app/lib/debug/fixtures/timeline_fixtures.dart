@@ -99,7 +99,7 @@ List<AlertedCall> manyFixtureCalls() => [
 ];
 
 Map<String, List<TimelineEvent>> fixtureEvents() => {
-  'call-1': _events([stageLow, stageMedium, stageHigh, stageHighNoCommand]),
+  'call-1': _events([stageLow, stageMedium, stageHigh, stageHighCredentials]),
   'call-2': _events([timelineCall2Authority, timelineCall2Credentials]),
   'call-5': _events([
     timelineLongPretext,

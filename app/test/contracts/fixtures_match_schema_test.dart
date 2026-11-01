@@ -57,6 +57,34 @@ void main() {
     }
   });
 
+  // Invalid fixtures the model cannot see: extra properties, or maxItems
+  // (the screen clamps quotes to two instead).
+  const modelIgnores = {
+    'stage-update/counter-move-phrase-id.json',
+    'family-alert/three-quotes.json',
+    'family-alert/transcript-field.json',
+  };
+  test('the model rejects every invalid fixture it can see', () {
+    var checked = 0;
+    for (final f in [
+      ..._json('../contracts/fixtures/invalid/stage-update'),
+      ..._json('../contracts/fixtures/invalid/family-alert'),
+    ]) {
+      final name = f.path.replaceAll(r'\', '/').split('/invalid/').last;
+      if (modelIgnores.contains(name)) continue;
+      final raw = f.readAsStringSync();
+      expect(
+        () => name.startsWith('family-alert')
+            ? FamilyAlert.parse(raw)
+            : StageUpdate.parse(raw),
+        throwsA(anything),
+        reason: name,
+      );
+      checked++;
+    }
+    expect(checked, 6);
+  });
+
   group('family-alert', () {
     final familySchema = JsonSchema.create(
       jsonDecode(
