@@ -171,31 +171,42 @@ class _InCallScreenState extends State<InCallScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _info(context, status, time, failed),
-                              if (!over) ...[
-                                SizedBox(height: m.l),
-                                CallToggle(
-                                  icon: vm.muted ? Icons.mic_off : Icons.mic,
-                                  label: vm.muted ? l.callMuted : l.callMute,
-                                  trailing: vm.muted ? '' : l.callMuteOff,
-                                  on: vm.muted,
-                                  alarm: true,
-                                  onPressed: vm.controlsEnabled
-                                      ? vm.toggleMute
-                                      : null,
+                              // One block, so spaceBetween pushes Mute and Speaker
+                              // down together onto Hang up (call.md: Spacer, then the controls).
+                              if (!over)
+                                Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    SizedBox(height: m.l),
+                                    CallToggle(
+                                      icon: vm.muted
+                                          ? Icons.mic_off
+                                          : Icons.mic,
+                                      label: vm.muted
+                                          ? l.callMuted
+                                          : l.callMute,
+                                      trailing: vm.muted ? '' : l.callMuteOff,
+                                      on: vm.muted,
+                                      alarm: true,
+                                      onPressed: vm.controlsEnabled
+                                          ? vm.toggleMute
+                                          : null,
+                                    ),
+                                    SizedBox(height: m.m),
+                                    CallToggle(
+                                      icon: Icons.volume_up,
+                                      label: l.callSpeaker,
+                                      trailing: vm.speakerOn
+                                          ? l.callSpeakerOn
+                                          : l.callSpeakerOff,
+                                      on: vm.speakerOn,
+                                      onPressed: vm.controlsEnabled
+                                          ? vm.toggleSpeaker
+                                          : null,
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(height: m.m),
-                                CallToggle(
-                                  icon: Icons.volume_up,
-                                  label: l.callSpeaker,
-                                  trailing: vm.speakerOn
-                                      ? l.callSpeakerOn
-                                      : l.callSpeakerOff,
-                                  on: vm.speakerOn,
-                                  onPressed: vm.controlsEnabled
-                                      ? vm.toggleSpeaker
-                                      : null,
-                                ),
-                              ],
                             ],
                           ),
                         ),

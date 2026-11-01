@@ -93,6 +93,19 @@ void main() {
     }
   });
 
+  testWidgets('1 active: Mute and Speaker sit together just above Hang up', (
+    tester,
+  ) async {
+    await pump(tester, active());
+    final toggles = find.byType(CallToggle);
+    final mute = tester.getRect(toggles.at(0));
+    final speaker = tester.getRect(toggles.at(1));
+    final hang = tester.getRect(find.byType(BigButton));
+    // The free space goes above the controls, not between Mute and the rest.
+    expect(speaker.top - mute.bottom, lessThanOrEqualTo(24));
+    expect(hang.top - speaker.bottom, lessThanOrEqualTo(48));
+  });
+
   forEachScale('2 connecting: mute and speaker disabled, Hang up enabled', (
     tester,
     scale,
