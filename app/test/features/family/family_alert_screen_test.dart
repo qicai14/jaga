@@ -290,7 +290,11 @@ void main() {
       await pumpJaga(tester, Builder(builder: band), scale: scale);
       expect(
         tester.getSemantics(find.text('Head')),
-        matchesSemantics(label: 'Head', isHeader: true, isLiveRegion: true),
+        matchesSemantics(
+          label: 'Head',
+          isHeader: true,
+          isLiveRegion: true,
+        ),
       );
       handle.dispose();
     });

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 void registerFontLicense() {
   LicenseRegistry.addLicense(() async* {
     final text = await rootBundle.loadString('assets/fonts/OFL.txt');
-    yield LicenseEntryWithLineBreaks(['Noto Sans, Noto Sans SC'], text);
+    yield LicenseEntryWithLineBreaks(
+        ['Noto Sans, Noto Sans SC'], text);
   });
 }
