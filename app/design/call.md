@@ -86,6 +86,12 @@ speaker state explicitly at answer.
   mic stays dead until she taps it. Build order in #12: (1) try `startActivity` straight from the answer receiver and check
   logcat for a BAL allow/deny line; (2) if denied, ask for "Display over other apps" (`SYSTEM_ALERT_WINDOW`), which permits
   background activity starts, as one more row in step 4; (3) keep the FSI for the lock screen. Re-test with a real call.
+- **Re-test with this build (2 Nov, 2 real calls, emulator, Jaga in the background, "Display over other apps" on):** the
+  direct start is allowed (`BAL_ALLOW_SAW_PERMISSION`), the in-call screen opens at answer, and there's no silencing line.
+  The recording's loudness was rms 5264, in line with the foreground calls (4873 to 5593), so the mic is live. The BAL log
+  line is removed. Registration with the server's incoming-only token works (ADR 0009, first unverified point).
+  **Still open:** with the emulator asleep (screen off, light doze) the call push never arrived and nothing rang. Not yet
+  known whether that is the emulator's push delivery or ours; to check on a real phone.
 - If FSI is denied (step 4 row c red), the dialer's own in-call screen stays; the Warning then uses the warning.md fallback.
 - The plugin's own foreground notification ("Voice Calls", English, tap target broken) can't change without a fork: noted.
 
@@ -96,7 +102,7 @@ Xiaomi autostart. Continue needs every row green.
 | Row | Check | Fix |
 |---|---|---|
 | Phone calls (`SetupItem.phoneCalls`) | `READ_PHONE_STATE`, `READ_PHONE_NUMBERS`, `CALL_PHONE` all granted | one request for the three (same Phone group: one system dialog); permanently denied: app details + `onboardingPermOpenSettingsHelp` |
-| Calling account | `isPhoneAccountEnabled()` | disabled with `onboardingPermCallingAccountFirst` until Phone calls is green; then `registerPhoneAccount()` (opens the calling-accounts page). Still red on resume: show `onboardingPermCallingAccountHelp`; intent fails (Samsung): `openPhoneAccountSettings()`, then app details |
+| Calling account | `isPhoneAccountEnabled()` | disabled with `onboardingPermCallingAccountFirst` until Phone calls is green; then `registerPhoneAccount()`; if the account is still off, `openPhoneAccountSettings()` (registering alone leaves it off on a system-managed ConnectionService). Still red on resume: show `onboardingPermCallingAccountHelp`; intent fails (Samsung): `openPhoneAccountSettings()`, then app details |
 Recovery: rows re-check on resume as today. **Status screen:** any red row → the existing `needsAttention` state (amber,
 `statusNeedsFamily`); no new row on the home screen (she can't fix it). **Settings** (behind the PIN) gains a first section
 `onboardingPermissionsTitle` with the same rows, so the co-pilot fixes it there. Keep `rejectCallOnNoPermissions` default

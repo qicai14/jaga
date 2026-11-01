@@ -22,11 +22,6 @@ object CallLauncher {
     const val NOTIFICATION_ID = 7201
     private const val TAG = "JagaCallLauncher"
 
-    /** Set by [MainActivity]; read only to log whether Android let the direct start through. */
-    // TODO: remove after the real-call trial (evidence for the bring-to-front log).
-    @Volatile
-    var activityResumed = false
-
     /** True from answer to the end of the call; [MainActivity] drops its lock-screen access when it is false. */
     @Volatile
     var callLive = false
@@ -44,22 +39,16 @@ object CallLauncher {
             Log.w(TAG, "direct startActivity threw: $e")
         }
         postFullScreen(context, open)
-        // startActivity never throws when Android blocks a background start, so look again shortly.
-        Handler(Looper.getMainLooper()).postDelayed({
-            overlay?.let {
+        // The overlay only needs to exist while Android decides on the start.
+        overlay?.let {
+            Handler(Looper.getMainLooper()).postDelayed({
                 try {
                     context.getSystemService(WindowManager::class.java).removeView(it)
                 } catch (e: RuntimeException) {
                     Log.w(TAG, "overlay window already gone: $e")
                 }
-            }
-            Log.i(
-                TAG,
-                (if (activityResumed) "BAL direct start ALLOWED: activity is in front"
-                else "BAL direct start DENIED: activity not in front after 1.5 s") +
-                    " (overlay permission: ${overlay != null})",
-            )
-        }, 1500)
+            }, 1500)
+        }
     }
 
     /** A 1 px invisible window, only if the user allowed "Display over other apps". */

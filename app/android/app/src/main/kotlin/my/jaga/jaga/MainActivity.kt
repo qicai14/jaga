@@ -31,7 +31,6 @@ class MainActivity : FlutterActivity() {
 
     override fun onResume() {
         super.onResume()
-        CallLauncher.activityResumed = true
         CallLauncher.cancelNotification(this)
     }
 
@@ -39,11 +38,6 @@ class MainActivity : FlutterActivity() {
         // Opened for a call that never reached the in-call screen: don't keep lighting the lock screen.
         if (!CallLauncher.callLive) setLockScreenAccess(false)
         super.onStop()
-    }
-
-    override fun onPause() {
-        CallLauncher.activityResumed = false
-        super.onPause()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
