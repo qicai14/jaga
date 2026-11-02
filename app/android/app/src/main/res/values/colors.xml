@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Jaga tokens (design-system.md): guarded teal and paper. -->
+    <color name="jaga_guarded">#0B5D4F</color>
+    <color name="jaga_paper">#FBF8F2</color>
+</resources>

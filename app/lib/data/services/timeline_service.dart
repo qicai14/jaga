@@ -1,0 +1,129 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import '../models/alerted_call.dart';
+import '../models/stage.dart';
+import 'copilot_http.dart';
+import 'network_exception.dart';
+
+/// The stage timelines the server keeps for alerted calls (ADR 0008).
+/// Failures throw [NetworkException].
+abstract class TimelineService {
+  /// Calls the family was alerted about, newest first. Genuine calls are never listed.
+  Future<List<AlertedCall>> calls();
+
+  Future<List<TimelineEvent>> events(String callId);
+
+  /// Deletes a call's timeline. It can't be brought back.
+  Future<void> delete(String callId);
+}
+
+class HttpTimelineService implements TimelineService {
+  HttpTimelineService({
+    required Uri baseUrl,
+    required String token,
+    http.Client? client,
+  }) : _api = CopilotApi(baseUrl, token, client);
+
+  final CopilotApi _api;
+
+  @override
+  Future<List<AlertedCall>> calls() async {
+    final res = await _api.send('GET', '/timelines');
+    if (res.statusCode != 200) throw _api.refused(res);
+    try {
+      return [
+        for (final j in jsonDecode(res.body) as List)
+          if (_reachedIsolation(j as Map<String, dynamic>))
+            AlertedCall.fromJson(j),
+      ];
+    } on Object {
+      throw const NetworkException();
+    }
+  }
+
+  /// A call that never got past pretext, authority or fear was not alerted
+  /// (the family-alert stages start at isolation), so it is not listed.
+  static bool _reachedIsolation(Map<String, dynamic> timeline) =>
+      (timeline['events'] as List).any(
+        (e) =>
+            Stage.fromJson((e as Map)['stage'] as String).index >=
+            Stage.isolation.index,
+      );
+
+  /// A 404 is an error: a wrong token gets the same bare 404 (ADR 0008).
+  @override
+  Future<List<TimelineEvent>> events(String callId) async {
+    final res = await _api.send(
+      'GET',
+      '/timelines/${Uri.encodeComponent(callId)}',
+    );
+    if (res.statusCode != 200) throw _api.refused(res);
+    try {
+      final json = jsonDecode(res.body) as Map<String, dynamic>;
+      return [
+        for (final e in json['events'] as List)
+          TimelineEvent.fromJson(e as Map<String, dynamic>),
+      ];
+    } on Object {
+      throw const NetworkException();
+    }
+  }
+
+  /// A 404 is an error: a wrong token gets the same bare 404 (ADR 0008).
+  @override
+  Future<void> delete(String callId) async {
+    final res = await _api.send(
+      'DELETE',
+      '/timelines/${Uri.encodeComponent(callId)}',
+    );
+    if (res.statusCode != 204) throw _api.refused(res);
+  }
+}
+
+/// For tests and the debug gallery.
+class FakeTimelineService implements TimelineService {
+  FakeTimelineService({
+    List<AlertedCall> calls = const [],
+    Map<String, List<TimelineEvent>> events = const {},
+  }) : _calls = [...calls],
+       _events = {...events};
+
+  final List<AlertedCall> _calls;
+  final Map<String, List<TimelineEvent>> _events;
+
+  /// Every call throws [NetworkException], to test failures.
+  bool offline = false;
+
+  /// [delete] waits for this first, to show the busy state.
+  Future<void>? hold;
+
+  /// Ids passed to [delete], in order.
+  final deleted = <String>[];
+
+  void _reach() {
+    if (offline) throw const NetworkException();
+  }
+
+  @override
+  Future<List<AlertedCall>> calls() async {
+    _reach();
+    return [..._calls];
+  }
+
+  @override
+  Future<List<TimelineEvent>> events(String callId) async {
+    _reach();
+    return [...?_events[callId]];
+  }
+
+  @override
+  Future<void> delete(String callId) async {
+    _reach();
+    await hold;
+    deleted.add(callId);
+    _calls.removeWhere((c) => c.callId == callId);
+    _events.remove(callId);
+  }
+}

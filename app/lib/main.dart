@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(const JagaApp());
+import 'app.dart';
+import 'bootstrap.dart';
+import 'core/theme/font_license.dart';
 
-class JagaApp extends StatelessWidget {
-  const JagaApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Jaga',
-      home: Scaffold(body: Center(child: Text('Jaga'))),
-    );
-  }
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicense();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  runApp(JagaApp(deps: await createDependencies()));
 }

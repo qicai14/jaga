@@ -1,0 +1,4 @@
+tags:
+  screenshots:
+    # Slow and writes files: run with `fvm flutter test --run-skipped -t screenshots`.
+    skip: "screenshots are opt-in: use --run-skipped -t screenshots"

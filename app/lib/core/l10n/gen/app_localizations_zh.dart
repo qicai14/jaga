@@ -1,0 +1,559 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Chinese (`zh`).
+class AppLocalizationsZh extends AppLocalizations {
+  AppLocalizationsZh([String locale = 'zh']) : super(locale);
+
+  @override
+  String get appTitle => 'Jaga';
+
+  @override
+  String get statusProtected => 'Jaga 正在保护您';
+
+  @override
+  String get statusPauseActive => 'Jaga 暂停已开启';
+
+  @override
+  String get callReconnecting => '正在重新连接';
+
+  @override
+  String get commonHoldHint => '按住 2 秒';
+
+  @override
+  String get commonTapAgainHint => '再点一次以确认';
+
+  @override
+  String get stageLabelPretext => '给出了来电理由';
+
+  @override
+  String get stageLabelAuthority => '自称是官员';
+
+  @override
+  String get stageLabelFear => '让您感到害怕';
+
+  @override
+  String get stageLabelIsolation => '要求您保密';
+
+  @override
+  String get stageLabelHandoff => '转给了另一个人';
+
+  @override
+  String get stageLabelMoney => '要求转账';
+
+  @override
+  String get stageLabelCredentials => '索要验证码或密码';
+
+  @override
+  String stageStepSemantics(int step, int total, String label) {
+    return '第 $step 步，共 $total 步：$label';
+  }
+
+  @override
+  String get cautionBannerText => '这通电话有诈骗迹象';
+
+  @override
+  String get warningSemanticsLabel => '诈骗警告';
+
+  @override
+  String get warningFromJaga => '来自 Jaga 的诈骗警告';
+
+  @override
+  String get warningEvidenceLabel => '来电者说';
+
+  @override
+  String get warningHangUp => '挂断';
+
+  @override
+  String get warningDismissLabel => '这通电话没问题';
+
+  @override
+  String get warningDismissHint => '按住 2 秒';
+
+  @override
+  String get warningDismissConfirmHint => '再点一次，确认这通电话没问题';
+
+  @override
+  String get warningCommandFallback => 'Letak telefon. Hang up.';
+
+  @override
+  String get familyNotifChannelAlerts => '诈骗警报';
+
+  @override
+  String get familyNotifChannelUpdates => '通话更新';
+
+  @override
+  String familyNotifTitle(String name) {
+    return '$name可能正在接听诈骗电话';
+  }
+
+  @override
+  String familyNotifBody(String stage) {
+    return '$stage。';
+  }
+
+  @override
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage。自称来自$agency。';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return '$name的来电可能是真实的';
+  }
+
+  @override
+  String familyNotifCallAction(String name) {
+    return '致电$name';
+  }
+
+  @override
+  String familyAlertHeadline(String name) {
+    return '$name可能正在接听诈骗电话';
+  }
+
+  @override
+  String familyAlertTime(String time) {
+    return '警报时间 $time';
+  }
+
+  @override
+  String get familyAlertAgencyLabel => '来电者自称来自';
+
+  @override
+  String get familyAlertQuotesLabel => '来电者说';
+
+  @override
+  String familyAlertCall(String name) {
+    return '致电$name';
+  }
+
+  @override
+  String get familyAlertOpenDialer => '打开电话应用';
+
+  @override
+  String familyGenuineHeadline(String name) {
+    return '$name的来电可能是真实的';
+  }
+
+  @override
+  String familyGenuineBody(String name) {
+    return 'Jaga 现在认为这通电话不太可能是诈骗。您仍可以致电$name确认。';
+  }
+
+  @override
+  String get familyAlertCallShort => '致电';
+
+  @override
+  String get familyAlertDialFailed => '无法打开电话应用。';
+
+  @override
+  String get commonCopy => '复制';
+
+  @override
+  String get commonCopied => '已复制';
+
+  @override
+  String get commonShare => '分享';
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get commonSkip => '跳过';
+
+  @override
+  String get commonDelete => '删除';
+
+  @override
+  String commonPinEntered(int count, int total) {
+    return '已输入 $count 位，共 $total 位';
+  }
+
+  @override
+  String onboardingStepOf(int step, int total) {
+    return '第 $step 步，共 $total 步';
+  }
+
+  @override
+  String get onboardingContinue => '继续';
+
+  @override
+  String get onboardingRoleTitle => '这部手机是给谁用的？';
+
+  @override
+  String get onboardingRoleProtected => '受 Jaga 保护的人';
+
+  @override
+  String get onboardingRoleProtectedBody => '打给这部手机的电话会在 Jaga 里响铃。';
+
+  @override
+  String get onboardingRoleCopilot => '家庭协助人';
+
+  @override
+  String get onboardingRoleCopilotBody => '接收您所照顾之人的警报。';
+
+  @override
+  String get onboardingLanguageTitle => '警告应使用哪种语言？';
+
+  @override
+  String get onboardingAppLanguageTitle => '选择您的语言';
+
+  @override
+  String get onboardingAboutTitle => '关于受保护的人';
+
+  @override
+  String get onboardingNameLabel => '受保护者的名字';
+
+  @override
+  String get onboardingNameHelper => '家人怎么称呼 TA？';
+
+  @override
+  String get onboardingRegionInfo => '地区：马来西亚。Jaga 使用马来西亚的官方电话号码。';
+
+  @override
+  String get onboardingSettingUp => '正在设置…';
+
+  @override
+  String get onboardingNetworkError => '无法连接 Jaga。请检查网络后重试。';
+
+  @override
+  String get onboardingPermissionsTitle => '手机权限';
+
+  @override
+  String get onboardingFix => '设置';
+
+  @override
+  String get onboardingFixedIt => '我已完成';
+
+  @override
+  String get onboardingPermNotifications => '通知';
+
+  @override
+  String get onboardingPermNotificationsWhy => '显示警报。';
+
+  @override
+  String get onboardingPermMicrophone => '麦克风';
+
+  @override
+  String get onboardingPermMicrophoneWhy => '让您能通过 Jaga 通话。';
+
+  @override
+  String get onboardingPermFullScreen => '全屏警报';
+
+  @override
+  String get onboardingPermFullScreenWhy => '让警告占满整个屏幕。';
+
+  @override
+  String get onboardingPermCallingAccount => '通话账户';
+
+  @override
+  String get onboardingPermCallingAccountWhy => '让电话在 Jaga 里响铃。';
+
+  @override
+  String get onboardingPermAutostart => '自动启动';
+
+  @override
+  String get onboardingPermAutostartWhy => '让 Jaga 在小米手机上保持运行。';
+
+  @override
+  String get onboardingForwardTitle => '将来电转接到 Jaga';
+
+  @override
+  String get onboardingForwardBody => '拨一次这个代码。之后打给这部手机的电话会在 Jaga 里响铃。';
+
+  @override
+  String get onboardingDialNow => '立即拨号';
+
+  @override
+  String get onboardingCheckForwarding => '检查转接';
+
+  @override
+  String get onboardingForwardNoLine => 'Jaga 线路尚未设置，所以没有可拨的代码。您可以继续。';
+
+  @override
+  String get onboardingForwardUndo => '以后要取消，请拨 ##21#，或在设置中使用“关闭转接”。';
+
+  @override
+  String get settingsTurnOffForwarding => '关闭转接';
+
+  @override
+  String get onboardingForwardDone => '我已拨号';
+
+  @override
+  String get onboardingPinTitle => '设置家庭协助人锁';
+
+  @override
+  String get onboardingPinBody => '只有家人能用这个 PIN 更改 Jaga 的设置，这样来电者就无法哄 TA 把它关掉。';
+
+  @override
+  String get onboardingPinConfirm => '请再输入一次 PIN';
+
+  @override
+  String get onboardingPinMismatch => '两次 PIN 不一致。请重新设置。';
+
+  @override
+  String get onboardingPauseTitle => '暂停令牌';
+
+  @override
+  String get onboardingPauseBody =>
+      '把这个代码交给受保护者的银行，只需一次。TA 转账时，银行会向 Jaga 核实，如果 TA 正在接听诈骗电话，银行可以暂缓这笔转账。';
+
+  @override
+  String get onboardingLinkTitle => '关联码';
+
+  @override
+  String get onboardingLinkBody => '最多 3 位家人可以在自己的 Jaga 应用中输入此代码。';
+
+  @override
+  String onboardingLinkShareText(String code, String name) {
+    return '打开 Jaga，选择“家庭协助人”，输入 $code，即可接收关于$name的警报。';
+  }
+
+  @override
+  String get onboardingJoined => '已加入';
+
+  @override
+  String get onboardingJoinedNone => '暂无';
+
+  @override
+  String get onboardingBuzzTitle => '感受震动';
+
+  @override
+  String get onboardingBuzzBody => '通话中手机这样震动时，请看屏幕。';
+
+  @override
+  String get onboardingBuzzButton => '感受震动';
+
+  @override
+  String get onboardingDoneProtected => 'Jaga 已设置好。';
+
+  @override
+  String get onboardingFinish => '完成';
+
+  @override
+  String get onboardingJoinCode => '输入 6 位代码';
+
+  @override
+  String get onboardingNamesTitle => '几项信息';
+
+  @override
+  String get onboardingYourName => '您的姓名';
+
+  @override
+  String get onboardingCallHer => '您对 TA 的称呼';
+
+  @override
+  String get onboardingCallHerHelper => '您怎么称呼 TA？';
+
+  @override
+  String get onboardingCodeWrong => '代码不匹配。请检查这 6 位数字。';
+
+  @override
+  String get onboardingCodeExpired => '此代码已过期。请索取新的代码。';
+
+  @override
+  String get onboardingCopilotsFull => '已关联 3 位家庭协助人。需要有人解除关联，您才能加入。';
+
+  @override
+  String get onboardingNotifTitle => '允许警报';
+
+  @override
+  String get onboardingNotifBody => '当您照顾的人可能正在接听诈骗电话时，Jaga 会在这里向您发送警报。';
+
+  @override
+  String get onboardingNotNow => '以后再说';
+
+  @override
+  String onboardingDoneCopilot(String name) {
+    return '您将收到关于$name的警报。';
+  }
+
+  @override
+  String get statusFamilyLabel => '您的家人';
+
+  @override
+  String get statusFamilyNone => '尚未关联家人';
+
+  @override
+  String get statusNeedsFamily => '请让家人检查 Jaga';
+
+  @override
+  String get settingsTitle => '设置';
+
+  @override
+  String get settingsPinTitle => '输入家庭协助人锁';
+
+  @override
+  String get settingsPinWrong => 'PIN 错误';
+
+  @override
+  String get settingsPinLocked => '尝试次数过多。请等待 5 分钟。';
+
+  @override
+  String get settingsReset => '按住以重置 Jaga';
+
+  @override
+  String get familyHomeProtected => '受保护';
+
+  @override
+  String get familyClearPause => '解除 Jaga 暂停';
+
+  @override
+  String familyClearPauseStatement(String name) {
+    return '我已和$name通过话，确认这笔转账是真实的。';
+  }
+
+  @override
+  String get familyClearPauseHold => '按住以解除 Jaga 暂停';
+
+  @override
+  String get familyPauseCleared => '已解除 Jaga 暂停';
+
+  @override
+  String get familyClearPauseError => '无法解除 Jaga 暂停。请检查网络后重试。';
+
+  @override
+  String get familyCallsTitle => '已发出警报的来电';
+
+  @override
+  String get familyCallsEmpty => '过去 30 天没有发出警报的来电。';
+
+  @override
+  String get familyCallsError => '无法加载来电。请检查网络。';
+
+  @override
+  String get commonTryAgain => '重试';
+
+  @override
+  String familyTimelineTitle(String date) {
+    return '$date的来电';
+  }
+
+  @override
+  String get familyTimelineError => '无法加载此时间线。请检查网络。';
+
+  @override
+  String get familyTimelineRiskMedium => '已显示提醒';
+
+  @override
+  String get familyTimelineRiskHigh => '已显示警告';
+
+  @override
+  String get familyTimelineRiskLow => '风险已降回较低';
+
+  @override
+  String familyCallHotline(String hotline) {
+    return '拨打 $hotline 举报';
+  }
+
+  @override
+  String get familyTimelineDelete => '删除';
+
+  @override
+  String get familyTimelineDeleteConfirm => '删除此时间线？删除后无法恢复。';
+
+  @override
+  String get familyTimelineDeleted => '时间线已删除';
+
+  @override
+  String get familyTimelineDeleteError => '无法删除时间线。请检查网络后重试。';
+
+  @override
+  String familyUnlink(String name) {
+    return '从此手机移除$name';
+  }
+
+  @override
+  String familyUnlinkConfirm(String name) {
+    return '从此手机移除$name？可用新代码重新关联。';
+  }
+
+  @override
+  String get familyUnlinkAction => '移除';
+
+  @override
+  String familyUnlinkError(String name) {
+    return '无法移除$name。请重试。';
+  }
+
+  @override
+  String get callProtecting => '正在保护这通电话';
+
+  @override
+  String get callConnecting => '正在接通…';
+
+  @override
+  String get callReconnectingAudio => '正在重新连接通话…';
+
+  @override
+  String get callEnded => '通话已结束';
+
+  @override
+  String get callDone => '完成';
+
+  @override
+  String get callFailed => '电话没有接通';
+
+  @override
+  String get callFailedBody => '如果有要紧事，对方会再打来。';
+
+  @override
+  String get callHangUp => '挂断';
+
+  @override
+  String get callMute => '静音';
+
+  @override
+  String get callMuteOff => '关';
+
+  @override
+  String get callMuted => '已静音：对方听不到你';
+
+  @override
+  String get callUnmuted => '已取消静音';
+
+  @override
+  String get callSpeaker => '扬声器';
+
+  @override
+  String get callSpeakerOn => '开';
+
+  @override
+  String get callSpeakerOff => '关';
+
+  @override
+  String callTimerSemantics(String time) {
+    return '通话时间 $time';
+  }
+
+  @override
+  String get callUnknownCaller => '未知号码';
+
+  @override
+  String get onboardingPermPhone => '电话';
+
+  @override
+  String get onboardingPermPhoneWhy => '让 Jaga 接听和挂断电话。';
+
+  @override
+  String get onboardingPermCallingAccountFirst => '请先允许电话权限。';
+
+  @override
+  String get onboardingPermCallingAccountHelp => '在列表中打开 Jaga，然后返回。';
+
+  @override
+  String onboardingPermOpenSettingsHelp(String item) {
+    return '打开“权限”，允许$item，然后返回。';
+  }
+
+  @override
+  String get onboardingPermOverlay => '显示在其他应用上层';
+
+  @override
+  String get onboardingPermOverlayWhy => '接听电话时，让 Jaga 显示在最前面。';
+}

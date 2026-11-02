@@ -1,0 +1,312 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show kReleaseMode;
+import 'package:flutter/material.dart';
+
+import 'core/config/build_config.dart';
+import 'core/haptics/buzzer.dart';
+import 'core/l10n/gen/app_localizations.dart';
+import 'core/theme/jaga_theme.dart';
+import 'core/widgets/view_model_host.dart';
+import 'data/models/linked_person.dart';
+import 'data/models/onboarding_progress.dart';
+import 'data/repositories/call_repository.dart';
+import 'data/repositories/call_risk_repository.dart';
+import 'data/repositories/family_alert_repository.dart';
+import 'data/repositories/onboarding_repository.dart';
+import 'data/repositories/pin_repository.dart';
+import 'data/services/alert_notifier.dart';
+import 'data/services/alert_push_service.dart';
+import 'data/services/attention_service.dart';
+import 'data/services/call_ui_service.dart';
+import 'data/services/copilot_pause_service.dart';
+import 'data/services/device_setup_service.dart';
+import 'data/services/dialer_service.dart';
+import 'data/services/share_service.dart';
+import 'data/services/stage_stream_service.dart';
+import 'data/services/timeline_service.dart';
+import 'features/call/view_models/in_call_view_model.dart';
+import 'features/call/views/in_call_screen.dart';
+import 'features/family/view_models/clear_pause_view_model.dart';
+import 'features/family/view_models/copilot_home_view_model.dart';
+import 'features/family/view_models/copilot_settings_view_model.dart';
+import 'features/family/view_models/family_alert_view_model.dart';
+import 'features/family/view_models/stage_timeline_view_model.dart';
+import 'features/family/views/copilot_home_screen.dart';
+import 'features/family/views/family_alert_screen.dart';
+import 'features/onboarding/view_models/onboarding_view_model.dart';
+import 'features/onboarding/view_models/protected_home_view_model.dart';
+import 'features/onboarding/views/onboarding_screen.dart';
+import 'features/onboarding/views/protected_home_screen.dart';
+import 'features/warning/view_models/warning_view_model.dart';
+
+/// Everything the screens need from outside, built once in `bootstrap.dart`
+/// (real) or by a test (fakes).
+class AppDependencies {
+  const AppDependencies({
+    required this.onboarding,
+    required this.pin,
+    required this.deviceSetup,
+    required this.dialer,
+    required this.buzzer,
+    required this.share,
+    required this.alertPush,
+    required this.alertNotifier,
+    required this.pause,
+    required this.timeline,
+    required this.call,
+    required this.callUi,
+    required this.stageStream,
+    required this.attention,
+    required this.initAlerts,
+    this.buildRole = BuildRole.dev,
+  });
+
+  final OnboardingRepository onboarding;
+  final PinRepository pin;
+  final DeviceSetupService deviceSetup;
+  final DialerService dialer;
+  final Buzzer buzzer;
+  final ShareService share;
+  final AlertPushService alertPush;
+  final AlertNotifier alertNotifier;
+  final CopilotPauseService pause;
+  final TimelineService timeline;
+  final CallRepository call;
+  final CallUiService callUi;
+  final StageStreamService stageStream;
+  final AttentionService attention;
+
+  /// Creates the notification channels. Only a co-pilot needs it.
+  final Future<void> Function() initAlerts;
+
+  /// Which roles onboarding offers (ADR 0010).
+  final BuildRole buildRole;
+}
+
+/// The locale and the home screen both come from the saved setup progress.
+class JagaApp extends StatefulWidget {
+  const JagaApp({super.key, required this.deps});
+
+  final AppDependencies deps;
+
+  @override
+  State<JagaApp> createState() => _JagaAppState();
+}
+
+class _JagaAppState extends State<JagaApp> {
+  /// Built once per language: a progress change must not rebuild the theme.
+  final _themes = <String, ThemeData>{};
+
+  AppDependencies get deps => widget.deps;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<OnboardingProgress>(
+      valueListenable: deps.onboarding.progress,
+      builder: (context, progress, _) {
+        final locale = Locale(progress.language);
+        return MaterialApp(
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          theme: _themes.putIfAbsent(
+            progress.language,
+            () => buildJagaTheme(locale),
+          ),
+          themeMode: ThemeMode.light,
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: _home(progress),
+        );
+      },
+    );
+  }
+
+  Widget _home(OnboardingProgress progress) {
+    if (!progress.complete) {
+      return ViewModelHost(
+        create: () => OnboardingViewModel(
+          repository: deps.onboarding,
+          pin: deps.pin,
+          deviceSetup: deps.deviceSetup,
+          dialer: deps.dialer,
+          buzzer: deps.buzzer,
+          share: deps.share,
+          buildRole: deps.buildRole,
+        ),
+        builder: (_, vm) => OnboardingScreen(vm: vm),
+      );
+    }
+    if (progress.role == OnboardingRole.copilot) {
+      return CopilotShell(deps: deps, person: progress.link!);
+    }
+    return ProtectedShell(
+      deps: deps,
+      child: ViewModelHost(
+        create: () => ProtectedHomeViewModel(
+          repository: deps.onboarding,
+          pin: deps.pin,
+          deviceSetup: deps.deviceSetup,
+          dialer: deps.dialer,
+          share: deps.share,
+          callsAreFake: kReleaseMode && deps.call.usesFakeService,
+        ),
+        builder: (_, vm) => ProtectedHomeScreen(vm: vm),
+      ),
+    );
+  }
+}
+
+/// The protected side: registers the Jaga line and puts the in-call screen in
+/// front whenever a call is on, including one that was answered while the app was closed.
+class ProtectedShell extends StatefulWidget {
+  const ProtectedShell({super.key, required this.deps, required this.child});
+
+  final AppDependencies deps;
+  final Widget child;
+
+  @override
+  State<ProtectedShell> createState() => _ProtectedShellState();
+}
+
+class _ProtectedShellState extends State<ProtectedShell> {
+  bool _open = false;
+
+  CallRepository get _call => widget.deps.call;
+
+  @override
+  void initState() {
+    super.initState();
+    _call.snapshot.addListener(_sync);
+    unawaited(_call.start().then((_) => _sync()));
+  }
+
+  @override
+  void dispose() {
+    _call.snapshot.removeListener(_sync);
+    _call.stop();
+    super.dispose();
+  }
+
+  void _sync() {
+    if (!mounted || _open || !_call.snapshot.value.live) return;
+    _open = true;
+    final deps = widget.deps;
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => ViewModelHost(
+              create: () => WarningViewModel(
+                repository: CallRiskRepository(
+                  deps.stageStream,
+                  callId: _call.snapshot.value.callId,
+                ),
+                buzzer: deps.buzzer,
+                attention: deps.attention,
+              ),
+              builder: (_, warning) => ViewModelHost(
+                create: () =>
+                    InCallViewModel(repository: _call, callUi: deps.callUi),
+                builder: (_, vm) => InCallScreen(vm: vm, warningVm: warning),
+              ),
+            ),
+          ),
+        )
+        .then((_) {
+          _open = false;
+          // A new call may have come in while the old one was leaving.
+          _sync();
+        });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// The co-pilot side: the home, which opens the family alert when a
+/// notification is tapped, including the tap that launched the app.
+class CopilotShell extends StatefulWidget {
+  const CopilotShell({super.key, required this.deps, required this.person});
+
+  final AppDependencies deps;
+  final LinkedPerson person;
+
+  @override
+  State<CopilotShell> createState() => _CopilotShellState();
+}
+
+class _CopilotShellState extends State<CopilotShell> {
+  late final _alerts = FamilyAlertRepository(
+    push: widget.deps.alertPush,
+    notifier: widget.deps.alertNotifier,
+    person: widget.person,
+  );
+  late final _home = CopilotHomeViewModel(
+    person: widget.person,
+    pause: widget.deps.pause,
+    timeline: widget.deps.timeline,
+  );
+  StreamSubscription<AlertOpen>? _opens;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_listen());
+  }
+
+  Future<void> _listen() async {
+    final notifier = widget.deps.alertNotifier;
+    await widget.deps.initAlerts();
+    final launch = await notifier.launchOpen();
+    if (!mounted) return;
+    _opens = notifier.opens.listen(_open);
+    if (launch != null) _open(launch);
+  }
+
+  void _open(AlertOpen open) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute<void>(
+            builder: (_) => ViewModelHost(
+              create: () => FamilyAlertViewModel(
+                repository: _alerts,
+                dialer: widget.deps.dialer,
+                initial: open.alert,
+              ),
+              builder: (_, vm) =>
+                  FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
+            ),
+          ),
+        )
+        // The call may have changed while the alert was open.
+        .then((_) {
+          if (mounted) _home.load();
+        });
+  }
+
+  @override
+  void dispose() {
+    _opens?.cancel();
+    _alerts.dispose();
+    _home.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => CopilotHomeScreen(
+    vm: _home,
+    createClearPause: () => ClearPauseViewModel(
+      personName: widget.person.name,
+      pause: widget.deps.pause,
+    ),
+    timelineFor: (call) => StageTimelineViewModel(
+      call: call,
+      timeline: widget.deps.timeline,
+      dialer: widget.deps.dialer,
+    ),
+    createSettings: () => CopilotSettingsViewModel(
+      repository: widget.deps.onboarding,
+      person: widget.person,
+    ),
+  );
+}

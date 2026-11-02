@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="call_notification_channel">Calls</string>
+    <string name="call_notification_title">Jaga is protecting this call</string>
+    <string name="call_notification_open">Open Jaga</string>
+</resources>
