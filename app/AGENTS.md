@@ -7,3 +7,5 @@
   (Malay, English, Mandarin via `flutter-setup-localization`).
 - Every screen gets a widget test. Run `fvm flutter analyze` and `fvm flutter test` before every PR.
 - iOS is out of scope (ADR 0001). Don't add iOS-only packages or code.
+- `lib/data/`: `services/` (platform and network wrappers), `repositories/` (what view models call), `models/` (typed from `contracts/`).
+- `lib/debug/`: debug gallery and fixtures. `main.dart` never imports it.
