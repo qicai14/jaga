@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
+import 'package:jaga/data/models/registration.dart';
 import 'package:jaga/data/repositories/onboarding_repository.dart';
 import 'package:jaga/data/repositories/pin_repository.dart';
 import 'package:jaga/data/services/key_value_store.dart';
@@ -92,6 +93,16 @@ void main() {
     expect(await pin.verify('1234'), PinResult.ok);
   });
 
+  test('an unreadable lock counter reads as locked, not as zero', () async {
+    await pin.set('1234');
+    final broken = _BrokenStore()..failReads = false;
+    final repo = PinRepository(store: broken, clock: () => now);
+    await repo.set('1234');
+    broken.failReads = true;
+    expect(await repo.lockedUntil(), isNotNull);
+    expect(await repo.verify('1234'), PinResult.locked);
+  });
+
   test(
     'progress is saved after every update and resumes on the next launch',
     () async {
@@ -159,12 +170,6 @@ void main() {
     },
   );
 
-  test('a secure storage failure reads as no PIN and no lock', () async {
-    final broken = PinRepository(store: _BrokenStore(), clock: () => now);
-    expect(await broken.lockedUntil(), isNull);
-    expect(await broken.verify('1234'), PinResult.wrong);
-  });
-
   group('saved progress', () {
     test('garbage falls back to a fresh start', () async {
       for (final garbage in ['not json', '{"role": 5}', '{}', '[]']) {
@@ -207,6 +212,24 @@ void main() {
         jagaLineNumber: '',
       );
       expect(repo.progress.value.registration!.forwardingCode, '');
+    });
+
+    test('a Jaga line that is not plain E.164 builds no forwarding code', () {
+      Registration with_(String n) => Registration(
+        protectedUserId: 'p',
+        jagaLineNumber: n,
+        pauseToken: 't',
+        linkCode: '123456',
+      );
+      expect(with_('+60 3 1234 5678').forwardingCode, '*21*+60312345678#');
+      for (final bad in [
+        '+60*31234#5678',
+        '0312345678',
+        '+123',
+        '+1234567890123456',
+      ]) {
+        expect(with_(bad).forwardingCode, '');
+      }
     });
 
     test(
