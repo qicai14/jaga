@@ -185,8 +185,8 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 14. The Clear Jaga Pause sheet cannot be closed while a request is in flight (`PopScope`, drag off); the timeline likewise blocks Back and a second delete. The sheet's text scrolls and its button stays pinned. The brief's `familyCall997` is `familyCallHotline`.
 15. The 997 hotline is `scamHotline` in `lib/data/models/scam_hotline.dart` (no region pack yet). "Genuine calls never appear" is the server's job: the list holds only calls that were alerted.
 
-`FcmAlertPushService` is a follow-up that waits for the team's Firebase project; #11 ships the `AlertPushService`
-interface and `FakeAlertPushService` only.
+`FcmAlertPushService` has since merged (see 16); #11 first shipped the `AlertPushService` interface and
+`FakeAlertPushService`.
 
 16. FCM data push and anonymous auth wired (28 Oct); server registration of the FCM token waits for contracts v1.
     Foreground pushes use `FirebaseMessaging.onMessage`; background and terminated ones go through

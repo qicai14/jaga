@@ -54,17 +54,17 @@ Everything is drawn in the 24-unit space of the notification glyph, then placed 
    `#FBF8F2` window background later.
 
 ## 4. Acceptance checks (emulator, API 34)
-- [ ] **Masks** (Settings > Wallpaper and style > app grid / icon shape, or a Pixel launcher with the shape changed):
+- [x] **Masks** (Settings > Wallpaper and style > app grid / icon shape, or a Pixel launcher with the shape changed):
   circle, squircle, rounded square and teardrop. The shield's corners and point are never clipped, and the gap from
   the tile edge looks even.
 - [ ] **Themed:** with Themed icons on (Wallpaper and style), the icon is a tinted shield with a clean J-shaped hole. It
   never shows as a flat blob or as the full-colour icon.
-- [ ] **48dp:** on the home screen at default grid and at Display size Largest, the J reads as a J, not a hook or a "U".
+- [x] **48dp:** on the home screen at default grid and at Display size Largest, the J reads as a J, not a hook or a "U".
   Also check it in the app drawer and Recents.
 - [ ] **Wallpapers:** solid white, solid black, a busy photo and a teal-ish wallpaper. The shield silhouette is
   identifiable in under a second on every one.
-- [ ] **Label:** shows as "Jaga" under the icon; Settings > Apps lists "Jaga".
-- [ ] **Brand:** no gradient, shadow, tick or extra colour. Put it next to a real antivirus icon: it should read as a bank
+- [x] **Label:** shows as "Jaga" under the icon; Settings > Apps lists "Jaga".
+- [x] **Brand:** no gradient, shadow, tick or extra colour. Put it next to a real antivirus icon: it should read as a bank
   or post office, not as security software.
 
 ## Decisions (implementation)
@@ -73,4 +73,4 @@ Everything is drawn in the 24-unit space of the notification glyph, then placed 
   night) use `jaga_paper`, so nothing flashes white or black. The app is light-only (`ThemeMode.light`).
 - No centred logo on the splash: the foreground layer is a paper shield, which would vanish on a paper background.
 - No legacy icon (`minSdk` 29); the five PNGs are deleted.
-- `ic_stat_jaga.xml` is unchanged. Emulator acceptance checks (section 4) are still to be run.
+- `ic_stat_jaga.xml` is unchanged. Emulator acceptance checks (section 4) are done; still to check: the themed icon and other wallpapers.
