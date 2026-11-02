@@ -9,3 +9,4 @@ Read this before you commit, open a PR or change dependencies.
 - Folder owners are in `.github/CODEOWNERS`. Stay inside your ticket's folder; ask before editing another lane's.
 - PR bodies follow the `pr` skill (Summary / Evidence / Merge Danger), with real test output as evidence.
 - No AI attribution lines in commits or PRs.
+- `app/android/app/google-services.json`, `app/lib/firebase_options.dart` and `firebase.json` hold client identifiers only and are committed on purpose. Never commit service accounts or private keys.
