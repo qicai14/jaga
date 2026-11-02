@@ -171,12 +171,11 @@ covers the plugin's 26.
 The in-call screen reads no `contracts/*.schema.json` field itself; the overlay uses `stage-update` as in warning.md.
 **Built:** `/twilio/voice` sends the CallSid as `<Parameter name="callId">` on the `<Client>`, which ties the Twilio call
 to the stage stream. `FakeCallService` has no callId, so it opens no stream.
-**Missing** (not in any schema, raise via #1): a Voice access token for `register()` (in `registration` or its own
-endpoint). `FakeCallService` needs no token.
+**Built:** `/voice-token` gives `register()` its Voice access token (ADR 0009). `FakeCallService` needs no token.
 
 ## 9. Needs another lane (Lane A, server TwiML)
-`<Dial callerId="{original From}"><Client>` with `__TWI_CALLER_NAME` (formatted number) and `callId` parameters; the
-access-token endpoint; what the caller hears if the app rejects the invite (missing permissions) or doesn't answer.
+`<Dial callerId="{original From}">` and a `__TWI_CALLER_NAME` (formatted number) parameter on the `<Client>`; what the
+caller hears if the app rejects the invite (missing permissions) or doesn't answer.
 
 ## 10. Widget tests (`test/features/call/`), each at 393×852 and at text scale 2.0
 1. active: masthead, caller label on one line, timer, mute, speaker, Hang up visible; no overflow; Hang up above the gesture bar.
