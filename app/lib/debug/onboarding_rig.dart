@@ -39,7 +39,9 @@ class OnboardingRig {
     FakeDeviceSetupService? device,
     AlertOpen? launch,
   }) async {
-    final api = FakeOnboardingApiService();
+    final api = FakeOnboardingApiService(
+      jagaLineNumber: fakeRegistration.jagaLineNumber,
+    );
     final secrets = InMemoryStore();
     final pin = PinRepository(store: secrets, clock: clock ?? DateTime.now);
     final repository = await OnboardingRepository.load(

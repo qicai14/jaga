@@ -34,6 +34,8 @@ import 'firebase_options.dart';
 const _serverUrl = String.fromEnvironment('JAGA_SERVER_URL');
 const _appToken = String.fromEnvironment('JAGA_APP_TOKEN');
 const _copilotToken = String.fromEnvironment('JAGA_COPILOT_TOKEN');
+// The Jaga line parents forward calls to, e.g. +60312345678. Unset = setup shows no code to dial.
+const _jagaLineNumber = String.fromEnvironment('JAGA_LINE_NUMBER');
 
 /// Starts Firebase. False (logged) when it is unreachable, so the app falls
 /// back to Fakes instead of crashing. [init] is a seam for tests.
@@ -59,7 +61,7 @@ Future<AppDependencies> createDependencies() async {
     appToken: _appToken.isNotEmpty,
     copilotToken: _copilotToken.isNotEmpty,
   );
-  // TODO(#1): the real onboarding API replaces this Fake once its contract lands.
+  // Settled: onboarding stays on this Fake for the demo, with the real line from JAGA_LINE_NUMBER.
   final realCopilot = _serverUrl.isNotEmpty && _copilotToken.isNotEmpty;
   debugPrint(
     realCopilot
@@ -85,7 +87,8 @@ Future<AppDependencies> createDependencies() async {
   final pin = PinRepository(store: const SecureStore());
   final onboarding = await OnboardingRepository.load(
     store: const SecureStore(),
-    api: FakeOnboardingApiService(),
+    api: FakeOnboardingApiService(jagaLineNumber: _jagaLineNumber),
+    jagaLineNumber: _jagaLineNumber,
     pin: pin,
     firstLanguage: _phoneLanguageOr('ms'),
   );

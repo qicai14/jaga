@@ -26,13 +26,25 @@ class OnboardingRepository {
     required OnboardingApiService api,
     required PinRepository pin,
     String firstLanguage = 'ms',
+    String? jagaLineNumber,
   }) async {
-    return OnboardingRepository._(
-      store,
-      api,
-      pin,
-      await _readProgress(store, firstLanguage),
-    );
+    var start = await _readProgress(store, firstLanguage);
+    final saved = start.registration;
+    // A registration saved by an earlier build may hold a line this build
+    // does not have (an old fake number): the configured line wins.
+    if (jagaLineNumber != null &&
+        saved != null &&
+        saved.jagaLineNumber != jagaLineNumber) {
+      start = start.copyWith(
+        registration: Registration(
+          protectedUserId: saved.protectedUserId,
+          jagaLineNumber: jagaLineNumber,
+          pauseToken: saved.pauseToken,
+          linkCode: saved.linkCode,
+        ),
+      );
+    }
+    return OnboardingRepository._(store, api, pin, start);
   }
 
   /// Unreadable or corrupt progress means a fresh start. The value itself is

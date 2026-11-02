@@ -28,7 +28,7 @@ const _linked = OnboardingProgress(
 Future<OnboardingRepository> repository({KeyValueStore? pinStore}) async {
   final repo = await OnboardingRepository.load(
     store: InMemoryStore(),
-    api: FakeOnboardingApiService(),
+    api: FakeOnboardingApiService(jagaLineNumber: ''),
     pin: PinRepository(store: pinStore ?? InMemoryStore()),
   );
   await repo.update(_linked);

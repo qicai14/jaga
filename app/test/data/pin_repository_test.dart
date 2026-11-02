@@ -95,7 +95,7 @@ void main() {
   test(
     'progress is saved after every update and resumes on the next launch',
     () async {
-      final api = FakeOnboardingApiService();
+      final api = FakeOnboardingApiService(jagaLineNumber: '');
       final repo = await OnboardingRepository.load(
         store: store,
         api: api,
@@ -127,7 +127,7 @@ void main() {
   test('a fresh start preselects the first language it is given', () async {
     final repo = await OnboardingRepository.load(
       store: store,
-      api: FakeOnboardingApiService(),
+      api: FakeOnboardingApiService(jagaLineNumber: ''),
       pin: pin,
       firstLanguage: 'zh',
     );
@@ -139,7 +139,7 @@ void main() {
     () async {
       final repo = await OnboardingRepository.load(
         store: store,
-        api: FakeOnboardingApiService(),
+        api: FakeOnboardingApiService(jagaLineNumber: ''),
         pin: pin,
       );
       await pin.set('1234');
@@ -171,7 +171,7 @@ void main() {
         store.values['onboarding.progress'] = garbage;
         final repo = await OnboardingRepository.load(
           store: store,
-          api: FakeOnboardingApiService(),
+          api: FakeOnboardingApiService(jagaLineNumber: ''),
           pin: pin,
         );
         final p = repo.progress.value;
@@ -186,10 +186,27 @@ void main() {
     test('an unreadable store falls back to a fresh start', () async {
       final repo = await OnboardingRepository.load(
         store: _BrokenStore(),
-        api: FakeOnboardingApiService(),
+        api: FakeOnboardingApiService(jagaLineNumber: ''),
         pin: pin,
       );
       expect(repo.progress.value.step, OnboardingStep.language);
+    });
+
+    test('a stored dead Jaga line is replaced by the configured one', () async {
+      await store.write(
+        onboardingProgressKey,
+        const OnboardingProgress(
+          role: OnboardingRole.protectedUser,
+          registration: fakeRegistration,
+        ).toJson(),
+      );
+      final repo = await OnboardingRepository.load(
+        store: store,
+        api: FakeOnboardingApiService(jagaLineNumber: ''),
+        pin: pin,
+        jagaLineNumber: '',
+      );
+      expect(repo.progress.value.registration!.forwardingCode, '');
     });
 
     test(
@@ -200,7 +217,7 @@ void main() {
           ..failWrites = true;
         final repo = await OnboardingRepository.load(
           store: broken,
-          api: FakeOnboardingApiService(),
+          api: FakeOnboardingApiService(jagaLineNumber: ''),
           pin: pin,
         );
         await repo.update(const OnboardingProgress(language: 'en'));

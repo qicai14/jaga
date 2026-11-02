@@ -5,6 +5,7 @@ import 'package:jaga/core/widgets/big_button.dart';
 import 'package:jaga/core/widgets/view_model_host.dart';
 import 'package:jaga/data/models/linked_person.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
+import 'package:jaga/data/models/registration.dart';
 import 'package:jaga/data/services/device_setup_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/onboarding_api_service.dart';
@@ -335,6 +336,27 @@ void main() {
     final uris = s.rig.dialer.dialed.map((n) => telUri(n).toString()).toList();
     expect(uris.first, allOf(endsWith('%23'), contains('*21*')));
     expect(uris.last, 'tel:*%2321%23');
+  });
+
+  testWidgets('with no Jaga line the step shows no code and can be finished', (
+    tester,
+  ) async {
+    await pumpSetup(
+      tester,
+      _protected.copyWith(
+        step: OnboardingStep.forwarding,
+        registration: const Registration(
+          protectedUserId: 'pu-1',
+          jagaLineNumber: '',
+          pauseToken: 'JAGA-7Q4M-2KXP-9D3F',
+          linkCode: fakeLinkCode,
+        ),
+      ),
+    );
+    expect(find.textContaining('not set up yet'), findsOneWidget);
+    expect(find.text('Dial now'), findsNothing);
+    expect(find.textContaining('*21*'), findsNothing);
+    expect(continueButton(tester, "I've dialled it").onPressed, isNotNull);
   });
 
   Future<void> tapContinue(WidgetTester tester) async {

@@ -37,6 +37,7 @@ abstract class OnboardingApiService {
   });
 }
 
+// Only for tests and the debug rig: a release build takes JAGA_LINE_NUMBER.
 const fakeLinkCode = '482913';
 const fakeRegistration = Registration(
   protectedUserId: 'pu-1',
@@ -50,6 +51,11 @@ const fakeProtectedUserPhone = '+60123456789';
 /// Fixtures: link code `000000` is full, `111111` expired, [fakeLinkCode]
 /// valid, anything else wrong.
 class FakeOnboardingApiService implements OnboardingApiService {
+  /// [jagaLineNumber] is the real line from JAGA_LINE_NUMBER; empty when unset.
+  FakeOnboardingApiService({required this.jagaLineNumber});
+
+  final String jagaLineNumber;
+
   /// Every call throws [OnboardingNetworkException], to test failures.
   bool offline = false;
 
@@ -71,7 +77,12 @@ class FakeOnboardingApiService implements OnboardingApiService {
   }) async {
     _reach();
     await hold;
-    return fakeRegistration;
+    return Registration(
+      protectedUserId: fakeRegistration.protectedUserId,
+      jagaLineNumber: jagaLineNumber,
+      pauseToken: fakeRegistration.pauseToken,
+      linkCode: fakeRegistration.linkCode,
+    );
   }
 
   @override
