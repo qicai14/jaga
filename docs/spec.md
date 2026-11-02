@@ -163,6 +163,7 @@ endpoints are settled in [ADR 0008](adr/0008-copilot-timeline-api.md). The notes
   timeline, clear Jaga Pause), onboarding (forwarding, language, pause token, link code), demo_bank (transfer, held screen).
 - Region pack and command language set at onboarding (the region's default; Malay for Malaysia), always followed by English. Not detected from the call.
 - Dismissing a Caution or Warning only hides it on the protected user's screen.
+- Minimum Android: Android 10 (API 29), matching `minSdk = 29` in `app/android/app/build.gradle.kts`.
 
 ### Privacy
 - Standard-mode Meta models only, zero data retention requested, no audio stored, IC/account/OTP masked before Spark,
