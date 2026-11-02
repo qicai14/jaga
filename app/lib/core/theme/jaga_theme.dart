@@ -5,10 +5,10 @@ import 'jaga_metrics.dart';
 import 'jaga_text_styles.dart';
 
 /// The one light theme (design-system.md section 5).
-ThemeData buildJagaTheme(Locale locale) {
+ThemeData buildJagaTheme() {
   const m = JagaMetrics.standard;
   const scheme = jagaColorScheme;
-  final text = jagaTextTheme(locale);
+  final text = jagaTextTheme();
   final buttonShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(m.radiusMedium),
   );
@@ -61,6 +61,6 @@ ThemeData buildJagaTheme(Locale locale) {
         borderSide: BorderSide(color: scheme.primary, width: 2),
       ),
     ),
-    extensions: [JagaColors.light, m, JagaTextStyles.of(locale)],
+    extensions: [JagaColors.light, m, JagaTextStyles.standard()],
   );
 }

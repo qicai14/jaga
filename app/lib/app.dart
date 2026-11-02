@@ -95,8 +95,8 @@ class JagaApp extends StatefulWidget {
 }
 
 class _JagaAppState extends State<JagaApp> {
-  /// Built once per language: a progress change must not rebuild the theme.
-  final _themes = <String, ThemeData>{};
+  /// Built once: a progress change must not rebuild the theme.
+  final _theme = buildJagaTheme();
 
   AppDependencies get deps => widget.deps;
 
@@ -108,10 +108,7 @@ class _JagaAppState extends State<JagaApp> {
         final locale = Locale(progress.language);
         return MaterialApp(
           onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-          theme: _themes.putIfAbsent(
-            progress.language,
-            () => buildJagaTheme(locale),
-          ),
+          theme: _theme,
           themeMode: ThemeMode.light,
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
