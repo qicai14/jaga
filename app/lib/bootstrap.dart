@@ -47,7 +47,9 @@ Future<bool> initFirebase([Future<void> Function()? init]) async {
         ))();
     return true;
   } on Object catch (e) {
-    debugPrint('Firebase is unavailable, using Fake push and auth: $e');
+    debugPrint(
+      'Firebase is unavailable, using Fake push and auth (${e.runtimeType})',
+    );
     return false;
   }
 }
@@ -149,14 +151,14 @@ Future<AppDependencies> createDependencies() async {
 }
 
 /// Signs in anonymously without holding up startup; a failure is logged and
-/// retried by the next `ensureSignedIn`. Debug builds also log the uid and
+/// only retried at the next app start. Debug builds also log the uid and
 /// whether an FCM token exists, for checking Firebase on a device.
 Future<void> _signIn(AuthService auth, FcmAlertPushService fcm) async {
   try {
     final uid = await auth.ensureSignedIn();
     if (kDebugMode) debugPrint('Jaga uid: $uid');
   } on Object catch (e) {
-    debugPrint('Jaga anonymous sign-in failed: $e');
+    debugPrint('Jaga anonymous sign-in failed (${e.runtimeType})');
   }
   if (!kDebugMode) return;
   try {
