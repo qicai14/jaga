@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
+import 'package:jaga/data/models/alerted_call.dart';
+import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/services/copilot_pause_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/timeline_service.dart';
@@ -12,6 +14,7 @@ import 'package:jaga/features/family/view_models/clear_pause_view_model.dart';
 import 'package:jaga/features/family/view_models/copilot_home_view_model.dart';
 import 'package:jaga/features/family/view_models/stage_timeline_view_model.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
+import 'package:jaga/features/family/views/stage_timeline_screen.dart';
 import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
 import 'package:jaga/features/family/views/widgets/quote_block.dart';
 import 'package:jaga/features/family/views/widgets/timeline_event_row.dart';
@@ -374,4 +377,43 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+
+  forEachScale('a live call cannot be deleted (the server answers 404)', (
+    tester,
+    scale,
+  ) async {
+    final live = AlertedCall(
+      callId: 'live-1',
+      at: DateTime.utc(2026, 10, 27, 10),
+      stage: Stage.authority,
+      live: true,
+    );
+    final timeline = FakeTimelineService(calls: [live]);
+    await pumpJaga(
+      tester,
+      StageTimelineScreen(
+        vm: StageTimelineViewModel(
+          call: live,
+          timeline: timeline,
+          dialer: FakeDialerService(),
+        ),
+      ),
+      scale: scale,
+    );
+    final button = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.delete_outline),
+    );
+    expect(button.onPressed, isNull);
+  });
+
+  test('a row with a null endedAt is live, one with a time is not', () {
+    Map<String, dynamic> row(Object? endedAt) => {
+      'callId': 'c',
+      'startedAt': '2026-10-27T09:00:00Z',
+      'endedAt': endedAt,
+      'events': <Object>[],
+    };
+    expect(AlertedCall.fromJson(row(null)).live, isTrue);
+    expect(AlertedCall.fromJson(row('2026-10-27T09:05:00Z')).live, isFalse);
+  });
 }
