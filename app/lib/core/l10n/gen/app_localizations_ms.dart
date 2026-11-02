@@ -284,6 +284,17 @@ class AppLocalizationsMs extends AppLocalizations {
   String get onboardingCheckForwarding => 'Semak pemajuan';
 
   @override
+  String get onboardingForwardNoLine =>
+      'Talian Jaga belum disediakan, jadi tiada kod untuk didail. Anda boleh teruskan.';
+
+  @override
+  String get onboardingForwardUndo =>
+      'Untuk membatalkannya kemudian, dail ##21# atau guna Matikan pemajuan di Tetapan.';
+
+  @override
+  String get settingsTurnOffForwarding => 'Matikan pemajuan';
+
+  @override
   String get onboardingForwardDone => 'Saya sudah dail';
 
   @override

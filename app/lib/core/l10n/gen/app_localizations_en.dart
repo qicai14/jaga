@@ -281,6 +281,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingCheckForwarding => 'Check forwarding';
 
   @override
+  String get onboardingForwardNoLine =>
+      'Jaga\'s line is not set up yet, so there is no code to dial. You can carry on.';
+
+  @override
+  String get onboardingForwardUndo =>
+      'To undo this later, dial ##21# or use Turn off forwarding in Settings.';
+
+  @override
+  String get settingsTurnOffForwarding => 'Turn off forwarding';
+
+  @override
   String get onboardingForwardDone => 'I\'ve dialled it';
 
   @override

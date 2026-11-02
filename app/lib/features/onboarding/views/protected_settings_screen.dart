@@ -73,6 +73,7 @@ class ProtectedSettingsScreen extends StatelessWidget {
                 code: vm.registration.forwardingCode,
                 onDial: vm.dialForwarding,
                 onCheck: vm.checkForwarding,
+                onTurnOff: vm.turnOffForwarding,
               ),
             ),
             _section(

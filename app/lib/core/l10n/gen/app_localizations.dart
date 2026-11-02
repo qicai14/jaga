@@ -574,6 +574,24 @@ abstract class AppLocalizations {
   /// **'Check forwarding'**
   String get onboardingCheckForwarding;
 
+  /// Forwarding step: shown instead of the code when the build has no Jaga line number.
+  ///
+  /// In en, this message translates to:
+  /// **'Jaga\'s line is not set up yet, so there is no code to dial. You can carry on.'**
+  String get onboardingForwardNoLine;
+
+  /// Forwarding step: how to cancel forwarding later.
+  ///
+  /// In en, this message translates to:
+  /// **'To undo this later, dial ##21# or use Turn off forwarding in Settings.'**
+  String get onboardingForwardUndo;
+
+  /// Settings button: dials the code that cancels call forwarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off forwarding'**
+  String get settingsTurnOffForwarding;
+
   /// Step 5 Continue label.
   ///
   /// In en, this message translates to:

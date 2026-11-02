@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/view_model_host.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
+import 'package:jaga/data/models/registration.dart';
 import 'package:jaga/data/services/device_setup_service.dart';
+import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/onboarding_api_service.dart';
 import 'package:jaga/debug/onboarding_rig.dart';
 import 'package:jaga/features/onboarding/view_models/protected_home_view_model.dart';
@@ -150,6 +152,33 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(fix);
     expect(rig.device.fixed, contains(SetupItem.autostart));
+  });
+
+  forEachScale('Turn off forwarding dials ##21# even with no Jaga line set', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pumpHome(
+      tester,
+      scale: scale,
+      start: _done.copyWith(
+        registration: const Registration(
+          protectedUserId: 'pu-1',
+          jagaLineNumber: '',
+          pauseToken: 'JAGA-7Q4M-2KXP-9D3F',
+          linkCode: fakeLinkCode,
+        ),
+      ),
+    );
+    await openSettings(tester);
+    expect(inSettings('Dial now'), findsNothing);
+    final off = inSettings('Turn off forwarding');
+    await scrollSettingsTo(tester, off);
+    await tester.tap(off);
+    await tester.pump();
+    expect(rig.dialer.dialed.map((n) => telUri(n).toString()), [
+      'tel:%23%2321%23',
+    ]);
   });
 
   forEachScale('Settings on a non-Xiaomi phone has no autostart row', (

@@ -273,6 +273,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingCheckForwarding => '检查转接';
 
   @override
+  String get onboardingForwardNoLine => 'Jaga 线路尚未设置，所以没有可拨的代码。您可以继续。';
+
+  @override
+  String get onboardingForwardUndo => '以后要取消，请拨 ##21#，或在设置中使用“关闭转接”。';
+
+  @override
+  String get settingsTurnOffForwarding => '关闭转接';
+
+  @override
   String get onboardingForwardDone => '我已拨号';
 
   @override

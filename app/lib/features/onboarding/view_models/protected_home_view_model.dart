@@ -112,6 +112,9 @@ class ProtectedHomeViewModel extends ChangeNotifier
 
   Future<void> dialForwarding() => _dialer.dial(registration.forwardingCode);
 
+  Future<void> turnOffForwarding() =>
+      _dialer.dial(Registration.cancelForwardingCode);
+
   Future<void> checkForwarding() =>
       _dialer.dial(Registration.checkForwardingCode);
 
