@@ -1,4 +1,4 @@
-// Valid against contracts/family-alert.schema.json (draft v0); the schema test
+// Valid against contracts/family-alert.schema.json (v1); the schema test
 // validates every string in [familyAlertFixtures].
 // Parse them with FamilyAlert.parse so tests and the gallery use the real model.
 
