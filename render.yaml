@@ -38,6 +38,8 @@ services:
         sync: false
       - key: JAGA_DEFAULT_REGION
         sync: false
+      - key: JAGA_CALLER_NOTICE_URL
+        sync: false
       - key: JAGA_FAMILY_TOKENS
         sync: false
       - key: JAGA_PROTECTED_USER_NAME

@@ -121,8 +121,11 @@ async def voice(request: Request) -> Response:
     identity = os.environ.get("JAGA_APP_CLIENT_IDENTITY", "")
     if not identity:
         raise HTTPException(503, "JAGA_APP_CLIENT_IDENTITY is not set")
+    notice = os.environ.get("JAGA_CALLER_NOTICE_URL", "")
+    # The notice goes before <Start> so nothing is streamed or transcribed until the caller has heard it.
+    play = f"<Play>{escape(notice)}</Play>" if notice else ""
     twiml = (
-        '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
+        f'<?xml version="1.0" encoding="UTF-8"?><Response>{play}<Start>'
         f'<Stream url={quoteattr(twilio_auth.stream_url(request))} track="both_tracks">'
         f'<Parameter name="region" value={quoteattr(region)}/></Stream></Start>'
         f"<Dial><Client>{escape(identity)}</Client></Dial></Response>"
