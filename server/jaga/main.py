@@ -33,6 +33,7 @@ app = FastAPI(title="Jaga", redirect_slashes=False)
 app.add_middleware(PauseCORS)
 app.include_router(telephony.router)
 app.include_router(pause.router)
+app.include_router(pause.copilot_router)
 app.include_router(timelines.router)
 app.include_router(voice_token.router)
 

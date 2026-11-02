@@ -60,6 +60,7 @@ class Call:
     ended_at: datetime | None = None
     push: alerts.Push | None = field(default_factory=alerts.push)
     warning: bool = False  # the stage on screen is a Warning
+    cleared_stage: str | None = None  # the stage a family co-pilot cleared Jaga Pause at (ADR 0010)
     changed: asyncio.Condition = field(default_factory=asyncio.Condition)
 
     async def publish(self, stage, risk, evidence=(), command=None, counterMove=None, source="rules") -> None:
