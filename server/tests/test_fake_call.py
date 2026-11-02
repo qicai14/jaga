@@ -362,6 +362,37 @@ def test_voice_webhook_streams_both_tracks_with_the_region_and_rings_the_app(cli
     assert twiml.findtext("Dial/Client") == "jaga-app"
 
 
+def test_voice_webhook_without_a_notice_url_is_todays_twiml_exactly(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    for value in (None, "", "  "):
+        if value is None:
+            monkeypatch.delenv("JAGA_CALLER_NOTICE_URL", raising=False)
+        else:
+            monkeypatch.setenv("JAGA_CALLER_NOTICE_URL", value)
+        assert voice(client).text == (
+            '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
+            '<Stream url="wss://testserver/twilio/media" track="both_tracks">'
+            '<Parameter name="region" value="my"/></Stream></Start>'
+            "<Dial><Client>jaga-app</Client></Dial></Response>"
+        )
+
+
+def test_voice_webhook_plays_the_caller_notice_before_the_stream_starts(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    monkeypatch.setenv("JAGA_CALLER_NOTICE_URL", "https://cdn.example/notice.mp3?v=1&lang=ms-en")
+    twiml = ElementTree.fromstring(voice(client).text)  # parsing proves the & was escaped
+
+    # Notice first: nothing is streamed or transcribed until the caller has heard it.
+    assert [child.tag for child in twiml] == ["Play", "Start", "Dial"]
+    assert twiml.findtext("Play") == "https://cdn.example/notice.mp3?v=1&lang=ms-en"
+    assert twiml.find("Play").attrib == {}
+
+
+def test_voice_webhook_with_a_notice_still_refuses_a_bad_signature(client, monkeypatch):
+    monkeypatch.setenv("JAGA_CALLER_NOTICE_URL", "https://cdn.example/notice.mp3")
+    assert voice(client, signed_with="someone-elses-token").status_code == 403
+
+
 def test_voice_webhook_without_a_valid_signature_is_refused(client):
     assert voice(client, signed_with="someone-elses-token").status_code == 403
     assert client.post("/twilio/voice", content="CallSid=CA_v").status_code == 403

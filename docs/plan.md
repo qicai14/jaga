@@ -41,6 +41,12 @@ helping the user verify, pulling in family and slowing the transfer are the rest
    - **Family co-pilot:** on first reaching isolation, and again at money or credentials, an FCM push with a summary and up to two masked quotes.
    - **Jaga Pause:** a bank app asks "is this customer mid-scam?"; the Demo Bank holds the transfer.
    - Jaga never hangs up or reports by itself. The user and family decide.
+   - **Caller notice:** if `JAGA_CALLER_NOTICE_URL` is set, the Jaga line plays that recording to the caller before connecting,
+     Malay then English: the call is screened and transcribed by an automated service. It plays before the stream starts, so
+     nothing is transcribed until it has finished. It is not legal advice and no lawyer has reviewed it. Keep the file short
+     and on a fast host: Twilio fetches it on first play, so a slow fetch delays connecting (cold start), and later plays can
+     use Twilio's cache (ETag/Last-Modified). Twilio's docs don't say what happens to the call if the fetch fails, so this
+     needs a real phone test.
    - **Safety rules:** if Muse Spark times out (2.5 s) or fails, a call at `money` or `credentials` still gets a Warning;
      below that it stays a Caution. Spark can lower a hard-trigger Warning to a Caution, never to nothing, and a follow-up
      push tells the family. The protected user can dismiss a Caution or Warning on their own screen only: it doesn't stop
