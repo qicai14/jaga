@@ -222,6 +222,7 @@ void main() {
         linkCode: '123456',
       );
       expect(with_('+60 3 1234 5678').forwardingCode, '*21*+60312345678#');
+      expect(with_('+60-3-1234-5678').forwardingCode, '*21*+60312345678#');
       for (final bad in [
         '+60*31234#5678',
         '0312345678',

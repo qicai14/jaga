@@ -36,9 +36,15 @@ class _PauseTokenBodyState extends State<PauseTokenBody> {
   Future<void> _wipeClipboard() async {
     _wipe?.cancel();
     _wipe = null;
-    final held = await Clipboard.getData(Clipboard.kTextPlain);
-    if (held?.text == widget.token) {
-      await Clipboard.setData(const ClipboardData(text: ''));
+    // Android 10+ blocks background clipboard reads, so the 60 s wipe can no-op
+    // while the app is backgrounded; the dispose wipe covers the return.
+    try {
+      final held = await Clipboard.getData(Clipboard.kTextPlain);
+      if (held?.text == widget.token) {
+        await Clipboard.setData(const ClipboardData(text: ''));
+      }
+    } on Object {
+      // Nothing to clear if the clipboard can't be reached.
     }
   }
 

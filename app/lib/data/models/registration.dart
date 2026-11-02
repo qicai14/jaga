@@ -28,7 +28,7 @@ class Registration {
   /// Empty when the build has no valid Jaga line (unset or not `+` and 8-15
   /// digits, so no `*` or `#` can change the code): never a dead number.
   String get forwardingCode {
-    final number = jagaLineNumber.replaceAll(' ', '');
+    final number = jagaLineNumber.replaceAll(RegExp(r'[ -]'), '');
     return _e164.hasMatch(number) ? '*21*$number#' : '';
   }
 

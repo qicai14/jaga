@@ -62,6 +62,7 @@ class PinRepository {
   Future<DateTime?> lockedUntil() async {
     final read = await _readCounter(_lockedUntilKey);
     // Fail closed: an unreadable lock counter reads as locked.
+    // Deliberate: now + 5 min, not persisted, re-checked on every call.
     if (read.failed) return _clock().add(_lockFor);
     final raw = int.tryParse(read.value ?? '');
     if (raw == null) return null;
