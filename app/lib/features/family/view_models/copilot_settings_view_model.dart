@@ -20,7 +20,7 @@ class CopilotSettingsViewModel extends ChangeNotifier {
 
   /// Forgets the link on this phone and goes back to setup; false if that
   /// failed and nothing changed. Only this phone forgets: the server is not
-  /// told, as there is no unlink endpoint yet (requested from contracts #1).
+  /// told, as there is no unlink endpoint yet (#116).
   Future<bool> unlink() async {
     try {
       await _repository.reset();
