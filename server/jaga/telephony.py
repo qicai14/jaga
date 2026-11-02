@@ -121,7 +121,7 @@ async def voice(request: Request) -> Response:
     identity = os.environ.get("JAGA_APP_CLIENT_IDENTITY", "")
     if not identity:
         raise HTTPException(503, "JAGA_APP_CLIENT_IDENTITY is not set")
-    notice = os.environ.get("JAGA_CALLER_NOTICE_URL", "")
+    notice = os.environ.get("JAGA_CALLER_NOTICE_URL", "").strip()
     # The notice goes before <Start> so nothing is streamed or transcribed until the caller has heard it.
     play = f"<Play>{escape(notice)}</Play>" if notice else ""
     twiml = (

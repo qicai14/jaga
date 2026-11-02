@@ -364,11 +364,11 @@ def test_voice_webhook_streams_both_tracks_with_the_region_and_rings_the_app(cli
 
 def test_voice_webhook_without_a_notice_url_is_todays_twiml_exactly(client, monkeypatch):
     monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
-    for unset in (True, False):
-        if unset:
+    for value in (None, "", "  "):
+        if value is None:
             monkeypatch.delenv("JAGA_CALLER_NOTICE_URL", raising=False)
         else:
-            monkeypatch.setenv("JAGA_CALLER_NOTICE_URL", "")
+            monkeypatch.setenv("JAGA_CALLER_NOTICE_URL", value)
         assert voice(client).text == (
             '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
             '<Stream url="wss://testserver/twilio/media" track="both_tracks">'
