@@ -172,9 +172,9 @@ Until #1 lands, missing fields are nullable in the model and their elements are 
 - Reconnect: a drop retries after 1, 2, 4, then every 8 s; `connected` is false meanwhile (the reconnecting dot).
   The server replays all updates on connect, so already-delivered messages are skipped by position. Close 1000 (call
   ended), close 1008 or a refused handshake (unknown call, HTTP 403) stop without retry. Malformed messages are ignored.
-- Depends on Lane A: `/twilio/voice` must send the CallSid as the `callId` Client parameter
-  (`<Client><Identity>{identity}</Identity><Parameter name="callId" value="{CallSid}"/></Client>`). Until then the
-  app gets no `callId` and stays on the Fake.
+- `/twilio/voice` sends the CallSid as the `callId` Client parameter
+  (`<Client><Identity>{identity}</Identity><Parameter name="callId" value="{CallSid}"/></Client>`); the Fake has none
+  and stays without a stream.
 - Local demo: `JAGA_SERVER_URL=http://10.0.2.2:8000` (debug builds allow cleartext to 10.0.2.2 and localhost only,
   `android/app/src/debug/res/xml/network_security_config.xml`). On origin/main `server/jaga/fakes/twilio.py` builds
   a scripted Media Stream and `server/tests/test_fake_call.py` plays one in-process, but no runnable driver script

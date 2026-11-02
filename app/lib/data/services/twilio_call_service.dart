@@ -54,7 +54,8 @@ class TwilioCallService implements CallService {
     return label == null || label.isEmpty ? null : label;
   }
 
-  // TODO(#19): callId has no contract field yet; null means "accept any call".
+  // The parent call's SID, sent by /twilio/voice as a <Parameter>; null on the Fake path, so no stage stream.
+  // The Answer event carries it, the 4-token Connected event does not, so reduceCallEvent keeps it from answer.
   static String? _callId(ActiveCall? call) =>
       call?.customParams?['callId'] as String?;
 

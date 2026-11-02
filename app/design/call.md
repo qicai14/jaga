@@ -169,9 +169,10 @@ covers the plugin's 26.
 
 ## 8. Contract fields
 The in-call screen reads no `contracts/*.schema.json` field itself; the overlay uses `stage-update` as in warning.md.
-**Missing** (not in any schema, raise via #1): the `callId` that ties the Twilio call to the stage stream (proposed:
-`<Parameter name="callId">` on the `<Client>`), and a Voice access token for `register()` (in `registration` or its own
-endpoint). Until then `CallRiskRepository(callId: null)` accepts any call and `FakeCallService` needs no token.
+**Built:** `/twilio/voice` sends the CallSid as `<Parameter name="callId">` on the `<Client>`, which ties the Twilio call
+to the stage stream. `FakeCallService` has no callId, so it opens no stream.
+**Missing** (not in any schema, raise via #1): a Voice access token for `register()` (in `registration` or its own
+endpoint). `FakeCallService` needs no token.
 
 ## 9. Needs another lane (Lane A, server TwiML)
 `<Dial callerId="{original From}"><Client>` with `__TWI_CALLER_NAME` (formatted number) and `callId` parameters; the

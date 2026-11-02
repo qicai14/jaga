@@ -29,7 +29,6 @@ class CallSnapshot {
   final String? callerLabel;
 
   /// Ties this call to the stage stream, when the server sends it.
-  // TODO(#19): callId has no contract field yet; null means "accept any call".
   final String? callId;
   final DateTime? connectedAt;
   final DateTime? endedAt;

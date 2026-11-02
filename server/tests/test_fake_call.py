@@ -4,6 +4,7 @@ import asyncio
 import json
 import time
 from pathlib import Path
+from urllib.parse import quote
 from xml.etree import ElementTree
 
 import pytest
@@ -341,7 +342,7 @@ def test_a_transcriber_that_cannot_be_built_leaves_no_call_behind(client, monkey
 def voice(client, signed_with=TOKEN, base="https://testserver", query="", **params):
     form = {"CallSid": ["CA_v"], "From": ["+60123456789"]} | params
     sig = twilio_auth.signature(f"{base}/twilio/voice{query}", form, signed_with)
-    body = "&".join(f"{k}={v[0]}".replace("+", "%2B") for k, v in form.items())
+    body = "&".join(f"{k}={quote(v[0])}" for k, v in form.items())
     return client.post(
         f"/twilio/voice{query}",
         content=body,
@@ -359,7 +360,7 @@ def test_voice_webhook_streams_both_tracks_with_the_region_and_rings_the_app(cli
     assert stream.get("url") == "wss://testserver/twilio/media"
     assert stream.get("track") == "both_tracks"
     assert {p.get("name"): p.get("value") for p in stream.findall("Parameter")} == {"region": "my"}
-    assert twiml.findtext("Dial/Client") == "jaga-app"
+    assert twiml.findtext("Dial/Client/Identity") == "jaga-app"
 
 
 def test_voice_webhook_without_a_notice_url_is_todays_twiml_exactly(client, monkeypatch):
@@ -373,8 +374,40 @@ def test_voice_webhook_without_a_notice_url_is_todays_twiml_exactly(client, monk
             '<?xml version="1.0" encoding="UTF-8"?><Response><Start>'
             '<Stream url="wss://testserver/twilio/media" track="both_tracks">'
             '<Parameter name="region" value="my"/></Stream></Start>'
-            "<Dial><Client>jaga-app</Client></Dial></Response>"
+            "<Dial><Client><Identity>jaga-app</Identity>"
+            '<Parameter name="callId" value="CA_v"/></Client></Dial></Response>'
         )
+
+
+def test_voice_webhook_sends_the_call_sid_as_the_apps_call_id_escaped(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    sid = "CA<&>'\"x"
+    twiml = ElementTree.fromstring(voice(client, CallSid=[sid]).text)
+
+    assert twiml.find("Dial/Client/Parameter").attrib == {"name": "callId", "value": sid}
+
+
+def test_voice_webhook_without_a_call_sid_is_a_bad_request(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    form = {"From": ["+60123456789"]}
+    sig = twilio_auth.signature("https://testserver/twilio/voice", form, TOKEN)
+    response = client.post(
+        "/twilio/voice",
+        content="From=%2B60123456789",
+        headers={"X-Twilio-Signature": sig, "Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+    assert response.status_code == 400
+
+
+def test_the_call_id_in_the_twiml_opens_the_stage_stream_of_that_call(client, monkeypatch):
+    monkeypatch.setenv("JAGA_APP_CLIENT_IDENTITY", "jaga-app")
+    twiml = ElementTree.fromstring(voice(client, CallSid=["CA_bridge"]).text)
+    call_id = twiml.find("Dial/Client/Parameter").get("value")
+
+    updates = play_call(client, call_id, SCRIPT)  # the fake media stream starts with the same callSid
+
+    assert updates and {u["callId"] for u in updates} == {"CA_bridge"}
 
 
 def test_voice_webhook_plays_the_caller_notice_before_the_stream_starts(client, monkeypatch):
