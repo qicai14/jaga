@@ -11,6 +11,7 @@ import logging
 import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from urllib.parse import parse_qs
 from xml.sax.saxutils import escape, quoteattr
 
 from fastapi import APIRouter, HTTPException, Request, WebSocket, status
@@ -121,6 +122,10 @@ async def voice(request: Request) -> Response:
     identity = os.environ.get("JAGA_APP_CLIENT_IDENTITY", "")
     if not identity:
         raise HTTPException(503, "JAGA_APP_CLIENT_IDENTITY is not set")
+    # The parent call's SID: the callId the app opens /calls/{callId}/stages with.
+    call_sid = parse_qs((await request.body()).decode(errors="replace")).get("CallSid", [""])[0]
+    if not call_sid:
+        raise HTTPException(400, "CallSid is missing")
     notice = os.environ.get("JAGA_CALLER_NOTICE_URL", "").strip()
     # The notice goes before <Start> so nothing is streamed or transcribed until the caller has heard it.
     play = f"<Play>{escape(notice)}</Play>" if notice else ""
@@ -128,7 +133,8 @@ async def voice(request: Request) -> Response:
         f'<?xml version="1.0" encoding="UTF-8"?><Response>{play}<Start>'
         f'<Stream url={quoteattr(twilio_auth.stream_url(request))} track="both_tracks">'
         f'<Parameter name="region" value={quoteattr(region)}/></Stream></Start>'
-        f"<Dial><Client>{escape(identity)}</Client></Dial></Response>"
+        f"<Dial><Client><Identity>{escape(identity)}</Identity>"
+        f'<Parameter name="callId" value={quoteattr(call_sid)}/></Client></Dial></Response>'
     )
     return Response(twiml, media_type="text/xml")
 
