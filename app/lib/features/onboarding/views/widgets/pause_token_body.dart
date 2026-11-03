@@ -29,12 +29,31 @@ class PauseTokenBody extends StatefulWidget {
 
 class _PauseTokenBodyState extends State<PauseTokenBody> {
   Timer? _reset;
+  Timer? _wipe;
   bool _copied = false;
+
+  /// Clears the clipboard, but only if it still holds the token.
+  Future<void> _wipeClipboard() async {
+    _wipe?.cancel();
+    _wipe = null;
+    // Android 10+ blocks background clipboard reads, so the 60 s wipe can no-op
+    // while the app is backgrounded; the dispose wipe covers the return.
+    try {
+      final held = await Clipboard.getData(Clipboard.kTextPlain);
+      if (held?.text == widget.token) {
+        await Clipboard.setData(const ClipboardData(text: ''));
+      }
+    } on Object {
+      // Nothing to clear if the clipboard can't be reached.
+    }
+  }
 
   /// A SnackBar would sit on top of Continue; the Copy button says "Copied" instead.
   void _copy() {
     Clipboard.setData(ClipboardData(text: widget.token));
     _reset?.cancel();
+    _wipe?.cancel();
+    _wipe = Timer(const Duration(seconds: 60), _wipeClipboard);
     setState(() => _copied = true);
     _reset = Timer(const Duration(seconds: 3), () {
       if (mounted) setState(() => _copied = false);
@@ -44,6 +63,8 @@ class _PauseTokenBodyState extends State<PauseTokenBody> {
   @override
   void dispose() {
     _reset?.cancel();
+    // Leaving the screen clears at once, so the token never outlives it.
+    if (_wipe != null) _wipeClipboard();
     super.dispose();
   }
 

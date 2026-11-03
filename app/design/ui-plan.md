@@ -21,7 +21,7 @@ design briefs (`app/design/<feature>.md`) are written by `b-architect` from this
 
 ### Onboarding (#10), done by the co-pilot on grandma's phone
 1. Role
-2. Command language (Malay preselected; options shown in their own script)
+2. Command language (the phone's language preselected when Jaga speaks it, otherwise Malay; Preston's decision, 2 Nov. Options shown in their own script)
 3. Region: Malaysia, shown for information only
 4. Phone permissions checklist: a live green tick per item, and a "Fix" button opening the right Android settings page
    (phone account, notifications, full-screen intent, Xiaomi autostart)

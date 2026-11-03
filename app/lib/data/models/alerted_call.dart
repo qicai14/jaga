@@ -1,8 +1,8 @@
 import 'stage.dart';
 import 'stage_update.dart' show Risk;
 
-// Parsed from `contracts/stage-timeline.schema.json` (ADR 0008). The timeline's
-// `endedAt` and an event's `source` are not shown, so they are not kept.
+// Parsed from `contracts/stage-timeline.schema.json` (ADR 0008). An event's
+// `source` is not shown, and `endedAt` is kept only as [AlertedCall.live].
 
 /// One call the family was alerted about, as a row of the co-pilot home.
 class AlertedCall {
@@ -11,6 +11,7 @@ class AlertedCall {
     required this.at,
     required this.stage,
     this.claimedAgency,
+    this.live = false,
   });
 
   /// A row from `GET /timelines`: [at] is `startedAt`, [stage] the latest event's.
@@ -23,6 +24,7 @@ class AlertedCall {
           ? Stage.none
           : Stage.fromJson((events.last as Map)['stage'] as String),
       claimedAgency: json['claimedAgency'] as String?,
+      live: json['endedAt'] == null,
     );
   }
 
@@ -30,6 +32,9 @@ class AlertedCall {
   final DateTime at;
   final Stage stage;
   final String? claimedAgency;
+
+  /// The call has not ended (`endedAt` null): the server refuses to delete it.
+  final bool live;
 }
 
 /// One step of a call's stage timeline: stage, time, risk and masked quotes.

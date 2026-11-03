@@ -32,8 +32,10 @@ A newer push for the same `callId` updates the open screen in place (stage only 
 - **Channels** (created at first launch): `family_alerts` "Scam alerts", `Importance.max` (heads-up), default sound and
   vibration, `NotificationVisibility.public`, category `message` (no DND bypass). `family_updates` "Call updates",
   `Importance.low` (no heads-up, no sound) for "may be genuine".
-- **Content:** title `familyNotifTitle` ("Mum may be on a scam call"), body `familyNotifBody` (stage label, plus agency
-  when known). Never quotes or summary on the lock screen. Notification id = hash of `callId`, so the second push and the
+- **Content:** name only, locked or unlocked, for privacy (Preston's decision, 2 Nov; supersedes "body shows stage and
+  agency"). Alert: title `familyNotifTitleCheck` ("Check on Mum now"), body `familyNotifBodyOpen` ("Urgent call alert.
+  Open Jaga to see more."). Follow-up: `familyNotifGenuineTitleUpdate` / `familyNotifBodyOpenCalm`. Stage, agency and
+  quotes appear only inside Jaga after the tap (the payload carries the full alert). Notification id = hash of `callId`, so the second push and the
   follow-up **replace** the first instead of stacking (`onlyAlertOnce: false` on the alert channel so the money push re-rings).
 - **Action** `familyNotifCallAction` ("Call Mum"), `showsUserInterface: true`: opens the alert screen with `autoDial`,
   which launches the dialer after the first frame. Returning from the dialer lands on the alert screen.
@@ -125,9 +127,8 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 | Key | English |
 |---|---|
 | `familyNotifChannelAlerts` / `familyNotifChannelUpdates` | Scam alerts / Call updates |
-| `familyNotifTitle` | {name} may be on a scam call |
-| `familyNotifBody` / `familyNotifBodyAgency` | {stage}. / {stage}. Says they are from {agency}. |
-| `familyNotifGenuineTitle` | {name}'s call may be genuine |
+| `familyNotifTitleCheck` / `familyNotifBodyOpen` | Check on {name} now / Urgent call alert. Open Jaga to see more. |
+| `familyNotifGenuineTitleUpdate` / `familyNotifBodyOpenCalm` | Update about {name} / Open Jaga to see more. |
 | `familyNotifCallAction` | Call {name} |
 | `familyAlertHeadline` | {name} may be on a scam call |
 | `familyAlertTime` | Alert at {time} |
@@ -173,7 +174,7 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 4. PIN: 4 digits, 5 wrong tries, then a 5-minute lockout.
 5. Onboarding step 9 is buzz-only.
 6. The call-forwarding step has a debug-only "Skip" (`kDebugMode`).
-7. The lock-screen notification shows stage and agency, never quotes or summary.
+7. The notification shows only the name and an urgent line; stage, agency and quotes are inside the app.
 8. No battery-optimisation checklist item for now.
 
 #23 deviations (flutter-dev):
@@ -185,8 +186,8 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 14. The Clear Jaga Pause sheet cannot be closed while a request is in flight (`PopScope`, drag off); the timeline likewise blocks Back and a second delete. The sheet's text scrolls and its button stays pinned. The brief's `familyCall997` is `familyCallHotline`.
 15. The 997 hotline is `scamHotline` in `lib/data/models/scam_hotline.dart` (no region pack yet). "Genuine calls never appear" is the server's job: the list holds only calls that were alerted.
 
-`FcmAlertPushService` is a follow-up that waits for the team's Firebase project; #11 ships the `AlertPushService`
-interface and `FakeAlertPushService` only.
+`FcmAlertPushService` has since merged (see 16); #11 first shipped the `AlertPushService` interface and
+`FakeAlertPushService`.
 
 16. FCM data push and anonymous auth wired (28 Oct); server registration of the FCM token waits for contracts v1.
     Foreground pushes use `FirebaseMessaging.onMessage`; background and terminated ones go through

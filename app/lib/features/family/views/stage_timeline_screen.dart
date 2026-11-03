@@ -66,7 +66,9 @@ class StageTimelineScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 tooltip: l.familyTimelineDelete,
-                onPressed: vm.deleting ? null : () => _delete(context),
+                onPressed: vm.deleting || vm.call.live
+                    ? null
+                    : () => _delete(context),
               ),
             ],
           ),

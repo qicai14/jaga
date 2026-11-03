@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../core/l10n/gen/app_localizations.dart';
-import '../../core/l10n/stage_labels.dart';
 import '../models/family_alert.dart';
 import '../models/linked_person.dart';
 
@@ -40,8 +39,8 @@ const callActionId = 'call';
 int notificationIdFor(String callId) =>
     callId.codeUnits.fold(0, (h, c) => (h * 31 + c) & 0x7fffffff);
 
-/// What one notification says and how loudly. The lock screen shows the stage
-/// and agency, never quotes or the summary.
+/// What one notification says and how loudly. The lock screen shows only the
+/// name and an urgent line; detail stays inside the app.
 @immutable
 class AlertContent {
   const AlertContent({
@@ -72,18 +71,12 @@ AlertContent alertContentFor(
   AppLocalizations l,
 ) {
   final genuine = alert.kind == FamilyAlertKind.mayBeGenuine;
-  final stage = alert.stage.label(l);
-  final agency = alert.claimedAgency;
   return AlertContent(
     id: notificationIdFor(alert.callId),
     title: genuine
-        ? l.familyNotifGenuineTitle(person.name)
-        : l.familyNotifTitle(person.name),
-    body: genuine
-        ? l.familyGenuineBody(person.name)
-        : agency == null
-        ? l.familyNotifBody(stage)
-        : l.familyNotifBodyAgency(stage, agency),
+        ? l.familyNotifGenuineTitleUpdate(person.name)
+        : l.familyNotifTitleCheck(person.name),
+    body: genuine ? l.familyNotifBodyOpenCalm : l.familyNotifBodyOpen,
     payload: jsonEncode(alert.toJson()),
     channelId: genuine ? updateChannelId : alertChannelId,
     channelName: genuine

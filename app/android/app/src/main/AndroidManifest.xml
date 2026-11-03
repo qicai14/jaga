@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <!-- The Warning fills the screen over the lock screen (Android 14 asks the user). -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
-    <!-- Jaga hears the caller during a Jaga line call. -->
+    <!-- The mic carries the protected user's own voice on the in-app call; the server hears the caller through Twilio. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- Lets Jaga come to the front when a call is answered from the phone's own call screen. -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>

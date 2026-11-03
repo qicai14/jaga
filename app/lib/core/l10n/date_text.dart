@@ -12,10 +12,10 @@ extension DateText on DateTime {
   String formatDayAndTime(BuildContext context) =>
       DateFormat.yMMMd(_locale(context)).add_jm().format(toLocal());
 
-  /// Time only for today, date and time before that.
-  String formatWhen(BuildContext context) {
+  /// Time only for today, date and time before that. [now] is for tests.
+  String formatWhen(BuildContext context, {DateTime? now}) {
     final local = toLocal();
-    final now = DateTime.now();
+    now ??= DateTime.now();
     final today =
         local.year == now.year &&
         local.month == now.month &&

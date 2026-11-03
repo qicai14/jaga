@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/l10n/gen/app_localizations.dart';
+import 'package:jaga/core/l10n/stage_labels.dart';
 import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/services/alert_notifier.dart';
@@ -43,8 +44,8 @@ void main() {
       expect(c.channelId, 'family_alerts');
       expect(c.importance, Importance.max);
       expect(c.id, notificationIdFor('call-1'));
-      expect(c.title, 'Mum may be on a scam call');
-      expect(c.body, 'Asked to move money. Says they are from PDRM.');
+      expect(c.title, 'Check on Mum now');
+      expect(c.body, 'Urgent call alert. Open Jaga to see more.');
     });
 
     test('a follow-up is quiet: family_updates channel at low importance', () {
@@ -52,27 +53,28 @@ void main() {
       expect(c.channelId, 'family_updates');
       expect(c.importance, Importance.low);
       expect(c.id, alertContentFor(money, familyPerson, l).id); // replaces it
-      expect(c.title, "Mum's call may be genuine");
+      expect(c.title, 'Update about Mum');
+      expect(c.body, 'Open Jaga to see more.');
     });
 
-    test('no agency: the body is only the stage', () {
-      final c = alertContentFor(
-        FamilyAlert.parse(familyNoAgency),
-        familyPerson,
-        l,
-      );
-      expect(c.body, 'Passed to another person.');
-    });
-
-    test('the lock screen never shows quotes or the summary', () {
-      for (final a in [money, genuine, FamilyAlert.parse(familyLongText)]) {
-        final c = alertContentFor(a, familyPerson, l);
-        for (final secret in [a.summary, ...a.quotes]) {
-          expect(c.title, isNot(contains(secret)));
-          expect(c.body, isNot(contains(secret)));
+    test(
+      'the lock screen never shows the stage, agency, quotes or summary',
+      () {
+        for (final a in [money, genuine, FamilyAlert.parse(familyLongText)]) {
+          final c = alertContentFor(a, familyPerson, l);
+          final stage = a.stage.label(l);
+          for (final secret in [
+            a.summary,
+            ...a.quotes,
+            stage,
+            ?a.claimedAgency,
+          ]) {
+            expect(c.title, isNot(contains(secret)));
+            expect(c.body, isNot(contains(secret)));
+          }
         }
-      }
-    });
+      },
+    );
   });
 
   group('alertOpenFrom', () {

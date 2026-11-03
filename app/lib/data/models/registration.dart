@@ -25,10 +25,14 @@ class Registration {
   final String linkCode;
 
   /// Dialled once on the protected phone to forward its calls to the Jaga line.
-  /// Empty when the build has no Jaga line (JAGA_LINE_NUMBER unset): never a dead number.
-  String get forwardingCode => jagaLineNumber.isEmpty
-      ? ''
-      : '*21*${jagaLineNumber.replaceAll(' ', '')}#';
+  /// Empty when the build has no valid Jaga line (unset or not `+` and 8-15
+  /// digits, so no `*` or `#` can change the code): never a dead number.
+  String get forwardingCode {
+    final number = jagaLineNumber.replaceAll(RegExp(r'[ -]'), '');
+    return _e164.hasMatch(number) ? '*21*$number#' : '';
+  }
+
+  static final _e164 = RegExp(r'^\+\d{8,15}$');
 
   /// Dialled to cancel forwarding; needs no Jaga line.
   static const cancelForwardingCode = '##21#';

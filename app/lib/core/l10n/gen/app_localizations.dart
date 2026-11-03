@@ -250,29 +250,29 @@ abstract class AppLocalizations {
   /// **'Call updates'**
   String get familyNotifChannelUpdates;
 
-  /// Notification title (lock screen). name is the protected user's name.
+  /// Notification title of a family alert. Name only, so the lock screen shows no detail. name is the protected user's name.
   ///
   /// In en, this message translates to:
-  /// **'{name} may be on a scam call'**
-  String familyNotifTitle(String name);
+  /// **'Check on {name} now'**
+  String familyNotifTitleCheck(String name);
 
-  /// Notification body without an agency. stage is the plain-word stage label. Never quotes or summary.
+  /// Notification body of a family alert. Stage, agency and quotes are shown only inside the app.
   ///
   /// In en, this message translates to:
-  /// **'{stage}.'**
-  String familyNotifBody(String stage);
+  /// **'Urgent call alert. Open Jaga to see more.'**
+  String get familyNotifBodyOpen;
 
-  /// Notification body with an agency. stage is the stage label, agency the one the caller claimed.
+  /// Notification title of the 'may be genuine' follow-up. Name only.
   ///
   /// In en, this message translates to:
-  /// **'{stage}. Says they are from {agency}.'**
-  String familyNotifBodyAgency(String stage, String agency);
+  /// **'Update about {name}'**
+  String familyNotifGenuineTitleUpdate(String name);
 
-  /// Notification title of the 'may be genuine' follow-up.
+  /// Notification body of the 'may be genuine' follow-up. Calm, no detail.
   ///
   /// In en, this message translates to:
-  /// **'{name}\'s call may be genuine'**
-  String familyNotifGenuineTitle(String name);
+  /// **'Open Jaga to see more.'**
+  String get familyNotifBodyOpenCalm;
 
   /// Notification action button that calls the protected user.
   ///

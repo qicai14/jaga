@@ -43,7 +43,9 @@ class PinRepository {
       await _clear();
       return PinResult.ok;
     }
-    final tries = (int.tryParse(await _read(_triesKey) ?? '') ?? 0) + 1;
+    final read = await _readCounter(_triesKey);
+    if (read.failed) return PinResult.locked;
+    final tries = (int.tryParse(read.value ?? '') ?? 0) + 1;
     if (tries < _maxWrongTries) {
       await _store.write(_triesKey, '$tries');
       return PinResult.wrong;
@@ -58,7 +60,11 @@ class PinRepository {
 
   /// When the lock ends, or null if not locked.
   Future<DateTime?> lockedUntil() async {
-    final raw = int.tryParse(await _read(_lockedUntilKey) ?? '');
+    final read = await _readCounter(_lockedUntilKey);
+    // Fail closed: an unreadable lock counter reads as locked.
+    // Deliberate: now + 5 min, not persisted, re-checked on every call.
+    if (read.failed) return _clock().add(_lockFor);
+    final raw = int.tryParse(read.value ?? '');
     if (raw == null) return null;
     final until = DateTime.fromMillisecondsSinceEpoch(raw);
     return until.isAfter(_clock()) ? until : null;
@@ -78,7 +84,17 @@ class PinRepository {
     await _store.delete(_lockedUntilKey);
   }
 
-  /// A secure-storage failure reads as nothing stored (no PIN, no lock).
+  /// The lockout counters: a failed read is reported, never read as zero.
+  Future<({String? value, bool failed})> _readCounter(String key) async {
+    try {
+      return (value: await _store.read(key), failed: false);
+    } on Object catch (e) {
+      debugPrint('Could not read the co-pilot lock (${e.runtimeType})');
+      return (value: null, failed: true);
+    }
+  }
+
+  /// A secure-storage failure reads as nothing stored (no PIN).
   Future<String?> _read(String key) async {
     try {
       return await _store.read(key);

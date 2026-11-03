@@ -15,13 +15,13 @@ class GalleryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: 'Jaga gallery',
-        debugShowCheckedModeBanner: false,
-        theme: buildJagaTheme(const Locale('en')),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: GalleryHome(entries: entries),
-      );
+    title: 'Jaga gallery',
+    debugShowCheckedModeBanner: false,
+    theme: buildJagaTheme(),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: GalleryHome(entries: entries),
+  );
 }
 
 class GalleryHome extends StatefulWidget {
@@ -48,7 +48,11 @@ class _GalleryHomeState extends State<GalleryHome> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(selected == null ? 'Gallery' : '${selected.feature}: ${selected.state}'),
+          title: Text(
+            selected == null
+                ? 'Gallery'
+                : '${selected.feature}: ${selected.state}',
+          ),
           actions: [
             DropdownButton<Locale>(
               value: _locale,
@@ -63,7 +67,8 @@ class _GalleryHomeState extends State<GalleryHome> {
               value: _scale,
               onChanged: (v) => setState(() => _scale = v!),
               items: [
-                for (final s in _scales) DropdownMenuItem(value: s, child: Text('x$s')),
+                for (final s in _scales)
+                  DropdownMenuItem(value: s, child: Text('x$s')),
               ],
             ),
             const SizedBox(width: 8),
@@ -87,7 +92,10 @@ class _GalleryHomeState extends State<GalleryHome> {
             child: Text(f.key, style: Theme.of(context).textTheme.titleLarge),
           ),
           for (final e in f.value)
-            ListTile(title: Text(e.state), onTap: () => setState(() => _selected = e)),
+            ListTile(
+              title: Text(e.state),
+              onTap: () => setState(() => _selected = e),
+            ),
         ],
       ],
     );
@@ -95,9 +103,10 @@ class _GalleryHomeState extends State<GalleryHome> {
 
   Widget _entry(GalleryEntry entry) {
     return Theme(
-      data: buildJagaTheme(_locale),
+      data: buildJagaTheme(),
       child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(_scale)),
+        data: MediaQuery.of(context)
+            .copyWith(textScaler: TextScaler.linear(_scale)),
         child: Localizations.override(
           context: context,
           locale: _locale,

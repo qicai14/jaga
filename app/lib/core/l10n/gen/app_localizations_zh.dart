@@ -87,24 +87,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get familyNotifChannelUpdates => '通话更新';
 
   @override
-  String familyNotifTitle(String name) {
-    return '$name可能正在接听诈骗电话';
+  String familyNotifTitleCheck(String name) {
+    return '现在就联系$name';
   }
 
   @override
-  String familyNotifBody(String stage) {
-    return '$stage。';
+  String get familyNotifBodyOpen => '紧急来电提醒。打开 Jaga 查看详情。';
+
+  @override
+  String familyNotifGenuineTitleUpdate(String name) {
+    return '关于$name的最新消息';
   }
 
   @override
-  String familyNotifBodyAgency(String stage, String agency) {
-    return '$stage。自称来自$agency。';
-  }
-
-  @override
-  String familyNotifGenuineTitle(String name) {
-    return '$name的来电可能是真实的';
-  }
+  String get familyNotifBodyOpenCalm => '打开 Jaga 查看详情。';
 
   @override
   String familyNotifCallAction(String name) {
