@@ -40,15 +40,20 @@ class TwilioCallService implements CallService {
   Future<CallSnapshot> current() async {
     // The app can start because a call is already on (answered with the app killed).
     if (_snapshot.phase == CallPhase.idle && await _platform.call.isOnCall()) {
-      final active = _activeCall();
-      _snapshot = _snapshot.copyWith(
-        phase: CallPhase.active,
-        callerLabel: _label(active),
-        callId: _callId(active),
-        connectedAt: _now(),
-        muted: await _platform.call.isMuted() ?? false,
-        speakerOn: await _platform.call.isOnSpeaker() ?? false,
-      );
+      final muted = await _platform.call.isMuted() ?? false;
+      final speakerOn = await _platform.call.isOnSpeaker() ?? false;
+      // Call events during the awaits are newer: overwriting them lost the callId and closed the stage stream (#19).
+      if (_snapshot.phase == CallPhase.idle) {
+        final active = _activeCall();
+        _snapshot = _snapshot.copyWith(
+          phase: CallPhase.active,
+          callerLabel: _label(active),
+          callId: _callId(active),
+          connectedAt: _now(),
+          muted: muted,
+          speakerOn: speakerOn,
+        );
+      }
     }
     return _snapshot;
   }

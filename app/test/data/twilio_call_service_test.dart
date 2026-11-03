@@ -1,13 +1,24 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jaga/core/haptics/fake_buzzer.dart';
 import 'package:jaga/data/models/call_snapshot.dart';
+import 'package:jaga/data/models/stage_update.dart';
+import 'package:jaga/data/repositories/call_repository.dart';
+import 'package:jaga/data/repositories/call_risk_repository.dart';
+import 'package:jaga/data/services/attention_service.dart';
+import 'package:jaga/data/services/stage_stream_service.dart';
 import 'package:jaga/data/services/twilio_call_service.dart';
+import 'package:jaga/data/services/voice_token_service.dart';
+import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
+import 'package:jaga/features/warning/view_models/warning_view_model.dart';
 import 'package:twilio_voice/twilio_voice.dart';
 
 final _t0 = DateTime.utc(2026, 11, 1, 10);
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late StreamController<CallEvent> events;
   late TwilioCallService service;
   final seen = <CallSnapshot>[];
@@ -184,6 +195,55 @@ void main() {
         expect(listens, 3);
       },
     );
+
+    test('a call event during the start-up read keeps the callId, so the '
+        'stage stream stays open and its updates show', () async {
+      const channel = MethodChannel('twilio_voice/messages');
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final muted = Completer<bool>();
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        if (call.method == 'isOnCall') return true;
+        if (call.method == 'isMuted') return muted.future;
+        return false;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      final stages = FakeStageStreamService();
+      final repo = CallRepository(
+        service: ringScreen,
+        tokens: FakeVoiceTokenService(),
+        stageStream: stages,
+      );
+      final warning = WarningViewModel(
+        repository: CallRiskRepository(stages),
+        buzzer: FakeBuzzer(),
+        attention: FakeAttentionService(),
+      );
+      addTearDown(() {
+        warning.dispose();
+        repo.dispose();
+        stages.dispose();
+      });
+
+      // The app starts mid-call: current() is waiting on isMuted when the
+      // plugin's buffered and re-emitted Connected events arrive.
+      final watching = repo.watch();
+      await pumpEventQueue();
+      plugin.add(CallEvent.connected);
+      await pumpEventQueue();
+      params = {'callId': 'c-9'};
+      plugin.add(CallEvent.connected);
+      expect(stages.connectedCalls, ['c-9']);
+
+      muted.complete(false);
+      await watching;
+      expect(repo.snapshot.value.callId, 'c-9');
+      expect(stages.closeCount, 0);
+
+      // No call event from here on: the stage update alone shows Caution.
+      stages.emit(StageUpdate.parse(stageMedium));
+      expect(warning.state.layer, WarningLayer.caution);
+    });
 
     test('dispose during a re-listen does not listen again', () async {
       plugin.add(CallEvent.connected);
