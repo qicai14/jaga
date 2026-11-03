@@ -32,10 +32,8 @@ A newer push for the same `callId` updates the open screen in place (stage only 
 - **Channels** (created at first launch): `family_alerts` "Scam alerts", `Importance.max` (heads-up), default sound and
   vibration, `NotificationVisibility.public`, category `message` (no DND bypass). `family_updates` "Call updates",
   `Importance.low` (no heads-up, no sound) for "may be genuine".
-- **Content:** name only, locked or unlocked, for privacy (Preston's decision, 2 Nov; supersedes "body shows stage and
-  agency"). Alert: title `familyNotifTitleCheck` ("Check on Mum now"), body `familyNotifBodyOpen` ("Urgent call alert.
-  Open Jaga to see more."). Follow-up: `familyNotifGenuineTitleUpdate` / `familyNotifBodyOpenCalm`. Stage, agency and
-  quotes appear only inside Jaga after the tap (the payload carries the full alert). Notification id = hash of `callId`, so the second push and the
+- **Content:** (lead's decision, Qi Cai, 3 Nov: the notification shows stage and agency; reverts Preston's 2 Nov name-only change) title `familyNotifTitle` ("Mum may be on a scam call"), body `familyNotifBody` (stage label, plus agency
+  when known). Never quotes or summary on the lock screen. Notification id = hash of `callId`, so the second push and the
   follow-up **replace** the first instead of stacking (`onlyAlertOnce: false` on the alert channel so the money push re-rings).
 - **Action** `familyNotifCallAction` ("Call Mum"), `showsUserInterface: true`: opens the alert screen with `autoDial`,
   which launches the dialer after the first frame. Returning from the dialer lands on the alert screen.
@@ -127,8 +125,9 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 | Key | English |
 |---|---|
 | `familyNotifChannelAlerts` / `familyNotifChannelUpdates` | Scam alerts / Call updates |
-| `familyNotifTitleCheck` / `familyNotifBodyOpen` | Check on {name} now / Urgent call alert. Open Jaga to see more. |
-| `familyNotifGenuineTitleUpdate` / `familyNotifBodyOpenCalm` | Update about {name} / Open Jaga to see more. |
+| `familyNotifTitle` | {name} may be on a scam call |
+| `familyNotifBody` / `familyNotifBodyAgency` | {stage}. / {stage}. Says they are from {agency}. |
+| `familyNotifGenuineTitle` | {name}'s call may be genuine |
 | `familyNotifCallAction` | Call {name} |
 | `familyAlertHeadline` | {name} may be on a scam call |
 | `familyAlertTime` | Alert at {time} |
@@ -174,7 +173,7 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 4. PIN: 4 digits, 5 wrong tries, then a 5-minute lockout.
 5. Onboarding step 9 is buzz-only.
 6. The call-forwarding step has a debug-only "Skip" (`kDebugMode`).
-7. The notification shows only the name and an urgent line; stage, agency and quotes are inside the app.
+7. The lock-screen notification shows stage and agency, never quotes or summary (lead's decision, Qi Cai, 3 Nov).
 8. No battery-optimisation checklist item for now.
 
 #23 deviations (flutter-dev):
