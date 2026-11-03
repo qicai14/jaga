@@ -14,9 +14,10 @@ class TwilioCallService implements CallService {
     Stream<CallEvent>? events,
     ActiveCall? Function()? activeCall,
     DateTime Function()? now,
-  }) : _activeCall = activeCall ?? (() => _platform.call.activeCall),
+  }) : _events = events ?? _platform.callEventsListener,
+       _activeCall = activeCall ?? (() => _platform.call.activeCall),
        _now = now ?? DateTime.now {
-    _sub = (events ?? _platform.callEventsListener).listen(_onEvent);
+    _sub = _events.listen(_onEvent);
   }
 
   static TwilioVoicePlatform get _platform => TwilioVoicePlatform.instance;
@@ -24,9 +25,13 @@ class TwilioCallService implements CallService {
   final Future<String?> Function() fcmToken;
   final ActiveCall? Function() _activeCall;
   final DateTime Function() _now;
+  final Stream<CallEvent> _events;
   final _controller = StreamController<CallSnapshot>.broadcast(sync: true);
-  late final StreamSubscription<CallEvent> _sub;
+  late StreamSubscription<CallEvent> _sub;
   CallSnapshot _snapshot = const CallSnapshot();
+  // Set once per call when we re-listen to recover the callId; cleared when the call is no longer live.
+  bool _relistened = false;
+  bool _disposed = false;
 
   @override
   Stream<CallSnapshot> get snapshots => _controller.stream;
@@ -56,8 +61,19 @@ class TwilioCallService implements CallService {
 
   // The parent call's SID, sent by /twilio/voice as a <Parameter>; null on the Fake path, so no stage stream.
   // The Answer event carries it, the 4-token Connected event does not, so reduceCallEvent keeps it from answer.
+  // Answered from the ring screen before Dart listens, the plugin buffers only the last call event, so Connected
+  // replaces Answer and the callId is lost; _onEvent then re-listens to get it back.
   static String? _callId(ActiveCall? call) =>
       call?.customParams?['callId'] as String?;
+
+  /// A fresh listen with nothing buffered makes the plugin re-emit the active call as a 5-token Connected, with
+  /// its custom params (TwilioVoicePlugin.onListen, emitActiveCallState).
+  Future<void> _relisten() async {
+    _relistened = true;
+    await _sub.cancel();
+    // dispose() may have run during the cancel.
+    if (!_disposed) _sub = _events.listen(_onEvent);
+  }
 
   void _onEvent(CallEvent event) {
     final active = _activeCall();
@@ -72,6 +88,12 @@ class TwilioCallService implements CallService {
     if (event == CallEvent.answer) {
       setSpeaker(false).catchError(
         (Object e) => debugPrint('Jaga could not set the speaker: $e'),
+      );
+    }
+    if (!next.live) _relistened = false;
+    if (event == CallEvent.connected && next.callId == null && !_relistened) {
+      _relisten().catchError(
+        (Object e) => debugPrint('Jaga could not re-listen for the callId: $e'),
       );
     }
     if (identical(next, _snapshot)) return;
@@ -105,6 +127,7 @@ class TwilioCallService implements CallService {
   }
 
   Future<void> dispose() async {
+    _disposed = true;
     await _sub.cancel();
     await _controller.close();
   }
@@ -135,6 +158,7 @@ CallSnapshot reduceCallEvent(
     case CallEvent.reconnected:
       return snapshot.copyWith(
         phase: CallPhase.active,
+        callId: callId,
         connectedAt: snapshot.connectedAt ?? now,
       );
     case CallEvent.reconnecting:

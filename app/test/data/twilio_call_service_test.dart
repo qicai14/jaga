@@ -116,6 +116,84 @@ void main() {
     expect(seen.last.phase, CallPhase.ended);
   });
 
+  group('answered from the ring screen: only a Connected without params', () {
+    late StreamController<CallEvent> plugin;
+    late TwilioCallService ringScreen;
+    var listens = 0;
+    Map<String, dynamic>? params;
+    final got = <CallSnapshot>[];
+
+    setUp(() {
+      listens = 0;
+      params = null;
+      got.clear();
+      plugin = StreamController<CallEvent>.broadcast(
+        sync: true,
+        onListen: () => listens++,
+      );
+      ringScreen = TwilioCallService(
+        fcmToken: () async => 'fcm',
+        events: plugin.stream,
+        activeCall: () => ActiveCall(
+          from: '+60326101599',
+          to: 'client:jaga',
+          callDirection: CallDirection.incoming,
+          customParams: params,
+        ),
+        now: () => clock,
+      );
+      ringScreen.snapshots.listen(got.add);
+    });
+
+    tearDown(() async {
+      await ringScreen.dispose();
+      await plugin.close();
+    });
+
+    test(
+      're-listens once and takes the callId from the re-emitted Connected',
+      () async {
+        plugin.add(CallEvent.connected);
+        expect(got.single.callId, isNull);
+        await pumpEventQueue();
+        expect(listens, 2);
+
+        // The plugin's re-emitted Connected carries the custom params.
+        params = {'callId': 'c-9'};
+        plugin.add(CallEvent.connected);
+        expect(got.last.phase, CallPhase.active);
+        expect(got.last.callId, 'c-9');
+        expect(got.last.connectedAt, _t0);
+      },
+    );
+
+    test(
+      'no callId after re-listening (Fake path): no second re-listen',
+      () async {
+        plugin.add(CallEvent.connected);
+        await pumpEventQueue();
+        plugin.add(CallEvent.connected);
+        await pumpEventQueue();
+        expect(listens, 2);
+        expect(got.last.callId, isNull);
+
+        // The next call gets its own re-listen.
+        plugin.add(CallEvent.callEnded);
+        plugin.add(CallEvent.connected);
+        await pumpEventQueue();
+        expect(listens, 3);
+      },
+    );
+
+    test('dispose during a re-listen does not listen again', () async {
+      plugin.add(CallEvent.connected);
+      await ringScreen.dispose();
+      await pumpEventQueue();
+      expect(listens, 1);
+      expect(plugin.hasListener, isFalse);
+    });
+  });
+
   test('events that mean nothing here change nothing', () {
     final before = seen.length;
     play([CallEvent.log, CallEvent.permission, CallEvent.hold]);
