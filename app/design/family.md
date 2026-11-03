@@ -315,3 +315,34 @@ the Settings tab reaches onboarding with no bar. `family_home_view_models_test`:
 
 `home-live` and `home-live-no-alert` stay identical on purpose: the tile says the call is live, which holds either way,
 so only the hint changes (`familyCallLiveOpen` or none). A second look would show a detail Preston can't act on.
+
+**12.6 Home header: the seal and the wordmark.** Preston asked for a fuller, more premium top on Home. The look is the
+launcher icon signing the page, like a letterhead. It stays on paper, not in a teal band: the `GuardedMasthead` band
+means "a notice is open" (call, Warning), and Home is the calm place. Calls and Settings keep their plain titles.
+```
+ScreenFrame(title: null, body: Column[ HomeHeader, gap l24, ProtectedPersonCard ... unchanged ])
+HomeHeader  views/widgets/home_header.dart   Semantics(header: true, label: appTitle) on the Row
+  Row(crossAxisAlignment: start)
+    JagaSeal(48)   core/widgets/jaga_seal.dart, ExcludeSemantics, fixed size (not text-scaled)
+    gap m16, Expanded(Column(start)
+      JagaWordmark(size: display, color: guarded)   new enum value display(32); keeps its 1.3 clamp (41.6sp max)
+      gap xs4, Text(familyHomeWatching(name), bodyMedium 20sp, onSurfaceVariant)   no clamp, wraps by word))
+```
+- **JagaSeal** is a `CustomPainter`, not an asset: a `guarded` rounded square (radiusSmall 12), with the launcher's
+  paper shield and the teal J from `launcher-icon.md` §2, copied by hand into `Path` calls (24-unit space scaled to the
+  tile, shield about 20 x 24dp, centred). No new images or packages, and that brief's rules hold: no gradient or glow.
+- **Tokens:** wordmark `guarded` #0B5D4F on `surface` #FBF8F2 (about 7.4:1, AAA). The line is `onSurfaceVariant` #3B4441
+  (about 9.6:1). Seal paper on teal is 7.4:1. Spacing: ScreenFrame's top l24, then the header, then l24 to the card.
+- **States:** the header never changes with pause or live state. The card's badges and the live tile already say that,
+  and a second copy would turn the header into an alarm. Only the name changes it. Loading, error, empty: same header
+  (the name comes from `vm.person`, which is set before load). A long name wraps under the wordmark; the seal stays at the top.
+- **Text x2.0:** the wordmark stops at 1.3 and the seal at 48dp; the line (40sp) wraps by word at 281dp (zh by character).
+
+| Key | en | ms | zh |
+|---|---|---|---|
+| `familyHomeWatching` | Keeping watch over calls to {name} | Mengawasi panggilan kepada {name} | 守护打给{name}的电话 |
+
+**Gallery:** every `home-*` entry picks it up; add `home-long-name` ("Puan Siti Aminah binti Abdullah"). Re-shoot
+`home-live` and `home-no-pause` at x1.0 and x2.0 in en and ms. **Tests** (`copilot_home_screen_test`,
+393x852 and x2.0, en/ms/zh): one header semantics node labelled "Jaga"; the line shows the name; the seal is 48x48;
+`home-long-name` at x2.0 has no overflow and the card starts below the header; no `ScreenFrame` title on Home.
