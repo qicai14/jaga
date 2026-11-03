@@ -70,7 +70,11 @@ void main() {
         if (state == 'alert-isolation' || state == 'home-pause-active') ...[
           ('zh', 1.0),
         ],
-        if (state == 'alert-long-text') ('ms', 2.0),
+        if (state == 'alert-long-text' ||
+            state == 'home-live' ||
+            state == 'calls-many' ||
+            state == 'tabs-settings')
+          ('ms', 2.0),
       ];
     }
     if (feature == 'onboarding') {

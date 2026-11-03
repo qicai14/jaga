@@ -18,7 +18,9 @@ import '../../features/family/view_models/copilot_home_view_model.dart';
 import '../../features/family/view_models/copilot_settings_view_model.dart';
 import '../../features/family/view_models/family_alert_view_model.dart';
 import '../../features/family/view_models/stage_timeline_view_model.dart';
+import '../../features/family/views/copilot_calls_screen.dart';
 import '../../features/family/views/copilot_home_screen.dart';
+import '../../features/family/views/copilot_tabs.dart';
 import '../../features/family/views/copilot_settings_screen.dart';
 import '../../features/family/views/family_alert_screen.dart';
 import '../../features/family/views/stage_timeline_screen.dart';
@@ -254,7 +256,7 @@ class _WithRigState extends State<_WithRig> {
   }
 }
 
-/// The co-pilot home on fakes. Opening a call, the sheet or Settings works as in the app.
+/// The co-pilot tabs on fakes. Opening a call, the sheet or a tab works as in the app.
 class _CopilotHomeDemo extends StatefulWidget {
   const _CopilotHomeDemo({
     this.pauseActive = false,
@@ -263,11 +265,15 @@ class _CopilotHomeDemo extends StatefulWidget {
     this.offline = false,
     this.live = 0,
     this.held = true,
+    this.tab = 0,
   });
 
   /// How many of the first calls are live, and whether alerts are held for them.
   final int live;
   final bool held;
+
+  /// The tab showing first: 0 Home, 1 Calls, 2 Settings.
+  final int tab;
 
   final bool pauseActive;
   final bool many;
@@ -279,6 +285,7 @@ class _CopilotHomeDemo extends StatefulWidget {
 }
 
 class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
+  late int _tab = widget.tab;
   late final _pause = FakeCopilotPauseService(active: widget.pauseActive)
     ..offline = widget.offline;
   // The first calls are the first fixture alerts: the live ones are these.
@@ -332,24 +339,46 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
         timeline: _timeline,
         alerts: _alerts,
       ),
-      builder: (_, vm) => CopilotHomeScreen(
-        vm: vm,
-        openAlert: (alert) => Navigator.of(context).push<void>(
-          MaterialPageRoute(
-            builder: (_) => _FamilyAlertDemo(alert, familyPerson),
-          ),
-        ),
-        createClearPause: () =>
-            ClearPauseViewModel(personName: familyPerson.name, pause: _pause),
-        timelineFor: (call) => StageTimelineViewModel(
-          call: call,
-          timeline: _timeline,
-          dialer: _dialer,
-        ),
-        createSettings: () => CopilotSettingsViewModel(
+      builder: (_, vm) => ViewModelHost(
+        create: () => CopilotSettingsViewModel(
           repository: rig.onboarding,
           person: familyPerson,
         ),
+        builder: (_, settings) {
+          StageTimelineViewModel timelineFor(AlertedCall call) =>
+              StageTimelineViewModel(
+                call: call,
+                timeline: _timeline,
+                dialer: _dialer,
+              );
+          void openAlert(FamilyAlert alert) => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => _FamilyAlertDemo(alert, familyPerson),
+            ),
+          );
+          return CopilotTabs(
+            index: _tab,
+            onSelect: (i) => setState(() => _tab = i),
+            tabs: [
+              CopilotHomeScreen(
+                vm: vm,
+                openAlert: openAlert,
+                createClearPause: () => ClearPauseViewModel(
+                  personName: familyPerson.name,
+                  pause: _pause,
+                ),
+                timelineFor: timelineFor,
+                onSeeAllCalls: () => setState(() => _tab = 1),
+              ),
+              CopilotCallsScreen(
+                vm: vm,
+                timelineFor: timelineFor,
+                openAlert: openAlert,
+              ),
+              CopilotSettingsScreen(vm: settings),
+            ],
+          );
+        },
       ),
     ),
   );
@@ -498,6 +527,10 @@ List<GalleryEntry> familyEntries() => [
   _home('home-live-no-alert', const _CopilotHomeDemo(live: 1, held: false)),
   _home('home-two-live', const _CopilotHomeDemo(live: 2)),
   _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
+  _home('calls-many', const _CopilotHomeDemo(many: true, tab: 1)),
+  _home('calls-empty', const _CopilotHomeDemo(empty: true, tab: 1)),
+  _home('calls-error', const _CopilotHomeDemo(offline: true, tab: 1)),
+  _home('tabs-settings', const _CopilotHomeDemo(tab: 2)),
   _home('settings', const _SettingsDemo()),
   _home('timeline', const _TimelineDemo('call-1')),
   _home('timeline-long-quotes', const _TimelineDemo('call-5')),
