@@ -331,3 +331,30 @@ ScreenFrame(title: null, body: Column[ Semantics(header: true, label: appTitle, 
 - **Gallery:** every `home-*` entry picks it up; `home-long-name` ("Puan Siti Aminah binti Abdullah") checks the card.
   **Tests** (`copilot_home_screen_test`, 393x852 and x2.0, en/ms/zh): one header node labelled "Jaga"; no app bar; the long
   name at x2.0 has no overflow and the card starts below the wordmark.
+
+**12.7 Which phone is this? (role marker, Preston 4 Nov).** Both roles share one app and one paper-and-teal look, so a
+glance can't tell them apart. Fix: one fixed spot, the top end corner of every main screen, says whose phone it is, like
+the owner's tag on a letterhead. The co-pilot header stays the wordmark only (12.6); no caption returns.
+```
+ScreenFrame(role: RoleBadge.family, ...)   new optional slot: first row, Align(end), then gap s8, then title or body
+  RoleBadge = StatusBadge(tone: neutral, icon: Icons.family_restroom, label: roleFamily)   core/widgets/role_badge.dart
+Home:     [                     (Family)]  /  Jaga (display)  /  card: "You look after" + Mum + Protected ...
+Calls:    [                     (Family)]  /  Alerted calls  /  list
+Settings: [                     (Family)]  /  Settings  /  language, Remove
+```
+- Neutral tone on purpose: grey `surfaceContainerHigh` with `onSurface` (AAA) never reads as a status, and teal stays
+  "protected", amber "live" and red "Warning". It isn't tappable, so no 56dp target; TalkBack reads it before the title.
+- **Card, from the co-pilot's side:** `ProtectedPersonCard` gets a first line `familyHomeWatching` (bodyMedium,
+  `onSurfaceVariant`) above the name. It sits inside the card, not under the wordmark, and it doesn't repeat the dropped
+  header caption. If Preston wants the card unchanged, drop this line: the badge alone carries the role.
+- Not on the alert, the timeline or the Clear Jaga Pause sheet: those are pushed full-screen from Home and name Mum in
+  their own band. The bar stays as it is (12.5); its absence on the protected side is the second cue.
+- Text: it follows the 1.5 cap. "Keluarga" at 30sp is about 200dp with icon and padding, so one line on 360dp.
+
+| Key | en | ms | zh |
+|---|---|---|---|
+| `roleFamily` | Family | Keluarga | 家人 |
+| `familyHomeWatching` | You look after | Anda menjaga | 您守护的是 |
+
+**Gallery/tests:** every `home-*`, `calls-*` and `tabs-settings` picks it up; `copilot_tabs_test` finds one "Family"
+badge on each tab in en/ms/zh at 393x852 and x1.5, end-aligned, above the header node, no overflow.
