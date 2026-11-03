@@ -179,5 +179,6 @@
   "familyNavHome": "主页",
   "familyNavCalls": "通话",
   "familyHomeLastCall": "最近警报",
-  "familyHomeSeeAllCalls": "查看所有通话"
+  "familyHomeSeeAllCalls": "查看所有通话",
+  "familyHomeWatching": "守护打给{name}的电话"
 }

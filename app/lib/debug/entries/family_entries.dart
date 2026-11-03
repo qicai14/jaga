@@ -266,6 +266,7 @@ class _CopilotHomeDemo extends StatefulWidget {
     this.live = 0,
     this.held = true,
     this.tab = 0,
+    this.person = familyPerson,
   });
 
   /// How many of the first calls are live, and whether alerts are held for them.
@@ -274,6 +275,7 @@ class _CopilotHomeDemo extends StatefulWidget {
 
   /// The tab showing first: 0 Home, 1 Calls, 2 Settings.
   final int tab;
+  final LinkedPerson person;
 
   final bool pauseActive;
   final bool many;
@@ -310,7 +312,7 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
   late final _alerts = FamilyAlertRepository(
     push: _push,
     notifier: FakeAlertNotifier(),
-    person: familyPerson,
+    person: widget.person,
   );
 
   @override
@@ -334,7 +336,7 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
   Widget build(BuildContext context) => _WithRig(
     (rig) => ViewModelHost(
       create: () => CopilotHomeViewModel(
-        person: familyPerson,
+        person: widget.person,
         pause: _pause,
         timeline: _timeline,
         alerts: _alerts,
@@ -342,7 +344,7 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
       builder: (_, vm) => ViewModelHost(
         create: () => CopilotSettingsViewModel(
           repository: rig.onboarding,
-          person: familyPerson,
+          person: widget.person,
         ),
         builder: (_, settings) {
           StageTimelineViewModel timelineFor(AlertedCall call) =>
@@ -353,7 +355,7 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
               );
           void openAlert(FamilyAlert alert) => Navigator.of(context).push<void>(
             MaterialPageRoute(
-              builder: (_) => _FamilyAlertDemo(alert, familyPerson),
+              builder: (_) => _FamilyAlertDemo(alert, widget.person),
             ),
           );
           return CopilotTabs(
@@ -364,7 +366,7 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
                 vm: vm,
                 openAlert: openAlert,
                 createClearPause: () => ClearPauseViewModel(
-                  personName: familyPerson.name,
+                  personName: widget.person.name,
                   pause: _pause,
                 ),
                 timelineFor: timelineFor,
@@ -526,6 +528,15 @@ List<GalleryEntry> familyEntries() => [
   _home('home-live', const _CopilotHomeDemo(live: 1)),
   _home('home-live-no-alert', const _CopilotHomeDemo(live: 1, held: false)),
   _home('home-two-live', const _CopilotHomeDemo(live: 2)),
+  _home(
+    'home-long-name',
+    const _CopilotHomeDemo(
+      person: LinkedPerson(
+        name: 'Puan Siti Aminah binti Abdullah',
+        phoneNumber: '+60 12-345 6789',
+      ),
+    ),
+  ),
   _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
   _home('calls-many', const _CopilotHomeDemo(many: true, tab: 1)),
   _home('calls-empty', const _CopilotHomeDemo(empty: true, tab: 1)),

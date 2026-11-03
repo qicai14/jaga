@@ -1149,6 +1149,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See all calls'**
   String get familyHomeSeeAllCalls;
+
+  /// Co-pilot home header: the fixed line under the wordmark. name is the protected user.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping watch over calls to {name}'**
+  String familyHomeWatching(String name);
 }
 
 class _AppLocalizationsDelegate

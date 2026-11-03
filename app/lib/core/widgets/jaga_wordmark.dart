@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 enum JagaWordmarkSize {
+  /// The co-pilot Home header.
+  display(32),
+
   /// Warning masthead.
   large(28),
 

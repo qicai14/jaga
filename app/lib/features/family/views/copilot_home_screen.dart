@@ -13,6 +13,7 @@ import '../view_models/load_status.dart';
 import '../view_models/stage_timeline_view_model.dart';
 import 'widgets/clear_pause_sheet.dart';
 import 'widgets/home_call_tile.dart';
+import 'widgets/home_header.dart';
 import 'widgets/protected_person_card.dart';
 
 /// The family co-pilot's home: the protected user, Jaga Pause, and the calls
@@ -66,10 +67,11 @@ class CopilotHomeScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) => ScreenFrame(
-        title: l.appTitle,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            HomeHeader(name: vm.person.name),
+            SizedBox(height: m.l),
             ProtectedPersonCard(
               name: vm.person.name,
               pauseActive: vm.status == LoadStatus.loaded && vm.pauseActive,

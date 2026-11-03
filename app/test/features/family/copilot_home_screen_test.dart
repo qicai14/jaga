@@ -5,6 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/family_alert.dart';
+import 'package:jaga/data/models/linked_person.dart';
+import 'package:jaga/core/widgets/jaga_seal.dart';
+import 'package:jaga/features/family/views/widgets/home_header.dart';
+import 'package:jaga/features/family/views/widgets/protected_person_card.dart';
 import 'package:jaga/data/repositories/family_alert_repository.dart';
 import 'package:jaga/data/services/alert_notifier.dart';
 import 'package:jaga/data/services/alert_push_service.dart';
@@ -27,11 +31,14 @@ import 'package:jaga/features/family/views/widgets/timeline_event_row.dart';
 import '../../support/harness.dart';
 
 class Rig {
-  Rig({bool pauseActive = true, FakeTimelineService? timeline})
-    : pause = FakeCopilotPauseService(active: pauseActive),
-      timeline = timeline ?? fixtureTimelineService() {
+  Rig({
+    bool pauseActive = true,
+    FakeTimelineService? timeline,
+    LinkedPerson person = familyPerson,
+  }) : pause = FakeCopilotPauseService(active: pauseActive),
+       timeline = timeline ?? fixtureTimelineService() {
     vm = CopilotHomeViewModel(
-      person: familyPerson,
+      person: person,
       pause: pause,
       timeline: this.timeline,
       alerts: alerts,
@@ -197,7 +204,7 @@ void main() {
     'hold to clear: the sheet closes, the badge goes, a SnackBar shows',
     (tester, scale) async {
       final rig = await pump(tester, scale);
-      await tester.tap(clearPause);
+      await tapVisible(tester, clearPause);
       await tester.pumpAndSettle();
       expect(
         find.text("I've spoken to Mum and checked this transfer is genuine."),
@@ -217,7 +224,7 @@ void main() {
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     rig.pause.offline = true;
     await hold(tester);
@@ -332,7 +339,7 @@ void main() {
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await tester.tap(find.byType(HoldToConfirmButton));
     await tester.pump();
@@ -353,7 +360,7 @@ void main() {
   ) async {
     final rig = await pump(tester, scale);
     // Idle: Back closes it and nothing is announced.
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -364,7 +371,7 @@ void main() {
     // Busy: Back (and, with room above the sheet, a tap outside) do nothing.
     final gate = Completer<void>();
     rig.pause.hold = gate.future;
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await hold(tester, settle: false);
     await tester.pump();
@@ -462,6 +469,54 @@ void main() {
       find.widgetWithIcon(IconButton, Icons.delete_outline),
     );
     expect(button.onPressed, isNull);
+  });
+
+  group('header', () {
+    for (final locale in const ['en', 'ms', 'zh']) {
+      forEachScale('seal, wordmark and the watching line ($locale)', (
+        tester,
+        scale,
+      ) async {
+        final handle = tester.ensureSemantics();
+        final rig = Rig();
+        addTearDown(rig.dispose);
+        await pumpJaga(
+          tester,
+          rig.screen,
+          scale: scale,
+          locale: Locale(locale),
+        );
+        expect(tester.getSize(find.byType(JagaSeal)), const Size(48, 48));
+        // One header node, labelled with the app name.
+        expect(find.bySemanticsLabel('Jaga'), findsOneWidget);
+        expect(
+          tester.getSemantics(find.bySemanticsLabel('Jaga')),
+          matchesSemantics(label: 'Jaga', isHeader: true),
+        );
+        expect(find.textContaining('Mum'), findsWidgets);
+        final line = find.descendant(
+          of: find.byType(HomeHeader),
+          matching: find.textContaining('Mum'),
+        );
+        expect(line, findsOneWidget);
+        handle.dispose();
+      });
+    }
+
+    forEachScale('a long name wraps under the wordmark; the card is below', (
+      tester,
+      scale,
+    ) async {
+      final rig = Rig(
+        person: const LinkedPerson(name: 'Puan Siti Aminah binti Abdullah'),
+      );
+      addTearDown(rig.dispose);
+      await pumpJaga(tester, rig.screen, scale: scale);
+      final header = tester.getRect(find.byType(HomeHeader));
+      final card = tester.getRect(find.byType(ProtectedPersonCard));
+      expect(card.top, greaterThanOrEqualTo(header.bottom));
+      expect(tester.getTopLeft(find.byType(JagaSeal)).dy, header.top);
+    });
   });
 
   group('navigation', () {
