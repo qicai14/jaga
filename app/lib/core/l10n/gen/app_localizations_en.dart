@@ -88,20 +88,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyNotifChannelUpdates => 'Call updates';
 
   @override
-  String familyNotifTitleCheck(String name) {
-    return 'Check on $name now';
+  String familyNotifTitle(String name) {
+    return '$name may be on a scam call';
   }
 
   @override
-  String get familyNotifBodyOpen => 'Urgent call alert. Open Jaga to see more.';
-
-  @override
-  String familyNotifGenuineTitleUpdate(String name) {
-    return 'Update about $name';
+  String familyNotifBody(String stage) {
+    return '$stage.';
   }
 
   @override
-  String get familyNotifBodyOpenCalm => 'Open Jaga to see more.';
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage. Says they are from $agency.';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return '$name\'s call may be genuine';
+  }
 
   @override
   String familyNotifCallAction(String name) {

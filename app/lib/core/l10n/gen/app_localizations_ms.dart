@@ -88,21 +88,24 @@ class AppLocalizationsMs extends AppLocalizations {
   String get familyNotifChannelUpdates => 'Kemas kini panggilan';
 
   @override
-  String familyNotifTitleCheck(String name) {
-    return 'Semak $name sekarang';
+  String familyNotifTitle(String name) {
+    return '$name mungkin menerima panggilan penipuan';
   }
 
   @override
-  String get familyNotifBodyOpen =>
-      'Amaran panggilan segera. Buka Jaga untuk lihat lagi.';
-
-  @override
-  String familyNotifGenuineTitleUpdate(String name) {
-    return 'Kemas kini tentang $name';
+  String familyNotifBody(String stage) {
+    return '$stage.';
   }
 
   @override
-  String get familyNotifBodyOpenCalm => 'Buka Jaga untuk lihat lagi.';
+  String familyNotifBodyAgency(String stage, String agency) {
+    return '$stage. Mengaku daripada $agency.';
+  }
+
+  @override
+  String familyNotifGenuineTitle(String name) {
+    return 'Panggilan $name mungkin sah';
+  }
 
   @override
   String familyNotifCallAction(String name) {
