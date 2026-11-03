@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/widgets/view_model_host.dart';
+import '../../data/models/alerted_call.dart';
 import '../../data/models/family_alert.dart';
 import '../../data/models/onboarding_progress.dart';
 import '../../data/models/linked_person.dart';
@@ -66,7 +67,12 @@ class _FamilyAlertDemoState extends State<_FamilyAlertDemo> {
   @override
   Widget build(BuildContext context) {
     final followUp = widget.followUp;
-    final screen = FamilyAlertScreen(vm: _vm);
+    final screen = FamilyAlertScreen(
+      vm: _vm,
+      onSeeTimeline: () => Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => _TimelineDemo(widget.alert.callId)),
+      ),
+    );
     if (followUp == null) return screen;
     return Column(
       children: [
@@ -255,7 +261,13 @@ class _CopilotHomeDemo extends StatefulWidget {
     this.many = false,
     this.empty = false,
     this.offline = false,
+    this.live = 0,
+    this.held = true,
   });
+
+  /// How many of the first calls are live, and whether alerts are held for them.
+  final int live;
+  final bool held;
 
   final bool pauseActive;
   final bool many;
@@ -269,12 +281,49 @@ class _CopilotHomeDemo extends StatefulWidget {
 class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
   late final _pause = FakeCopilotPauseService(active: widget.pauseActive)
     ..offline = widget.offline;
+  // The first calls are the first fixture alerts: the live ones are these.
+  static const _raws = [familyLongText, familyNoQuotes];
   late final _timeline =
       (widget.empty
             ? FakeTimelineService()
+            : widget.live > 0
+            ? FakeTimelineService(
+                calls: [
+                  for (final (i, c) in fixtureCalls().indexed)
+                    i < widget.live
+                        ? AlertedCall.fromAlert(FamilyAlert.parse(_raws[i]))
+                        : c,
+                ],
+                events: fixtureEvents(),
+              )
             : fixtureTimelineService(many: widget.many))
         ..offline = widget.offline;
   final _dialer = FakeDialerService();
+  final _push = FakeAlertPushService();
+  late final _alerts = FamilyAlertRepository(
+    push: _push,
+    notifier: FakeAlertNotifier(),
+    person: familyPerson,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.live > 0) {
+      if (widget.held) {
+        for (final raw in _raws.take(widget.live)) {
+          _alerts.receive(FamilyAlert.parse(raw));
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _alerts.dispose();
+    _push.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => _WithRig(
@@ -283,9 +332,15 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
         person: familyPerson,
         pause: _pause,
         timeline: _timeline,
+        alerts: _alerts,
       ),
       builder: (_, vm) => CopilotHomeScreen(
         vm: vm,
+        openAlert: (alert) => Navigator.of(context).push<void>(
+          MaterialPageRoute(
+            builder: (_) => _FamilyAlertDemo(alert, familyPerson),
+          ),
+        ),
         createClearPause: () =>
             ClearPauseViewModel(personName: familyPerson.name, pause: _pause),
         timelineFor: (call) => StageTimelineViewModel(
@@ -327,7 +382,16 @@ class _TimelineDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ViewModelHost(
     create: () => StageTimelineViewModel(
-      call: fixtureCalls().firstWhere((c) => c.callId == callId),
+      call: fixtureCalls().firstWhere(
+        (c) => c.callId == callId,
+        orElse: () => AlertedCall.fromAlert(
+          FamilyAlert.parse(
+            familyAlertFixtures.firstWhere(
+              (raw) => raw.contains('"callId": "$callId"'),
+            ),
+          ),
+        ),
+      ),
       timeline: fixtureTimelineService(),
       dialer: FakeDialerService(),
     ),
@@ -434,6 +498,9 @@ List<GalleryEntry> familyEntries() => [
   _home('home-no-pause', const _CopilotHomeDemo()),
   _home('home-empty', const _CopilotHomeDemo(empty: true)),
   _home('home-error', const _CopilotHomeDemo(offline: true)),
+  _home('home-live', const _CopilotHomeDemo(live: 1)),
+  _home('home-live-no-alert', const _CopilotHomeDemo(live: 1, held: false)),
+  _home('home-two-live', const _CopilotHomeDemo(live: 2)),
   _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
   _home('settings', const _SettingsDemo()),
   _home('timeline', const _TimelineDemo('call-1')),

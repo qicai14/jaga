@@ -51,12 +51,17 @@ Future<Rig> pump(
   String initial, {
   LinkedPerson person = familyPerson,
   bool autoDial = false,
+  VoidCallback? onSeeTimeline,
 }) async {
   final rig = Rig(initial, person);
   addTearDown(rig.dispose);
   await pumpJaga(
     tester,
-    FamilyAlertScreen(vm: rig.vm, autoDial: autoDial),
+    FamilyAlertScreen(
+      vm: rig.vm,
+      autoDial: autoDial,
+      onSeeTimeline: onSeeTimeline,
+    ),
     scale: scale,
   );
   return rig;
@@ -89,6 +94,77 @@ void main() {
       handle.dispose();
     },
   );
+
+  group('navigation', () {
+    forEachScale('back arrow: tooltip, 56dp, pops', (tester, scale) async {
+      final rig = Rig(familyMoney, familyPerson);
+      addTearDown(rig.dispose);
+      await pumpJaga(
+        tester,
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(builder: (_) => FamilyAlertScreen(vm: rig.vm)),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+        scale: scale,
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      final back = find.byTooltip('Back to home');
+      expect(back, findsOneWidget);
+      expect(tester.getSize(back).shortestSide, greaterThanOrEqualTo(56));
+      await tester.tap(back);
+      await tester.pumpAndSettle();
+      expect(find.byType(FamilyAlertScreen), findsNothing);
+    });
+
+    forEachScale('See what happened calls onSeeTimeline', (
+      tester,
+      scale,
+    ) async {
+      var taps = 0;
+      await pump(tester, scale, familyMoney, onSeeTimeline: () => taps++);
+      final button = find.text('See what happened');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      expect(taps, 1);
+    });
+
+    forEachScale('onSeeTimeline null hides the button', (tester, scale) async {
+      await pump(tester, scale, familyMoney);
+      expect(find.text('See what happened'), findsNothing);
+    });
+
+    forEachScale(
+      'long text: Call stays pinned, the timeline button scrolls in',
+      (tester, scale) async {
+        await pump(
+          tester,
+          scale,
+          familyLongText,
+          person: familyPersonLongName,
+          onSeeTimeline: () {},
+        );
+        final callButton = find.byType(BigButton).last;
+        final call = tester.getRect(callButton);
+        expect(call.bottom, lessThanOrEqualTo(852));
+        final button = find.text('See what happened');
+        await tester.ensureVisible(button);
+        await tester.pump();
+        expect(button, findsOneWidget);
+        expect(tester.getRect(callButton), call);
+      },
+    );
+
+    forEachScale('may-be-genuine keeps both', (tester, scale) async {
+      await pump(tester, scale, familyMayBeGenuine, onSeeTimeline: () {});
+      expect(find.byTooltip('Back to home'), findsOneWidget);
+      expect(find.text('See what happened'), findsOneWidget);
+    });
+  });
 
   forEachScale('2 Call dials the number once', (tester, scale) async {
     final rig = await pump(tester, scale, familyIsolation);

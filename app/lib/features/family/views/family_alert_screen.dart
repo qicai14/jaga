@@ -17,12 +17,20 @@ const _longNameLength = 12;
 /// The family co-pilot's alert: who and when, how far the scam got, who the
 /// caller claims to be, what is happening, proof, and one button to call.
 class FamilyAlertScreen extends StatefulWidget {
-  const FamilyAlertScreen({super.key, required this.vm, this.autoDial = false});
+  const FamilyAlertScreen({
+    super.key,
+    required this.vm,
+    this.autoDial = false,
+    this.onSeeTimeline,
+  });
 
   final FamilyAlertViewModel vm;
 
   /// Opened from the notification's Call action: dial after the first frame.
   final bool autoDial;
+
+  /// Opens this call's stage timeline; null hides the button.
+  final VoidCallback? onSeeTimeline;
 
   @override
   State<FamilyAlertScreen> createState() => _FamilyAlertScreenState();
@@ -64,6 +72,17 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
                       children: [
                         NameBand(
                           genuine: genuine,
+                          leading: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back),
+                              tooltip: l.familyAlertBack,
+                              color: genuine
+                                  ? context.jagaColors.onGenuineContainer
+                                  : context.jagaColors.onCaution,
+                              onPressed: () => Navigator.of(context).maybePop(),
+                            ),
+                          ),
                           headline: genuine
                               ? l.familyGenuineHeadline(s.personName)
                               : l.familyAlertHeadline(s.personName),
@@ -103,6 +122,15 @@ class _FamilyAlertScreenState extends State<FamilyAlertScreen> {
                                   SizedBox(height: m.s),
                                   QuoteBlock(quote: quote),
                                 ],
+                              ],
+                              if (widget.onSeeTimeline != null) ...[
+                                SizedBox(height: m.l),
+                                BigButton(
+                                  tone: BigButtonTone.quiet,
+                                  icon: Icons.timeline,
+                                  label: l.familyAlertSeeTimeline,
+                                  onPressed: widget.onSeeTimeline,
+                                ),
                               ],
                             ],
                           ),
