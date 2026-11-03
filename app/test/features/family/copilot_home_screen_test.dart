@@ -477,7 +477,6 @@ void main() {
         scale,
       ) async {
         final handle = tester.ensureSemantics();
-        addTearDown(handle.dispose);
         final rig = Rig();
         addTearDown(rig.dispose);
         await pumpJaga(
@@ -486,11 +485,16 @@ void main() {
           scale: scale,
           locale: Locale(locale),
         );
-        expect(find.byType(AppBar), findsNothing);
-        expect(
-          tester.getSemantics(find.bySemanticsLabel('Jaga')),
-          matchesSemantics(label: 'Jaga', isHeader: true),
-        );
+        try {
+          expect(find.byType(AppBar), findsNothing);
+          expect(
+            tester.getSemantics(find.bySemanticsLabel('Jaga')),
+            matchesSemantics(label: 'Jaga', isHeader: true),
+          );
+        } finally {
+          // Semantics handles must be gone before the test ends, so not a tear-down.
+          handle.dispose();
+        }
       });
     }
 
