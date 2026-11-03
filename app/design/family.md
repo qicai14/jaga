@@ -69,7 +69,7 @@ Scaffold(surface) > Column
   so the co-pilot can dial it herself. The next successful tap clears it.
 - Order is the scan order in seconds: who and when, how far it got, who they claim to be, what's happening, proof, act.
 - **Time:** `at` as local time, `DateFormat.jm(locale)` ("2:04 PM"); today only shows time, older shows date too.
-- **Back:** normal `canPop`. Back goes to the co-pilot home (or exits if it was a cold start with no home yet).
+- **Back:** normal `canPop`; a visible back button too, see §12.1.
 - **Motion:** one moment. When the follow-up arrives with the screen open, the band cross-fades amber → blue (200 ms,
   instant with `disableAnimations`), and TalkBack announces the new headline.
 - **States:** `alert-isolation`, `alert-money` (second push), `alert-credentials`, `no-agency`, `no-quotes`,
@@ -100,7 +100,7 @@ StageTimelineScreen: ScreenFrame(title: familyTimelineTitle(date))
   bottomAction: BigButton(familyCallHotline(hotline)) ; AppBar action: IconButton(delete, semantics familyTimelineDelete)
     → AlertDialog(familyTimelineDeleteConfirm) → deletes, pops, SnackBar familyTimelineDeleted
 ```
-Settings (app language, unlink) via the AppBar overflow. Genuine calls never appear. Error: list fails to load →
+Settings (app language, unlink) via a visible AppBar icon (§12.2). Genuine calls never appear. Error: list fails to load →
 `familyCallsError` + "Try again" (`commonTryAgain`). Clear Jaga Pause fails → sheet stays, `familyClearPauseError`.
 
 ## 7. Contract fields → elements
@@ -179,7 +179,7 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 
 #23 deviations (flutter-dev):
 9. No `FakeFamilyHomeService`: two interfaces instead, `CopilotPauseService` (isActive, clear) and `TimelineService` (calls, events, delete), each with a Fake only. View models take the services directly (no pass-through repository). `AlertedCall` and `TimelineEvent` reuse v0 fields and are provisional until #1; only the fixtures convert from `FamilyAlert` and `StageUpdate`.
-10. Settings is one "Settings" item in the AppBar overflow, opening a screen with the app language list and "Remove {name} from this phone" (confirm dialog, then `OnboardingRepository.reset()`; a failure shows `familyUnlinkError` and stays put). Only this phone forgets: the server is not told, there is no unlink endpoint yet, so no copy promises alerts stop.
+10. Settings (now an AppBar icon, §12.2), opening a screen with the app language list and "Remove {name} from this phone" (confirm dialog, then `OnboardingRepository.reset()`; a failure shows `familyUnlinkError` and stays put). Only this phone forgets: the server is not told, there is no unlink endpoint yet, so no copy promises alerts stop.
 11. `StageTimelineScreen` puts its title in the scrolling body, not `ScreenFrame.title`: a long title plus the pinned 997 button overflowed at text x2.0.
 12. Clear Jaga Pause has its own `ClearPauseViewModel`, so every sheet opens clean. While busy the hold button becomes a spinner button.
 13. The timeline's risk badge shows only where risk differs from the step before (Caution shown / Warning shown / Risk fell back to low); never red. Extra copy keys: `familyTimelineError`, `familyTimelineDeleteError`, `familyTimelineRisk*`, `familyUnlink*`.
@@ -199,3 +199,66 @@ Settings (app language, unlink) via the AppBar overflow. Genuine calls never app
 `firebase_core`, `firebase_messaging` (FCM data pushes; needs `google-services.json` from the team's Firebase project),
 `flutter_local_notifications` (channels, heads-up, action, launch details; needs `POST_NOTIFICATIONS`), `url_launcher`
 (`tel:`; add a `<queries>` intent for `tel` to the manifest). #23 adds nothing new.
+
+## 12. Navigation refinements (4 Nov)
+Qi Cai flagged co-pilot navigation as the weak spot; Preston approved these four. No contract change: `live` already
+comes from the timeline's `endedAt`, and the alert itself stays in memory in the repository.
+
+**12.1 The alert screen gets a way out and a way to the timeline.** `CopilotShell` keeps home as the root, so Back on
+the alert always lands on home, even after a cold start.
+```
+NameBand(leading: IconButton(Icons.arrow_back, tooltip familyAlertBack, 56dp, onCaution | onGenuineContainer) → pop)
+  ... body as in §4 ...
+  6 (last in the scroll) gap l24, BigButton(tone: quiet, icon: Icons.timeline, label: familyAlertSeeTimeline)
+BottomAction (pinned, unchanged): [dial failed], BigButton(Call)
+```
+- The back button sits at the start of the band's top row, above the headline, so it scrolls with the band (the same
+  reason as §4: nothing else gets pinned). System Back works everywhere.
+- "See what happened" goes at the **end of the scroll**, not beside Call: the pinned area stays a single button at text
+  x2.0. It pushes `StageTimelineScreen` for that `callId`, using `AlertedCall.fromAlert(alert)` (promote
+  `alertedCallFrom` from `debug/fixtures` to `data/models`; `live: true`, so Delete stays off). Back returns to the alert.
+- `FamilyAlertScreen({..., VoidCallback? onSeeTimeline})`: null hides the button (gallery, old tests).
+- States: alert, may-be-genuine (the back icon in `onGenuineContainer`), no-number, dial-failed; all keep the timeline button.
+
+**12.2 Settings is a visible icon.** Swap the `PopupMenuButton` for `IconButton(Icons.settings_outlined,
+tooltip: settingsTitle)`. Add `iconButtonTheme` to `jaga_theme.dart` with `minimumSize: Size.square(m.minTarget)`, so
+every IconButton (this one, the timeline's Delete, 12.1's back) is 56dp. No new copy.
+
+**12.3 Home can reopen a live alert.**
+- `FamilyAlertRepository` gains `FamilyAlert? latest(String callId)`, a read of `_latest`, which already holds the merged
+  alert per call. It is memory only: it starts empty after the process dies. That's fine; see the fallback.
+- `CopilotHomeViewModel` gets the repository injected: it exposes `calls` with the live ones first (newest first, then
+  the rest in service order), `heldAlert(callId)`, and listens to `repository.alerts` to `load()` again, so a new push
+  shows on home without a notification tap.
+- Tap a live call that has a held alert: the shell's existing `_open` (passed as `openAlert`, so the alert route is
+  built in one place) opens `FamilyAlertScreen`. A live call with no held alert, or an ended call: `StageTimelineScreen`, as now.
+- States: no live call (list as now), one live with an alert, live without an alert (opens the timeline), two live,
+  list loading or error (no live row; the notification still opens the alert). The alert screen is never opened with
+  partial data (§4).
+
+**12.4 The live tile carries a marker.** In `AlertedCallTile`, if `call.live`: the first row is `StatusBadge(familyCallLiveNow,
+BadgeTone.caution, Icons.phone_in_talk)`, then date and time, and so on. The tile border is a 3dp `cautionEdge`
+(`Material.shape: RoundedRectangleBorder(side: …)`). The fill stays `surfaceContainer`, because amber
+fill belongs to the name band and never red. Semantics: the label starts with "Live now", hint `familyCallLiveOpen` when
+an alert will open. At text x2.0 the badge text wraps (`Flexible`); the tile grows, minHeight 72.
+
+**Copy** (new keys; `settingsTitle` is reused)
+| Key | en | ms | zh |
+|---|---|---|---|
+| `familyAlertBack` | Back to home | Kembali ke laman utama | 返回主页 |
+| `familyAlertSeeTimeline` | See what happened | Lihat apa yang berlaku | 查看通话经过 |
+| `familyCallLiveNow` | Live now | Sedang berlangsung | 正在通话 |
+| `familyCallLiveOpen` | Opens the alert | Membuka amaran | 打开警报 |
+
+**Gallery** (`family_entries.dart`): add `home-live` (live call with a held alert, at the top), `home-live-no-alert`
+(opens the timeline), `home-two-live`; `alert-*` and `may-be-genuine` pass `onSeeTimeline` into the fixture timeline.
+
+**Tests** (393×852, and again at text scale 2.0)
+1. `family_alert_screen_test`: back tooltip found, 56dp, pops; "See what happened" pushes the timeline with the alert's
+   `callId`; `alert-long-text` at x2.0: Call fully visible and pinned, the timeline button reachable by scrolling, no
+   overflow; `onSeeTimeline: null` hides it.
+2. `copilot_home_screen_test`: no `PopupMenuButton`; the settings tooltip is found, 56dp, opens settings; the live call
+   is first with "Live now"; a tap with an alert opens `FamilyAlertScreen`, without one opens the timeline; an ended
+   call opens the timeline; two live at x2.0 don't overflow.
+3. `family_alert_repository` test: `latest` returns the merged alert (stage never down), and null for an unknown call.
+4. `family_home_view_models_test`: live calls first; a repository push triggers one reload.
