@@ -353,5 +353,6 @@ Settings: [                     (Family)]  /  Settings  /  language, Remove
 |---|---|---|---|
 | `roleFamily` | Family | Keluarga | 家人 |
 
-**Gallery/tests:** every `home-*`, `calls-*` and `tabs-settings` picks it up; `copilot_tabs_test` finds one "Family"
-badge on each tab in en/ms/zh at 393x852 and x1.5, end-aligned, above the header node, no overflow.
+**Gallery/tests:** every `home-*`, `calls-*` and `tabs-settings` picks it up. `role_badge_test` (real Noto) checks no split
+word, end alignment and order above the title for en/ms/zh at x1.0 and x2.0 (family at its 1.5 cap); one "Family" badge per
+tab is checked in `copilot_home_screen_test` (Home, Calls) and `copilot_settings_screen_test` (Settings).

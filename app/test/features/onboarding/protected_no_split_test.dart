@@ -11,52 +11,28 @@ import 'protected_home_test.dart' show pumpHome, unlockWith;
 void main() {
   setUpAll(loadNotoFonts);
 
-  for (final locale in ['en', 'ms', 'zh']) {
-    final l = Locale(locale);
-
-    testWidgets('the status screen splits no word ($locale x2.0)', (
-      tester,
-    ) async {
-      await pumpHome(
-        tester,
-        scale: 2.0,
-        locale: l,
-        family: ['Aisyah', 'Daniel'],
-      );
-      expectNoSplitWords(tester);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('the status screen with no family splits no word ($locale)', (
-      tester,
-    ) async {
-      await pumpHome(tester, scale: 2.0, locale: l);
-      expectNoSplitWords(tester);
-    });
-
-    testWidgets('the ask-your-family state splits no word ($locale x2.0)', (
-      tester,
-    ) async {
-      await pumpHome(
-        tester,
-        scale: 2.0,
-        locale: l,
-        device: FakeDeviceSetupService(),
-      );
-      expectNoSplitWords(tester);
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('the protected settings split no word ($locale x2.0)', (
-      tester,
-    ) async {
-      await pumpHome(tester, scale: 2.0, locale: l);
+  // Every state of her status screen, then the unlocked settings.
+  final states = <String, Future<void> Function(WidgetTester, Locale)>{
+    'status with family': (t, l) =>
+        pumpHome(t, scale: 2.0, locale: l, family: ['Aisyah', 'Daniel']),
+    'status with no family': (t, l) => pumpHome(t, scale: 2.0, locale: l),
+    'ask your family': (t, l) =>
+        pumpHome(t, scale: 2.0, locale: l, device: FakeDeviceSetupService()),
+    'settings': (t, l) async {
+      await pumpHome(t, scale: 2.0, locale: l);
       // The gate's title is English-only in openGate; the badge is any locale.
-      await tester.longPress(find.byType(RoleBadge));
-      await tester.pumpAndSettle();
-      await unlockWith(tester, '1234');
-      expectNoSplitWords(tester);
-      expect(tester.takeException(), isNull);
-    });
+      await t.longPress(find.byType(RoleBadge));
+      await t.pumpAndSettle();
+      await unlockWith(t, '1234');
+    },
+  };
+  for (final locale in ['en', 'ms', 'zh']) {
+    for (final MapEntry(key: name, value: pump) in states.entries) {
+      testWidgets('$name splits no word ($locale x2.0)', (tester) async {
+        await pump(tester, Locale(locale));
+        expectNoSplitWords(tester);
+        expect(tester.takeException(), isNull);
+      });
+    }
   }
 }

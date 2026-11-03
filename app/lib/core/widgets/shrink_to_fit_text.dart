@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+/// A "word" for line breaking: a run of non-space, non-CJK characters (CJK
+/// wraps by character, so it has no words to split).
+final jagaWordPattern = RegExp(r'[^\s\u4e00-\u9fff]+');
+
 /// Text that must fit its box without scrolling. Steps the font size down 2sp at
 /// a time (measured with the ambient `TextScaler`) until it fits, never below
 /// [minFontSize]. At the floor it clips nothing and calls [onOverflow] so the
@@ -35,7 +39,7 @@ class ShrinkToFitText extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         bool wordsFit(double size, double maxWidth) {
-          for (final w in RegExp(r'[^\s一-鿿]+').allMatches(text)) {
+          for (final w in jagaWordPattern.allMatches(text)) {
             final painter = TextPainter(
               text: TextSpan(
                 text: w.group(0),

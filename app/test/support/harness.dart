@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:jaga/core/widgets/shrink_to_fit_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/l10n/gen/app_localizations.dart';
 import 'package:jaga/core/theme/jaga_theme.dart';
@@ -73,28 +74,41 @@ Future<void> loadNotoFonts() async {
 }
 
 /// Fails if any word of any text under [within] (default: the whole tree) is
-/// wider than its line, i.e. split mid-word. Needs [loadNotoFonts]. CJK wraps
-/// by character, so only runs of other characters count as words.
+/// wider than its line, i.e. split mid-word. Needs [loadNotoFonts]. Words are
+/// measured with the style of the span they are in. Fails too if it finds no
+/// text at all, so a wrong [within] cannot pass for free.
 void expectNoSplitWords(WidgetTester tester, {Finder? within}) {
   final root = within ?? find.byType(MaterialApp);
-  final paragraphs = tester.renderObjectList<RenderParagraph>(
-    find.descendant(of: root, matching: find.byType(RichText)),
-  );
+  final paragraphs = tester
+      .renderObjectList<RenderParagraph>(
+        find.descendant(of: root, matching: find.byType(RichText)),
+      )
+      .toList();
+  expect(paragraphs, isNotEmpty, reason: 'no text found to check');
   for (final p in paragraphs) {
-    final style = p.text.style;
-    if (style == null) continue;
-    final plain = p.text.toPlainText();
-    for (final w in RegExp(r'[^\s一-鿿]+').allMatches(plain)) {
-      final painter = TextPainter(
-        text: TextSpan(text: w.group(0), style: style),
-        textDirection: TextDirection.ltr,
-        textScaler: p.textScaler,
-      )..layout();
-      expect(
-        painter.width,
-        lessThanOrEqualTo(p.size.width + 0.5),
-        reason: '"${w.group(0)}" is split in "$plain"',
-      );
+    void check(InlineSpan span, TextStyle? inherited) {
+      if (span is! TextSpan) return;
+      final style = inherited?.merge(span.style) ?? span.style;
+      final text = span.text;
+      if (text != null && style != null) {
+        for (final w in jagaWordPattern.allMatches(text)) {
+          final painter = TextPainter(
+            text: TextSpan(text: w.group(0), style: style),
+            textDirection: TextDirection.ltr,
+            textScaler: p.textScaler,
+          )..layout();
+          expect(
+            painter.width,
+            lessThanOrEqualTo(p.size.width + 0.5),
+            reason: '"${w.group(0)}" is split in "${p.text.toPlainText()}"',
+          );
+        }
+      }
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        check(child, style);
+      }
     }
+
+    check(p.text, null);
   }
 }

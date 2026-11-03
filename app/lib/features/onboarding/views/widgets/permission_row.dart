@@ -74,7 +74,9 @@ class PermissionRow extends StatelessWidget {
     final mark = Icon(icon, size: 32, color: color);
     // At large text the icon goes above the text, so a long word like
     // "Pemberitahuan" gets the full width instead of splitting.
-    final large = MediaQuery.textScalerOf(context).scale(1) > 1.5;
+    // Probed at the real title size: Android 14+ scales large text nonlinearly.
+    final size = text.titleLarge!.fontSize!;
+    final large = MediaQuery.textScalerOf(context).scale(size) / size > 1.5;
     return Semantics(
       liveRegion: true,
       child: Padding(
