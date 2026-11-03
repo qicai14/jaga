@@ -568,4 +568,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get familyCallLiveOpen => '打开警报';
+
+  @override
+  String get familyNavHome => '主页';
+
+  @override
+  String get familyNavCalls => '通话';
+
+  @override
+  String get familyHomeLastCall => '最近警报';
+
+  @override
+  String get familyHomeSeeAllCalls => '查看所有通话';
 }

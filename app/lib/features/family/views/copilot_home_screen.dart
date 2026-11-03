@@ -9,13 +9,10 @@ import '../../../data/models/alerted_call.dart';
 import '../../../data/models/family_alert.dart';
 import '../view_models/clear_pause_view_model.dart';
 import '../view_models/copilot_home_view_model.dart';
-import '../view_models/copilot_settings_view_model.dart';
 import '../view_models/load_status.dart';
 import '../view_models/stage_timeline_view_model.dart';
-import 'copilot_settings_screen.dart';
-import 'stage_timeline_screen.dart';
-import 'widgets/alerted_call_tile.dart';
 import 'widgets/clear_pause_sheet.dart';
+import 'widgets/home_call_tile.dart';
 import 'widgets/protected_person_card.dart';
 
 /// The family co-pilot's home: the protected user, Jaga Pause, and the calls
@@ -26,17 +23,19 @@ class CopilotHomeScreen extends StatelessWidget {
     required this.vm,
     required this.createClearPause,
     required this.timelineFor,
-    required this.createSettings,
     required this.openAlert,
+    required this.onSeeAllCalls,
   });
 
   final CopilotHomeViewModel vm;
   final ClearPauseViewModel Function() createClearPause;
   final StageTimelineViewModel Function(AlertedCall call) timelineFor;
-  final CopilotSettingsViewModel Function() createSettings;
 
   /// Opens the family alert screen (the shell builds that route).
   final void Function(FamilyAlert alert) openAlert;
+
+  /// Switches to the Calls tab.
+  final VoidCallback onSeeAllCalls;
 
   Future<void> _clearPause(BuildContext context) async {
     final l = AppLocalizations.of(context);
@@ -59,42 +58,6 @@ class CopilotHomeScreen extends StatelessWidget {
     vm.load();
   }
 
-  Future<void> _openTimeline(BuildContext context, AlertedCall call) async {
-    final deleted = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => ViewModelHost(
-          create: () => timelineFor(call),
-          builder: (_, timelineVm) => StageTimelineScreen(vm: timelineVm),
-        ),
-      ),
-    );
-    if (deleted == true) vm.load();
-  }
-
-  void _openSettings(BuildContext context) {
-    Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => ViewModelHost(
-          create: createSettings,
-          builder: (_, settingsVm) => CopilotSettingsScreen(vm: settingsVm),
-        ),
-      ),
-    );
-  }
-
-  Widget _tile(BuildContext context, AlertedCall call) {
-    final alert = call.live ? vm.heldAlert(call.callId) : null;
-    return Padding(
-      padding: EdgeInsets.only(bottom: context.metrics.s),
-      child: AlertedCallTile(
-        call: call,
-        opensAlert: alert != null,
-        onTap: () =>
-            alert == null ? _openTimeline(context, call) : openAlert(alert),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -103,15 +66,6 @@ class CopilotHomeScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) => ScreenFrame(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              tooltip: l.settingsTitle,
-              onPressed: () => _openSettings(context),
-            ),
-          ],
-        ),
         title: l.appTitle,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,11 +76,6 @@ class CopilotHomeScreen extends StatelessWidget {
               onClearPause: () => _clearPause(context),
             ),
             SizedBox(height: m.xl),
-            Semantics(
-              header: true,
-              child: Text(l.familyCallsTitle, style: text.titleLarge),
-            ),
-            SizedBox(height: m.m),
             switch (vm.status) {
               LoadStatus.loading => const Center(
                 child: CircularProgressIndicator(),
@@ -143,17 +92,47 @@ class CopilotHomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              LoadStatus.loaded when vm.calls.isEmpty => Text(
-                l.familyCallsEmpty,
-                style: text.bodyLarge,
-              ),
-              LoadStatus.loaded => Column(
-                children: [for (final call in vm.calls) _tile(context, call)],
-              ),
+              LoadStatus.loaded => _calls(context),
             },
           ],
         ),
       ),
+    );
+  }
+
+  /// Every live call; with none, the last ended one; then the way to all of them.
+  Widget _calls(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final m = context.metrics;
+    final text = Theme.of(context).textTheme;
+    final live = vm.liveCalls;
+    final last = vm.lastEnded;
+    HomeCallTile tile(AlertedCall call) => HomeCallTile(
+      vm: vm,
+      call: call,
+      timelineFor: timelineFor,
+      openAlert: openAlert,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final call in live) tile(call),
+        if (live.isEmpty && last != null) ...[
+          Semantics(
+            header: true,
+            child: Text(l.familyHomeLastCall, style: text.titleLarge),
+          ),
+          SizedBox(height: m.m),
+          tile(last),
+        ],
+        if (live.isEmpty && last == null)
+          Text(l.familyCallsEmpty, style: text.bodyLarge),
+        if (vm.calls.isNotEmpty)
+          TextButton(
+            onPressed: onSeeAllCalls,
+            child: Text(l.familyHomeSeeAllCalls),
+          ),
+      ],
     );
   }
 }

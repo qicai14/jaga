@@ -9,6 +9,7 @@ import 'core/l10n/gen/app_localizations.dart';
 import 'core/theme/jaga_theme.dart';
 import 'core/widgets/view_model_host.dart';
 import 'data/models/alerted_call.dart';
+import 'data/models/family_alert.dart';
 import 'data/models/linked_person.dart';
 import 'data/models/onboarding_progress.dart';
 import 'data/repositories/call_repository.dart';
@@ -33,7 +34,10 @@ import 'features/family/view_models/copilot_home_view_model.dart';
 import 'features/family/view_models/copilot_settings_view_model.dart';
 import 'features/family/view_models/family_alert_view_model.dart';
 import 'features/family/view_models/stage_timeline_view_model.dart';
+import 'features/family/views/copilot_calls_screen.dart';
 import 'features/family/views/copilot_home_screen.dart';
+import 'features/family/views/copilot_settings_screen.dart';
+import 'features/family/views/copilot_tabs.dart';
 import 'features/family/views/family_alert_screen.dart';
 import 'features/family/views/stage_timeline_screen.dart';
 import 'features/onboarding/view_models/onboarding_view_model.dart';
@@ -246,6 +250,11 @@ class _CopilotShellState extends State<CopilotShell> {
     timeline: widget.deps.timeline,
     alerts: _alerts,
   );
+  late final _settings = CopilotSettingsViewModel(
+    repository: widget.deps.onboarding,
+    person: widget.person,
+  );
+  int _tab = 0;
   StreamSubscription<AlertOpen>? _opens;
 
   @override
@@ -311,21 +320,34 @@ class _CopilotShellState extends State<CopilotShell> {
     _opens?.cancel();
     _alerts.dispose();
     _home.dispose();
+    _settings.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => CopilotHomeScreen(
-    vm: _home,
-    createClearPause: () => ClearPauseViewModel(
-      personName: widget.person.name,
-      pause: widget.deps.pause,
-    ),
-    timelineFor: _timelineFor,
-    openAlert: (alert) => _open(AlertOpen(alert)),
-    createSettings: () => CopilotSettingsViewModel(
-      repository: widget.deps.onboarding,
-      person: widget.person,
-    ),
-  );
+  Widget build(BuildContext context) {
+    void openAlert(FamilyAlert alert) => _open(AlertOpen(alert));
+    return CopilotTabs(
+      index: _tab,
+      onSelect: (i) => setState(() => _tab = i),
+      tabs: [
+        CopilotHomeScreen(
+          vm: _home,
+          createClearPause: () => ClearPauseViewModel(
+            personName: widget.person.name,
+            pause: widget.deps.pause,
+          ),
+          timelineFor: _timelineFor,
+          openAlert: openAlert,
+          onSeeAllCalls: () => setState(() => _tab = 1),
+        ),
+        CopilotCallsScreen(
+          vm: _home,
+          timelineFor: _timelineFor,
+          openAlert: openAlert,
+        ),
+        CopilotSettingsScreen(vm: _settings),
+      ],
+    );
+  }
 }

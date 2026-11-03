@@ -53,7 +53,6 @@ class CopilotSettingsScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) => ScreenFrame(
-        appBar: AppBar(),
         title: l.settingsTitle,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

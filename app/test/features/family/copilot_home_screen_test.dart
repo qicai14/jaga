@@ -17,6 +17,7 @@ import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
 import 'package:jaga/features/family/view_models/clear_pause_view_model.dart';
 import 'package:jaga/features/family/view_models/copilot_home_view_model.dart';
 import 'package:jaga/features/family/view_models/stage_timeline_view_model.dart';
+import 'package:jaga/features/family/views/copilot_calls_screen.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
 import 'package:jaga/features/family/views/stage_timeline_screen.dart';
 import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
@@ -63,9 +64,18 @@ class Rig {
         ClearPauseViewModel(personName: familyPerson.name, pause: pause),
     timelineFor: (call) =>
         StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
-    createSettings: () => throw UnimplementedError('covered in app_test'),
+    openAlert: opened.add,
+    onSeeAllCalls: () => seeAll++,
+  );
+
+  Widget get callsScreen => CopilotCallsScreen(
+    vm: vm,
+    timelineFor: (call) =>
+        StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
     openAlert: opened.add,
   );
+
+  var seeAll = 0;
 }
 
 Future<Rig> pump(
@@ -74,12 +84,13 @@ Future<Rig> pump(
   bool pauseActive = true,
   FakeTimelineService? timeline,
   bool offline = false,
+  bool calls = false,
 }) async {
   // Offline before the Rig: the view model starts loading in its constructor.
   final svc = (timeline ?? fixtureTimelineService())..offline = offline;
   final rig = Rig(pauseActive: pauseActive, timeline: svc);
   addTearDown(rig.dispose);
-  await pumpJaga(tester, rig.screen, scale: scale);
+  await pumpJaga(tester, calls ? rig.callsScreen : rig.screen, scale: scale);
   return rig;
 }
 
@@ -113,7 +124,31 @@ void main() {
     expect(find.text('Protected'), findsOneWidget);
     expect(find.text('Jaga Pause active'), findsOneWidget);
     expect(clearPause, findsOneWidget);
+    // Home shows only the last alert; the full list is on Calls.
+    expect(find.text('Last alert'), findsOneWidget);
+    expect(find.byType(AlertedCallTile, skipOffstage: false), findsOneWidget);
+    expect(find.byType(PopupMenuButton<void>), findsNothing);
+    expect(find.byIcon(Icons.settings_outlined), findsNothing);
+  });
+
+  forEachScale('See all calls asks the shell for the Calls tab', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    await tapVisible(tester, find.text('See all calls'));
+    expect(rig.seeAll, 1);
+  });
+
+  forEachScale('Calls lists every call, with no pause card', (
+    tester,
+    scale,
+  ) async {
+    final rig = Rig();
+    addTearDown(rig.dispose);
+    await pumpJaga(tester, rig.callsScreen, scale: scale);
     expect(find.text('Alerted calls'), findsOneWidget);
+    expect(find.text('Protected'), findsNothing);
     expect(find.byType(AlertedCallTile, skipOffstage: false), findsNWidgets(5));
   });
 
@@ -150,7 +185,9 @@ void main() {
   });
 
   forEachScale('many calls scroll without overflow', (tester, scale) async {
-    await pump(tester, scale, timeline: fixtureTimelineService(many: true));
+    final rig = Rig(timeline: fixtureTimelineService(many: true));
+    addTearDown(rig.dispose);
+    await pumpJaga(tester, rig.callsScreen, scale: scale);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -5000));
     await tester.pump();
     expect(find.byType(AlertedCallTile), findsWidgets);
@@ -199,7 +236,7 @@ void main() {
     tester,
     scale,
   ) async {
-    final rig = await pump(tester, scale);
+    final rig = await pump(tester, scale, calls: true);
     final tile = find.byType(AlertedCallTile, skipOffstage: false).last;
     await tester.ensureVisible(tile); // call-1, the oldest
     await tester.tap(tile);
@@ -235,7 +272,7 @@ void main() {
     tester,
     scale,
   ) async {
-    final rig = await pump(tester, scale);
+    final rig = await pump(tester, scale, calls: true);
     await tapVisible(tester, find.byType(AlertedCallTile).first); // call-5
     await tester.pumpAndSettle();
 
@@ -434,17 +471,6 @@ void main() {
       stage: Stage.money,
       live: true,
     );
-
-    forEachScale('settings is an icon button, not a menu', (
-      tester,
-      scale,
-    ) async {
-      await pump(tester, scale);
-      expect(find.byType(PopupMenuButton<void>), findsNothing);
-      final button = find.byTooltip('Settings');
-      expect(button, findsOneWidget);
-      expect(tester.getSize(button).shortestSide, greaterThanOrEqualTo(56));
-    });
 
     forEachScale('a live call is first, marked, and opens its held alert', (
       tester,

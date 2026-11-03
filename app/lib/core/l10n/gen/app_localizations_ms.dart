@@ -597,4 +597,16 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get familyCallLiveOpen => 'Membuka amaran';
+
+  @override
+  String get familyNavHome => 'Utama';
+
+  @override
+  String get familyNavCalls => 'Panggilan';
+
+  @override
+  String get familyHomeLastCall => 'Amaran terakhir';
+
+  @override
+  String get familyHomeSeeAllCalls => 'Lihat semua panggilan';
 }

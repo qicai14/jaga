@@ -591,4 +591,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyCallLiveOpen => 'Opens the alert';
+
+  @override
+  String get familyNavHome => 'Home';
+
+  @override
+  String get familyNavCalls => 'Calls';
+
+  @override
+  String get familyHomeLastCall => 'Last alert';
+
+  @override
+  String get familyHomeSeeAllCalls => 'See all calls';
 }

@@ -369,5 +369,13 @@
   "familyCallLiveNow": "Live now",
   "@familyCallLiveNow": {"description": "Co-pilot home: badge on a call that is still going."},
   "familyCallLiveOpen": "Opens the alert",
-  "@familyCallLiveOpen": {"description": "Co-pilot home: screen reader hint on a live call that opens its alert."}
+  "@familyCallLiveOpen": {"description": "Co-pilot home: screen reader hint on a live call that opens its alert."},
+  "familyNavHome": "Home",
+  "@familyNavHome": {"description": "Co-pilot bottom bar: the Home tab."},
+  "familyNavCalls": "Calls",
+  "@familyNavCalls": {"description": "Co-pilot bottom bar: the Calls tab."},
+  "familyHomeLastCall": "Last alert",
+  "@familyHomeLastCall": {"description": "Co-pilot home: heading above the most recent ended call."},
+  "familyHomeSeeAllCalls": "See all calls",
+  "@familyHomeSeeAllCalls": {"description": "Co-pilot home: button that switches to the Calls tab."}
 }

@@ -43,6 +43,20 @@ class CopilotHomeViewModel extends ChangeNotifier {
   /// Live calls first (newest first), then the rest in service order.
   List<AlertedCall> get calls => _sorted;
 
+  /// Calls still going: every one is shown on Home.
+  List<AlertedCall> get liveCalls => [
+    for (final c in _sorted)
+      if (c.live) c,
+  ];
+
+  /// The newest call that has ended, if any.
+  AlertedCall? get lastEnded {
+    for (final c in _sorted) {
+      if (!c.live) return c;
+    }
+    return null;
+  }
+
   /// The alert held for [callId], if this process has seen one.
   FamilyAlert? heldAlert(String callId) => _alerts.latest(callId);
 

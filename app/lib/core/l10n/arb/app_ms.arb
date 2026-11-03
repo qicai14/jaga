@@ -175,5 +175,9 @@
   "familyAlertBack": "Kembali ke laman utama",
   "familyAlertSeeTimeline": "Lihat apa yang berlaku",
   "familyCallLiveNow": "Sedang berlangsung",
-  "familyCallLiveOpen": "Membuka amaran"
+  "familyCallLiveOpen": "Membuka amaran",
+  "familyNavHome": "Utama",
+  "familyNavCalls": "Panggilan",
+  "familyHomeLastCall": "Amaran terakhir",
+  "familyHomeSeeAllCalls": "Lihat semua panggilan"
 }

@@ -74,6 +74,29 @@ void main() {
       },
     );
 
+    test('liveCalls and lastEnded split the list', () async {
+      timeline = FakeTimelineService(
+        calls: [
+          call('a', 9),
+          call('b', 3, live: true),
+          call('c', 8),
+          call('d', 5, live: true),
+        ],
+      );
+      build();
+      await pumpEventQueue();
+      expect([for (final c in vm.liveCalls) c.callId], ['d', 'b']);
+      expect(vm.lastEnded!.callId, 'a');
+    });
+
+    test('lastEnded is null with no ended call', () async {
+      timeline = FakeTimelineService(calls: [call('b', 3, live: true)]);
+      build();
+      await pumpEventQueue();
+      expect(vm.lastEnded, isNull);
+      expect(vm.liveCalls, hasLength(1));
+    });
+
     test('heldAlert reads the repository', () async {
       build();
       await pumpEventQueue();

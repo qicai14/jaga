@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/app.dart';
 import 'package:jaga/data/models/alerted_call.dart';
+import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
 import 'package:jaga/features/family/views/family_alert_screen.dart';
 import 'package:jaga/features/family/views/stage_timeline_screen.dart';
@@ -168,7 +169,7 @@ void main() {
 
   group('co-pilot settings', () {
     Future<void> openSettings(WidgetTester tester) async {
-      await tester.tap(find.byTooltip('Settings'));
+      await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
     }
 
@@ -180,7 +181,10 @@ void main() {
       await openSettings(tester);
       await tester.tap(find.text('Bahasa Melayu'));
       await tester.pumpAndSettle();
-      expect(find.text('Tetapan'), findsOneWidget);
+      expect(
+        find.text('Tetapan'),
+        findsNWidgets(2),
+      ); // the tab and the page title
     });
 
     testWidgets('unlink asks first, then returns to setup', (tester) async {
@@ -202,6 +206,88 @@ void main() {
       expect(rig.onboarding.progress.value.link, isNull);
       expect(find.text('Choose your language'), findsOneWidget);
       expect(find.byIcon(Icons.arrow_back), findsNothing);
+      expect(find.byType(NavigationBar), findsNothing);
+    });
+  });
+
+  group('co-pilot tabs', () {
+    final copilot = _copilotDone.copyWith(language: 'en', complete: true);
+    final ended = AlertedCall(
+      callId: 'old-1',
+      at: DateTime.utc(2026, 10, 20, 9),
+      stage: Stage.money,
+    );
+
+    /// A rig with one ended call, loaded (an alert opened and closed reloads).
+    Future<OnboardingRig> pumpWithCall(WidgetTester tester) async {
+      final rig = await pumpApp(tester, start: copilot);
+      rig.timeline.add(ended);
+      rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyMoney)));
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      return rig;
+    }
+
+    testWidgets('home has no app bar and no gear; See all calls opens Calls', (
+      tester,
+    ) async {
+      await pumpWithCall(tester);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.text('Last alert'), findsOneWidget);
+      await tester.tap(find.text('See all calls'));
+      await tester.pumpAndSettle();
+      expect(find.text('Alerted calls'), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        1,
+      );
+    });
+
+    testWidgets('a Calls tile opens the timeline over the bar; Back is Calls', (
+      tester,
+    ) async {
+      await pumpWithCall(tester);
+      await tester.tap(find.text('Calls'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(StageTimelineScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.text('Alerted calls'), findsOneWidget);
+    });
+
+    testWidgets('a notification on Calls opens the alert without the bar', (
+      tester,
+    ) async {
+      final rig = await pumpApp(tester, start: copilot);
+      await tester.tap(find.text('Calls'));
+      await tester.pumpAndSettle();
+      rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyMoney)));
+      await tester.pumpAndSettle();
+      expect(find.byType(FamilyAlertScreen), findsOneWidget);
+      expect(find.byType(NavigationBar), findsNothing);
+      await tester.ensureVisible(find.byTooltip('Back to home'));
+      await tester.tap(find.byTooltip('Back to home'));
+      await tester.pumpAndSettle();
+      expect(find.text('Alerted calls'), findsOneWidget);
+      expect(find.byType(NavigationBar), findsOneWidget);
+    });
+
+    testWidgets('Back on Calls goes to Home first', (tester) async {
+      await pumpApp(tester, start: copilot);
+      await tester.tap(find.text('Calls'));
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        0,
+      );
     });
   });
 

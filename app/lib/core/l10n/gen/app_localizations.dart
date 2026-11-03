@@ -1125,6 +1125,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opens the alert'**
   String get familyCallLiveOpen;
+
+  /// Co-pilot bottom bar: the Home tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get familyNavHome;
+
+  /// Co-pilot bottom bar: the Calls tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls'**
+  String get familyNavCalls;
+
+  /// Co-pilot home: heading above the most recent ended call.
+  ///
+  /// In en, this message translates to:
+  /// **'Last alert'**
+  String get familyHomeLastCall;
+
+  /// Co-pilot home: button that switches to the Calls tab.
+  ///
+  /// In en, this message translates to:
+  /// **'See all calls'**
+  String get familyHomeSeeAllCalls;
 }
 
 class _AppLocalizationsDelegate

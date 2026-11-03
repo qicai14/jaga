@@ -175,5 +175,9 @@
   "familyAlertBack": "返回主页",
   "familyAlertSeeTimeline": "查看通话经过",
   "familyCallLiveNow": "正在通话",
-  "familyCallLiveOpen": "打开警报"
+  "familyCallLiveOpen": "打开警报",
+  "familyNavHome": "主页",
+  "familyNavCalls": "通话",
+  "familyHomeLastCall": "最近警报",
+  "familyHomeSeeAllCalls": "查看所有通话"
 }
