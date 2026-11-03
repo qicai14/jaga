@@ -36,6 +36,14 @@ const _appToken = String.fromEnvironment('JAGA_APP_TOKEN');
 const _copilotToken = String.fromEnvironment('JAGA_COPILOT_TOKEN');
 // The Jaga line parents forward calls to, e.g. +60312345678. Unset = setup shows no code to dial.
 const _jagaLineNumber = String.fromEnvironment('JAGA_LINE_NUMBER');
+// Comma-separated names the protected home shows as linked family. Unset = none.
+const _familyNames = String.fromEnvironment('JAGA_FAMILY_NAMES');
+
+/// `"A, B,,"` to `['A', 'B']`.
+List<String> parseFamilyNames(String raw) => [
+  for (final n in raw.split(','))
+    if (n.trim().isNotEmpty) n.trim(),
+];
 
 /// Starts Firebase. False (logged) when it is unreachable, so the app falls
 /// back to Fakes instead of crashing. [init] is a seam for tests.
@@ -89,7 +97,9 @@ Future<AppDependencies> createDependencies() async {
   final pin = PinRepository(store: const SecureStore());
   final onboarding = await OnboardingRepository.load(
     store: const SecureStore(),
-    api: FakeOnboardingApiService(jagaLineNumber: _jagaLineNumber),
+    // shortcut: names are baked into the APK, not read from the server's real link (JAGA_FAMILY_TOKENS), upgrade when the real onboarding API lands (#116 / #12).
+    api: FakeOnboardingApiService(jagaLineNumber: _jagaLineNumber)
+      ..joined = parseFamilyNames(_familyNames),
     jagaLineNumber: _jagaLineNumber,
     pin: pin,
     firstLanguage: _phoneLanguageOr('ms'),
