@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/big_button.dart';
+import '../../../core/widgets/jaga_wordmark.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../../../core/widgets/view_model_host.dart';
 import '../../../data/models/alerted_call.dart';
@@ -13,7 +14,6 @@ import '../view_models/load_status.dart';
 import '../view_models/stage_timeline_view_model.dart';
 import 'widgets/clear_pause_sheet.dart';
 import 'widgets/home_call_tile.dart';
-import 'widgets/home_header.dart';
 import 'widgets/protected_person_card.dart';
 
 /// The family co-pilot's home: the protected user, Jaga Pause, and the calls
@@ -70,7 +70,15 @@ class CopilotHomeScreen extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            HomeHeader(name: vm.person.name),
+            // The wordmark hides itself from TalkBack: this is the header.
+            Semantics(
+              header: true,
+              label: l.appTitle,
+              child: JagaWordmark(
+                size: JagaWordmarkSize.display,
+                color: context.jagaColors.guarded,
+              ),
+            ),
             SizedBox(height: m.l),
             ProtectedPersonCard(
               name: vm.person.name,

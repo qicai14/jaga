@@ -603,9 +603,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => 'See all calls';
-
-  @override
-  String familyHomeWatching(String name) {
-    return 'Keeping watch over calls to $name';
-  }
 }

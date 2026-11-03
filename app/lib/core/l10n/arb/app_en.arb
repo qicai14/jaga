@@ -377,7 +377,5 @@
   "familyHomeLastCall": "Last alert",
   "@familyHomeLastCall": {"description": "Co-pilot home: heading above the most recent ended call."},
   "familyHomeSeeAllCalls": "See all calls",
-  "@familyHomeSeeAllCalls": {"description": "Co-pilot home: button that switches to the Calls tab."},
-  "familyHomeWatching": "Keeping watch over calls to {name}",
-  "@familyHomeWatching": {"description": "Co-pilot home header: the fixed line under the wordmark. name is the protected user.", "placeholders": { "name": { "type": "String" } } }
+  "@familyHomeSeeAllCalls": {"description": "Co-pilot home: button that switches to the Calls tab."}
 }

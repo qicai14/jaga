@@ -580,9 +580,4 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => '查看所有通话';
-
-  @override
-  String familyHomeWatching(String name) {
-    return '守护打给$name的电话';
-  }
 }

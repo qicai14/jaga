@@ -179,6 +179,5 @@
   "familyNavHome": "Utama",
   "familyNavCalls": "Panggilan",
   "familyHomeLastCall": "Amaran terakhir",
-  "familyHomeSeeAllCalls": "Lihat semua panggilan",
-  "familyHomeWatching": "Mengawasi panggilan kepada {name}"
+  "familyHomeSeeAllCalls": "Lihat semua panggilan"
 }

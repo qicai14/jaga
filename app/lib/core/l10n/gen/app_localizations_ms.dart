@@ -609,9 +609,4 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => 'Lihat semua panggilan';
-
-  @override
-  String familyHomeWatching(String name) {
-    return 'Mengawasi panggilan kepada $name';
-  }
 }

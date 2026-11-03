@@ -6,8 +6,7 @@ import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/linked_person.dart';
-import 'package:jaga/core/widgets/jaga_seal.dart';
-import 'package:jaga/features/family/views/widgets/home_header.dart';
+import 'package:jaga/core/widgets/jaga_wordmark.dart';
 import 'package:jaga/features/family/views/widgets/protected_person_card.dart';
 import 'package:jaga/data/repositories/family_alert_repository.dart';
 import 'package:jaga/data/services/alert_notifier.dart';
@@ -473,7 +472,7 @@ void main() {
 
   group('header', () {
     for (final locale in const ['en', 'ms', 'zh']) {
-      forEachScale('seal, wordmark and the watching line ($locale)', (
+      forEachScale('the wordmark is the one header node ($locale)', (
         tester,
         scale,
       ) async {
@@ -486,24 +485,16 @@ void main() {
           scale: scale,
           locale: Locale(locale),
         );
-        expect(tester.getSize(find.byType(JagaSeal)), const Size(48, 48));
-        // One header node, labelled with the app name.
-        expect(find.bySemanticsLabel('Jaga'), findsOneWidget);
+        expect(find.byType(AppBar), findsNothing);
         expect(
           tester.getSemantics(find.bySemanticsLabel('Jaga')),
           matchesSemantics(label: 'Jaga', isHeader: true),
         );
-        expect(find.textContaining('Mum'), findsWidgets);
-        final line = find.descendant(
-          of: find.byType(HomeHeader),
-          matching: find.textContaining('Mum'),
-        );
-        expect(line, findsOneWidget);
         handle.dispose();
       });
     }
 
-    forEachScale('a long name wraps under the wordmark; the card is below', (
+    forEachScale('a long name wraps in the card, below the wordmark', (
       tester,
       scale,
     ) async {
@@ -512,10 +503,9 @@ void main() {
       );
       addTearDown(rig.dispose);
       await pumpJaga(tester, rig.screen, scale: scale);
-      final header = tester.getRect(find.byType(HomeHeader));
+      final wordmark = tester.getRect(find.byType(JagaWordmark));
       final card = tester.getRect(find.byType(ProtectedPersonCard));
-      expect(card.top, greaterThanOrEqualTo(header.bottom));
-      expect(tester.getTopLeft(find.byType(JagaSeal)).dy, header.top);
+      expect(card.top, greaterThanOrEqualTo(wordmark.bottom));
     });
   });
 
