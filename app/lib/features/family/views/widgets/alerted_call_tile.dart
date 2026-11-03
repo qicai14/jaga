@@ -49,33 +49,44 @@ class AlertedCallTile extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 72),
             child: Padding(
               padding: EdgeInsets.all(m.m),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (call.live) ...[
-                          StatusBadge(
-                            label: l.familyCallLiveNow,
-                            tone: BadgeTone.caution,
-                            icon: Icons.phone_in_talk,
-                          ),
-                          SizedBox(height: m.xs),
-                        ],
-                        Text(
-                          call.at.formatDayAndTime(context),
-                          style: text.titleLarge,
-                        ),
-                        if (agency != null)
-                          Text(agency, style: text.bodyMedium),
-                        SizedBox(height: m.s),
-                        StageProgressBar(stage: call.stage, compact: true),
-                      ],
+                  // Above the row, not beside the chevron: the badge gets the
+                  // tile's full width, so "Sedang berlangsung" wraps at the space.
+                  if (call.live) ...[
+                    // "berlangsung" is 3dp too wide at x2.0 even on the full width.
+                    MediaQuery.withClampedTextScaling(
+                      maxScaleFactor: 1.9,
+                      child: StatusBadge(
+                        label: l.familyCallLiveNow,
+                        tone: BadgeTone.caution,
+                        icon: Icons.phone_in_talk,
+                      ),
                     ),
+                    SizedBox(height: m.xs),
+                  ],
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              call.at.formatDayAndTime(context),
+                              style: text.titleLarge,
+                            ),
+                            if (agency != null)
+                              Text(agency, style: text.bodyMedium),
+                            SizedBox(height: m.s),
+                            StageProgressBar(stage: call.stage, compact: true),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: m.s),
+                      const ExcludeSemantics(child: Icon(Icons.chevron_right)),
+                    ],
                   ),
-                  SizedBox(width: m.s),
-                  const ExcludeSemantics(child: Icon(Icons.chevron_right)),
                 ],
               ),
             ),

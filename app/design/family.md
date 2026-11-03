@@ -241,6 +241,8 @@ BadgeTone.caution, Icons.phone_in_talk)`, then date and time, and so on. The til
 (`Material.shape: RoundedRectangleBorder(side: …)`). The fill stays `surfaceContainer`, because amber
 fill belongs to the name band and never red. Semantics: the label starts with "Live now", hint `familyCallLiveOpen` when
 an alert will open. At text x2.0 the badge text wraps (`Flexible`); the tile grows, minHeight 72.
+  Decision (4 Nov): the badge sits above the date row, not beside the chevron, so it has the tile's full width, and its
+  text scale is clamped to 1.9 (only there), because "berlangsung" is still 3dp too wide at x2.0 and would split mid-word.
 
 **Copy** (new keys; `settingsTitle` is reused)
 | Key | en | ms | zh |
@@ -291,7 +293,8 @@ CopilotShell (owns _tab, _home, _settings) → CopilotTabs(index, onSelect, tabs
   `primaryContainer` with `StadiumBorder(side: 2dp primary)`, since the fill alone is too close to the bar; selected icon
   filled + `onPrimaryContainer`; labels `labelMedium` (20sp), selected w700 `onPrimaryContainer` (10.9:1), unselected
   `onSurfaceVariant` (about 9:1). Not `primary`: 6.5:1 on the bar misses AAA. Each destination is about 131 × 80dp.
-- **Text x2.0:** the bar gets `MediaQuery.withClampedTextScaling(maxScaleFactor: 1.3)` (26sp, like BigButton's cap).
+- **Text x2.0:** the bar gets `MediaQuery.withClampedTextScaling(maxScaleFactor: 1.2)` (24sp). 1.3 (26sp) was the first
+  choice, but the bold selected "Panggilan" wrapped at 1.3 in ms and pushed the indicator out of the bar.
   Labels are short so ms fits; the full label stays in semantics, which M3 announces as "selected, tab 1 of 3".
 
 Copy: `settingsTitle` is the third label; `familyCallsTitle` stays the Calls page title ("Alerted calls" is too wide).
