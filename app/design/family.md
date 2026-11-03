@@ -32,7 +32,8 @@ A newer push for the same `callId` updates the open screen in place (stage only 
 - **Channels** (created at first launch): `family_alerts` "Scam alerts", `Importance.max` (heads-up), default sound and
   vibration, `NotificationVisibility.public`, category `message` (no DND bypass). `family_updates` "Call updates",
   `Importance.low` (no heads-up, no sound) for "may be genuine".
-- **Content:** (lead's decision, Qi Cai, 3 Nov: the notification shows stage and agency; reverts Preston's 2 Nov name-only change) title `familyNotifTitle` ("Mum may be on a scam call"), body `familyNotifBody` (stage label, plus agency
+- **Content:** (lead's decision, Qi Cai, 3 Nov: stage and agency show; reverts the 2 Nov name-only change.)
+  Title `familyNotifTitle` ("Mum may be on a scam call"), body `familyNotifBody` (stage label, plus agency
   when known). Never quotes or summary on the lock screen. Notification id = hash of `callId`, so the second push and the
   follow-up **replace** the first instead of stacking (`onlyAlertOnce: false` on the alert channel so the money push re-rings).
 - **Action** `familyNotifCallAction` ("Call Mum"), `showsUserInterface: true`: opens the alert screen with `autoDial`,
