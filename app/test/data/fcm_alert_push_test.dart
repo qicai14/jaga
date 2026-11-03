@@ -83,6 +83,13 @@ void main() {
     });
   });
 
+  group('parseFamilyNames', () {
+    test('splits on commas, trims and drops empties', () {
+      expect(parseFamilyNames(' Aisyah,, Faiz ,'), ['Aisyah', 'Faiz']);
+      expect(parseFamilyNames(''), isEmpty);
+    });
+  });
+
   group('initFirebase', () {
     test('is true when init succeeds', () async {
       expect(await initFirebase(() async {}), isTrue);

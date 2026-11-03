@@ -141,4 +141,5 @@ The co-pilot token must not be on the protected user's phone (ADR 0010), so each
 - Neither token: a dev build with both roles and all Fakes.
 - Both tokens: the app refuses to start (debug and release).
 - Add `--dart-define=JAGA_LINE_NUMBER=+60...` to the protected build: the line setup tells parents to forward to. Unset, setup shows no code.
+- Add `--dart-define=JAGA_FAMILY_NAMES=Aisyah,Faiz` to the protected build: the names the home (and setup step 8) shows as linked family co-pilots. Unset, it shows none.
 - Never put either token in a public build.
