@@ -66,9 +66,12 @@ ThemeData buildJagaTheme() {
         (states) => states.contains(WidgetState.selected)
             ? text.labelMedium?.copyWith(
                 color: scheme.onPrimaryContainer,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
               )
-            : text.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+            : text.labelMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w400,
+              ),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(

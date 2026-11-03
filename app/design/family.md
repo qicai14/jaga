@@ -291,7 +291,7 @@ CopilotShell (owns _tab, _home, _settings) → CopilotTabs(index, onSelect, tabs
 - **Unlink** swaps `CopilotShell` out at the app root, as now, so the bar goes with it. `popUntil(isFirst)` stays harmless.
 - **Theme** (`navigationBarTheme` in `jaga_theme.dart`): background `surfaceContainer`, elevation 0; indicator
   `primaryContainer` with `StadiumBorder(side: 2dp primary)`, since the fill alone is too close to the bar; selected icon
-  filled + `onPrimaryContainer`; labels `labelMedium` (20sp), selected w700 `onPrimaryContainer` (10.9:1), unselected
+  filled + `onPrimaryContainer`; labels `labelMedium` (20sp), selected w600 `onPrimaryContainer` (10.9:1), unselected w400
   `onSurfaceVariant` (about 9:1). Not `primary`: 6.5:1 on the bar misses AAA. Each destination is about 131 × 80dp.
 - **Text x2.0:** the bar gets `MediaQuery.withClampedTextScaling(maxScaleFactor: 1.2)` (24sp). 1.3 (26sp) was the first
   choice, but the bold selected "Panggilan" wrapped at 1.3 in ms and pushed the indicator out of the bar.
