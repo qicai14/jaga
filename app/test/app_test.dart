@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/app.dart';
@@ -5,6 +7,8 @@ import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
+import 'package:jaga/features/onboarding/views/onboarding_screen.dart';
+import 'package:jaga/features/onboarding/views/protected_home_screen.dart';
 import 'package:jaga/features/family/views/family_alert_screen.dart';
 import 'package:jaga/features/family/views/stage_timeline_screen.dart';
 import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
@@ -23,6 +27,7 @@ Future<OnboardingRig> pumpApp(
   WidgetTester tester, {
   OnboardingProgress start = const OnboardingProgress(),
   AlertOpen? launch,
+  double scale = 1.0,
 }) async {
   final rig = await OnboardingRig.create(
     start: start,
@@ -34,7 +39,9 @@ Future<OnboardingRig> pumpApp(
   addTearDown(rig.dispose);
   tester.view.physicalSize = phoneSize;
   tester.view.devicePixelRatio = 1.0;
+  tester.platformDispatcher.textScaleFactorTestValue = scale;
   addTearDown(tester.view.reset);
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
   await tester.pumpWidget(JagaApp(deps: rig.deps));
   await tester.pumpAndSettle();
   return rig;
@@ -53,7 +60,54 @@ const _copilotDone = OnboardingProgress(
   link: LinkedPerson(name: 'Mak Cik', phoneNumber: fakeProtectedUserPhone),
 );
 
+/// What a 10sp text really gets under the system scale of the test (2.0).
+double _scaled(WidgetTester tester, Type screen) =>
+    MediaQuery.textScalerOf(tester.element(find.byType(screen).first))
+        .scale(10);
+
 void main() {
+  group('text scale (system x2.0)', () {
+    final copilot = _copilotDone.copyWith(language: 'en', complete: true);
+
+    testWidgets('a co-pilot screen and a pushed family alert stop at 1.5', (
+      tester,
+    ) async {
+      final rig = await pumpApp(tester, start: copilot, scale: 2.0);
+      expect(_scaled(tester, CopilotHomeScreen), 15);
+      rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyMoney)));
+      await tester.pumpAndSettle();
+      expect(_scaled(tester, FamilyAlertScreen), 15);
+    });
+
+    testWidgets('onboarding stops at 1.5', (tester) async {
+      await pumpApp(tester, scale: 2.0);
+      expect(_scaled(tester, OnboardingScreen), 15);
+    });
+
+    testWidgets('the protected home and the routes over it keep 2.0', (
+      tester,
+    ) async {
+      await pumpApp(
+        tester,
+        start: _protectedDone.copyWith(language: 'en', complete: true),
+        scale: 2.0,
+      );
+      expect(_scaled(tester, ProtectedHomeScreen), 20);
+      // The call and Warning screens are routes pushed over this home.
+      final context = tester.element(find.byType(ProtectedHomeScreen));
+      unawaited(
+        Navigator.of(context).push<void>(
+          MaterialPageRoute(builder: (_) => const Scaffold(body: Text('over'))),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        MediaQuery.textScalerOf(tester.element(find.text('over'))).scale(10),
+        20,
+      );
+    });
+  });
+
   testWidgets(
     'a fresh install starts on the language screen, in Malay, with no back arrow',
     (tester) async {

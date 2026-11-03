@@ -145,6 +145,8 @@ One entry per step and sub-state: `language`, `role`, `about`, `about-loading`, 
 `pin-locked`, `settings`.
 
 ## 10. Widget tests (`test/features/onboarding/`), each at 393×852 and again at text scale 2.0
+
+All of onboarding, both roles, caps the system text scale at 1.5 (`copilotMaxTextScale`, applied app-wide in `app.dart`; Preston, 4 Nov): the co-pilot does the protected phone's setup, and larger text looks out of place. The tests pump at 2.0 without the cap, which is the harder case.
 1. Each step: title, body and Continue visible; no overflow; Continue reachable (pinned) at 2.0.
 2. Progress text "Step n of 10" / "of 5" matches the step; back returns to n-1 with values kept.
 3. Relaunch with saved progress at step 6 opens step 6; step 4 re-runs `check()`.

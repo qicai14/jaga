@@ -55,14 +55,10 @@ class AlertedCallTile extends StatelessWidget {
                   // Above the row, not beside the chevron: the badge gets the
                   // tile's full width, so "Sedang berlangsung" wraps at the space.
                   if (call.live) ...[
-                    // "berlangsung" is 3dp too wide at x2.0 even on the full width.
-                    MediaQuery.withClampedTextScaling(
-                      maxScaleFactor: 1.9,
-                      child: StatusBadge(
-                        label: l.familyCallLiveNow,
-                        tone: BadgeTone.caution,
-                        icon: Icons.phone_in_talk,
-                      ),
+                    StatusBadge(
+                      label: l.familyCallLiveNow,
+                      tone: BadgeTone.caution,
+                      icon: Icons.phone_in_talk,
                     ),
                     SizedBox(height: m.xs),
                   ],

@@ -7,6 +7,7 @@ import 'core/config/build_config.dart';
 import 'core/haptics/buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
 import 'core/theme/jaga_theme.dart';
+import 'core/theme/text_scale.dart';
 import 'core/widgets/view_model_host.dart';
 import 'data/models/alerted_call.dart';
 import 'data/models/family_alert.dart';
@@ -90,6 +91,13 @@ class AppDependencies {
   final BuildRole buildRole;
 }
 
+/// The text scale cap for [progress]: every co-pilot screen and all of
+/// onboarding are capped; the protected person's screens are not (null).
+double? maxTextScaleFor(OnboardingProgress progress) =>
+    !progress.complete || progress.role == OnboardingRole.copilot
+    ? copilotMaxTextScale
+    : null;
+
 /// The locale and the home screen both come from the saved setup progress.
 class JagaApp extends StatefulWidget {
   const JagaApp({super.key, required this.deps});
@@ -119,6 +127,16 @@ class _JagaAppState extends State<JagaApp> {
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          // Above the Navigator, so pushed routes, dialogs and sheets are capped too.
+          builder: (context, child) {
+            final cap = maxTextScaleFor(progress);
+            return cap == null
+                ? child!
+                : MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: cap,
+                    child: child!,
+                  );
+          },
           home: _home(progress),
         );
       },

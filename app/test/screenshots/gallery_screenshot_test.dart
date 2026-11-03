@@ -122,7 +122,10 @@ void main() {
               locale: Locale(locale),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
-              home: Builder(builder: e.build),
+              home: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: e.maxTextScale ?? double.infinity,
+                child: Builder(builder: e.build),
+              ),
             ),
           ),
         );

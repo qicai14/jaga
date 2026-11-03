@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:jaga/core/theme/text_scale.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
@@ -19,18 +20,22 @@ void main() {
       ) async {
         await pumpJaga(
           tester,
-          Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: AlertedCallTile(
-                call: AlertedCall(
-                  callId: 'c',
-                  at: DateTime.utc(2026, 10, 27, 10),
-                  stage: Stage.money,
-                  claimedAgency: 'Suruhanjaya Pencegahan Rasuah Malaysia',
-                  live: true,
+          MediaQuery.withClampedTextScaling(
+            // As in the app, where the co-pilot side is capped.
+            maxScaleFactor: copilotMaxTextScale,
+            child: Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: AlertedCallTile(
+                  call: AlertedCall(
+                    callId: 'c',
+                    at: DateTime.utc(2026, 10, 27, 10),
+                    stage: Stage.money,
+                    claimedAgency: 'Suruhanjaya Pencegahan Rasuah Malaysia',
+                    live: true,
+                  ),
+                  onTap: () {},
                 ),
-                onTap: () {},
               ),
             ),
           ),

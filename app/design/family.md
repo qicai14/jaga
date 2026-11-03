@@ -203,6 +203,8 @@ Settings (app language, unlink) via a visible AppBar icon (§12.2). Genuine call
 ## 12. Navigation refinements (4 Nov)
 Qi Cai flagged co-pilot navigation as the weak spot; Preston approved these four. No contract change: `live` already
 comes from the timeline's `endedAt`, and the alert itself stays in memory in the repository.
+The whole co-pilot side (every route, dialog and sheet) caps the system text scale at 1.5 (`copilotMaxTextScale`, set app-wide in
+`app.dart`; Preston, 4 Nov). Text above that looks out of place there. The tighter caps below (bar 1.2, wordmark 1.3) stay.
 
 **12.1 The alert screen gets a way out and a way to the timeline.** `CopilotShell` keeps home as the root, so Back on
 the alert always lands on home, even after a cold start.
