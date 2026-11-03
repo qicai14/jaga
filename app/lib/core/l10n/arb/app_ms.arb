@@ -171,5 +171,9 @@
   "onboardingPermCallingAccountHelp": "Hidupkan Jaga dalam senarai, kemudian kembali.",
   "onboardingPermOpenSettingsHelp": "Buka Kebenaran, benarkan {item}, kemudian kembali.",
   "onboardingPermOverlay": "Paparan di atas apl lain",
-  "onboardingPermOverlayWhy": "Membolehkan Jaga muncul di hadapan apabila anda menjawab panggilan."
+  "onboardingPermOverlayWhy": "Membolehkan Jaga muncul di hadapan apabila anda menjawab panggilan.",
+  "familyAlertBack": "Kembali ke laman utama",
+  "familyAlertSeeTimeline": "Lihat apa yang berlaku",
+  "familyCallLiveNow": "Sedang berlangsung",
+  "familyCallLiveOpen": "Membuka amaran"
 }

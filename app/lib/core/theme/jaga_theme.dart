@@ -46,6 +46,9 @@ ThemeData buildJagaTheme() {
         textStyle: text.labelLarge,
       ),
     ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(minimumSize: Size.square(m.minTarget)),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: scheme.surfaceContainer,

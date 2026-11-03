@@ -1101,6 +1101,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lets Jaga come to the front when you answer a call.'**
   String get onboardingPermOverlayWhy;
+
+  /// The family alert's back arrow tooltip and label.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get familyAlertBack;
+
+  /// The family alert's quiet button that opens the call's stage timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'See what happened'**
+  String get familyAlertSeeTimeline;
+
+  /// Co-pilot home: badge on a call that is still going.
+  ///
+  /// In en, this message translates to:
+  /// **'Live now'**
+  String get familyCallLiveNow;
+
+  /// Co-pilot home: screen reader hint on a live call that opens its alert.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the alert'**
+  String get familyCallLiveOpen;
 }
 
 class _AppLocalizationsDelegate

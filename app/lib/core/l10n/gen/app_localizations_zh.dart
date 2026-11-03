@@ -556,4 +556,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingPermOverlayWhy => '接听电话时，让 Jaga 显示在最前面。';
+
+  @override
+  String get familyAlertBack => '返回主页';
+
+  @override
+  String get familyAlertSeeTimeline => '查看通话经过';
+
+  @override
+  String get familyCallLiveNow => '正在通话';
+
+  @override
+  String get familyCallLiveOpen => '打开警报';
 }

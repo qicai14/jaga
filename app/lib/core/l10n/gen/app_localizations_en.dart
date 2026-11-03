@@ -579,4 +579,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get onboardingPermOverlayWhy =>
       'Lets Jaga come to the front when you answer a call.';
+
+  @override
+  String get familyAlertBack => 'Back to home';
+
+  @override
+  String get familyAlertSeeTimeline => 'See what happened';
+
+  @override
+  String get familyCallLiveNow => 'Live now';
+
+  @override
+  String get familyCallLiveOpen => 'Opens the alert';
 }

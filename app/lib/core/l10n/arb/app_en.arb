@@ -361,5 +361,13 @@
   "onboardingPermOverlay": "Display over other apps",
   "@onboardingPermOverlay": {"description": "Permission row title. Android's own name for the setting."},
   "onboardingPermOverlayWhy": "Lets Jaga come to the front when you answer a call.",
-  "@onboardingPermOverlayWhy": {"description": "Permission row reason."}
+  "@onboardingPermOverlayWhy": {"description": "Permission row reason."},
+  "familyAlertBack": "Back to home",
+  "@familyAlertBack": {"description": "The family alert's back arrow tooltip and label."},
+  "familyAlertSeeTimeline": "See what happened",
+  "@familyAlertSeeTimeline": {"description": "The family alert's quiet button that opens the call's stage timeline."},
+  "familyCallLiveNow": "Live now",
+  "@familyCallLiveNow": {"description": "Co-pilot home: badge on a call that is still going."},
+  "familyCallLiveOpen": "Opens the alert",
+  "@familyCallLiveOpen": {"description": "Co-pilot home: screen reader hint on a live call that opens its alert."}
 }
