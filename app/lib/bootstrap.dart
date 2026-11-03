@@ -97,7 +97,8 @@ Future<AppDependencies> createDependencies() async {
   final pin = PinRepository(store: const SecureStore());
   final onboarding = await OnboardingRepository.load(
     store: const SecureStore(),
-    // shortcut: names are baked into the APK, not read from the server's real link (JAGA_FAMILY_TOKENS), upgrade when the real onboarding API lands (#116 / #12).
+    // shortcut: names are baked into the APK, not read from the server link
+    // (JAGA_FAMILY_TOKENS); replace with the real onboarding API (#116 / #12).
     api: FakeOnboardingApiService(jagaLineNumber: _jagaLineNumber)
       ..joined = parseFamilyNames(_familyNames),
     jagaLineNumber: _jagaLineNumber,
