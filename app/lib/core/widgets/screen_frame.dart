@@ -11,6 +11,7 @@ class ScreenFrame extends StatelessWidget {
     this.appBar,
     this.title,
     this.titleStyle,
+    this.role,
     required this.body,
     this.bottomAction,
   });
@@ -21,6 +22,9 @@ class ScreenFrame extends StatelessWidget {
 
   /// A smaller title for long ones; the default is headlineMedium.
   final TextStyle? titleStyle;
+
+  /// A [RoleBadge] on its own row at the top end, above the title.
+  final Widget? role;
   final Widget body;
   final Widget? bottomAction;
 
@@ -37,9 +41,20 @@ class ScreenFrame extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (role != null)
+                  Padding(
+                    padding: EdgeInsets.only(top: m.m, bottom: m.s),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: role,
+                    ),
+                  ),
                 if (title != null)
                   Padding(
-                    padding: EdgeInsets.only(top: m.l, bottom: m.m),
+                    padding: EdgeInsets.only(
+                      top: role == null ? m.l : 0,
+                      bottom: m.m,
+                    ),
                     child: Semantics(
                       header: true,
                       child: Text(
@@ -52,7 +67,9 @@ class ScreenFrame extends StatelessWidget {
                   ),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.only(top: title == null ? m.l : 0),
+                    padding: EdgeInsets.only(
+                      top: title == null && role == null ? m.l : 0,
+                    ),
                     child: SizedBox(width: double.infinity, child: body),
                   ),
                 ),

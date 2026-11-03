@@ -603,4 +603,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => 'See all calls';
+
+  @override
+  String get roleFamily => 'Family';
+
+  @override
+  String get roleProtected => 'Protected phone';
 }

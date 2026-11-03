@@ -67,6 +67,18 @@ void main() {
     expect(find.text('Remove Mum from this phone'), findsOneWidget);
   });
 
+  forEachScale('settings carries one Family badge, above the title', (
+    tester,
+    scale,
+  ) async {
+    await pump(tester, scale);
+    expect(find.text('Family'), findsOneWidget);
+    expect(
+      tester.getBottomLeft(find.text('Family')).dy,
+      lessThanOrEqualTo(tester.getTopLeft(find.text('Settings')).dy),
+    );
+  });
+
   for (final locale in const ['ms', 'zh']) {
     testWidgets('settings in $locale at text x2.0 has no overflow', (
       tester,

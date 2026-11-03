@@ -4,6 +4,7 @@ import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/big_button.dart';
 import '../../../core/widgets/jaga_wordmark.dart';
+import '../../../core/widgets/role_badge.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../../../core/widgets/view_model_host.dart';
 import '../../../data/models/alerted_call.dart';
@@ -67,6 +68,7 @@ class CopilotHomeScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) => ScreenFrame(
+        role: const RoleBadge.family(),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

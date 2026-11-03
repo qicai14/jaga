@@ -1149,6 +1149,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'See all calls'**
   String get familyHomeSeeAllCalls;
+
+  /// Role marker at the top end of every co-pilot tab: whose phone this is.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get roleFamily;
+
+  /// Role marker on the protected user's status and settings screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected phone'**
+  String get roleProtected;
 }
 
 class _AppLocalizationsDelegate

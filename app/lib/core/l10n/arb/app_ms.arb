@@ -179,5 +179,7 @@
   "familyNavHome": "Utama",
   "familyNavCalls": "Panggilan",
   "familyHomeLastCall": "Amaran terakhir",
-  "familyHomeSeeAllCalls": "Lihat semua panggilan"
+  "familyHomeSeeAllCalls": "Lihat semua panggilan",
+  "roleFamily": "Keluarga",
+  "roleProtected": "Telefon dilindungi"
 }

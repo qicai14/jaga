@@ -470,6 +470,20 @@ void main() {
     expect(button.onPressed, isNull);
   });
 
+  group('role badge', () {
+    forEachScale('Home and Calls each carry one Family badge', (
+      tester,
+      scale,
+    ) async {
+      final rig = Rig();
+      addTearDown(rig.dispose);
+      for (final screen in [rig.screen, rig.callsScreen]) {
+        await pumpJaga(tester, screen, scale: scale);
+        expect(find.text('Family'), findsOneWidget);
+      }
+    });
+  });
+
   group('header', () {
     for (final locale in const ['en', 'ms', 'zh']) {
       forEachScale('the wordmark is the one header node ($locale)', (

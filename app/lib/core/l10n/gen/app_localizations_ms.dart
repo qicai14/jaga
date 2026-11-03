@@ -609,4 +609,10 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => 'Lihat semua panggilan';
+
+  @override
+  String get roleFamily => 'Keluarga';
+
+  @override
+  String get roleProtected => 'Telefon dilindungi';
 }

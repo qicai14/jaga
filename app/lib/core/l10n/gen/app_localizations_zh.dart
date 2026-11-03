@@ -580,4 +580,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get familyHomeSeeAllCalls => '查看所有通话';
+
+  @override
+  String get roleFamily => '家人';
+
+  @override
+  String get roleProtected => '受保护的手机';
 }

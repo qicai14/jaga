@@ -179,5 +179,7 @@
   "familyNavHome": "主页",
   "familyNavCalls": "通话",
   "familyHomeLastCall": "最近警报",
-  "familyHomeSeeAllCalls": "查看所有通话"
+  "familyHomeSeeAllCalls": "查看所有通话",
+  "roleFamily": "家人",
+  "roleProtected": "受保护的手机"
 }

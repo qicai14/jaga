@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/big_button.dart';
+import '../../../core/widgets/role_badge.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../../../data/models/alerted_call.dart';
 import '../../../data/models/family_alert.dart';
@@ -32,6 +33,7 @@ class CopilotCallsScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: vm,
       builder: (context, _) => ScreenFrame(
+        role: const RoleBadge.family(),
         title: l.familyCallsTitle,
         // "Panggilan yang dimaklumkan" splits mid-word in headlineMedium at x2.0.
         titleStyle: text.titleLarge,
