@@ -6,11 +6,21 @@ import '../theme/theme_context.dart';
 /// Page scaffold: safe area, 24dp side padding, optional title, scrolling body,
 /// and a bottom action pinned above the gesture bar.
 class ScreenFrame extends StatelessWidget {
-  const ScreenFrame({super.key, this.appBar, this.title, required this.body, this.bottomAction});
+  const ScreenFrame({
+    super.key,
+    this.appBar,
+    this.title,
+    this.titleStyle,
+    required this.body,
+    this.bottomAction,
+  });
 
   /// Setup steps put the back arrow and progress here.
   final PreferredSizeWidget? appBar;
   final String? title;
+
+  /// A smaller title for long ones; the default is headlineMedium.
+  final TextStyle? titleStyle;
   final Widget body;
   final Widget? bottomAction;
 
@@ -32,8 +42,12 @@ class ScreenFrame extends StatelessWidget {
                     padding: EdgeInsets.only(top: m.l, bottom: m.m),
                     child: Semantics(
                       header: true,
-                      child: Text(title!,
-                          style: Theme.of(context).textTheme.headlineMedium),
+                      child: Text(
+                        title!,
+                        style:
+                            titleStyle ??
+                            Theme.of(context).textTheme.headlineMedium,
+                      ),
                     ),
                   ),
                 Expanded(

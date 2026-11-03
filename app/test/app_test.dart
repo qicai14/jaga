@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/app.dart';
+import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
@@ -276,6 +277,41 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Alerted calls'), findsOneWidget);
       expect(find.byType(NavigationBar), findsOneWidget);
+
+      // System Back closes it the same way.
+      rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyMoney)));
+      await tester.pumpAndSettle();
+      expect(find.byType(FamilyAlertScreen), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(find.byType(FamilyAlertScreen), findsNothing);
+      expect(find.text('Alerted calls'), findsOneWidget);
+      expect(
+        tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
+        1,
+      );
+    });
+
+    testWidgets('clearing the pause shows one SnackBar, not one per tab', (
+      tester,
+    ) async {
+      final rig = await pumpApp(tester, start: copilot);
+      rig.pause.active = true;
+      rig.notifier.emitOpen(AlertOpen(FamilyAlert.parse(familyMoney)));
+      await tester.pumpAndSettle();
+      await tester.binding.handlePopRoute(); // reloads Home: the card shows
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Clear Jaga Pause'));
+      await tester.pumpAndSettle();
+      final g = await tester.startGesture(
+        tester.getCenter(find.byType(HoldToConfirmButton)),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 2100));
+      await g.up();
+      await tester.pumpAndSettle();
+      expect(find.text('Jaga Pause cleared'), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
     });
 
     testWidgets('Back on Calls goes to Home first', (tester) async {

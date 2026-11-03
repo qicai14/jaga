@@ -33,6 +33,8 @@ class CopilotCallsScreen extends StatelessWidget {
       listenable: vm,
       builder: (context, _) => ScreenFrame(
         title: l.familyCallsTitle,
+        // "Panggilan yang dimaklumkan" splits mid-word in headlineMedium at x2.0.
+        titleStyle: text.titleLarge,
         body: switch (vm.status) {
           LoadStatus.loading => const Center(
             child: CircularProgressIndicator(),

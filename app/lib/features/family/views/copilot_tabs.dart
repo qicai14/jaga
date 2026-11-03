@@ -27,9 +27,9 @@ class CopilotTabs extends StatelessWidget {
       },
       child: Scaffold(
         body: IndexedStack(index: index, children: tabs),
-        // Labels are short, so a 1.3 cap keeps three of them on one line at x2.0.
+        // "Panggilan" in bold wraps at 1.3: a 1.2 cap keeps all three on one line.
         bottomNavigationBar: MediaQuery.withClampedTextScaling(
-          maxScaleFactor: 1.3,
+          maxScaleFactor: 1.2,
           child: NavigationBar(
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             selectedIndex: index,
@@ -42,7 +42,6 @@ class CopilotTabs extends StatelessWidget {
               ),
               NavigationDestination(
                 icon: const Icon(Icons.history),
-                selectedIcon: const Icon(Icons.history),
                 label: l.familyNavCalls,
               ),
               NavigationDestination(
