@@ -31,6 +31,7 @@ Future<OnboardingRig> pumpHome(
   List<String> family = const [],
   bool callsAreFake = false,
   OnboardingProgress start = _done,
+  Locale locale = const Locale('en'),
 }) async {
   final rig = await OnboardingRig.create(
     start: start,
@@ -46,6 +47,7 @@ Future<OnboardingRig> pumpHome(
       builder: (_, vm) => ProtectedHomeScreen(vm: vm),
     ),
     scale: scale,
+    locale: locale,
   );
   return rig;
 }

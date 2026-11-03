@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/l10n/gen/app_localizations.dart';
@@ -69,4 +70,31 @@ Future<void> loadNotoFonts() async {
     'NotoSans-ExtraBold.ttf',
   ]);
   await load('NotoSansSC', ['NotoSansSC-Regular.otf', 'NotoSansSC-Bold.otf']);
+}
+
+/// Fails if any word of any text under [within] (default: the whole tree) is
+/// wider than its line, i.e. split mid-word. Needs [loadNotoFonts]. CJK wraps
+/// by character, so only runs of other characters count as words.
+void expectNoSplitWords(WidgetTester tester, {Finder? within}) {
+  final root = within ?? find.byType(MaterialApp);
+  final paragraphs = tester.renderObjectList<RenderParagraph>(
+    find.descendant(of: root, matching: find.byType(RichText)),
+  );
+  for (final p in paragraphs) {
+    final style = p.text.style;
+    if (style == null) continue;
+    final plain = p.text.toPlainText();
+    for (final w in RegExp(r'[^\s一-鿿]+').allMatches(plain)) {
+      final painter = TextPainter(
+        text: TextSpan(text: w.group(0), style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: p.textScaler,
+      )..layout();
+      expect(
+        painter.width,
+        lessThanOrEqualTo(p.size.width + 0.5),
+        reason: '"${w.group(0)}" is split in "$plain"',
+      );
+    }
+  }
 }
