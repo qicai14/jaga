@@ -81,6 +81,8 @@ void main() {
         }.contains(state))
           ('en', 2.0),
         if (state == 'perms-mixed' || state == 'link-code') ...[('zh', 1.0)],
+        // The role badge must not split a word at the protected phone's full scale.
+        if (state == 'status') ...[('en', 2.0), ('ms', 2.0)],
       ];
     }
     if (feature != 'warning') return [('ms', 1.0), ('en', 1.0)];

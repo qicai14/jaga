@@ -12,10 +12,16 @@ class GalleryEntry {
 
   final String feature;
 
-  /// Family and onboarding screens run capped in the app (`copilotMaxTextScale`).
-  double? get maxTextScale => feature == 'family' || feature == 'onboarding'
-      ? copilotMaxTextScale
-      : null;
   final String state;
   final Widget Function(BuildContext context) build;
+
+  /// Family and onboarding screens run capped in the app (`copilotMaxTextScale`),
+  /// except the protected phone's own status and settings screens.
+  double? get maxTextScale =>
+      feature == 'family' ||
+          (feature == 'onboarding' &&
+              !state.startsWith('status') &&
+              state != 'settings')
+      ? copilotMaxTextScale
+      : null;
 }
