@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/features/family/views/copilot_tabs.dart';
@@ -52,28 +49,9 @@ const _labels = {
   'zh': ['主页', '通话', null],
 };
 
-Future<void> _load(String family, List<String> files) async {
-  final loader = FontLoader(family);
-  for (final f in files) {
-    final bytes = File('assets/fonts/$f').readAsBytesSync();
-    loader.addFont(Future.value(ByteData.sublistView(bytes)));
-  }
-  await loader.load();
-}
-
 /// Line counts need the real fonts: the default test font, Ahem, is far wider.
 void main() {
-  setUpAll(() async {
-    await _load('NotoSans', [
-      'NotoSans-Regular.ttf',
-      'NotoSans-SemiBold.ttf',
-      'NotoSans-ExtraBold.ttf',
-    ]);
-    await _load('NotoSansSC', [
-      'NotoSansSC-Regular.otf',
-      'NotoSansSC-Bold.otf',
-    ]);
-  });
+  setUpAll(loadNotoFonts);
 
   for (final locale in ['en', 'ms', 'zh']) {
     for (final scale in textScales) {

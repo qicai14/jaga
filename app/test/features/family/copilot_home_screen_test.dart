@@ -477,6 +477,7 @@ void main() {
         scale,
       ) async {
         final handle = tester.ensureSemantics();
+        addTearDown(handle.dispose);
         final rig = Rig();
         addTearDown(rig.dispose);
         await pumpJaga(
@@ -490,7 +491,6 @@ void main() {
           tester.getSemantics(find.bySemanticsLabel('Jaga')),
           matchesSemantics(label: 'Jaga', isHeader: true),
         );
-        handle.dispose();
       });
     }
 

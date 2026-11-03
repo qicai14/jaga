@@ -271,7 +271,7 @@ gets a bar. It replaces 12.2's settings icon; the `iconButtonTheme` stays.
 CopilotShell (owns _tab, _home, _settings) → CopilotTabs(index, onSelect, tabs)   views/copilot_tabs.dart, no deps
   PopScope(canPop: index == 0, onPopInvoked: !didPop → onSelect(0))
   Scaffold(body: IndexedStack(tabs), bottomNavigationBar: NavigationBar(height 80, labelBehavior: alwaysShow))
-    0 Home      Icons.home_outlined / home        CopilotHomeScreen   (title appTitle)
+    0 Home      Icons.home_outlined / home        CopilotHomeScreen   (wordmark header)
     1 Calls     Icons.history / history           CopilotCallsScreen  (title familyCallsTitle)
     2 Settings  Icons.settings_outlined / settings  CopilotSettingsScreen (title settingsTitle, no back arrow)
 ```

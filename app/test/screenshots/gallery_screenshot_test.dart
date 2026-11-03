@@ -32,16 +32,7 @@ String _slug(String s) => s
 
 void main() {
   setUpAll(() async {
-    const dir = 'assets/fonts/';
-    await _load('NotoSans', [
-      '${dir}NotoSans-Regular.ttf',
-      '${dir}NotoSans-SemiBold.ttf',
-      '${dir}NotoSans-ExtraBold.ttf',
-    ]);
-    await _load('NotoSansSC', [
-      '${dir}NotoSansSC-Regular.otf',
-      '${dir}NotoSansSC-Bold.otf',
-    ]);
+    await loadNotoFonts();
     // Icons: the SDK's fonts, found through FLUTTER_ROOT (set by `flutter test`).
     final root = Platform.environment['FLUTTER_ROOT'];
     final icons = root == null

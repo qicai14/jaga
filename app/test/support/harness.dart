@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/l10n/gen/app_localizations.dart';
 import 'package:jaga/core/theme/jaga_theme.dart';
@@ -46,4 +49,24 @@ void forEachScale(
       expect(tester.takeException(), isNull);
     });
   }
+}
+
+/// Loads the real Noto Sans fonts (Latin and Chinese). The default test font,
+/// Ahem, is far wider, so tests that count lines or split words need these.
+Future<void> loadNotoFonts() async {
+  Future<void> load(String family, List<String> files) async {
+    final loader = FontLoader(family);
+    for (final f in files) {
+      final bytes = File('assets/fonts/$f').readAsBytesSync();
+      loader.addFont(Future.value(ByteData.sublistView(bytes)));
+    }
+    await loader.load();
+  }
+
+  await load('NotoSans', [
+    'NotoSans-Regular.ttf',
+    'NotoSans-SemiBold.ttf',
+    'NotoSans-ExtraBold.ttf',
+  ]);
+  await load('NotoSansSC', ['NotoSansSC-Regular.otf', 'NotoSansSC-Bold.otf']);
 }
