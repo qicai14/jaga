@@ -82,6 +82,19 @@ class CopilotHomeScreen extends StatelessWidget {
     );
   }
 
+  Widget _tile(BuildContext context, AlertedCall call) {
+    final alert = call.live ? vm.heldAlert(call.callId) : null;
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.metrics.s),
+      child: AlertedCallTile(
+        call: call,
+        opensAlert: alert != null,
+        onTap: () =>
+            alert == null ? _openTimeline(context, call) : openAlert(alert),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -135,25 +148,7 @@ class CopilotHomeScreen extends StatelessWidget {
                 style: text.bodyLarge,
               ),
               LoadStatus.loaded => Column(
-                children: [
-                  for (final call in vm.calls)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: m.s),
-                      child: AlertedCallTile(
-                        call: call,
-                        opensAlert:
-                            call.live && vm.heldAlert(call.callId) != null,
-                        onTap: () {
-                          final alert = call.live
-                              ? vm.heldAlert(call.callId)
-                              : null;
-                          alert == null
-                              ? _openTimeline(context, call)
-                              : openAlert(alert);
-                        },
-                      ),
-                    ),
-                ],
+                children: [for (final call in vm.calls) _tile(context, call)],
               ),
             },
           ],

@@ -279,8 +279,11 @@ class _CopilotShellState extends State<CopilotShell> {
                 onSeeTimeline: () => Navigator.of(context).push<void>(
                   MaterialPageRoute(
                     builder: (_) => ViewModelHost(
-                      create: () =>
-                          _timelineFor(AlertedCall.fromAlert(open.alert)),
+                      create: () => _timelineFor(
+                        AlertedCall.fromAlert(
+                          _alerts.latest(open.alert.callId) ?? open.alert,
+                        ),
+                      ),
                       builder: (_, timelineVm) =>
                           StageTimelineScreen(vm: timelineVm),
                     ),

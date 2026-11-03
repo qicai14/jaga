@@ -96,6 +96,9 @@ class FakeTimelineService implements TimelineService {
   /// Every call throws [NetworkException], to test failures.
   bool offline = false;
 
+  /// Adds a call, as if the server started one.
+  void add(AlertedCall call) => _calls.add(call);
+
   /// [delete] waits for this first, to show the busy state.
   Future<void>? hold;
 

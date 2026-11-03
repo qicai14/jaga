@@ -21,7 +21,7 @@ class CopilotHomeViewModel extends ChangeNotifier {
     required this._alerts,
   }) {
     // A new push shows on home without a notification tap.
-    _sub = _alerts.alerts.listen((_) => load());
+    _sub = _alerts.alerts.listen((_) => unawaited(_reload()));
     load();
   }
 
@@ -34,17 +34,14 @@ class CopilotHomeViewModel extends ChangeNotifier {
   bool _disposed = false;
   LoadStatus _status = LoadStatus.loading;
   bool _pauseActive = false;
-  List<AlertedCall> _calls = const [];
+  List<AlertedCall> _sorted = const [];
+  int _generation = 0;
 
   LoadStatus get status => _status;
   bool get pauseActive => _pauseActive;
 
   /// Live calls first (newest first), then the rest in service order.
-  List<AlertedCall> get calls => [
-    ...(_calls.where((c) => c.live).toList()
-      ..sort((a, b) => b.at.compareTo(a.at))),
-    ..._calls.where((c) => !c.live),
-  ];
+  List<AlertedCall> get calls => _sorted;
 
   /// The alert held for [callId], if this process has seen one.
   FamilyAlert? heldAlert(String callId) => _alerts.latest(callId);
@@ -58,6 +55,7 @@ class CopilotHomeViewModel extends ChangeNotifier {
   /// Loads the pause status and the calls. Content already on screen stays
   /// while it refreshes; after an error the spinner returns.
   Future<void> load() async {
+    final generation = ++_generation;
     if (_status != LoadStatus.loaded) {
       _status = LoadStatus.loading;
       notifyListeners();
@@ -71,15 +69,29 @@ class CopilotHomeViewModel extends ChangeNotifier {
     try {
       final calls = await _timeline.calls();
       final active = await pause;
-      if (_disposed) return;
+      // A newer load started meanwhile: its answer wins.
+      if (_disposed || generation != _generation) return;
       _pauseActive = active ?? _pauseActive;
-      _calls = calls;
+      _sorted = [
+        ...(calls.where((c) => c.live).toList()
+          ..sort((a, b) => b.at.compareTo(a.at))),
+        ...calls.where((c) => !c.live),
+      ];
       _status = LoadStatus.loaded;
     } on NetworkException {
-      if (_disposed) return;
+      if (_disposed || generation != _generation) return;
       _status = LoadStatus.error;
     }
     notifyListeners();
+  }
+
+  /// A push reloads in the background: nothing may escape unhandled.
+  Future<void> _reload() async {
+    try {
+      await load();
+    } catch (e) {
+      debugPrint('Could not reload the calls: ${e.runtimeType}');
+    }
   }
 
   @override
