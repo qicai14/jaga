@@ -101,6 +101,14 @@ void main() {
       expect(notifier.shown.every((s) => s.$2 == familyPerson), isTrue);
     });
 
+    test('latest returns the merged alert, and null for an unknown call', () {
+      expect(repo.latest('call-1'), isNull);
+      repo.receive(alert(familyMoney));
+      repo.receive(alert(familyIsolation)); // older and lower
+      expect(repo.latest('call-1')!.stage, Stage.money);
+      expect(repo.latest('nope'), isNull);
+    });
+
     test('a redelivery or a stale push re-notifies nobody', () async {
       push.emit(alert(familyMoney));
       push.emit(alert(familyMoney)); // the same push again

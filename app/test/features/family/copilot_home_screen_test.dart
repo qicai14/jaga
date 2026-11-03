@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
+import 'package:jaga/data/models/family_alert.dart';
+import 'package:jaga/data/repositories/family_alert_repository.dart';
+import 'package:jaga/data/services/alert_notifier.dart';
+import 'package:jaga/data/services/alert_push_service.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/services/copilot_pause_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
@@ -29,7 +33,23 @@ class Rig {
       person: familyPerson,
       pause: pause,
       timeline: this.timeline,
+      alerts: alerts,
     );
+  }
+
+  final push = FakeAlertPushService();
+  late final alerts = FamilyAlertRepository(
+    push: push,
+    notifier: FakeAlertNotifier(),
+    person: familyPerson,
+  );
+
+  /// Alerts passed to openAlert.
+  final opened = <FamilyAlert>[];
+  void dispose() {
+    vm.dispose();
+    alerts.dispose();
+    push.dispose();
   }
 
   final FakeCopilotPauseService pause;
@@ -44,6 +64,7 @@ class Rig {
     timelineFor: (call) =>
         StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
     createSettings: () => throw UnimplementedError('covered in app_test'),
+    openAlert: opened.add,
   );
 }
 
@@ -57,7 +78,7 @@ Future<Rig> pump(
   // Offline before the Rig: the view model starts loading in its constructor.
   final svc = (timeline ?? fixtureTimelineService())..offline = offline;
   final rig = Rig(pauseActive: pauseActive, timeline: svc);
-  addTearDown(rig.vm.dispose);
+  addTearDown(rig.dispose);
   await pumpJaga(tester, rig.screen, scale: scale);
   return rig;
 }
@@ -404,6 +425,82 @@ void main() {
       find.widgetWithIcon(IconButton, Icons.delete_outline),
     );
     expect(button.onPressed, isNull);
+  });
+
+  group('navigation', () {
+    AlertedCall live(String id, int minute) => AlertedCall(
+      callId: id,
+      at: DateTime.utc(2026, 10, 27, 11, minute),
+      stage: Stage.money,
+      live: true,
+    );
+
+    forEachScale('settings is an icon button, not a menu', (
+      tester,
+      scale,
+    ) async {
+      await pump(tester, scale);
+      expect(find.byType(PopupMenuButton<void>), findsNothing);
+      final button = find.byTooltip('Settings');
+      expect(button, findsOneWidget);
+      expect(tester.getSize(button).shortestSide, greaterThanOrEqualTo(56));
+    });
+
+    forEachScale('a live call is first, marked, and opens its held alert', (
+      tester,
+      scale,
+    ) async {
+      final calls = await fixtureTimelineService().calls();
+      final svc = FakeTimelineService(
+        calls: [
+          ...calls,
+          AlertedCall.fromAlert(FamilyAlert.parse(familyMoney)),
+        ],
+      );
+      final rig = Rig(timeline: svc);
+      addTearDown(rig.dispose);
+      rig.alerts.receive(FamilyAlert.parse(familyMoney));
+      await pumpJaga(tester, rig.screen, scale: scale);
+      final first = find.byType(AlertedCallTile).first;
+      expect(tester.widget<AlertedCallTile>(first).call.live, isTrue);
+      expect(find.text('Live now'), findsOneWidget);
+      await tapVisible(tester, first);
+      await tester.pumpAndSettle();
+      expect(rig.opened.single.callId, 'call-1');
+      expect(find.byType(StageTimelineScreen), findsNothing);
+    });
+
+    forEachScale('a live call without a held alert opens the timeline', (
+      tester,
+      scale,
+    ) async {
+      final svc = FakeTimelineService(calls: [live('x', 1)]);
+      final rig = await pump(tester, scale, timeline: svc);
+      await tapVisible(tester, find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(rig.opened, isEmpty);
+      expect(find.byType(StageTimelineScreen), findsOneWidget);
+    });
+
+    forEachScale('an ended call opens the timeline even with an alert held', (
+      tester,
+      scale,
+    ) async {
+      final rig = await pump(tester, scale);
+      rig.alerts.receive(FamilyAlert.parse(familyLongText));
+      await tapVisible(tester, find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(rig.opened, isEmpty);
+      expect(find.byType(StageTimelineScreen), findsOneWidget);
+    });
+
+    forEachScale('two live calls do not overflow', (tester, scale) async {
+      final svc = FakeTimelineService(calls: [live('x', 1), live('y', 2)]);
+      await pump(tester, scale, timeline: svc);
+      expect(find.text('Live now'), findsNWidgets(2));
+      final first = find.byType(AlertedCallTile).first;
+      expect(tester.widget<AlertedCallTile>(first).call.callId, 'y');
+    });
   });
 
   test('a row with a null endedAt is live, one with a time is not', () {

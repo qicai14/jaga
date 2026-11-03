@@ -8,6 +8,7 @@ import 'core/haptics/buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
 import 'core/theme/jaga_theme.dart';
 import 'core/widgets/view_model_host.dart';
+import 'data/models/alerted_call.dart';
 import 'data/models/linked_person.dart';
 import 'data/models/onboarding_progress.dart';
 import 'data/repositories/call_repository.dart';
@@ -34,6 +35,7 @@ import 'features/family/view_models/family_alert_view_model.dart';
 import 'features/family/view_models/stage_timeline_view_model.dart';
 import 'features/family/views/copilot_home_screen.dart';
 import 'features/family/views/family_alert_screen.dart';
+import 'features/family/views/stage_timeline_screen.dart';
 import 'features/onboarding/view_models/onboarding_view_model.dart';
 import 'features/onboarding/view_models/protected_home_view_model.dart';
 import 'features/onboarding/views/onboarding_screen.dart';
@@ -242,6 +244,7 @@ class _CopilotShellState extends State<CopilotShell> {
     person: widget.person,
     pause: widget.deps.pause,
     timeline: widget.deps.timeline,
+    alerts: _alerts,
   );
   StreamSubscription<AlertOpen>? _opens;
 
@@ -270,8 +273,20 @@ class _CopilotShellState extends State<CopilotShell> {
                 dialer: widget.deps.dialer,
                 initial: open.alert,
               ),
-              builder: (_, vm) =>
-                  FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
+              builder: (context, vm) => FamilyAlertScreen(
+                vm: vm,
+                autoDial: open.autoDial,
+                onSeeTimeline: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => ViewModelHost(
+                      create: () =>
+                          _timelineFor(AlertedCall.fromAlert(open.alert)),
+                      builder: (_, timelineVm) =>
+                          StageTimelineScreen(vm: timelineVm),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         )
@@ -280,6 +295,13 @@ class _CopilotShellState extends State<CopilotShell> {
           if (mounted) _home.load();
         });
   }
+
+  StageTimelineViewModel _timelineFor(AlertedCall call) =>
+      StageTimelineViewModel(
+        call: call,
+        timeline: widget.deps.timeline,
+        dialer: widget.deps.dialer,
+      );
 
   @override
   void dispose() {
@@ -296,11 +318,8 @@ class _CopilotShellState extends State<CopilotShell> {
       personName: widget.person.name,
       pause: widget.deps.pause,
     ),
-    timelineFor: (call) => StageTimelineViewModel(
-      call: call,
-      timeline: widget.deps.timeline,
-      dialer: widget.deps.dialer,
-    ),
+    timelineFor: _timelineFor,
+    openAlert: (alert) => _open(AlertOpen(alert)),
     createSettings: () => CopilotSettingsViewModel(
       repository: widget.deps.onboarding,
       person: widget.person,

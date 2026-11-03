@@ -1,3 +1,4 @@
+import 'family_alert.dart';
 import 'stage.dart';
 import 'stage_update.dart' show Risk;
 
@@ -27,6 +28,16 @@ class AlertedCall {
       live: json['endedAt'] == null,
     );
   }
+
+  /// The call behind a family alert. An alert only exists while the call is on,
+  /// so it is live (Delete stays off).
+  factory AlertedCall.fromAlert(FamilyAlert alert) => AlertedCall(
+    callId: alert.callId,
+    at: alert.at,
+    stage: alert.stage,
+    claimedAgency: alert.claimedAgency,
+    live: true,
+  );
 
   final String callId;
   final DateTime at;

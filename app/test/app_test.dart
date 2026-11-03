@@ -111,9 +111,7 @@ void main() {
 
   group('co-pilot settings', () {
     Future<void> openSettings(WidgetTester tester) async {
-      await tester.tap(find.byType(PopupMenuButton<void>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Settings'));
+      await tester.tap(find.byTooltip('Settings'));
       await tester.pumpAndSettle();
     }
 

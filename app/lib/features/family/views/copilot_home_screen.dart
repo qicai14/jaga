@@ -6,6 +6,7 @@ import '../../../core/widgets/big_button.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../../../core/widgets/view_model_host.dart';
 import '../../../data/models/alerted_call.dart';
+import '../../../data/models/family_alert.dart';
 import '../view_models/clear_pause_view_model.dart';
 import '../view_models/copilot_home_view_model.dart';
 import '../view_models/copilot_settings_view_model.dart';
@@ -26,12 +27,16 @@ class CopilotHomeScreen extends StatelessWidget {
     required this.createClearPause,
     required this.timelineFor,
     required this.createSettings,
+    required this.openAlert,
   });
 
   final CopilotHomeViewModel vm;
   final ClearPauseViewModel Function() createClearPause;
   final StageTimelineViewModel Function(AlertedCall call) timelineFor;
   final CopilotSettingsViewModel Function() createSettings;
+
+  /// Opens the family alert screen (the shell builds that route).
+  final void Function(FamilyAlert alert) openAlert;
 
   Future<void> _clearPause(BuildContext context) async {
     final l = AppLocalizations.of(context);
@@ -87,13 +92,10 @@ class CopilotHomeScreen extends StatelessWidget {
       builder: (context, _) => ScreenFrame(
         appBar: AppBar(
           actions: [
-            PopupMenuButton<void>(
-              itemBuilder: (_) => [
-                PopupMenuItem<void>(
-                  onTap: () => _openSettings(context),
-                  child: Text(l.settingsTitle),
-                ),
-              ],
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: l.settingsTitle,
+              onPressed: () => _openSettings(context),
             ),
           ],
         ),
@@ -139,7 +141,16 @@ class CopilotHomeScreen extends StatelessWidget {
                       padding: EdgeInsets.only(bottom: m.s),
                       child: AlertedCallTile(
                         call: call,
-                        onTap: () => _openTimeline(context, call),
+                        opensAlert:
+                            call.live && vm.heldAlert(call.callId) != null,
+                        onTap: () {
+                          final alert = call.live
+                              ? vm.heldAlert(call.callId)
+                              : null;
+                          alert == null
+                              ? _openTimeline(context, call)
+                              : openAlert(alert);
+                        },
                       ),
                     ),
                 ],

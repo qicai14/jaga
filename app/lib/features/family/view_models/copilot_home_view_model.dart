@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../data/models/alerted_call.dart';
+import '../../../data/models/family_alert.dart';
 import '../../../data/models/linked_person.dart';
+import '../../../data/repositories/family_alert_repository.dart';
 import '../../../data/services/copilot_pause_service.dart';
 import '../../../data/services/network_exception.dart';
 import '../../../data/services/timeline_service.dart';
@@ -14,13 +18,18 @@ class CopilotHomeViewModel extends ChangeNotifier {
     required this.person,
     required this._pause,
     required this._timeline,
+    required this._alerts,
   }) {
+    // A new push shows on home without a notification tap.
+    _sub = _alerts.alerts.listen((_) => load());
     load();
   }
 
   final LinkedPerson person;
   final CopilotPauseService _pause;
   final TimelineService _timeline;
+  final FamilyAlertRepository _alerts;
+  late final StreamSubscription<FamilyAlert> _sub;
 
   bool _disposed = false;
   LoadStatus _status = LoadStatus.loading;
@@ -29,7 +38,16 @@ class CopilotHomeViewModel extends ChangeNotifier {
 
   LoadStatus get status => _status;
   bool get pauseActive => _pauseActive;
-  List<AlertedCall> get calls => _calls;
+
+  /// Live calls first (newest first), then the rest in service order.
+  List<AlertedCall> get calls => [
+    ...(_calls.where((c) => c.live).toList()
+      ..sort((a, b) => b.at.compareTo(a.at))),
+    ..._calls.where((c) => !c.live),
+  ];
+
+  /// The alert held for [callId], if this process has seen one.
+  FamilyAlert? heldAlert(String callId) => _alerts.latest(callId);
 
   /// The sheet cleared it: hide the pause row now, before the reload confirms.
   void markPauseCleared() {
@@ -67,6 +85,7 @@ class CopilotHomeViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _sub.cancel();
     super.dispose();
   }
 }
