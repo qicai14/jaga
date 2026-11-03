@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/app.dart';
+import 'package:jaga/data/models/alerted_call.dart';
+import 'package:jaga/features/family/views/copilot_home_screen.dart';
+import 'package:jaga/features/family/views/family_alert_screen.dart';
+import 'package:jaga/features/family/views/stage_timeline_screen.dart';
+import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
 import 'package:jaga/data/models/linked_person.dart';
 import 'package:jaga/data/models/onboarding_progress.dart';
 import 'package:jaga/data/services/alert_notifier.dart';
@@ -107,6 +112,58 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mak Cik'), findsOneWidget);
     expect(find.text('Protected'), findsOneWidget);
+  });
+
+  group('co-pilot navigation', () {
+    final copilot = _copilotDone.copyWith(language: 'en', complete: true);
+    final money = FamilyAlert.parse(familyMoney);
+
+    testWidgets(
+      'a launch alert: See what happened, a live timeline, Back, Back',
+      (tester) async {
+        await pumpApp(tester, start: copilot, launch: AlertOpen(money));
+        expect(find.text('Mum may be on a scam call'), findsNothing);
+        expect(find.byType(FamilyAlertScreen), findsOneWidget);
+        final button = find.text('See what happened');
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(find.byType(StageTimelineScreen), findsOneWidget);
+        final delete = tester.widget<IconButton>(
+          find.widgetWithIcon(IconButton, Icons.delete_outline),
+        );
+        expect(delete.onPressed, isNull);
+        final vm = tester
+            .widget<StageTimelineScreen>(find.byType(StageTimelineScreen))
+            .vm;
+        expect(vm.call.callId, money.callId);
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        expect(find.byType(FamilyAlertScreen), findsOneWidget);
+        await tester.ensureVisible(find.byTooltip('Back to home'));
+        await tester.tap(find.byTooltip('Back to home'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CopilotHomeScreen), findsOneWidget);
+      },
+    );
+
+    testWidgets('a live call with a held alert opens the alert from home', (
+      tester,
+    ) async {
+      final rig = await pumpApp(
+        tester,
+        start: copilot,
+        launch: AlertOpen(money),
+      );
+      rig.timeline.add(AlertedCall.fromAlert(money));
+      await tester.ensureVisible(find.byTooltip('Back to home'));
+      await tester.tap(find.byTooltip('Back to home'));
+      await tester.pumpAndSettle();
+      expect(find.text('Live now'), findsOneWidget);
+      await tester.tap(find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(find.byType(FamilyAlertScreen), findsOneWidget);
+    });
   });
 
   group('co-pilot settings', () {

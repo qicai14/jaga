@@ -309,11 +309,9 @@ class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
   @override
   void initState() {
     super.initState();
-    if (widget.live > 0) {
-      if (widget.held) {
-        for (final raw in _raws.take(widget.live)) {
-          _alerts.receive(FamilyAlert.parse(raw));
-        }
+    if (widget.live > 0 && widget.held) {
+      for (final raw in _raws.take(widget.live)) {
+        _alerts.receive(FamilyAlert.parse(raw));
       }
     }
   }
@@ -385,11 +383,9 @@ class _TimelineDemo extends StatelessWidget {
       call: fixtureCalls().firstWhere(
         (c) => c.callId == callId,
         orElse: () => AlertedCall.fromAlert(
-          FamilyAlert.parse(
-            familyAlertFixtures.firstWhere(
-              (raw) => raw.contains('"callId": "$callId"'),
-            ),
-          ),
+          familyAlertFixtures
+              .map(FamilyAlert.parse)
+              .firstWhere((a) => a.callId == callId),
         ),
       ),
       timeline: fixtureTimelineService(),
