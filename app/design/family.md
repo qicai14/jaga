@@ -262,3 +262,53 @@ an alert will open. At text x2.0 the badge text wraps (`Flexible`); the tile gro
    call opens the timeline; two live at x2.0 don't overflow.
 3. `family_alert_repository` test: `latest` returns the merged alert (stage never down), and null for an unknown call.
 4. `family_home_view_models_test`: live calls first; a repository push triggers one reload.
+
+**12.5 Co-pilot tabs (bottom bar).** Preston asked for basic tabs. Co-pilot side only: the protected user's app never
+gets a bar. It replaces 12.2's settings icon; the `iconButtonTheme` stays.
+```
+CopilotShell (owns _tab, _home, _settings) → CopilotTabs(index, onSelect, tabs)   views/copilot_tabs.dart, no deps
+  PopScope(canPop: index == 0, onPopInvoked: !didPop → onSelect(0))
+  Scaffold(body: IndexedStack(tabs), bottomNavigationBar: NavigationBar(height 80, labelBehavior: alwaysShow))
+    0 Home      Icons.home_outlined / home        CopilotHomeScreen   (title appTitle)
+    1 Calls     Icons.history / history           CopilotCallsScreen  (title familyCallsTitle)
+    2 Settings  Icons.settings_outlined / settings  CopilotSettingsScreen (title settingsTitle, no back arrow)
+```
+- **Home is for "is she safe right now"; Calls is the record.** Home: ProtectedPersonCard (pause, Clear Jaga Pause), then
+  every live tile (12.4), then, if none is live, one tile under `familyHomeLastCall`, then `TextButton(familyHomeSeeAllCalls)`
+  → `onSelect(1)` (a tab switch, not a push). The full list lives only on Calls (live first, as 12.3). Empty and error
+  states move with the list to Calls; Home shows `familyCallsEmpty` in place of the last call, or the error row with
+  `commonTryAgain`.
+- **One view model, two tabs.** `CopilotHomeViewModel` stays the single owner of calls, the `repository.alerts`
+  listener and the reload after the alert closes; it adds `liveCalls` and `lastEnded` getters. Both tabs read it, so
+  a push reloads once and both tabs agree. The shell also owns `CopilotSettingsViewModel` now that settings is not a route.
+- **No nested navigators.** Timeline, Clear Jaga Pause sheet and the alert push on the root navigator, full-screen over
+  the bar. The timeline has its own pinned hotline button, and a bar under it would eat the height text x2.0 needs.
+  Back pops to the shell, and `IndexedStack` keeps the tab and its scroll. The family alert stays as it is (urgent, no bar):
+  Back returns to the tab that was showing; on a cold start, Home. Android Back on Calls or Settings goes to Home
+  first, then leaves the app.
+- **Unlink** swaps `CopilotShell` out at the app root, as now, so the bar goes with it. `popUntil(isFirst)` stays harmless.
+- **Theme** (`navigationBarTheme` in `jaga_theme.dart`): background `surfaceContainer`, elevation 0; indicator
+  `primaryContainer` with `StadiumBorder(side: 2dp primary)`, since the fill alone is too close to the bar; selected icon
+  filled + `onPrimaryContainer`; labels `labelMedium` (20sp), selected w700 `onPrimaryContainer` (10.9:1), unselected
+  `onSurfaceVariant` (about 9:1). Not `primary`: 6.5:1 on the bar misses AAA. Each destination is about 131 × 80dp.
+- **Text x2.0:** the bar gets `MediaQuery.withClampedTextScaling(maxScaleFactor: 1.3)` (26sp, like BigButton's cap).
+  Labels are short so ms fits; the full label stays in semantics, which M3 announces as "selected, tab 1 of 3".
+
+Copy: `settingsTitle` is the third label; `familyCallsTitle` stays the Calls page title ("Alerted calls" is too wide).
+| Key | en | ms | zh |
+|---|---|---|---|
+| `familyNavHome` | Home | Utama | 主页 |
+| `familyNavCalls` | Calls | Panggilan | 通话 |
+| `familyHomeLastCall` | Last alert | Amaran terakhir | 最近警报 |
+| `familyHomeSeeAllCalls` | See all calls | Lihat semua panggilan | 查看所有通话 |
+
+**Gallery:** `_home` entries render inside `CopilotTabs` (index 0, fixture tabs); add `calls-many`, `calls-empty`,
+`calls-error`, `tabs-settings`. Screenshots: `home-live`, `calls-many`, `tabs-settings` at x1.0 and x2.0, in ms.
+**Tests:** `copilot_tabs_test`: three labels shown at 393×852 and at x2.0 in en/ms/zh with no overflow, each ≥ 56dp,
+selected flag, Back on tab 1 selects 0, Back on 0 pops. `app_test` co-pilot navigation: no settings icon in the
+home app bar; See all calls selects Calls; a Calls tile opens the timeline with no `NavigationBar`, and Back
+lands on Calls again; a notification on Calls opens the alert without the bar, and Back lands on Calls; Unlink from
+the Settings tab reaches onboarding with no bar. `family_home_view_models_test`: `liveCalls`, `lastEnded`.
+
+`home-live` and `home-live-no-alert` stay identical on purpose: the tile says the call is live, which holds either way,
+so only the hint changes (`familyCallLiveOpen` or none). A second look would show a detail Preston can't act on.
