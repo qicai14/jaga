@@ -109,7 +109,7 @@ class Verdict(BaseModel):
   system prompt. Spark never writes what the protected user sees: it returns a **phrase ID**, checked against that
   stage's reviewed **phrase library** ([ADR 0006](docs/adr/0006-phrase-library-only.md)). Any other output counts as a
   failure. A caller saying "ignore the warning on your phone" can at worst make Spark fail.
-- **Fail-safe, not fail-open.** Spark has 2.5 s. If it times out or answers badly, Jaga keeps the rules' answer, and a
+- **Fail-safe, not fail-open.** Spark has 5 s. If it times out or answers badly, Jaga keeps the rules' answer, and a
   call already at `money` or `credentials` still gets a Warning.
 - **Privacy.** Standard tier only, `store: false` on every request, masked snippets, no audio stored.
 
@@ -184,7 +184,7 @@ sequenceDiagram
     end
     Note over S: Stage rises to authority: Caution (rules alone)
     S-->>P: Caution banner
-    S->>M: Stage, risk, masked snippet (2.5 s budget)
+    S->>M: Stage, risk, masked snippet (5 s budget)
     M-->>S: Verdict {stage, risk, counterMove phrase ID}
     Note over S: Caller asks for "akaun selamat": hard trigger
     S-->>P: Warning: command, counter-move, evidence
@@ -237,12 +237,12 @@ We report what we measured, including where we fell short. Full reports: [`eval/
 [`malay-dev.md`](eval/reports/malay-dev.md)). This is a **development set, not held-out**: the phrases were widened
 after hearing some of these recordings, so the numbers are optimistic for unseen calls.
 
-| Measure | Target | Jaga as deployed | n |
+| Measure | Target | Jaga (rules + Spark, 2.5 s run) | n |
 |---|---|---|---|
 | Scams caught before the money | ≥ 90% | 50% (95% CI 20% to 80%) | 10 scam calls |
 | False alarms per 10 h of genuine calls | ≤ 1 | 3.6 (CI 0 to 11) | 10 genuine calls |
 | Rules decision after a line is transcribed, p95 | | 0.002 s | 7 Warnings |
-| Muse Spark answer time p50 / p95 | ≤ 2.5 s budget | 2.09 s / 2.48 s | 9 answered asks |
+| Muse Spark answer time p50 / p95 (2.5 s run) | ≤ 2.5 s budget | 2.09 s / 2.48 s | 9 answered asks |
 
 What it taught us: 7 of 10 scams got a Warning, and Spark changed no outcome on this set, even with a 6 s budget. The
 limit is the phrase library (3 scams never got past `authority`), not the model.
