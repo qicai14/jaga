@@ -6,7 +6,7 @@ Numbers only, run on 3 Nov 2026 on cached Muse transcripts (no new transcription
 - **rules+Spark, 2.5 s:** the server as deployed, with Muse Spark and the server's 2.5 s Spark timeout. 20 paid
   Spark asks.
 - **rules+Spark, 6 s (eval only):** the same, with the Spark timeout raised to 6 s in the run script only (the
-  server still uses 2.5 s). 20 paid Spark asks.
+  server still uses 2.5 s). 20 paid Spark asks. Update 5 Nov: the live server now uses 5 s (#124); the table was measured at 2.5 s.
 
 Both Spark runs use `report.py`'s `run_arm` and `metrics`, through a local script that sends one line per
 second, adds 15 s of silence at the end and times each Spark answer. Time to Warning came from a

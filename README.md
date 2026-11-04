@@ -43,7 +43,7 @@ ask **Jaga Pause** "is this customer mid-scam?" before releasing a transfer.
 
 | What | Where | What you can do |
 |---|---|---|
-| Demo video | `VIDEO_LINK_TODO` | The full flow on real phones: a live scam call, the Warning, the family alert and the Demo Bank holding a transfer |
+| Demo video | [youtu.be/g_XCapNMfxg](https://youtu.be/g_XCapNMfxg) | The full flow on real phones: a live scam call, the Warning, the family alert and the Demo Bank holding a transfer |
 | Android APK | [Releases](https://github.com/qicai14/jaga/releases) | Install on any Android phone (sideload, debug-signed) |
 | Source | this repo | Run the server with fakes and replay calls through it, no keys needed ([Quick start](#quick-start)) |
 
@@ -237,19 +237,19 @@ We report what we measured, including where we fell short. Full reports: [`eval/
 [`malay-dev.md`](eval/reports/malay-dev.md)). This is a **development set, not held-out**: the phrases were widened
 after hearing some of these recordings, so the numbers are optimistic for unseen calls.
 
-| Measure | Target | Jaga (rules + Spark, 2.5 s run) | n |
+| Measure | Target | Jaga (rules + Spark, measured at the earlier 2.5 s timeout) | n |
 |---|---|---|---|
 | Scams caught before the money | ≥ 90% | 50% (95% CI 20% to 80%) | 10 scam calls |
 | False alarms per 10 h of genuine calls | ≤ 1 | 3.6 (CI 0 to 11) | 10 genuine calls |
 | Rules decision after a line is transcribed, p95 | | 0.002 s | 7 Warnings |
-| Muse Spark answer time p50 / p95 (2.5 s run) | ≤ 2.5 s budget | 2.09 s / 2.48 s | 9 answered asks |
+| Muse Spark answer time p50 / p95 (earlier 2.5 s timeout) | ≤ 2.5 s budget (earlier timeout) | 2.09 s / 2.48 s | 9 answered asks |
 
 What it taught us: 7 of 10 scams got a Warning, and Spark changed no outcome on this set, even with a 6 s budget. The
-limit is the phrase library (3 scams never got past `authority`), not the model.
+limit is the phrase library (3 scams never got past `authority`), not the model. The live server's timeout is now 5 s (#124); these numbers were not re-run.
 
 **TeleAntiFraud-28k** (400 Mandarin calls, transcribed by Muse Voice Transcribe, rules only;
-[`teleantifraud.md`](eval/reports/teleantifraud.md)): Macro-F1 0.333. **Caveat: the Malaysia pack has no Mandarin
-phrases yet (#36)**, so every call ended at stage `none`. This is the all-normal baseline, kept as a harness check.
+[`teleantifraud.md`](eval/reports/teleantifraud.md)): Macro-F1 0.333. **Caveat: the Malaysia pack had no Mandarin
+phrases when this ran (#36; Mandarin shipped later in #75)**, so every call ended at stage `none`. This is the all-normal baseline, kept as a harness check.
 
 ## Technical depth
 
@@ -358,7 +358,7 @@ Who built what, from the merged PRs, their commits and the issues they closed (n
 | Who | What they built |
 |---|---|
 | **Lim Qi Cai** ([@qicai14](https://github.com/qicai14)), lead | **The whole server:** the Twilio Jaga line, the Muse Voice Transcribe and Muse Spark clients, the stage tracker and Malaysia region pack, Spark escalation and its fail-safe, family alerts over FCM, the Jaga Pause API, stage timelines and the voice access token. **All contracts and ADRs.** **Product edges:** the Demo Bank (#66), CI, and the move to Render (#84). **Most of the evidence:** the TeleAntiFraud run (#68), the Muse ASR rescore (#69), the Spark-written Manglish corpus (#74), finishing the metrics report (#80) and the Malay dev-set report (#120). Live-call fixes in the app (#117, #118). |
-| **Preston** ([@Shadewebdev](https://github.com/Shadewebdev)) | **The Flutter app** (#113: about 100 commits, 216 files, replacing 14 stacked PRs): the design system and launcher icon, onboarding, taking the Jaga line call, the Caution and Warning screens, the family co-pilot's alerts, timeline and Jaga Pause clear, Firebase push, and the permissions checklist. Closed #11 and #59. Follow-ups in #114, and co-pilot navigation in #122. |
+| **Preston** ([@Shadewebdev](https://github.com/Shadewebdev)) | **The Flutter app** (#113, replacing 14 stacked PRs): the design system and launcher icon, onboarding, taking the Jaga line call, the Caution and Warning screens, the family co-pilot's alerts, timeline and Jaga Pause clear, Firebase push, and the permissions checklist. Closed #11 and #59. Follow-ups in #114, and co-pilot navigation in #122. |
 | **Joshua** ([@jlee-0211](https://github.com/jlee-0211)) | The Mandarin, Cantonese and Tamil script pack phrases (#36; Mandarin shipped in #75), and the first commits of the red-team set (#72) and the replay harness (#73). |
 | **Lau Foon Xuan** ([@LXfoon](https://github.com/LXfoon)) | Opened the eval PRs: the red-team set (#72), the replay harness (#73), the Mandarin phrases (#75) and the first cut of the metrics report and ablation (#80). The first transcription spike (#3, later redone in #69). |
 
