@@ -43,7 +43,7 @@ ask **Jaga Pause** "is this customer mid-scam?" before releasing a transfer.
 
 | What | Where | What you can do |
 |---|---|---|
-| Demo video | `VIDEO_LINK_TODO` | The full flow on real phones: a live scam call, the Warning, the family alert and the Demo Bank holding a transfer |
+| Demo video | [youtu.be/g_XCapNMfxg](https://youtu.be/g_XCapNMfxg) | The full flow on real phones: a live scam call, the Warning, the family alert and the Demo Bank holding a transfer |
 | Android APK | [Releases](https://github.com/qicai14/jaga/releases) | Install on any Android phone (sideload, debug-signed) |
 | Source | this repo | Run the server with fakes and replay calls through it, no keys needed ([Quick start](#quick-start)) |
 
