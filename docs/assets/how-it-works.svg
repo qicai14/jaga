@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="1200" height="430" role="img" aria-labelledby="t d">
+  <title id="t">How Jaga works</title>
+  <desc id="d">Four steps: a scammer calls; the Jaga line hears the call with Muse Voice Transcribe; free rules track the scam script and ask Muse Spark only when they fire; the phone warns, the family co-pilot gets a push and Jaga Pause holds the bank transfer.</desc>
+  <style>
+    .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; }
+    .meta { fill: #ecfdf5; stroke: #14b8a6; stroke-width: 3; }
+    .num { fill: #0f766e; font: 800 22px 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    .h { fill: #0f172a; font: 700 22px 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    .p { fill: #334155; font: 400 16px 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; }
+    .tag { fill: #0f766e; font: 700 14px 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; letter-spacing: 1px; }
+    .arrow { stroke: #0f766e; stroke-width: 4; fill: none; marker-end: url(#a); }
+    .icon { fill: none; stroke: #0f766e; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#0f766e"/>
+    </marker>
+  </defs>
+  <!-- Own background, so it reads the same on GitHub's light and dark themes -->
+  <rect width="1200" height="430" rx="24" fill="#f8fafc"/>
+  <text x="40" y="52" class="h" style="font-size:26px">How Jaga works</text>
+  <text x="40" y="80" class="p">The scammer talks. Jaga listens for the script, not the number.</text>
+
+  <!-- 1 -->
+  <rect x="40" y="110" width="250" height="280" rx="18" class="card"/>
+  <text x="62" y="146" class="num">1</text>
+  <path class="icon" d="M70 180c0 40 30 70 70 70l14-16-20-14-10 8c-14-6-24-16-30-30l8-10-14-20z"/>
+  <text x="62" y="290" class="h">A scammer calls</text>
+  <text x="62" y="318" class="p">"Ini Pegawai PDRM. Akaun</text>
+  <text x="62" y="340" class="p">mak cik terlibat kes..."</text>
+  <text x="62" y="372" class="p">The SIM forwards to the Jaga line.</text>
+
+  <!-- 2 -->
+  <rect x="330" y="110" width="250" height="280" rx="18" class="meta"/>
+  <text x="352" y="146" class="num">2</text>
+  <text x="560" y="146" text-anchor="end" class="tag">META AI</text>
+  <path class="icon" d="M372 210h16M398 186v48M414 172v76M430 196v28M446 180v60M462 204v12"/>
+  <text x="352" y="290" class="h">Jaga hears it</text>
+  <text x="352" y="318" class="p">Muse Voice Transcribe turns</text>
+  <text x="352" y="340" class="p">the live Malay / English call</text>
+  <text x="352" y="362" class="p">into lines as it happens.</text>
+
+  <!-- 3 -->
+  <rect x="620" y="110" width="250" height="280" rx="18" class="meta"/>
+  <text x="642" y="146" class="num">3</text>
+  <text x="850" y="146" text-anchor="end" class="tag">META AI</text>
+  <path class="icon" d="M660 240l40-40 30 24 50-58M760 166h20v20"/>
+  <text x="642" y="290" class="h">Jaga tracks the script</text>
+  <text x="642" y="318" class="p">Free rules follow the scam</text>
+  <text x="642" y="340" class="p">stages. Muse Spark is asked</text>
+  <text x="642" y="362" class="p">only when the rules fire.</text>
+
+  <!-- 4 -->
+  <rect x="910" y="110" width="250" height="280" rx="18" class="card"/>
+  <text x="932" y="146" class="num">4</text>
+  <path class="icon" d="M1000 168l40 15v28c0 26-17 44-40 52-23-8-40-26-40-52v-28zM985 212l11 11 21-23"/>
+  <text x="932" y="290" class="h">Jaga steps in</text>
+  <text x="932" y="318" class="p">Warning on the phone, push</text>
+  <text x="932" y="340" class="p">to the family co-pilot, and</text>
+  <text x="932" y="362" class="p">Jaga Pause holds the transfer.</text>
+
+  <path class="arrow" d="M292 250h34"/>
+  <path class="arrow" d="M582 250h34"/>
+  <path class="arrow" d="M872 250h34"/>
+</svg>
