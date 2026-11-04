@@ -1,6 +1,6 @@
 # Adversarial test set: usage notes
 
-**Purpose:** test the two layers described in `GLOSSARY.md` and `docs/spec.md`: (1) the rules layer (stage tracker plus hard triggers such as a TAC request or "akaun selamat") and (2) Muse Spark, called on a new stage from `authority` up (max 5 per call, 2.5 s timeout). Spec story 52 asks for exactly these paraphrase, Manglish and injection variants as test data.
+**Purpose:** test the two layers described in `GLOSSARY.md` and `docs/spec.md`: (1) the rules layer (stage tracker plus hard triggers such as a TAC request or "akaun selamat") and (2) Muse Spark, called on a new stage from `authority` up (max 5 per call, 5 s timeout). Spec story 52 asks for exactly these paraphrase, Manglish and injection variants as test data.
 
 **Test only. Never tune on it.** Do not use these rows for training, writing rules or the hard-trigger list, prompts, few-shot examples or thresholds. The hard-trigger list and phrase library are still open content work (spec "Further Notes"); this set must not be mined for them. If you inspect failures and then change the rules or prompt, the set is spent for that purpose: write fresh cases and record the date and change here.
 

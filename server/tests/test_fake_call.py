@@ -785,8 +785,21 @@ def test_spark_asks_stop_at_five_a_call_and_the_sixth_stage_gets_the_fail_safe(c
     assert updates[-1]["source"] == "rules"
 
 
-def test_the_spark_limits_are_a_second_and_a_half_and_five_asks():
-    assert (spark.TIMEOUT, spark.MAX_CALLS) == (2.5, 5)
+def test_the_spark_limits_are_five_seconds_and_five_asks():
+    assert (spark.TIMEOUT, spark.MAX_CALLS) == (5.0, 5)
+
+
+def test_a_spark_verdict_is_logged_with_its_risk_and_time_but_no_transcript(client, monkeypatch, caplog):
+    caplog.set_level("INFO")
+    spark_says(monkeypatch, spark_out("low"))
+
+    trail(client, "CA_verdictlog", [("caller", "Saya Inspektor Ali dari PDRM.")])
+
+    assert any(
+        m.startswith("call CA_verdictlog: Muse Spark verdict risk=low in ") and m.endswith(" s")
+        for m in caplog.messages
+    )
+    assert "Inspektor" not in caplog.text
 
 
 def test_a_slow_verdict_for_an_older_stage_cannot_lower_a_newer_warning(client, monkeypatch):

@@ -47,7 +47,7 @@ helping the user verify, pulling in family and slowing the transfer are the rest
      and on a fast host: Twilio fetches it on first play, so a slow fetch delays connecting (cold start), and later plays can
      use Twilio's cache (ETag/Last-Modified). Twilio's docs don't say what happens to the call if the fetch fails, so this
      needs a real phone test.
-   - **Safety rules:** if Muse Spark times out (2.5 s) or fails, a call at `money` or `credentials` still gets a Warning;
+   - **Safety rules:** if Muse Spark times out (5 s) or fails, a call at `money` or `credentials` still gets a Warning;
      below that it stays a Caution. Spark can lower a hard-trigger Warning to a Caution, never to nothing, and a follow-up
      push tells the family. The protected user can dismiss a Caution or Warning on their own screen only: it doesn't stop
      family alerts, clear Jaga Pause or stop tracking, because scammers coach victims to tap "okay". Only a family co-pilot
