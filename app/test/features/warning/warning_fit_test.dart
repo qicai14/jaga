@@ -1,24 +1,15 @@
-import 'dart:io';
-
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/big_button.dart';
 import 'package:jaga/data/models/stage_update.dart';
 import 'package:jaga/debug/fixtures/stage_update_fixtures.dart';
 
+import '../../support/harness.dart' show loadNotoFonts;
 import 'warning_overlay_test.dart' show emit, pump;
 
 /// Measured with the real Noto Sans (the default test font, Ahem, is about 1.6x
 /// wider and would fail the budget for the wrong reason).
 void main() {
-  setUpAll(() async {
-    final loader = FontLoader('NotoSans');
-    for (final f in ['Regular', 'SemiBold', 'ExtraBold']) {
-      final bytes = File('assets/fonts/NotoSans-$f.ttf').readAsBytesSync();
-      loader.addFont(Future.value(ByteData.sublistView(bytes)));
-    }
-    await loader.load();
-  });
+  setUpAll(loadNotoFonts);
 
   final cases = {
     'high': (
@@ -30,8 +21,7 @@ void main() {
       'Bank tidak akan minta kod TAC anda. Letak telefon dan hubungi bank anda sendiri di 03-2174 1717.',
     ),
   };
-  for (final MapEntry(key: name, value: (fixture, counter))
-      in cases.entries) {
+  for (final MapEntry(key: name, value: (fixture, counter)) in cases.entries) {
     for (final scale in [1.0, 2.0]) {
       testWidgets(
         '$name at 393x852, text x$scale: command and counter-move sit above Hang up',

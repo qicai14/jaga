@@ -32,16 +32,7 @@ String _slug(String s) => s
 
 void main() {
   setUpAll(() async {
-    const dir = 'assets/fonts/';
-    await _load('NotoSans', [
-      '${dir}NotoSans-Regular.ttf',
-      '${dir}NotoSans-SemiBold.ttf',
-      '${dir}NotoSans-ExtraBold.ttf',
-    ]);
-    await _load('NotoSansSC', [
-      '${dir}NotoSansSC-Regular.otf',
-      '${dir}NotoSansSC-Bold.otf',
-    ]);
+    await loadNotoFonts();
     // Icons: the SDK's fonts, found through FLUTTER_ROOT (set by `flutter test`).
     final root = Platform.environment['FLUTTER_ROOT'];
     final icons = root == null
@@ -70,7 +61,11 @@ void main() {
         if (state == 'alert-isolation' || state == 'home-pause-active') ...[
           ('zh', 1.0),
         ],
-        if (state == 'alert-long-text') ('ms', 2.0),
+        if (state == 'alert-long-text' ||
+            state == 'home-live' ||
+            state == 'calls-many' ||
+            state == 'tabs-settings')
+          ('ms', 2.0),
       ];
     }
     if (feature == 'onboarding') {
@@ -86,6 +81,9 @@ void main() {
         }.contains(state))
           ('en', 2.0),
         if (state == 'perms-mixed' || state == 'link-code') ...[('zh', 1.0)],
+        // The role badge must not split a word at the protected phone's full scale.
+        if (state == 'status') ...[('en', 2.0), ('ms', 2.0), ('zh', 2.0)],
+        if (state == 'status-needs-attention') ...[('en', 2.0), ('ms', 2.0)],
       ];
     }
     if (feature != 'warning') return [('ms', 1.0), ('en', 1.0)];
@@ -127,7 +125,10 @@ void main() {
               locale: Locale(locale),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
-              home: Builder(builder: e.build),
+              home: MediaQuery.withClampedTextScaling(
+                maxScaleFactor: e.maxTextScale ?? double.infinity,
+                child: Builder(builder: e.build),
+              ),
             ),
           ),
         );

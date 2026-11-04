@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/hold_to_confirm_button.dart';
+import '../../../core/widgets/role_badge.dart';
 import '../../../core/widgets/screen_frame.dart';
 import '../view_models/protected_home_view_model.dart';
 import 'widgets/forwarding_body.dart';
@@ -42,6 +43,7 @@ class ProtectedSettingsScreen extends StatelessWidget {
       listenable: vm,
       builder: (context, _) => ScreenFrame(
         appBar: AppBar(),
+        role: const RoleBadge.protected(),
         title: l.settingsTitle,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

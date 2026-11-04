@@ -290,6 +290,58 @@ void main() {
       );
     });
 
+    testWidgets('wholeWords steps down until the longest word fits', (
+      tester,
+    ) async {
+      await pumpJaga(
+        tester,
+        const Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              child: ShrinkToFitText(
+                text: 'Pemberitahuan penting',
+                style: TextStyle(fontSize: 40),
+                minFontSize: 12,
+                wholeWords: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      // Ahem is 1em wide per letter: 13 letters need a size of at most 15.
+      final size = tester.widget<Text>(find.byType(Text)).style!.fontSize!;
+      expect(size, lessThanOrEqualTo(15.4));
+      expect(size, greaterThanOrEqualTo(12));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('wholeWords holds at the floor without throwing', (
+      tester,
+    ) async {
+      await pumpJaga(
+        tester,
+        const Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 50,
+              child: ShrinkToFitText(
+                text: 'Pemberitahuan',
+                style: TextStyle(fontSize: 40),
+                minFontSize: 20,
+                wholeWords: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      // Nothing fits in 50dp: it stays at the floor instead of looping or throwing.
+      expect(tester.widget<Text>(find.byType(Text)).style!.fontSize, 20);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('reports overflow at the floor', (tester) async {
       var overflowed = false;
       await pumpJaga(

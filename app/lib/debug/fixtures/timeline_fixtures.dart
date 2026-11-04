@@ -55,14 +55,6 @@ const timelineV0Fixtures = [
   timelineLongIsolation,
 ];
 
-/// The latest alert of a call, as a row of the home list.
-AlertedCall alertedCallFrom(FamilyAlert alert) => AlertedCall(
-  callId: alert.callId,
-  at: alert.at,
-  stage: alert.stage,
-  claimedAgency: alert.claimedAgency,
-);
-
 /// A stage update, as a step of the timeline.
 TimelineEvent timelineEventFrom(StageUpdate update) => TimelineEvent(
   at: update.at,
@@ -75,6 +67,14 @@ List<TimelineEvent> _events(List<String> raw) => [
   for (final r in raw) timelineEventFrom(StageUpdate.parse(r)),
 ];
 
+/// An ended call: the fixture rows are not live, so Delete works.
+AlertedCall _endedCall(FamilyAlert alert) => AlertedCall(
+  callId: alert.callId,
+  at: alert.at,
+  stage: alert.stage,
+  claimedAgency: alert.claimedAgency,
+);
+
 /// Five calls, newest first, with timelines for call-1, call-2 and call-5.
 List<AlertedCall> fixtureCalls() => [
   for (final raw in [
@@ -84,7 +84,7 @@ List<AlertedCall> fixtureCalls() => [
     familyCredentials,
     familyMoney,
   ])
-    alertedCallFrom(FamilyAlert.parse(raw)),
+    _endedCall(FamilyAlert.parse(raw)),
 ];
 
 /// Twelve calls a day apart, for the long list.

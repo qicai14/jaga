@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/gen/app_localizations.dart';
 import '../../../core/theme/theme_context.dart';
+import '../../../core/widgets/role_badge.dart';
 import '../../../core/widgets/screen_frame.dart';
+import '../../../core/widgets/shrink_to_fit_text.dart';
 import '../view_models/protected_home_view_model.dart';
 import 'protected_settings_screen.dart';
 import 'widgets/pin_gate_sheet.dart';
@@ -43,6 +45,7 @@ class ProtectedHomeScreen extends StatelessWidget {
       child: ListenableBuilder(
         listenable: vm,
         builder: (context, _) => ScreenFrame(
+          role: const RoleBadge.protected(),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -73,11 +76,14 @@ class ProtectedHomeScreen extends StatelessWidget {
                       : null,
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minHeight: m.minTarget),
-                    child: Text(
-                      vm.needsAttention
+                    // Steps down only when a word would split (never below body size).
+                    child: ShrinkToFitText(
+                      text: vm.needsAttention
                           ? l.statusNeedsFamily
                           : l.statusProtected,
-                      style: text.displaySmall,
+                      style: text.displaySmall!,
+                      minFontSize: 20,
+                      wholeWords: true,
                     ),
                   ),
                 ),

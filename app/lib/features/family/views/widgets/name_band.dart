@@ -10,11 +10,15 @@ class NameBand extends StatelessWidget {
     required this.genuine,
     required this.headline,
     required this.time,
+    this.leading,
   });
 
   final bool genuine;
   final String headline;
   final String time;
+
+  /// The back arrow, at the start of the top row above the headline.
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +51,7 @@ class NameBand extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ?leading,
                 Semantics(
                   header: true,
                   liveRegion: true,

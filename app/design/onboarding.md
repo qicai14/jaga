@@ -90,6 +90,13 @@ forwarding (step 5 view), pause token (step 7 view), link code (step 8 view), re
 If a step-4 check fails on resume, the screen shows the `needsAttention` state (decision 3): amber icon,
 `statusNeedsFamily`, same layout.
 
+**Role marker (Preston, 4 Nov; matches family.md 12.7).** `ScreenFrame(role: RoleBadge.protected)` on the status screen and
+on `ProtectedSettingsScreen`: top end corner, above the icon or title. `StatusBadge(tone: guarded, icon: Icons.shield,
+label: roleProtected)`; teal here, because nothing else on this screen is a badge and it echoes the check.
+`roleProtected`: en "Protected phone", ms "Telefon dilindungi", zh "受保护的手机". It scales to 2.0 (40sp) and wraps between
+words, never inside one. Not tappable, so the long press still works through it. The hero, the amber state and the call and
+Warning screens are unchanged. Tests: status and settings at x1.0 and x2.0 in en/ms/zh find the badge, no overflow.
+
 ## 7. Server data (no contract yet; all **missing**, ask #1 for `registration` and `link` schemas)
 - `register(region, commandLanguage, personName, fcmToken)` → `protectedUserId`, `jagaLineNumber`, `pauseToken`,
   `linkCode`, `linkCodeExpiresAt?`.
@@ -145,6 +152,8 @@ One entry per step and sub-state: `language`, `role`, `about`, `about-loading`, 
 `pin-locked`, `settings`.
 
 ## 10. Widget tests (`test/features/onboarding/`), each at 393×852 and again at text scale 2.0
+
+All of onboarding, both roles, caps the system text scale at 1.5 (`copilotMaxTextScale`, applied app-wide in `app.dart`; Preston, 4 Nov): the co-pilot does the protected phone's setup, and larger text looks out of place. The tests pump at 2.0 without the cap, which is the harder case.
 1. Each step: title, body and Continue visible; no overflow; Continue reachable (pinned) at 2.0.
 2. Progress text "Step n of 10" / "of 5" matches the step; back returns to n-1 with values kept.
 3. Relaunch with saved progress at step 6 opens step 6; step 4 re-runs `check()`.

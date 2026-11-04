@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../core/widgets/view_model_host.dart';
+import '../../data/models/alerted_call.dart';
 import '../../data/models/family_alert.dart';
 import '../../data/models/onboarding_progress.dart';
 import '../../data/models/linked_person.dart';
@@ -17,7 +18,9 @@ import '../../features/family/view_models/copilot_home_view_model.dart';
 import '../../features/family/view_models/copilot_settings_view_model.dart';
 import '../../features/family/view_models/family_alert_view_model.dart';
 import '../../features/family/view_models/stage_timeline_view_model.dart';
+import '../../features/family/views/copilot_calls_screen.dart';
 import '../../features/family/views/copilot_home_screen.dart';
+import '../../features/family/views/copilot_tabs.dart';
 import '../../features/family/views/copilot_settings_screen.dart';
 import '../../features/family/views/family_alert_screen.dart';
 import '../../features/family/views/stage_timeline_screen.dart';
@@ -66,7 +69,12 @@ class _FamilyAlertDemoState extends State<_FamilyAlertDemo> {
   @override
   Widget build(BuildContext context) {
     final followUp = widget.followUp;
-    final screen = FamilyAlertScreen(vm: _vm);
+    final screen = FamilyAlertScreen(
+      vm: _vm,
+      onSeeTimeline: () => Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => _TimelineDemo(widget.alert.callId)),
+      ),
+    );
     if (followUp == null) return screen;
     return Column(
       children: [
@@ -248,14 +256,26 @@ class _WithRigState extends State<_WithRig> {
   }
 }
 
-/// The co-pilot home on fakes. Opening a call, the sheet or Settings works as in the app.
+/// The co-pilot tabs on fakes. Opening a call, the sheet or a tab works as in the app.
 class _CopilotHomeDemo extends StatefulWidget {
   const _CopilotHomeDemo({
     this.pauseActive = false,
     this.many = false,
     this.empty = false,
     this.offline = false,
+    this.live = 0,
+    this.held = true,
+    this.tab = 0,
+    this.person = familyPerson,
   });
+
+  /// How many of the first calls are live, and whether alerts are held for them.
+  final int live;
+  final bool held;
+
+  /// The tab showing first: 0 Home, 1 Calls, 2 Settings.
+  final int tab;
+  final LinkedPerson person;
 
   final bool pauseActive;
   final bool many;
@@ -267,36 +287,100 @@ class _CopilotHomeDemo extends StatefulWidget {
 }
 
 class _CopilotHomeDemoState extends State<_CopilotHomeDemo> {
+  late int _tab = widget.tab;
   late final _pause = FakeCopilotPauseService(active: widget.pauseActive)
     ..offline = widget.offline;
+  // The first calls are the first fixture alerts: the live ones are these.
+  static const _raws = [familyLongText, familyNoQuotes];
   late final _timeline =
       (widget.empty
             ? FakeTimelineService()
+            : widget.live > 0
+            ? FakeTimelineService(
+                calls: [
+                  for (final (i, c) in fixtureCalls().indexed)
+                    i < widget.live
+                        ? AlertedCall.fromAlert(FamilyAlert.parse(_raws[i]))
+                        : c,
+                ],
+                events: fixtureEvents(),
+              )
             : fixtureTimelineService(many: widget.many))
         ..offline = widget.offline;
   final _dialer = FakeDialerService();
+  final _push = FakeAlertPushService();
+  late final _alerts = FamilyAlertRepository(
+    push: _push,
+    notifier: FakeAlertNotifier(),
+    person: widget.person,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.live > 0 && widget.held) {
+      for (final raw in _raws.take(widget.live)) {
+        _alerts.receive(FamilyAlert.parse(raw));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _alerts.dispose();
+    _push.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => _WithRig(
     (rig) => ViewModelHost(
       create: () => CopilotHomeViewModel(
-        person: familyPerson,
+        person: widget.person,
         pause: _pause,
         timeline: _timeline,
+        alerts: _alerts,
       ),
-      builder: (_, vm) => CopilotHomeScreen(
-        vm: vm,
-        createClearPause: () =>
-            ClearPauseViewModel(personName: familyPerson.name, pause: _pause),
-        timelineFor: (call) => StageTimelineViewModel(
-          call: call,
-          timeline: _timeline,
-          dialer: _dialer,
-        ),
-        createSettings: () => CopilotSettingsViewModel(
+      builder: (_, vm) => ViewModelHost(
+        create: () => CopilotSettingsViewModel(
           repository: rig.onboarding,
-          person: familyPerson,
+          person: widget.person,
         ),
+        builder: (_, settings) {
+          StageTimelineViewModel timelineFor(AlertedCall call) =>
+              StageTimelineViewModel(
+                call: call,
+                timeline: _timeline,
+                dialer: _dialer,
+              );
+          void openAlert(FamilyAlert alert) => Navigator.of(context).push<void>(
+            MaterialPageRoute(
+              builder: (_) => _FamilyAlertDemo(alert, widget.person),
+            ),
+          );
+          return CopilotTabs(
+            index: _tab,
+            onSelect: (i) => setState(() => _tab = i),
+            tabs: [
+              CopilotHomeScreen(
+                vm: vm,
+                openAlert: openAlert,
+                createClearPause: () => ClearPauseViewModel(
+                  personName: widget.person.name,
+                  pause: _pause,
+                ),
+                timelineFor: timelineFor,
+                onSeeAllCalls: () => setState(() => _tab = 1),
+              ),
+              CopilotCallsScreen(
+                vm: vm,
+                timelineFor: timelineFor,
+                openAlert: openAlert,
+              ),
+              CopilotSettingsScreen(vm: settings),
+            ],
+          );
+        },
       ),
     ),
   );
@@ -327,7 +411,14 @@ class _TimelineDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ViewModelHost(
     create: () => StageTimelineViewModel(
-      call: fixtureCalls().firstWhere((c) => c.callId == callId),
+      call: fixtureCalls().firstWhere(
+        (c) => c.callId == callId,
+        orElse: () => AlertedCall.fromAlert(
+          familyAlertFixtures
+              .map(FamilyAlert.parse)
+              .firstWhere((a) => a.callId == callId),
+        ),
+      ),
       timeline: fixtureTimelineService(),
       dialer: FakeDialerService(),
     ),
@@ -434,7 +525,23 @@ List<GalleryEntry> familyEntries() => [
   _home('home-no-pause', const _CopilotHomeDemo()),
   _home('home-empty', const _CopilotHomeDemo(empty: true)),
   _home('home-error', const _CopilotHomeDemo(offline: true)),
+  _home('home-live', const _CopilotHomeDemo(live: 1)),
+  _home('home-live-no-alert', const _CopilotHomeDemo(live: 1, held: false)),
+  _home('home-two-live', const _CopilotHomeDemo(live: 2)),
+  _home(
+    'home-long-name',
+    const _CopilotHomeDemo(
+      person: LinkedPerson(
+        name: 'Puan Siti Aminah binti Abdullah',
+        phoneNumber: '+60 12-345 6789',
+      ),
+    ),
+  ),
   _home('home-many', const _CopilotHomeDemo(pauseActive: true, many: true)),
+  _home('calls-many', const _CopilotHomeDemo(many: true, tab: 1)),
+  _home('calls-empty', const _CopilotHomeDemo(empty: true, tab: 1)),
+  _home('calls-error', const _CopilotHomeDemo(offline: true, tab: 1)),
+  _home('tabs-settings', const _CopilotHomeDemo(tab: 2)),
   _home('settings', const _SettingsDemo()),
   _home('timeline', const _TimelineDemo('call-1')),
   _home('timeline-long-quotes', const _TimelineDemo('call-5')),

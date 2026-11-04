@@ -585,4 +585,34 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get onboardingPermOverlayWhy =>
       'Membolehkan Jaga muncul di hadapan apabila anda menjawab panggilan.';
+
+  @override
+  String get familyAlertBack => 'Kembali ke laman utama';
+
+  @override
+  String get familyAlertSeeTimeline => 'Lihat apa yang berlaku';
+
+  @override
+  String get familyCallLiveNow => 'Sedang berlangsung';
+
+  @override
+  String get familyCallLiveOpen => 'Membuka amaran';
+
+  @override
+  String get familyNavHome => 'Utama';
+
+  @override
+  String get familyNavCalls => 'Panggilan';
+
+  @override
+  String get familyHomeLastCall => 'Amaran terakhir';
+
+  @override
+  String get familyHomeSeeAllCalls => 'Lihat semua panggilan';
+
+  @override
+  String get roleFamily => 'Keluarga';
+
+  @override
+  String get roleProtected => 'Telefon dilindungi';
 }

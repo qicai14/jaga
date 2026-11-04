@@ -4,6 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/widgets/hold_to_confirm_button.dart';
 import 'package:jaga/data/models/alerted_call.dart';
+import 'package:jaga/data/models/family_alert.dart';
+import 'package:jaga/data/models/linked_person.dart';
+import 'package:jaga/core/widgets/jaga_wordmark.dart';
+import 'package:jaga/features/family/views/widgets/protected_person_card.dart';
+import 'package:jaga/data/repositories/family_alert_repository.dart';
+import 'package:jaga/data/services/alert_notifier.dart';
+import 'package:jaga/data/services/alert_push_service.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/services/copilot_pause_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
@@ -13,6 +20,7 @@ import 'package:jaga/debug/fixtures/timeline_fixtures.dart';
 import 'package:jaga/features/family/view_models/clear_pause_view_model.dart';
 import 'package:jaga/features/family/view_models/copilot_home_view_model.dart';
 import 'package:jaga/features/family/view_models/stage_timeline_view_model.dart';
+import 'package:jaga/features/family/views/copilot_calls_screen.dart';
 import 'package:jaga/features/family/views/copilot_home_screen.dart';
 import 'package:jaga/features/family/views/stage_timeline_screen.dart';
 import 'package:jaga/features/family/views/widgets/alerted_call_tile.dart';
@@ -22,14 +30,33 @@ import 'package:jaga/features/family/views/widgets/timeline_event_row.dart';
 import '../../support/harness.dart';
 
 class Rig {
-  Rig({bool pauseActive = true, FakeTimelineService? timeline})
-    : pause = FakeCopilotPauseService(active: pauseActive),
-      timeline = timeline ?? fixtureTimelineService() {
+  Rig({
+    bool pauseActive = true,
+    FakeTimelineService? timeline,
+    LinkedPerson person = familyPerson,
+  }) : pause = FakeCopilotPauseService(active: pauseActive),
+       timeline = timeline ?? fixtureTimelineService() {
     vm = CopilotHomeViewModel(
-      person: familyPerson,
+      person: person,
       pause: pause,
       timeline: this.timeline,
+      alerts: alerts,
     );
+  }
+
+  final push = FakeAlertPushService();
+  late final alerts = FamilyAlertRepository(
+    push: push,
+    notifier: FakeAlertNotifier(),
+    person: familyPerson,
+  );
+
+  /// Alerts passed to openAlert.
+  final opened = <FamilyAlert>[];
+  void dispose() {
+    vm.dispose();
+    alerts.dispose();
+    push.dispose();
   }
 
   final FakeCopilotPauseService pause;
@@ -43,8 +70,18 @@ class Rig {
         ClearPauseViewModel(personName: familyPerson.name, pause: pause),
     timelineFor: (call) =>
         StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
-    createSettings: () => throw UnimplementedError('covered in app_test'),
+    openAlert: opened.add,
+    onSeeAllCalls: () => seeAll++,
   );
+
+  Widget get callsScreen => CopilotCallsScreen(
+    vm: vm,
+    timelineFor: (call) =>
+        StageTimelineViewModel(call: call, timeline: timeline, dialer: dialer),
+    openAlert: opened.add,
+  );
+
+  var seeAll = 0;
 }
 
 Future<Rig> pump(
@@ -53,12 +90,13 @@ Future<Rig> pump(
   bool pauseActive = true,
   FakeTimelineService? timeline,
   bool offline = false,
+  bool calls = false,
 }) async {
   // Offline before the Rig: the view model starts loading in its constructor.
   final svc = (timeline ?? fixtureTimelineService())..offline = offline;
   final rig = Rig(pauseActive: pauseActive, timeline: svc);
-  addTearDown(rig.vm.dispose);
-  await pumpJaga(tester, rig.screen, scale: scale);
+  addTearDown(rig.dispose);
+  await pumpJaga(tester, calls ? rig.callsScreen : rig.screen, scale: scale);
   return rig;
 }
 
@@ -92,7 +130,31 @@ void main() {
     expect(find.text('Protected'), findsOneWidget);
     expect(find.text('Jaga Pause active'), findsOneWidget);
     expect(clearPause, findsOneWidget);
+    // Home shows only the last alert; the full list is on Calls.
+    expect(find.text('Last alert'), findsOneWidget);
+    expect(find.byType(AlertedCallTile, skipOffstage: false), findsOneWidget);
+    expect(find.byType(PopupMenuButton<void>), findsNothing);
+    expect(find.byIcon(Icons.settings_outlined), findsNothing);
+  });
+
+  forEachScale('See all calls asks the shell for the Calls tab', (
+    tester,
+    scale,
+  ) async {
+    final rig = await pump(tester, scale);
+    await tapVisible(tester, find.text('See all calls'));
+    expect(rig.seeAll, 1);
+  });
+
+  forEachScale('Calls lists every call, with no pause card', (
+    tester,
+    scale,
+  ) async {
+    final rig = Rig();
+    addTearDown(rig.dispose);
+    await pumpJaga(tester, rig.callsScreen, scale: scale);
     expect(find.text('Alerted calls'), findsOneWidget);
+    expect(find.text('Protected'), findsNothing);
     expect(find.byType(AlertedCallTile, skipOffstage: false), findsNWidgets(5));
   });
 
@@ -129,7 +191,9 @@ void main() {
   });
 
   forEachScale('many calls scroll without overflow', (tester, scale) async {
-    await pump(tester, scale, timeline: fixtureTimelineService(many: true));
+    final rig = Rig(timeline: fixtureTimelineService(many: true));
+    addTearDown(rig.dispose);
+    await pumpJaga(tester, rig.callsScreen, scale: scale);
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -5000));
     await tester.pump();
     expect(find.byType(AlertedCallTile), findsWidgets);
@@ -139,7 +203,7 @@ void main() {
     'hold to clear: the sheet closes, the badge goes, a SnackBar shows',
     (tester, scale) async {
       final rig = await pump(tester, scale);
-      await tester.tap(clearPause);
+      await tapVisible(tester, clearPause);
       await tester.pumpAndSettle();
       expect(
         find.text("I've spoken to Mum and checked this transfer is genuine."),
@@ -159,7 +223,7 @@ void main() {
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     rig.pause.offline = true;
     await hold(tester);
@@ -178,7 +242,7 @@ void main() {
     tester,
     scale,
   ) async {
-    final rig = await pump(tester, scale);
+    final rig = await pump(tester, scale, calls: true);
     final tile = find.byType(AlertedCallTile, skipOffstage: false).last;
     await tester.ensureVisible(tile); // call-1, the oldest
     await tester.tap(tile);
@@ -214,7 +278,7 @@ void main() {
     tester,
     scale,
   ) async {
-    final rig = await pump(tester, scale);
+    final rig = await pump(tester, scale, calls: true);
     await tapVisible(tester, find.byType(AlertedCallTile).first); // call-5
     await tester.pumpAndSettle();
 
@@ -274,7 +338,7 @@ void main() {
     scale,
   ) async {
     final rig = await pump(tester, scale);
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await tester.tap(find.byType(HoldToConfirmButton));
     await tester.pump();
@@ -295,7 +359,7 @@ void main() {
   ) async {
     final rig = await pump(tester, scale);
     // Idle: Back closes it and nothing is announced.
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
@@ -306,7 +370,7 @@ void main() {
     // Busy: Back (and, with room above the sheet, a tap outside) do nothing.
     final gate = Completer<void>();
     rig.pause.hold = gate.future;
-    await tester.tap(clearPause);
+    await tapVisible(tester, clearPause);
     await tester.pumpAndSettle();
     await hold(tester, settle: false);
     await tester.pump();
@@ -404,6 +468,128 @@ void main() {
       find.widgetWithIcon(IconButton, Icons.delete_outline),
     );
     expect(button.onPressed, isNull);
+  });
+
+  group('role badge', () {
+    forEachScale('Home and Calls each carry one Family badge', (
+      tester,
+      scale,
+    ) async {
+      final rig = Rig();
+      addTearDown(rig.dispose);
+      for (final screen in [rig.screen, rig.callsScreen]) {
+        await pumpJaga(tester, screen, scale: scale);
+        expect(find.text('Family'), findsOneWidget);
+      }
+    });
+  });
+
+  group('header', () {
+    for (final locale in const ['en', 'ms', 'zh']) {
+      forEachScale('the wordmark is the one header node ($locale)', (
+        tester,
+        scale,
+      ) async {
+        final handle = tester.ensureSemantics();
+        final rig = Rig();
+        addTearDown(rig.dispose);
+        await pumpJaga(
+          tester,
+          rig.screen,
+          scale: scale,
+          locale: Locale(locale),
+        );
+        try {
+          expect(find.byType(AppBar), findsNothing);
+          expect(
+            tester.getSemantics(find.bySemanticsLabel('Jaga')),
+            matchesSemantics(label: 'Jaga', isHeader: true),
+          );
+        } finally {
+          // Semantics handles must be gone before the test ends, so not a tear-down.
+          handle.dispose();
+        }
+      });
+    }
+
+    forEachScale('a long name wraps in the card, below the wordmark', (
+      tester,
+      scale,
+    ) async {
+      final rig = Rig(
+        person: const LinkedPerson(name: 'Puan Siti Aminah binti Abdullah'),
+      );
+      addTearDown(rig.dispose);
+      await pumpJaga(tester, rig.screen, scale: scale);
+      final wordmark = tester.getRect(find.byType(JagaWordmark));
+      final card = tester.getRect(find.byType(ProtectedPersonCard));
+      expect(card.top, greaterThanOrEqualTo(wordmark.bottom));
+    });
+  });
+
+  group('navigation', () {
+    AlertedCall live(String id, int minute) => AlertedCall(
+      callId: id,
+      at: DateTime.utc(2026, 10, 27, 11, minute),
+      stage: Stage.money,
+      live: true,
+    );
+
+    forEachScale('a live call is first, marked, and opens its held alert', (
+      tester,
+      scale,
+    ) async {
+      final calls = await fixtureTimelineService().calls();
+      final svc = FakeTimelineService(
+        calls: [
+          ...calls,
+          AlertedCall.fromAlert(FamilyAlert.parse(familyMoney)),
+        ],
+      );
+      final rig = Rig(timeline: svc);
+      addTearDown(rig.dispose);
+      rig.alerts.receive(FamilyAlert.parse(familyMoney));
+      await pumpJaga(tester, rig.screen, scale: scale);
+      final first = find.byType(AlertedCallTile).first;
+      expect(tester.widget<AlertedCallTile>(first).call.live, isTrue);
+      expect(find.text('Live now'), findsOneWidget);
+      await tapVisible(tester, first);
+      await tester.pumpAndSettle();
+      expect(rig.opened.single.callId, 'call-1');
+      expect(find.byType(StageTimelineScreen), findsNothing);
+    });
+
+    forEachScale('a live call without a held alert opens the timeline', (
+      tester,
+      scale,
+    ) async {
+      final svc = FakeTimelineService(calls: [live('x', 1)]);
+      final rig = await pump(tester, scale, timeline: svc);
+      await tapVisible(tester, find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(rig.opened, isEmpty);
+      expect(find.byType(StageTimelineScreen), findsOneWidget);
+    });
+
+    forEachScale('an ended call opens the timeline even with an alert held', (
+      tester,
+      scale,
+    ) async {
+      final rig = await pump(tester, scale);
+      rig.alerts.receive(FamilyAlert.parse(familyLongText));
+      await tapVisible(tester, find.byType(AlertedCallTile).first);
+      await tester.pumpAndSettle();
+      expect(rig.opened, isEmpty);
+      expect(find.byType(StageTimelineScreen), findsOneWidget);
+    });
+
+    forEachScale('two live calls do not overflow', (tester, scale) async {
+      final svc = FakeTimelineService(calls: [live('x', 1), live('y', 2)]);
+      await pump(tester, scale, timeline: svc);
+      expect(find.text('Live now'), findsNWidgets(2));
+      final first = find.byType(AlertedCallTile).first;
+      expect(tester.widget<AlertedCallTile>(first).call.callId, 'y');
+    });
   });
 
   test('a row with a null endedAt is live, one with a time is not', () {

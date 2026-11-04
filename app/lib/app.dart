@@ -7,7 +7,10 @@ import 'core/config/build_config.dart';
 import 'core/haptics/buzzer.dart';
 import 'core/l10n/gen/app_localizations.dart';
 import 'core/theme/jaga_theme.dart';
+import 'core/theme/text_scale.dart';
 import 'core/widgets/view_model_host.dart';
+import 'data/models/alerted_call.dart';
+import 'data/models/family_alert.dart';
 import 'data/models/linked_person.dart';
 import 'data/models/onboarding_progress.dart';
 import 'data/repositories/call_repository.dart';
@@ -32,8 +35,12 @@ import 'features/family/view_models/copilot_home_view_model.dart';
 import 'features/family/view_models/copilot_settings_view_model.dart';
 import 'features/family/view_models/family_alert_view_model.dart';
 import 'features/family/view_models/stage_timeline_view_model.dart';
+import 'features/family/views/copilot_calls_screen.dart';
 import 'features/family/views/copilot_home_screen.dart';
+import 'features/family/views/copilot_settings_screen.dart';
+import 'features/family/views/copilot_tabs.dart';
 import 'features/family/views/family_alert_screen.dart';
+import 'features/family/views/stage_timeline_screen.dart';
 import 'features/onboarding/view_models/onboarding_view_model.dart';
 import 'features/onboarding/view_models/protected_home_view_model.dart';
 import 'features/onboarding/views/onboarding_screen.dart';
@@ -84,6 +91,13 @@ class AppDependencies {
   final BuildRole buildRole;
 }
 
+/// The text scale cap for [progress]: every co-pilot screen and all of
+/// onboarding are capped; the protected person's screens are not (null).
+double? maxTextScaleFor(OnboardingProgress progress) =>
+    !progress.complete || progress.role == OnboardingRole.copilot
+    ? copilotMaxTextScale
+    : null;
+
 /// The locale and the home screen both come from the saved setup progress.
 class JagaApp extends StatefulWidget {
   const JagaApp({super.key, required this.deps});
@@ -113,6 +127,16 @@ class _JagaAppState extends State<JagaApp> {
           locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          // Above the Navigator, so pushed routes, dialogs and sheets are capped too.
+          builder: (context, child) {
+            final cap = maxTextScaleFor(progress);
+            return cap == null
+                ? child!
+                : MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: cap,
+                    child: child!,
+                  );
+          },
           home: _home(progress),
         );
       },
@@ -242,7 +266,13 @@ class _CopilotShellState extends State<CopilotShell> {
     person: widget.person,
     pause: widget.deps.pause,
     timeline: widget.deps.timeline,
+    alerts: _alerts,
   );
+  late final _settings = CopilotSettingsViewModel(
+    repository: widget.deps.onboarding,
+    person: widget.person,
+  );
+  int _tab = 0;
   StreamSubscription<AlertOpen>? _opens;
 
   @override
@@ -270,8 +300,23 @@ class _CopilotShellState extends State<CopilotShell> {
                 dialer: widget.deps.dialer,
                 initial: open.alert,
               ),
-              builder: (_, vm) =>
-                  FamilyAlertScreen(vm: vm, autoDial: open.autoDial),
+              builder: (context, vm) => FamilyAlertScreen(
+                vm: vm,
+                autoDial: open.autoDial,
+                onSeeTimeline: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => ViewModelHost(
+                      create: () => _timelineFor(
+                        AlertedCall.fromAlert(
+                          _alerts.latest(open.alert.callId) ?? open.alert,
+                        ),
+                      ),
+                      builder: (_, timelineVm) =>
+                          StageTimelineScreen(vm: timelineVm),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ),
         )
@@ -281,29 +326,46 @@ class _CopilotShellState extends State<CopilotShell> {
         });
   }
 
+  StageTimelineViewModel _timelineFor(AlertedCall call) =>
+      StageTimelineViewModel(
+        call: call,
+        timeline: widget.deps.timeline,
+        dialer: widget.deps.dialer,
+      );
+
   @override
   void dispose() {
     _opens?.cancel();
     _alerts.dispose();
     _home.dispose();
+    _settings.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => CopilotHomeScreen(
-    vm: _home,
-    createClearPause: () => ClearPauseViewModel(
-      personName: widget.person.name,
-      pause: widget.deps.pause,
-    ),
-    timelineFor: (call) => StageTimelineViewModel(
-      call: call,
-      timeline: widget.deps.timeline,
-      dialer: widget.deps.dialer,
-    ),
-    createSettings: () => CopilotSettingsViewModel(
-      repository: widget.deps.onboarding,
-      person: widget.person,
-    ),
-  );
+  Widget build(BuildContext context) {
+    void openAlert(FamilyAlert alert) => _open(AlertOpen(alert));
+    return CopilotTabs(
+      index: _tab,
+      onSelect: (i) => setState(() => _tab = i),
+      tabs: [
+        CopilotHomeScreen(
+          vm: _home,
+          createClearPause: () => ClearPauseViewModel(
+            personName: widget.person.name,
+            pause: widget.deps.pause,
+          ),
+          timelineFor: _timelineFor,
+          openAlert: openAlert,
+          onSeeAllCalls: () => setState(() => _tab = 1),
+        ),
+        CopilotCallsScreen(
+          vm: _home,
+          timelineFor: _timelineFor,
+          openAlert: openAlert,
+        ),
+        CopilotSettingsScreen(vm: _settings),
+      ],
+    );
+  }
 }

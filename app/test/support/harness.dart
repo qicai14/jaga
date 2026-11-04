@@ -1,4 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:jaga/core/widgets/shrink_to_fit_text.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/core/l10n/gen/app_localizations.dart';
 import 'package:jaga/core/theme/jaga_theme.dart';
@@ -45,5 +50,65 @@ void forEachScale(
       await body(tester, scale);
       expect(tester.takeException(), isNull);
     });
+  }
+}
+
+/// Loads the real Noto Sans fonts (Latin and Chinese). The default test font,
+/// Ahem, is far wider, so tests that count lines or split words need these.
+Future<void> loadNotoFonts() async {
+  Future<void> load(String family, List<String> files) async {
+    final loader = FontLoader(family);
+    for (final f in files) {
+      final bytes = File('assets/fonts/$f').readAsBytesSync();
+      loader.addFont(Future.value(ByteData.sublistView(bytes)));
+    }
+    await loader.load();
+  }
+
+  await load('NotoSans', [
+    'NotoSans-Regular.ttf',
+    'NotoSans-SemiBold.ttf',
+    'NotoSans-ExtraBold.ttf',
+  ]);
+  await load('NotoSansSC', ['NotoSansSC-Regular.otf', 'NotoSansSC-Bold.otf']);
+}
+
+/// Fails if any word of any text under [within] (default: the whole tree) is
+/// wider than its line, i.e. split mid-word. Needs [loadNotoFonts]. Words are
+/// measured with the style of the span they are in. Fails too if it finds no
+/// text at all, so a wrong [within] cannot pass for free.
+void expectNoSplitWords(WidgetTester tester, {Finder? within}) {
+  final root = within ?? find.byType(MaterialApp);
+  final paragraphs = tester
+      .renderObjectList<RenderParagraph>(
+        find.descendant(of: root, matching: find.byType(RichText)),
+      )
+      .toList();
+  expect(paragraphs, isNotEmpty, reason: 'no text found to check');
+  for (final p in paragraphs) {
+    void check(InlineSpan span, TextStyle? inherited) {
+      if (span is! TextSpan) return;
+      final style = inherited?.merge(span.style) ?? span.style;
+      final text = span.text;
+      if (text != null && style != null) {
+        for (final w in jagaWordPattern.allMatches(text)) {
+          final painter = TextPainter(
+            text: TextSpan(text: w.group(0), style: style),
+            textDirection: TextDirection.ltr,
+            textScaler: p.textScaler,
+          )..layout();
+          expect(
+            painter.width,
+            lessThanOrEqualTo(p.size.width + 0.5),
+            reason: '"${w.group(0)}" is split in "${p.text.toPlainText()}"',
+          );
+        }
+      }
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        check(child, style);
+      }
+    }
+
+    check(p.text, null);
   }
 }

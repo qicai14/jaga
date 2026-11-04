@@ -31,6 +31,7 @@ Future<OnboardingRig> pumpHome(
   List<String> family = const [],
   bool callsAreFake = false,
   OnboardingProgress start = _done,
+  Locale locale = const Locale('en'),
 }) async {
   final rig = await OnboardingRig.create(
     start: start,
@@ -46,6 +47,7 @@ Future<OnboardingRig> pumpHome(
       builder: (_, vm) => ProtectedHomeScreen(vm: vm),
     ),
     scale: scale,
+    locale: locale,
   );
   return rig;
 }
@@ -291,6 +293,34 @@ void main() {
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
     expect(find.text('Enter the co-pilot lock'), findsNothing);
+  });
+
+  forEachScale('the status screen says it is a Protected phone', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale);
+    expect(find.text('Protected phone'), findsOneWidget);
+  });
+
+  forEachScale('a long press on the role badge still asks for the lock', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale);
+    await tester.longPress(find.text('Protected phone'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter the co-pilot lock'), findsOneWidget);
+  });
+
+  forEachScale('the settings screen carries the Protected phone badge', (
+    tester,
+    scale,
+  ) async {
+    await pumpHome(tester, scale: scale);
+    await openGate(tester);
+    await unlockWith(tester, '1234');
+    expect(inSettings('Protected phone'), findsOneWidget);
   });
 
   testWidgets('a short tap does nothing', (tester) async {

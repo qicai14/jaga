@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jaga/data/models/alerted_call.dart';
 import 'package:jaga/data/models/scam_hotline.dart';
+import 'package:jaga/data/models/family_alert.dart';
 import 'package:jaga/data/models/stage.dart';
 import 'package:jaga/data/models/stage_update.dart' show Risk;
+import 'package:jaga/data/repositories/family_alert_repository.dart';
+import 'package:jaga/data/services/alert_notifier.dart';
+import 'package:jaga/data/services/alert_push_service.dart';
 import 'package:jaga/data/services/copilot_pause_service.dart';
 import 'package:jaga/data/services/dialer_service.dart';
 import 'package:jaga/data/services/timeline_service.dart';
@@ -20,18 +24,96 @@ void main() {
     late FakeCopilotPauseService pause;
     late FakeTimelineService timeline;
     late CopilotHomeViewModel vm;
+    late FakeAlertPushService push;
+    late FamilyAlertRepository alerts;
 
     CopilotHomeViewModel build() => vm = CopilotHomeViewModel(
       person: familyPerson,
       pause: pause,
       timeline: timeline,
+      alerts: alerts,
     );
 
     setUp(() {
       pause = FakeCopilotPauseService(active: true);
       timeline = fixtureTimelineService();
+      push = FakeAlertPushService();
+      alerts = FamilyAlertRepository(
+        push: push,
+        notifier: FakeAlertNotifier(),
+        person: familyPerson,
+      );
     });
-    tearDown(() => vm.dispose());
+    tearDown(() {
+      vm.dispose();
+      alerts.dispose();
+      push.dispose();
+    });
+
+    AlertedCall call(String id, int day, {bool live = false}) => AlertedCall(
+      callId: id,
+      at: DateTime.utc(2026, 10, day),
+      stage: Stage.money,
+      live: live,
+    );
+
+    test(
+      'live calls come first, newest first; the rest keep their order',
+      () async {
+        timeline = FakeTimelineService(
+          calls: [
+            call('a', 9),
+            call('b', 3, live: true),
+            call('c', 8),
+            call('d', 5, live: true),
+          ],
+        );
+        build();
+        await pumpEventQueue();
+        expect([for (final c in vm.calls) c.callId], ['d', 'b', 'a', 'c']);
+      },
+    );
+
+    test('liveCalls and lastEnded split the list', () async {
+      timeline = FakeTimelineService(
+        calls: [
+          call('a', 9),
+          call('b', 3, live: true),
+          call('c', 8),
+          call('d', 5, live: true),
+        ],
+      );
+      build();
+      await pumpEventQueue();
+      expect([for (final c in vm.liveCalls) c.callId], ['d', 'b']);
+      expect(vm.lastEnded!.callId, 'a');
+    });
+
+    test('lastEnded is null with no ended call', () async {
+      timeline = FakeTimelineService(calls: [call('b', 3, live: true)]);
+      build();
+      await pumpEventQueue();
+      expect(vm.lastEnded, isNull);
+      expect(vm.liveCalls, hasLength(1));
+    });
+
+    test('heldAlert reads the repository', () async {
+      build();
+      await pumpEventQueue();
+      expect(vm.heldAlert('call-1'), isNull);
+      alerts.receive(FamilyAlert.parse(familyMoney));
+      expect(vm.heldAlert('call-1')!.stage, Stage.money);
+    });
+
+    test('a repository push reloads once', () async {
+      build();
+      await pumpEventQueue();
+      var notified = 0;
+      vm.addListener(() => notified++);
+      push.emit(FamilyAlert.parse(familyMoney));
+      await pumpEventQueue();
+      expect(notified, 1);
+    });
 
     test('loads the pause status and the alerted calls', () async {
       build();

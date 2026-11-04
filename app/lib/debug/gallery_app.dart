@@ -105,8 +105,11 @@ class _GalleryHomeState extends State<GalleryHome> {
     return Theme(
       data: buildJagaTheme(),
       child: MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(_scale)),
+        data: MediaQuery.of(context).copyWith(
+          // As in the app: family and onboarding stop at the cap.
+          textScaler: TextScaler.linear(_scale)
+              .clamp(maxScaleFactor: entry.maxTextScale ?? double.infinity),
+        ),
         child: Localizations.override(
           context: context,
           locale: _locale,

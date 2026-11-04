@@ -41,6 +41,9 @@ class FamilyAlertRepository {
   /// Every push that changed what we hold for its call, merged.
   Stream<FamilyAlert> get alerts => _merged.stream;
 
+  /// The merged alert held for [callId], or null: memory only, so empty after a restart.
+  FamilyAlert? latest(String callId) => _latest[callId];
+
   /// The alert that launched the app from a terminated state, if any.
   Future<FamilyAlert?> launchAlert() => _push.launchAlert();
 

@@ -1101,6 +1101,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lets Jaga come to the front when you answer a call.'**
   String get onboardingPermOverlayWhy;
+
+  /// The family alert's back arrow tooltip and label.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to home'**
+  String get familyAlertBack;
+
+  /// The family alert's quiet button that opens the call's stage timeline.
+  ///
+  /// In en, this message translates to:
+  /// **'See what happened'**
+  String get familyAlertSeeTimeline;
+
+  /// Co-pilot home: badge on a call that is still going.
+  ///
+  /// In en, this message translates to:
+  /// **'Live now'**
+  String get familyCallLiveNow;
+
+  /// Co-pilot home: screen reader hint on a live call that opens its alert.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the alert'**
+  String get familyCallLiveOpen;
+
+  /// Co-pilot bottom bar: the Home tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get familyNavHome;
+
+  /// Co-pilot bottom bar: the Calls tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Calls'**
+  String get familyNavCalls;
+
+  /// Co-pilot home: heading above the most recent ended call.
+  ///
+  /// In en, this message translates to:
+  /// **'Last alert'**
+  String get familyHomeLastCall;
+
+  /// Co-pilot home: button that switches to the Calls tab.
+  ///
+  /// In en, this message translates to:
+  /// **'See all calls'**
+  String get familyHomeSeeAllCalls;
+
+  /// Role marker at the top end of every co-pilot tab: whose phone this is.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get roleFamily;
+
+  /// Role marker on the protected user's status and settings screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Protected phone'**
+  String get roleProtected;
 }
 
 class _AppLocalizationsDelegate

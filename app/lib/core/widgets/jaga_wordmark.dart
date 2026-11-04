@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 enum JagaWordmarkSize {
+  /// The co-pilot Home header.
+  display(32),
+
   /// Warning masthead.
   large(28),
 
@@ -12,8 +15,9 @@ enum JagaWordmarkSize {
   final double fontSize;
 }
 
-/// The word "Jaga" as Jaga's signature on a notice. Identity, not content: its
-/// own text-scale cap (1.3) and hidden from TalkBack.
+/// The word "Jaga" as Jaga's signature: on a notice, and as the co-pilot Home
+/// header. Identity, not content: its own text-scale cap (1.3) and hidden from
+/// TalkBack (a header `Semantics` around it carries the name).
 class JagaWordmark extends StatelessWidget {
   const JagaWordmark({
     super.key,

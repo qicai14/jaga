@@ -46,6 +46,37 @@ ThemeData buildJagaTheme() {
         textStyle: text.labelLarge,
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      height: 80,
+      backgroundColor: scheme.surfaceContainer,
+      elevation: 0,
+      // The fill alone is too close to the bar: the outline carries it.
+      indicatorColor: scheme.primaryContainer,
+      indicatorShape: StadiumBorder(
+        side: BorderSide(color: scheme.primary, width: 2),
+      ),
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          color: states.contains(WidgetState.selected)
+              ? scheme.onPrimaryContainer
+              : scheme.onSurfaceVariant,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? text.labelMedium?.copyWith(
+                color: scheme.onPrimaryContainer,
+                fontWeight: FontWeight.w600,
+              )
+            : text.labelMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w400,
+              ),
+      ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(minimumSize: Size.square(m.minTarget)),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: scheme.surfaceContainer,
