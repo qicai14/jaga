@@ -1,9 +1,16 @@
+import logging
 import os
 
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from jaga import pause, telephony, timelines, voice_token
+
+# uvicorn only configures its own loggers, so without this jaga.* INFO lines hit lastResort (WARNING+).
+_jaga_log = logging.getLogger("jaga")
+_jaga_log.setLevel(logging.INFO)
+if not _jaga_log.handlers:
+    _jaga_log.addHandler(logging.StreamHandler())
 
 
 class PauseCORS:
