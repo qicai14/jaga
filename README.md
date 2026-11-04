@@ -123,7 +123,7 @@ comparable as the prompt changes.
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     scammer(["Caller"]) -->|"calls the parent's number"| sim["Protected user's SIM<br/>call forwarding"]
     sim --> line["Jaga line<br/>(Twilio number)"]
     line -->|"rings"| app["Jaga Android app<br/>protected user"]
@@ -193,7 +193,7 @@ down when Muse Spark says the call sounds genuine.
 
 ```mermaid
 stateDiagram-v2
-    direction LR
+    direction TB
     [*] --> none
     none --> pretext: "This is your bank / courier / LHDN"
     pretext --> authority: "Transferring you to the police"
