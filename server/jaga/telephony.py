@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from urllib.parse import parse_qs
@@ -166,8 +167,16 @@ async def hear(call: Call, leg: str, line: str) -> None:
         # shortcut: this inline await holds the leg's queue up to the timeout; move Spark off the leg task
         # if audio sheds in live tests (with #21).
         try:
+            began = time.monotonic()
             async with asyncio.timeout(spark.TIMEOUT):
                 raw = await call.spark.assess(stage, risk, call.tracker.snippet())
+            said = raw.get("risk") if isinstance(raw, dict) else None  # untrusted: log only a known word
+            log.info(
+                "call %s: Muse Spark verdict risk=%s in %.2f s",
+                call.call_id,
+                said if said in ("low", "medium", "high") else "invalid",
+                time.monotonic() - began,
+            )
         except Exception as e:  # incl. the timeout; type only, the message could quote a transcript
             log.warning("call %s: Muse Spark failed (%s)", call.call_id, type(e).__name__)
     # The other leg may have moved the call on while Spark was thinking; Spark never heard that, so drop it.
