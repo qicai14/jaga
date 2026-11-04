@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/jaga-banner.svg" alt="JAGA: hears the scam script, stops the money" width="100%">
+<img src="docs/assets/jaga-banner.svg" alt="JAGA" width="100%">
 
 **An Android scam-call guardian for Malaysian families. It listens to *what* the caller says, not *who* is calling, and stops the money before it moves.**
 

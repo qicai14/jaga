@@ -20,7 +20,5 @@
   <path d="M260 70l70 26v52c0 46-30 78-70 92-40-14-70-46-70-92V96z" fill="#14b8a6" opacity="0.18"/>
   <path d="M260 70l70 26v52c0 46-30 78-70 92-40-14-70-46-70-92V96z" fill="none" stroke="#5eead4" stroke-width="6" stroke-linejoin="round"/>
   <path d="M232 152l20 20 38-42" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="380" y="190" fill="url(#word)" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="150" font-weight="800" letter-spacing="18">JAGA</text>
-  <text x="384" y="240" fill="#99f6e4" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="27" font-weight="500" letter-spacing="1">Hears the scam script. Stops the money.</text>
-  <text x="1150" y="60" text-anchor="end" fill="#5eead4" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="600" letter-spacing="3">JAGA · "TO GUARD" IN MALAY</text>
+  <text x="380" y="205" fill="url(#word)" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="150" font-weight="800" letter-spacing="18">JAGA</text>
 </svg>
